@@ -4,587 +4,196 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CronoRiego — Estrategias de riego para tu huerto</title>
-<meta name="description" content="Cada semana te decimos exactamente cuánto y cuándo regar cada zona de tu huerto. Balance hídrico semanal basado en datos reales." />
+<meta name="description" content="Cada semana te decimos exactamente cuánto y cuándo regar cada zona de tu huerto." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --teal-900: #0f3a52;
-    --teal-700: #1A5276;
-    --teal-500: #2E86AB;
-    --teal-50:  #eaf3f8;
-    --green-900: #154a29;
-    --green-700: #1E8449;
-    --green-500: #2fa365;
-    --green-50:  #ecf7f0;
-    --sage:    #d7e5d3;
-    --sage-50: #f3f7f1;
-    --ink:     #0e1f26;
-    --ink-2:   #344e5c;
-    --muted:   #6a8391;
-    --line:    #e4ecef;
-    --bg:      #ffffff;
-    --bg-soft: #f7faf9;
-    --danger:  #c0392b;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --shadow-sm: 0 1px 2px rgba(15, 58, 82, 0.05), 0 2px 8px rgba(15, 58, 82, 0.04);
-    --shadow-md: 0 4px 12px rgba(15, 58, 82, 0.06), 0 12px 32px rgba(15, 58, 82, 0.08);
-    --shadow-lg: 0 10px 30px rgba(15, 58, 82, 0.10), 0 30px 80px rgba(15, 58, 82, 0.12);
-  }
+  :root{--teal-900:#0f3a52;--teal-700:#1A5276;--teal-500:#2E86AB;--teal-50:#eaf3f8;--green-900:#154a29;--green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;--sage-50:#f3f7f1;--ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;--bg:#ffffff;--bg-soft:#f7faf9;--danger:#c0392b;--radius-lg:20px;--radius-md:14px;--shadow-sm:0 1px 2px rgba(15,58,82,.05),0 2px 8px rgba(15,58,82,.04);--shadow-md:0 4px 12px rgba(15,58,82,.06),0 12px 32px rgba(15,58,82,.08);--shadow-lg:0 10px 30px rgba(15,58,82,.10),0 30px 80px rgba(15,58,82,.12);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{margin:0;font-family:'Manrope',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  img{max-width:100%;display:block;}a{color:inherit;text-decoration:none;}
+  h1,h2,h3,h4{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.15;color:var(--ink);margin:0;}
+  p{margin:0;}.container{width:100%;max-width:1180px;margin:0 auto;padding:0 24px;}
 
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    font-family: 'Manrope', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-  img { max-width: 100%; display: block; }
-  a { color: inherit; text-decoration: none; }
-  h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; color: var(--ink); margin: 0; }
-  p { margin: 0; }
+  /* HEADER */
+  .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid transparent;transition:border-color .25s,background .25s,box-shadow .25s;}
+  .header.scrolled{border-bottom-color:var(--line);box-shadow:0 1px 0 rgba(15,58,82,.02);}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:76px;}
+  .brand{display:flex;align-items:center;gap:12px;}.brand img{height:40px;}
+  .brand-text{display:flex;flex-direction:column;line-height:1;}
+  .brand-text .b1{font-weight:800;color:var(--teal-700);font-size:16px;letter-spacing:.02em;}
+  .brand-text .b2{font-weight:800;color:var(--green-700);font-size:16px;letter-spacing:.02em;}
+  .nav-links{display:flex;gap:28px;align-items:center;}
+  .nav-links a{color:var(--ink-2);font-weight:500;font-size:15px;transition:color .2s;}
+  .nav-links a:hover{color:var(--teal-700);}
+  .nav-cta{background:var(--teal-700);color:#fff!important;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14px;box-shadow:0 6px 14px rgba(26,82,118,.22);transition:transform .2s,background .2s;}
+  .nav-cta:hover{background:var(--teal-900)!important;transform:translateY(-1px);}
+  .hamburger{display:none;background:none;border:0;cursor:pointer;padding:8px;}
+  @media(max-width:860px){.nav-links{display:none;position:absolute;top:76px;left:0;right:0;flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:12px 24px;z-index:50;}.nav-links.open{display:flex;}.nav-links a{padding:14px 0;border-bottom:1px solid var(--line);width:100%;}.nav-links a:last-child{border-bottom:0;}.nav-cta{align-self:flex-start;margin:8px 0 4px;}.hamburger{display:inline-flex;}}
 
-  .container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  /* HERO */
+  .hero{position:relative;padding:88px 0 96px;background:radial-gradient(900px 400px at 85% -20%,rgba(46,134,171,.10),transparent 60%),radial-gradient(700px 400px at 10% 110%,rgba(30,132,73,.09),transparent 60%),var(--bg);overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(to right,rgba(15,58,82,.035) 1px,transparent 1px),linear-gradient(to bottom,rgba(15,58,82,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);pointer-events:none;}
+  .hero-grid{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:var(--green-50);color:var(--green-700);font-size:13px;font-weight:600;border:1px solid rgba(30,132,73,.18);}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green-500);box-shadow:0 0 0 4px rgba(46,163,101,.18);}
+  .hero h1{font-size:clamp(42px,6vw,68px);margin-top:18px;color:var(--teal-900);}
+  .hero h1 em{font-style:italic;color:var(--green-700);font-weight:500;}
+  .hero .sub{margin-top:22px;font-size:18px;color:var(--ink-2);max-width:560px;}
+  .hero-ctas{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+  .btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--teal-700);color:#fff;padding:16px 26px;border-radius:999px;font-weight:600;font-size:16px;box-shadow:0 10px 24px rgba(26,82,118,.24);transition:transform .2s,box-shadow .2s,background .2s;border:0;cursor:pointer;font-family:inherit;}
+  .btn-primary:hover{background:var(--teal-900);transform:translateY(-2px);}
+  .btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:16px 22px;border-radius:999px;border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:15px;background:#fff;transition:border-color .2s,color .2s;}
+  .btn-ghost:hover{border-color:var(--teal-700);color:var(--teal-700);}
+  .hero-meta{display:flex;gap:26px;margin-top:36px;flex-wrap:wrap;color:var(--muted);font-size:14px;}
+  .hero-meta span{display:inline-flex;align-items:center;gap:8px;}
+  .hero-card{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg);padding:26px;transform:perspective(1200px) rotateY(-4deg) rotateX(2deg);}
+  .hc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .hc-title{font-family:'Manrope',sans-serif;font-weight:700;color:var(--teal-900);font-size:15px;}
+  .hc-badge{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green-700);background:var(--green-50);padding:5px 9px;border-radius:999px;border:1px solid rgba(30,132,73,.18);}
+  .hc-row{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line);}
+  .hc-row:last-child{border-bottom:0;}.hc-zone{font-weight:700;color:var(--teal-700);font-size:14px;}
+  .hc-bar{height:8px;background:var(--sage-50);border-radius:999px;overflow:hidden;}
+  .hc-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--teal-500),var(--green-500));border-radius:999px;}
+  .hc-val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);font-size:14px;}
+  .hc-val small{color:var(--muted);font-weight:500;}
+  @media(max-width:980px){.hero-grid{grid-template-columns:1fr;}.hero-card{transform:none;}}
 
-  /* Header */
-  .header {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
-    border-bottom: 1px solid transparent;
-    transition: border-color .25s ease, background .25s ease, box-shadow .25s ease;
-  }
-  .header.scrolled { border-bottom-color: var(--line); box-shadow: 0 1px 0 rgba(15,58,82,.02); }
-  .nav {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 76px;
-  }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand img { height: 40px; width: auto; }
-  .brand-text { display: flex; flex-direction: column; line-height: 1; }
-  .brand-text .b1 { font-weight: 800; color: var(--teal-700); font-size: 16px; letter-spacing: .02em; }
-  .brand-text .b2 { font-weight: 800; color: var(--green-700); font-size: 16px; letter-spacing: .02em; }
+  /* SECTIONS */
+  section{padding:104px 0;position:relative;}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-700);padding:6px 12px;border-radius:999px;background:var(--teal-50);}
+  .section-title{font-size:clamp(32px,4vw,48px);margin-top:18px;color:var(--teal-900);max-width:820px;}
+  .section-lead{margin-top:16px;font-size:17px;color:var(--ink-2);max-width:680px;}.section-head{margin-bottom:56px;}
 
-  .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a { color: var(--ink-2); font-weight: 500; font-size: 15px; transition: color .2s ease; }
-  .nav-links a:hover { color: var(--teal-700); }
-  .nav-cta {
-    background: var(--teal-700); color: #fff; padding: 10px 18px;
-    border-radius: 999px; font-weight: 600; font-size: 14px;
-    transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
-    box-shadow: 0 6px 14px rgba(26, 82, 118, 0.22);
-  }
-  .nav-cta:hover { background: var(--teal-900); transform: translateY(-1px); }
-  .hamburger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; }
-  .hamburger svg { stroke: var(--ink); }
+  /* PROBLEM */
+  .problem{background:var(--bg-soft);}.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .problem-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:28px;box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s;}
+  .problem-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+  .icon-x{width:44px;height:44px;border-radius:12px;background:rgba(192,57,43,.08);color:var(--danger);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .problem-card p{color:var(--ink-2);font-size:15.5px;}
+  .solution{margin-top:32px;display:flex;align-items:flex-start;gap:16px;padding:24px 28px;border-radius:var(--radius-md);background:linear-gradient(180deg,#fff,var(--green-50));border:1px solid rgba(30,132,73,.22);box-shadow:var(--shadow-sm);}
+  .icon-check{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:var(--green-700);color:#fff;display:inline-flex;align-items:center;justify-content:center;}
+  .solution p{font-size:17px;color:var(--teal-900);font-weight:500;}
+  @media(max-width:860px){.problem-grid{grid-template-columns:1fr;}}
 
-  @media (max-width: 860px) {
-    .nav-links { display: none; position: absolute; top: 76px; left: 0; right: 0; flex-direction: column; gap: 0; background: #fff; border-bottom: 1px solid var(--line); padding: 12px 24px; }
-    .nav-links.open { display: flex; }
-    .nav-links a { padding: 14px 0; border-bottom: 1px solid var(--line); width: 100%; }
-    .nav-links a:last-child { border-bottom: 0; }
-    .nav-cta { align-self: flex-start; margin: 8px 0 4px; }
-    .hamburger { display: inline-flex; }
-  }
+  /* STEPS */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .step{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:28px;box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s,border-color .3s;}
+  .step:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:rgba(26,82,118,.25);}
+  .step-num{font-family:'Fraunces',serif;font-size:44px;font-weight:600;color:var(--teal-700);line-height:1;margin-bottom:18px;display:flex;align-items:baseline;gap:10px;}
+  .step-num::after{content:"";flex:1;height:1px;background:var(--line);}
+  .step-icon{width:40px;height:40px;border-radius:10px;background:var(--teal-50);color:var(--teal-700);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .step h3{font-family:'Manrope',sans-serif;font-weight:700;font-size:17px;color:var(--teal-900);margin-bottom:10px;}
+  .step p{color:var(--ink-2);font-size:14.5px;}
+  @media(max-width:1000px){.steps{grid-template-columns:repeat(2,1fr);}}@media(max-width:540px){.steps{grid-template-columns:1fr;}}
 
-  /* Hero */
-  .hero {
-    position: relative;
-    padding: 88px 0 96px;
-    background:
-      radial-gradient(900px 400px at 85% -20%, rgba(46, 134, 171, 0.10), transparent 60%),
-      radial-gradient(700px 400px at 10% 110%, rgba(30, 132, 73, 0.09), transparent 60%),
-      var(--bg);
-    overflow: hidden;
-  }
-  .hero::before {
-    content: "";
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(to right, rgba(15, 58, 82, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 58, 82, 0.035) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
-    pointer-events: none;
-  }
-  .hero-grid {
-    position: relative;
-    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center;
-  }
-  .pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 7px 14px; border-radius: 999px;
-    background: var(--green-50); color: var(--green-700);
-    font-size: 13px; font-weight: 600; letter-spacing: .02em;
-    border: 1px solid rgba(30, 132, 73, 0.18);
-  }
-  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-500); box-shadow: 0 0 0 4px rgba(46, 163, 101, .18); }
+  /* WHATSAPP */
+  .whatsapp-section{background:radial-gradient(700px 400px at 15% 10%,rgba(30,132,73,.08),transparent 60%),radial-gradient(700px 400px at 85% 90%,rgba(37,211,102,.08),transparent 60%),var(--bg);overflow:hidden;}
+  .wa-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+  .wa-copy .eyebrow{background:#e6f7ed;color:#128c3a;}
+  .wa-features{margin-top:28px;display:flex;flex-direction:column;gap:14px;}
+  .wa-feat{display:flex;gap:14px;align-items:flex-start;}
+  .wa-feat-icon{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:#e6f7ed;color:#128c3a;display:inline-flex;align-items:center;justify-content:center;}
+  .wa-feat h4{font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;color:var(--teal-900);margin-bottom:2px;}
+  .wa-feat p{font-size:14.5px;color:var(--ink-2);}
+  .phone{width:360px;max-width:100%;margin:0 auto;background:#0b141a;border-radius:44px;padding:14px;box-shadow:0 40px 80px rgba(15,58,82,.22),0 10px 30px rgba(15,58,82,.10);position:relative;}
+  .phone::before{content:"";position:absolute;top:18px;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#0b141a;border-radius:20px;z-index:3;}
+  .phone-screen{background:linear-gradient(135deg,#efeae2,#e7ddd2);border-radius:32px;overflow:hidden;height:620px;display:flex;flex-direction:column;}
+  .wa-header{background:#128c3a;color:#fff;padding:44px 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+  .wa-back{width:18px;height:18px;color:#fff;opacity:.9;}
+  .wa-avatar{width:38px;height:38px;border-radius:50%;background:#fff;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:2px;overflow:hidden;}
+  .wa-avatar img{width:100%;height:100%;object-fit:contain;}
+  .wa-contact{flex:1;line-height:1.1;}.wa-contact .name{font-weight:600;font-size:15px;}.wa-contact .status{font-size:11.5px;opacity:.85;margin-top:2px;}
+  .wa-icons{display:flex;gap:16px;color:#fff;opacity:.9;}
+  .wa-chat{flex:1;overflow:hidden;padding:14px 12px 12px;display:flex;flex-direction:column;gap:8px;}
+  .wa-date{align-self:center;background:#ddecc9;color:#3b4a3c;font-size:11px;padding:4px 10px;border-radius:8px;margin:2px 0 6px;}
+  .bubble{max-width:78%;padding:8px 11px 6px;border-radius:10px;font-size:13px;line-height:1.4;color:#111b21;box-shadow:0 1px .5px rgba(0,0,0,.08);word-wrap:break-word;}
+  .bubble .time{display:inline-block;font-size:10px;color:#667781;margin-left:8px;}
+  .bubble.received{background:#fff;align-self:flex-start;border-top-left-radius:2px;}
+  .bubble.sent{background:#d9fdd3;align-self:flex-end;border-top-right-radius:2px;}
+  .bubble .tick{color:#53bdeb;font-weight:bold;margin-left:2px;font-size:11px;}
+  .bubble .zone-line{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px dashed rgba(0,0,0,.08);font-variant-numeric:tabular-nums;}
+  .bubble .zone-line:last-of-type{border-bottom:0;}.bubble .zone-line b{color:#128c3a;font-weight:700;}
+  .bubble .wtitle{font-weight:700;color:#128c3a;display:block;margin-bottom:6px;font-size:12.5px;}
+  .wa-input{padding:8px 10px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .wa-input-field{flex:1;background:#fff;border-radius:22px;padding:9px 14px;color:#667781;font-size:13px;}
+  .wa-send{width:40px;height:40px;border-radius:50%;background:#128c3a;color:#fff;display:inline-flex;align-items:center;justify-content:center;}
+  @media(max-width:900px){.wa-grid{grid-template-columns:1fr;gap:40px;}.wa-copy{order:1;}.wa-phone-wrap{order:2;}}
 
-  .hero h1 {
-    font-size: clamp(42px, 6vw, 68px);
-    margin-top: 18px;
-    color: var(--teal-900);
-  }
-  .hero h1 em { font-style: italic; color: var(--green-700); font-weight: 500; }
-  .hero .sub {
-    margin-top: 22px; font-size: 18px; color: var(--ink-2); max-width: 560px;
-  }
-  .hero-ctas { display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: var(--teal-700); color: #fff;
-    padding: 16px 26px; border-radius: 999px;
-    font-weight: 600; font-size: 16px;
-    box-shadow: 0 10px 24px rgba(26, 82, 118, 0.24);
-    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    border: 0; cursor: pointer;
-  }
-  .btn-primary:hover { background: var(--teal-900); transform: translateY(-2px); box-shadow: 0 16px 32px rgba(26, 82, 118, 0.30); }
-  .btn-primary svg { transition: transform .2s ease; }
-  .btn-primary:hover svg { transform: translateX(4px); }
+  /* BENEFITS */
+  .benefits{background:var(--bg-soft);}.benefits-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .benefit{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:26px 22px;box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s;}
+  .benefit:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+  .benefit-icon{width:48px;height:48px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .b-water{background:#e8f4fa;color:var(--teal-500);}.b-energy{background:#fff3da;color:#c68c1e;}.b-leaf{background:#e8f4ec;color:var(--green-700);}.b-drop{background:#eaf3f8;color:var(--teal-700);}.b-chart{background:#eaf7f0;color:var(--green-500);}
+  .benefit h3{font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;color:var(--teal-900);margin-bottom:8px;text-transform:uppercase;}
+  .benefit p{font-size:14.5px;color:var(--ink-2);}
+  @media(max-width:1100px){.benefits-grid{grid-template-columns:repeat(3,1fr);}}@media(max-width:680px){.benefits-grid{grid-template-columns:repeat(2,1fr);}}@media(max-width:440px){.benefits-grid{grid-template-columns:1fr;}}
 
-  .btn-ghost {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 16px 22px; border-radius: 999px;
-    border: 1px solid var(--line); color: var(--ink);
-    font-weight: 600; font-size: 15px; background: #fff;
-    transition: border-color .2s ease, color .2s ease;
-  }
-  .btn-ghost:hover { border-color: var(--teal-700); color: var(--teal-700); }
+  /* PRICING */
+  .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:stretch;}
+  .price{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:32px 26px;position:relative;box-shadow:var(--shadow-sm);transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column;}
+  .price:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+  .price-range{font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+  .price-amount{margin-top:14px;font-family:'Fraunces',serif;font-weight:600;font-size:38px;color:var(--teal-900);line-height:1;}
+  .price-amount small{font-family:'Manrope',sans-serif;font-size:14px;color:var(--muted);font-weight:500;display:block;margin-top:6px;}
+  .price-features{list-style:none;padding:0;margin:22px 0 0;}.price-features li{display:flex;gap:10px;padding:8px 0;font-size:14.5px;color:var(--ink-2);}
+  .price-features svg{flex-shrink:0;color:var(--green-700);}
+  .price.popular{border-color:var(--teal-700);background:linear-gradient(180deg,#fff,#f5fbfe);box-shadow:0 20px 50px rgba(26,82,118,.14);transform:translateY(-6px);}
+  .price.popular:hover{transform:translateY(-10px);}
+  .popular-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--teal-700);color:#fff;padding:6px 14px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}
+  .pricing-example{margin-top:36px;padding:22px 26px;background:var(--teal-50);color:var(--teal-900);border-radius:var(--radius-md);font-size:15.5px;display:inline-flex;align-items:center;gap:14px;border:1px solid rgba(26,82,118,.14);}
+  .pricing-example strong{color:var(--teal-700);font-weight:700;}
+  @media(max-width:1000px){.pricing-grid{grid-template-columns:repeat(2,1fr);}.price.popular{transform:none;}}@media(max-width:560px){.pricing-grid{grid-template-columns:1fr;}}
 
-  .hero-meta { display: flex; gap: 26px; margin-top: 36px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
-  .hero-meta span { display: inline-flex; align-items: center; gap: 8px; }
+  /* CLIENTS */
+  .clients{background:linear-gradient(180deg,var(--bg-soft),#fff);}.clients-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .client{background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);padding:24px;display:flex;gap:16px;align-items:flex-start;transition:transform .3s,box-shadow .3s;}
+  .client:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+  .client-mark{width:48px;height:48px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,var(--teal-700),var(--green-700));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:18px;}
+  .client h4{font-family:'Manrope',sans-serif;font-weight:700;font-size:16px;color:var(--teal-900);margin-bottom:4px;}
+  .client p{color:var(--muted);font-size:14px;}
+  @media(max-width:900px){.clients-grid{grid-template-columns:repeat(2,1fr);}}@media(max-width:520px){.clients-grid{grid-template-columns:1fr;}}
 
-  /* Hero card */
-  .hero-card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 24px;
-    box-shadow: var(--shadow-lg);
-    padding: 26px;
-    transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
-  }
-  .hc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .hc-title { font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--teal-900); font-size: 15px; }
-  .hc-badge { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green-700); background: var(--green-50); padding: 5px 9px; border-radius: 999px; border: 1px solid rgba(30, 132, 73, .18); }
-  .hc-row { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
-  .hc-row:last-child { border-bottom: 0; }
-  .hc-zone { font-weight: 700; color: var(--teal-700); font-size: 14px; }
-  .hc-bar { height: 8px; background: var(--sage-50); border-radius: 999px; overflow: hidden; }
-  .hc-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--teal-500), var(--green-500)); border-radius: 999px; }
-  .hc-val { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); font-size: 14px; }
-  .hc-val small { color: var(--muted); font-weight: 500; }
+  /* CTA / CONTACT */
+  .cta-final{background:radial-gradient(600px 300px at 90% -10%,rgba(46,134,171,.18),transparent 60%),radial-gradient(600px 300px at 0% 110%,rgba(30,132,73,.18),transparent 60%),var(--teal-900);color:#fff;}
+  .cta-final .section-title{color:#fff;}.cta-final .eyebrow{background:rgba(255,255,255,.08);color:#cfe4ef;}
+  .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;}
+  .cta-copy p{color:rgba(255,255,255,.78);font-size:17px;margin-top:14px;max-width:440px;}
+  .cta-info{margin-top:32px;display:flex;flex-direction:column;gap:12px;}
+  .cta-info-row{display:flex;gap:12px;align-items:center;color:rgba(255,255,255,.88);font-size:15px;}.cta-info-row svg{color:var(--green-500);}
+  .form-card{background:#fff;color:var(--ink);border-radius:var(--radius-lg);padding:32px;box-shadow:0 30px 80px rgba(0,0,0,.25);}
+  .form-card h3{font-family:'Manrope',sans-serif;font-weight:700;font-size:20px;color:var(--teal-900);margin-bottom:6px;}
+  .form-card .hint{color:var(--muted);font-size:14px;margin-bottom:22px;}
+  .field{margin-bottom:16px;}.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:6px;}
+  .field input,.field textarea,.field select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:15px;color:var(--ink);background:#fff;transition:border-color .2s,box-shadow .2s;}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--teal-700);box-shadow:0 0 0 4px rgba(26,82,118,.14);}
+  .field textarea{min-height:110px;resize:vertical;}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-submit{width:100%;justify-content:center;margin-top:6px;}
+  .form-ok{margin-top:14px;padding:16px 18px;border-radius:10px;background:var(--green-50);color:var(--green-900);font-size:15px;font-weight:600;border:1px solid rgba(30,132,73,.24);display:none;text-align:center;}
+  .form-ok.show{display:block;}
+  @media(max-width:900px){.cta-grid{grid-template-columns:1fr;}.field-row{grid-template-columns:1fr;}}
 
-  @media (max-width: 980px) {
-    .hero-grid { grid-template-columns: 1fr; }
-    .hero-card { transform: none; }
-  }
+  /* FOOTER */
+  .footer{background:#fff;padding:40px 0;border-top:1px solid var(--line);}
+  .footer-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:14px;}
 
-  /* Section */
-  section { padding: 104px 0; position: relative; }
-  .eyebrow {
-    display: inline-block;
-    font-size: 13px; font-weight: 700; letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--teal-700);
-    padding: 6px 12px; border-radius: 999px;
-    background: var(--teal-50);
-  }
-  .section-title { font-size: clamp(32px, 4vw, 48px); margin-top: 18px; color: var(--teal-900); max-width: 820px; }
-  .section-lead { margin-top: 16px; font-size: 17px; color: var(--ink-2); max-width: 680px; }
-  .section-head { margin-bottom: 56px; }
-
-  /* Problem */
-  .problem { background: var(--bg-soft); }
-  .problem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .problem-card {
-    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-md);
-    padding: 28px; box-shadow: var(--shadow-sm);
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .problem-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .icon-x {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: rgba(192, 57, 43, 0.08); color: var(--danger);
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-  }
-  .problem-card p { color: var(--ink-2); font-size: 15.5px; }
-
-  .solution {
-    margin-top: 32px;
-    display: flex; align-items: flex-start; gap: 16px;
-    padding: 24px 28px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(180deg, #fff, var(--green-50));
-    border: 1px solid rgba(30, 132, 73, 0.22);
-    box-shadow: var(--shadow-sm);
-  }
-  .icon-check {
-    flex-shrink: 0;
-    width: 44px; height: 44px; border-radius: 12px;
-    background: var(--green-700); color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .solution p { font-size: 17px; color: var(--teal-900); font-weight: 500; }
-
-  @media (max-width: 860px) {
-    .problem-grid { grid-template-columns: 1fr; }
-  }
-
-  /* How it works */
-  .steps {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-    counter-reset: step;
-  }
-  .step {
-    background: #fff; border: 1px solid var(--line);
-    border-radius: var(--radius-md); padding: 28px;
-    position: relative; overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
-  }
-  .step:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: rgba(26, 82, 118, .25); }
-  .step-num {
-    font-family: 'Fraunces', serif;
-    font-size: 44px; font-weight: 600; color: var(--teal-700);
-    line-height: 1; margin-bottom: 18px;
-    display: flex; align-items: baseline; gap: 10px;
-  }
-  .step-num::after {
-    content: ""; flex: 1; height: 1px; background: var(--line);
-  }
-  .step-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: var(--teal-50); color: var(--teal-700);
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-  }
-  .step h3 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 17px; color: var(--teal-900); margin-bottom: 10px; }
-  .step p { color: var(--ink-2); font-size: 14.5px; }
-
-  @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 540px) { .steps { grid-template-columns: 1fr; } }
-
-  /* WhatsApp */
-  .whatsapp-section {
-    background:
-      radial-gradient(700px 400px at 15% 10%, rgba(30, 132, 73, 0.08), transparent 60%),
-      radial-gradient(700px 400px at 85% 90%, rgba(37, 211, 102, 0.08), transparent 60%),
-      var(--bg);
-    overflow: hidden;
-  }
-  .wa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  .wa-copy .eyebrow { background: #e6f7ed; color: #128c3a; }
-  .wa-features { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
-  .wa-feat { display: flex; gap: 14px; align-items: flex-start; }
-  .wa-feat-icon {
-    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-    background: #e6f7ed; color: #128c3a;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .wa-feat h4 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; color: var(--teal-900); margin-bottom: 2px; }
-  .wa-feat p { font-size: 14.5px; color: var(--ink-2); }
-
-  .phone {
-    width: 360px; max-width: 100%;
-    margin: 0 auto;
-    background: #0b141a;
-    border-radius: 44px;
-    padding: 14px;
-    box-shadow: 0 40px 80px rgba(15, 58, 82, 0.22), 0 10px 30px rgba(15, 58, 82, 0.10);
-    position: relative;
-  }
-  .phone::before {
-    content: "";
-    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-    width: 110px; height: 28px; background: #0b141a;
-    border-radius: 20px; z-index: 3;
-  }
-  .phone-screen {
-    background: #e5ddd5;
-    border-radius: 32px;
-    overflow: hidden;
-    position: relative;
-    height: 620px;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1px),
-      radial-gradient(circle at 60% 70%, rgba(0,0,0,0.02) 1px, transparent 1px),
-      linear-gradient(135deg, #efeae2 0%, #e7ddd2 100%);
-    background-size: 30px 30px, 40px 40px, 100% 100%;
-    display: flex; flex-direction: column;
-  }
-  .wa-header {
-    background: #128c3a;
-    color: #fff;
-    padding: 44px 16px 12px;
-    display: flex; align-items: center; gap: 12px;
-    flex-shrink: 0;
-  }
-  .wa-back { width: 18px; height: 18px; color: #fff; opacity: .9; }
-  .wa-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: #fff; flex-shrink: 0;
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 2px; overflow: hidden;
-  }
-  .wa-avatar img { width: 100%; height: 100%; object-fit: contain; }
-  .wa-contact { flex: 1; line-height: 1.1; }
-  .wa-contact .name { font-weight: 600; font-size: 15px; }
-  .wa-contact .status { font-size: 11.5px; opacity: .85; margin-top: 2px; }
-  .wa-icons { display: flex; gap: 16px; color: #fff; opacity: .9; }
-
-  .wa-chat {
-    flex: 1; overflow: hidden;
-    padding: 14px 12px 12px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .wa-date {
-    align-self: center; background: #ddecc9; color: #3b4a3c;
-    font-size: 11px; padding: 4px 10px; border-radius: 8px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.04);
-    margin: 2px 0 6px;
-  }
-  .bubble {
-    max-width: 78%;
-    padding: 8px 11px 6px;
-    border-radius: 10px;
-    font-size: 13px; line-height: 1.4;
-    color: #111b21;
-    position: relative;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,.08);
-    word-wrap: break-word;
-  }
-  .bubble .time { display: inline-block; font-size: 10px; color: #667781; margin-left: 8px; vertical-align: baseline; }
-  .bubble.received { background: #fff; align-self: flex-start; border-top-left-radius: 2px; }
-  .bubble.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 2px; }
-  .bubble .tick { color: #53bdeb; font-weight: bold; margin-left: 2px; font-size: 11px; }
-  .bubble strong { font-weight: 700; }
-  .bubble .zone-line { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-variant-numeric: tabular-nums; }
-  .bubble .zone-line:last-of-type { border-bottom: 0; }
-  .bubble .zone-line b { color: #128c3a; font-weight: 700; }
-  .bubble .title { font-weight: 700; color: #128c3a; display: block; margin-bottom: 6px; font-size: 12.5px; }
-
-  .wa-input {
-    padding: 8px 10px; background: transparent;
-    display: flex; align-items: center; gap: 8px;
-    flex-shrink: 0;
-  }
-  .wa-input-field {
-    flex: 1; background: #fff; border-radius: 22px;
-    padding: 9px 14px; color: #667781; font-size: 13px;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,.08);
-  }
-  .wa-send {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #128c3a; color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 900px) {
-    .wa-grid { grid-template-columns: 1fr; gap: 40px; }
-    .wa-copy { order: 1; }
-    .wa-phone-wrap { order: 2; }
-  }
-
-  /* Benefits */
-  .benefits { background: var(--bg-soft); }
-  .benefits-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-  .benefit {
-    background: #fff; border: 1px solid var(--line);
-    border-radius: var(--radius-md); padding: 26px 22px;
-    text-align: left;
-    box-shadow: var(--shadow-sm);
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .benefit:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-  .benefit-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-  }
-  .b-water { background: #e8f4fa; color: var(--teal-500); }
-  .b-energy { background: #fff3da; color: #c68c1e; }
-  .b-leaf { background: #e8f4ec; color: var(--green-700); }
-  .b-drop { background: #eaf3f8; color: var(--teal-700); }
-  .b-chart { background: #eaf7f0; color: var(--green-500); }
-  .benefit h3 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; color: var(--teal-900); margin-bottom: 8px; letter-spacing: .01em; text-transform: uppercase; }
-  .benefit p { font-size: 14.5px; color: var(--ink-2); }
-
-  @media (max-width: 1100px) { .benefits-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 680px)  { .benefits-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 440px)  { .benefits-grid { grid-template-columns: 1fr; } }
-
-  /* Pricing */
-  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
-  .price {
-    background: #fff; border: 1px solid var(--line);
-    border-radius: var(--radius-lg); padding: 32px 26px;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-    transition: transform .3s ease, box-shadow .3s ease;
-    display: flex; flex-direction: column;
-  }
-  .price:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-  .price-range { font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
-  .price-amount { margin-top: 14px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 38px; color: var(--teal-900); line-height: 1; }
-  .price-amount small { font-family: 'Manrope', sans-serif; font-size: 14px; color: var(--muted); font-weight: 500; letter-spacing: 0; display: block; margin-top: 6px; }
-  .price-features { list-style: none; padding: 0; margin: 22px 0 0; }
-  .price-features li { display: flex; gap: 10px; padding: 8px 0; font-size: 14.5px; color: var(--ink-2); }
-  .price-features svg { flex-shrink: 0; color: var(--green-700); }
-  .price.popular {
-    border-color: var(--teal-700);
-    background: linear-gradient(180deg, #fff, #f5fbfe);
-    box-shadow: 0 20px 50px rgba(26, 82, 118, 0.14);
-    transform: translateY(-6px);
-  }
-  .price.popular:hover { transform: translateY(-10px); }
-  .popular-tag {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    background: var(--teal-700); color: #fff;
-    padding: 6px 14px; border-radius: 999px;
-    font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
-    box-shadow: 0 6px 16px rgba(26, 82, 118, 0.28);
-  }
-  .pricing-example {
-    margin-top: 36px; padding: 22px 26px;
-    background: var(--teal-50); color: var(--teal-900);
-    border-radius: var(--radius-md);
-    font-size: 15.5px;
-    display: inline-flex; align-items: center; gap: 14px;
-    border: 1px solid rgba(26, 82, 118, .14);
-  }
-  .pricing-example strong { color: var(--teal-700); font-weight: 700; }
-
-  @media (max-width: 1000px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } .price.popular { transform: none; } }
-  @media (max-width: 560px)  { .pricing-grid { grid-template-columns: 1fr; } }
-
-  /* Clients */
-  .clients { background: linear-gradient(180deg, var(--bg-soft), #fff); }
-  .clients-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .client {
-    background: #fff; border: 1px solid var(--line);
-    border-radius: var(--radius-md); padding: 24px;
-    display: flex; gap: 16px; align-items: flex-start;
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .client:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-  .client-mark {
-    width: 48px; height: 48px; flex-shrink: 0;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--teal-700), var(--green-700));
-    color: #fff; display: inline-flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-weight: 700; font-size: 18px;
-  }
-  .client h4 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 16px; color: var(--teal-900); margin-bottom: 4px; }
-  .client p { color: var(--muted); font-size: 14px; }
-
-  .stats {
-    margin-top: 48px; padding: 28px 32px;
-    background: var(--teal-900); color: #fff;
-    border-radius: var(--radius-lg);
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
-    position: relative; overflow: hidden;
-  }
-  .stats::before {
-    content: ""; position: absolute; inset: 0;
-    background-image:
-      linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: linear-gradient(to right, black, transparent 80%);
-    -webkit-mask-image: linear-gradient(to right, black, transparent 80%);
-  }
-  .stat { position: relative; }
-  .stat-num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 34px; color: #fff; line-height: 1; }
-  .stat-lbl { margin-top: 8px; font-size: 13.5px; color: rgba(255,255,255,.72); }
-
-  @media (max-width: 900px) { .clients-grid { grid-template-columns: repeat(2, 1fr); } .stats { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .clients-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr; } }
-
-  /* CTA Final + Form */
-  .cta-final {
-    background:
-      radial-gradient(600px 300px at 90% -10%, rgba(46, 134, 171, 0.18), transparent 60%),
-      radial-gradient(600px 300px at 0% 110%, rgba(30, 132, 73, 0.18), transparent 60%),
-      var(--teal-900);
-    color: #fff;
-  }
-  .cta-final .section-title { color: #fff; }
-  .cta-final .eyebrow { background: rgba(255,255,255,.08); color: #cfe4ef; }
-  .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
-  .cta-copy p { color: rgba(255,255,255,.78); font-size: 17px; margin-top: 14px; max-width: 440px; }
-  .cta-info { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
-  .cta-info-row { display: flex; gap: 12px; align-items: center; color: rgba(255,255,255,.88); font-size: 15px; }
-  .cta-info-row svg { color: var(--green-500); }
-
-  .form-card {
-    background: #fff; color: var(--ink);
-    border-radius: var(--radius-lg); padding: 32px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.25);
-  }
-  .form-card h3 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 20px; color: var(--teal-900); margin-bottom: 6px; }
-  .form-card .hint { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; letter-spacing: .02em; }
-  .field input, .field textarea, .field select {
-    width: 100%; padding: 12px 14px;
-    border: 1px solid var(--line); border-radius: 10px;
-    font-family: inherit; font-size: 15px; color: var(--ink);
-    background: #fff; transition: border-color .2s ease, box-shadow .2s ease;
-  }
-  .field input:focus, .field textarea:focus, .field select:focus {
-    outline: none; border-color: var(--teal-700);
-    box-shadow: 0 0 0 4px rgba(26, 82, 118, .14);
-  }
-  .field textarea { min-height: 110px; resize: vertical; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .form-submit { width: 100%; justify-content: center; margin-top: 6px; }
-  .form-ok {
-    margin-top: 14px; padding: 12px 14px; border-radius: 10px;
-    background: var(--green-50); color: var(--green-900);
-    font-size: 14px; border: 1px solid rgba(30,132,73,.24);
-    display: none;
-  }
-  .form-ok.show { display: block; }
-
-  @media (max-width: 900px) { .cta-grid { grid-template-columns: 1fr; } .field-row { grid-template-columns: 1fr; } }
-
-  /* Footer */
-  .footer { background: #fff; padding: 40px 0; border-top: 1px solid var(--line); }
-  .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
-
-  /* Scroll fade-in */
-  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-  .reveal.d1 { transition-delay: .06s; }
-  .reveal.d2 { transition-delay: .12s; }
-  .reveal.d3 { transition-delay: .18s; }
-  .reveal.d4 { transition-delay: .24s; }
-
-  ::selection { background: rgba(30, 132, 73, .22); color: var(--teal-900); }
+  /* REVEAL */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  .reveal.d1{transition-delay:.06s;}.reveal.d2{transition-delay:.12s;}.reveal.d3{transition-delay:.18s;}.reveal.d4{transition-delay:.24s;}
+  ::selection{background:rgba(30,132,73,.22);color:var(--teal-900);}
 </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
+<!-- HEADER -->
 <header class="header" id="header">
   <div class="container nav">
     <a href="#top" class="brand">
       <img src="https://customer-assets.emergentagent.com/job_cronoriego-landing/artifacts/jcwh689k_image.png" alt="CronoRiego" />
-      <div class="brand-text">
-        <span class="b1">CRONO</span>
-        <span class="b2">RIEGO</span>
-      </div>
+      <div class="brand-text"><span class="b1">CRONO</span><span class="b2">RIEGO</span></div>
     </a>
     <nav class="nav-links" id="navLinks">
       <a href="#problema">El problema</a>
@@ -596,12 +205,12 @@
       <a href="#contacto" class="nav-cta">Contáctanos</a>
     </nav>
     <button class="hamburger" id="hamburger" aria-label="Abrir menú">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
     </button>
   </div>
 </header>
 
-<!-- ===== HERO ===== -->
+<!-- HERO -->
 <section class="hero" id="top">
   <div class="container hero-grid">
     <div class="reveal">
@@ -609,147 +218,55 @@
       <h1>Deja de regar<br/><em>al ojo.</em></h1>
       <p class="sub">Cada semana te decimos exactamente <strong>cuánto y cuándo regar</strong> cada zona de tu huerto. Balance hídrico basado en datos reales — no en corazonadas.</p>
       <div class="hero-ctas">
-        <a href="#contacto" class="btn-primary">
-          Quiero mi plan de riego
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <a href="#contacto" class="btn-primary">Quiero mi plan de riego <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
         <a href="#como-funciona" class="btn-ghost">Ver cómo funciona</a>
       </div>
       <div class="hero-meta">
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          +25.000 ha gestionadas
-        </span>
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Chile y Canadá
-        </span>
-        <span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Inscrito CNR
-        </span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>+25.000 ha gestionadas</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Chile y Canadá</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Inscrito CNR</span>
       </div>
     </div>
-
     <div class="reveal d2">
       <div class="hero-card" aria-hidden="true">
-        <div class="hc-head">
-          <div class="hc-title">Recomendación semanal · Semana 47</div>
-          <span class="hc-badge">Vía WhatsApp</span>
-        </div>
-        <div class="hc-row">
-          <span class="hc-zone">Zona 01</span>
-          <div class="hc-bar"><span style="width:72%"></span></div>
-          <span class="hc-val">4.2 h <small>/riego</small></span>
-        </div>
-        <div class="hc-row">
-          <span class="hc-zone">Zona 02</span>
-          <div class="hc-bar"><span style="width:58%"></span></div>
-          <span class="hc-val">3.5 h <small>/riego</small></span>
-        </div>
-        <div class="hc-row">
-          <span class="hc-zone">Zona 03</span>
-          <div class="hc-bar"><span style="width:86%"></span></div>
-          <span class="hc-val">5.1 h <small>/riego</small></span>
-        </div>
-        <div class="hc-row">
-          <span class="hc-zone">Zona 04</span>
-          <div class="hc-bar"><span style="width:44%"></span></div>
-          <span class="hc-val">2.8 h <small>/riego</small></span>
-        </div>
-        <div class="hc-row">
-          <span class="hc-zone">Zona 05</span>
-          <div class="hc-bar"><span style="width:66%"></span></div>
-          <span class="hc-val">3.9 h <small>/riego</small></span>
-        </div>
+        <div class="hc-head"><div class="hc-title">Recomendación semanal · Semana 47</div><span class="hc-badge">Vía WhatsApp</span></div>
+        <div class="hc-row"><span class="hc-zone">Zona 01</span><div class="hc-bar"><span style="width:72%"></span></div><span class="hc-val">4.2 h <small>/riego</small></span></div>
+        <div class="hc-row"><span class="hc-zone">Zona 02</span><div class="hc-bar"><span style="width:58%"></span></div><span class="hc-val">3.5 h <small>/riego</small></span></div>
+        <div class="hc-row"><span class="hc-zone">Zona 03</span><div class="hc-bar"><span style="width:86%"></span></div><span class="hc-val">5.1 h <small>/riego</small></span></div>
+        <div class="hc-row"><span class="hc-zone">Zona 04</span><div class="hc-bar"><span style="width:44%"></span></div><span class="hc-val">2.8 h <small>/riego</small></span></div>
+        <div class="hc-row"><span class="hc-zone">Zona 05</span><div class="hc-bar"><span style="width:66%"></span></div><span class="hc-val">3.9 h <small>/riego</small></span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== PROBLEM ===== -->
+<!-- PROBLEM -->
 <section class="problem" id="problema">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">El problema</span>
-      <h2 class="section-title">La pregunta de cada lunes…</h2>
-      <p class="section-lead">¿Cuánto tiempo y con qué frecuencia debo regar esta semana? Equivocarse cuesta caro.</p>
-    </div>
+    <div class="section-head reveal"><span class="eyebrow">El problema</span><h2 class="section-title">La pregunta de cada lunes…</h2><p class="section-lead">¿Cuánto tiempo y con qué frecuencia debo regar esta semana? Equivocarse cuesta caro.</p></div>
     <div class="problem-grid">
-      <div class="problem-card reveal d1">
-        <div class="icon-x">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </div>
-        <p><strong>Riegos excesivos</strong> lavan fertilizantes y aumentan el costo de bombeo.</p>
-      </div>
-      <div class="problem-card reveal d2">
-        <div class="icon-x">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </div>
-        <p><strong>Riegos deficitarios</strong> sin estrategia reducen drásticamente la producción.</p>
-      </div>
-      <div class="problem-card reveal d3">
-        <div class="icon-x">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </div>
-        <p>Basarse sólo en <strong>calicatas y sensores</strong> es reactivo — no permite planificar.</p>
-      </div>
+      <div class="problem-card reveal d1"><div class="icon-x"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><p><strong>Riegos excesivos</strong> lavan fertilizantes y aumentan el costo de bombeo.</p></div>
+      <div class="problem-card reveal d2"><div class="icon-x"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><p><strong>Riegos deficitarios</strong> sin estrategia reducen drásticamente la producción.</p></div>
+      <div class="problem-card reveal d3"><div class="icon-x"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div><p>Basarse sólo en <strong>calicatas y sensores</strong> es reactivo — no permite planificar.</p></div>
     </div>
-    <div class="solution reveal">
-      <div class="icon-check">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <p>Con un <strong>balance hídrico semanal</strong> basado en datos reales, puedes planificar y programar con certeza.</p>
-    </div>
+    <div class="solution reveal"><div class="icon-check"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><p>Con un <strong>balance hídrico semanal</strong> basado en datos reales, puedes planificar y programar con certeza.</p></div>
   </div>
 </section>
 
-<!-- ===== HOW IT WORKS ===== -->
+<!-- HOW IT WORKS -->
 <section id="como-funciona">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Cómo funciona</span>
-      <h2 class="section-title">Cómo funciona CRONORIEGO</h2>
-      <p class="section-lead">Un proceso continuo de cuatro pasos que convierte datos en decisiones de riego accionables.</p>
-    </div>
+    <div class="section-head reveal"><span class="eyebrow">Cómo funciona</span><h2 class="section-title">Cómo funciona CRONORIEGO</h2><p class="section-lead">Un proceso continuo de cuatro pasos que convierte datos en decisiones de riego accionables.</p></div>
     <div class="steps">
-      <div class="step reveal d1">
-        <div class="step-num">01</div>
-        <div class="step-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg>
-        </div>
-        <h3>Recolección de datos</h3>
-        <p>Imágenes satelitales, pronósticos meteorológicos, datos del suelo y del sistema de riego.</p>
-      </div>
-      <div class="step reveal d2">
-        <div class="step-num">02</div>
-        <div class="step-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
-        </div>
-        <h3>Modelación y análisis</h3>
-        <p>Calculamos la evapotranspiración real del cultivo y las necesidades hídricas exactas por zona.</p>
-      </div>
-      <div class="step reveal d3">
-        <div class="step-num">03</div>
-        <div class="step-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </div>
-        <h3>Recomendación semanal</h3>
-        <p>Tiempo y frecuencia de riego por zona, entregado cada semana directo a tu WhatsApp.</p>
-      </div>
-      <div class="step reveal d4">
-        <div class="step-num">04</div>
-        <div class="step-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.55"/><polyline points="21 4 21 10 15 10"/></svg>
-        </div>
-        <h3>Seguimiento continuo</h3>
-        <p>Validamos en terreno, ajustamos el balance y te damos soporte directo cuando lo necesites.</p>
-      </div>
+      <div class="step reveal d1"><div class="step-num">01</div><div class="step-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><h3>Recolección de datos</h3><p>Imágenes satelitales, pronósticos meteorológicos, datos del suelo y del sistema de riego.</p></div>
+      <div class="step reveal d2"><div class="step-num">02</div><div class="step-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h3>Modelación y análisis</h3><p>Calculamos la evapotranspiración real del cultivo y las necesidades hídricas exactas por zona.</p></div>
+      <div class="step reveal d3"><div class="step-num">03</div><div class="step-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><h3>Recomendación semanal</h3><p>Tiempo y frecuencia de riego por zona, entregado cada semana directo a tu WhatsApp.</p></div>
+      <div class="step reveal d4"><div class="step-num">04</div><div class="step-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.55"/><polyline points="21 4 21 10 15 10"/></svg></div><h3>Seguimiento continuo</h3><p>Validamos en terreno, ajustamos el balance y te damos soporte directo cuando lo necesites.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===== WHATSAPP MOCKUP ===== -->
+<!-- WHATSAPP -->
 <section class="whatsapp-section" id="whatsapp">
   <div class="container wa-grid">
     <div class="wa-copy reveal">
@@ -757,248 +274,83 @@
       <h2 class="section-title">Tu plan de riego llega al teléfono de tu jefe de campo.</h2>
       <p class="section-lead">Cada semana recibes la recomendación exacta por zona — lista para programar. Y si tienes dudas, respondemos el mismo chat.</p>
       <div class="wa-features">
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div>
-            <h4>Entrega puntual cada lunes</h4>
-            <p>Recibes el plan de la semana antes de programar los riegos.</p>
-          </div>
-        </div>
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          </div>
-          <div>
-            <h4>Consultas directas al equipo técnico</h4>
-            <p>Responde el chat y te contesta un agrónomo — sin formularios ni tickets.</p>
-          </div>
-        </div>
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <div>
-            <h4>Ajustes en tiempo real</h4>
-            <p>Cambió el clima o falló una bomba — nos avisas y ajustamos el balance.</p>
-          </div>
-        </div>
+        <div class="wa-feat"><div class="wa-feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><h4>Entrega puntual cada lunes</h4><p>Recibes el plan de la semana antes de programar los riegos.</p></div></div>
+        <div class="wa-feat"><div class="wa-feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><div><h4>Consultas directas al equipo técnico</h4><p>Responde el chat y te contesta un agrónomo — sin formularios ni tickets.</p></div></div>
+        <div class="wa-feat"><div class="wa-feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><h4>Ajustes en tiempo real</h4><p>Cambió el clima o falló una bomba — nos avisas y ajustamos el balance.</p></div></div>
       </div>
     </div>
-
     <div class="wa-phone-wrap reveal d2">
       <div class="phone" aria-hidden="true">
         <div class="phone-screen">
           <div class="wa-header">
-            <svg class="wa-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <div class="wa-avatar">
-              <img src="https://customer-assets.emergentagent.com/job_cronoriego-landing/artifacts/jcwh689k_image.png" alt="CronoRiego" />
-            </div>
-            <div class="wa-contact">
-              <div class="name">CronoRiego</div>
-              <div class="status">en línea</div>
-            </div>
-            <div class="wa-icons">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </div>
+            <svg class="wa-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <div class="wa-avatar"><img src="https://customer-assets.emergentagent.com/job_cronoriego-landing/artifacts/jcwh689k_image.png" alt="CR"/></div>
+            <div class="wa-contact"><div class="name">CronoRiego</div><div class="status">en línea</div></div>
+            <div class="wa-icons"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.04 4.11h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
           </div>
           <div class="wa-chat">
             <div class="wa-date">Lunes, 24 de noviembre</div>
-            <div class="bubble received">
-              <span class="title">🌿 Plan de riego · Semana 47</span>
-              <div class="zone-line"><span>Zona 01 · Cerezos</span><b>4.2 h × 3/sem</b></div>
-              <div class="zone-line"><span>Zona 02 · Cerezos</span><b>3.5 h × 3/sem</b></div>
-              <div class="zone-line"><span>Zona 03 · Nogales</span><b>5.1 h × 2/sem</b></div>
-              <div class="zone-line"><span>Zona 04 · Nogales</span><b>2.8 h × 2/sem</b></div>
-              <span class="time">08:15</span>
-            </div>
-            <div class="bubble received">
-              ET₀ de la semana: <strong>5.8 mm/día</strong>. Viene más cálido que la anterior — mantenemos frecuencia y subimos 20 min en Zona 03.
-              <span class="time">08:15</span>
-            </div>
-            <div class="bubble sent">
-              Perfecto. Una consulta: ayer llovieron 6 mm en el sector norte, ¿ajustamos Zona 03 y 04?
-              <span class="time">09:42 <span class="tick">✓✓</span></span>
-            </div>
-            <div class="bubble received">
-              Sí. Con esa lluvia salta un riego en Zona 03 y bajas 40 min en Zona 04 esta semana. Actualizo el balance y te mando el detalle. 👍
-              <span class="time">09:45</span>
-            </div>
-            <div class="bubble sent">
-              Gracias, lo programo ahora.
-              <span class="time">09:46 <span class="tick">✓✓</span></span>
-            </div>
+            <div class="bubble received"><span class="wtitle">🌿 Plan de riego · Semana 47</span><div class="zone-line"><span>Zona 01 · Cerezos</span><b>4.2 h × 3/sem</b></div><div class="zone-line"><span>Zona 02 · Cerezos</span><b>3.5 h × 3/sem</b></div><div class="zone-line"><span>Zona 03 · Nogales</span><b>5.1 h × 2/sem</b></div><div class="zone-line"><span>Zona 04 · Nogales</span><b>2.8 h × 2/sem</b></div><span class="time">08:15</span></div>
+            <div class="bubble received">ET₀ de la semana: <strong>5.8 mm/día</strong>. Subimos 20 min en Zona 03.<span class="time">08:15</span></div>
+            <div class="bubble sent">¿Ajustamos por los 6 mm de lluvia de ayer en Zona 03 y 04?<span class="time">09:42 <span class="tick">✓✓</span></span></div>
+            <div class="bubble received">Sí. Salta un riego en Z03 y bajas 40 min en Z04. 👍<span class="time">09:45</span></div>
+            <div class="bubble sent">Gracias, lo programo ahora.<span class="time">09:46 <span class="tick">✓✓</span></span></div>
           </div>
-          <div class="wa-input">
-            <div class="wa-input-field">Escribe un mensaje...</div>
-            <div class="wa-send">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </div>
-          </div>
+          <div class="wa-input"><div class="wa-input-field">Escribe un mensaje...</div><div class="wa-send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== BENEFITS ===== -->
+<!-- BENEFITS -->
 <section class="benefits" id="beneficios">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Beneficios</span>
-      <h2 class="section-title">Lo que ganas con CRONORIEGO</h2>
-      <p class="section-lead">Menos desperdicio, más producción y un control real de cada recurso que entra a tu huerto.</p>
-    </div>
+    <div class="section-head reveal"><span class="eyebrow">Beneficios</span><h2 class="section-title">Lo que ganas con CRONORIEGO</h2><p class="section-lead">Menos desperdicio, más producción y un control real de cada recurso que entra a tu huerto.</p></div>
     <div class="benefits-grid">
-      <div class="benefit reveal d1">
-        <div class="benefit-icon b-water">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
-        </div>
-        <h3>Agua</h3>
-        <p>Aumenta la productividad del agua.</p>
-      </div>
-      <div class="benefit reveal d2">
-        <div class="benefit-icon b-energy">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <h3>Energía</h3>
-        <p>Control del costo de bombeo — cada encendido de bomba tiene un propósito exacto.</p>
-      </div>
-      <div class="benefit reveal d3">
-        <div class="benefit-icon b-leaf">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20a8 8 0 0 1-8-8V4h8a8 8 0 0 1 8 8v8h-8z"/><path d="M3 4c6 4 10 10 8 16"/></svg>
-        </div>
-        <h3>Fertilizantes</h3>
-        <p>Reducción de la lixiviación — llega con agua y nutrientes exactamente donde quieres.</p>
-      </div>
-      <div class="benefit reveal d4">
-        <div class="benefit-icon b-drop">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/><path d="M8 14l8 0"/></svg>
-        </div>
-        <h3>Fertiriego</h3>
-        <p>Dosis de fertilizante para el fertiriego para lograr concentraciones óptimas en la zona de raíces.</p>
-      </div>
-      <div class="benefit reveal d4">
-        <div class="benefit-icon b-chart">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        </div>
-        <h3>Producción</h3>
-        <p>Aumento de la producción al eliminar el estrés hídrico.</p>
-      </div>
+      <div class="benefit reveal d1"><div class="benefit-icon b-water"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg></div><h3>Agua</h3><p>Aumenta la productividad del agua.</p></div>
+      <div class="benefit reveal d2"><div class="benefit-icon b-energy"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Energía</h3><p>Control del costo de bombeo — cada encendido tiene un propósito exacto.</p></div>
+      <div class="benefit reveal d3"><div class="benefit-icon b-leaf"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 20a8 8 0 0 1-8-8V4h8a8 8 0 0 1 8 8v8h-8z"/><path d="M3 4c6 4 10 10 8 16"/></svg></div><h3>Fertilizantes</h3><p>Reducción de la lixiviación — agua y nutrientes donde los necesitas.</p></div>
+      <div class="benefit reveal d4"><div class="benefit-icon b-drop"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/><path d="M8 14h8"/></svg></div><h3>Fertiriego</h3><p>Dosis exactas para lograr concentraciones óptimas en la zona de raíces.</p></div>
+      <div class="benefit reveal d4"><div class="benefit-icon b-chart"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><h3>Producción</h3><p>Aumento de producción al eliminar el estrés hídrico.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===== PRICING ===== -->
+<!-- PRICING -->
 <section id="precios">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Precios</span>
-      <h2 class="section-title">Inversión mensual por zona</h2>
-      <p class="section-lead">Transparente, escalable y pensado para predios de cualquier tamaño. Valores en CLP.</p>
-    </div>
+    <div class="section-head reveal"><span class="eyebrow">Precios</span><h2 class="section-title">Inversión mensual por zona</h2><p class="section-lead">Transparente, escalable y pensado para predios de cualquier tamaño. Valores en CLP.</p></div>
     <div class="pricing-grid">
-      <div class="price reveal d1">
-        <div class="price-range">1–10 zonas</div>
-        <div class="price-amount">$13.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Balance hídrico semanal</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Entrega por WhatsApp</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Soporte técnico</li>
-        </ul>
-      </div>
-      <div class="price popular reveal d2">
-        <span class="popular-tag">Más popular</span>
-        <div class="price-range">11–20 zonas</div>
-        <div class="price-amount">$11.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Validación en terreno</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Ajustes por zona</li>
-        </ul>
-      </div>
-      <div class="price reveal d3">
-        <div class="price-range">21–40 zonas</div>
-        <div class="price-amount">$10.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Reporte ejecutivo mensual</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Coordinación con jefe de campo</li>
-        </ul>
-      </div>
-      <div class="price reveal d4">
-        <div class="price-range">+41 zonas</div>
-        <div class="price-amount">$9.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Gestión multi-predio</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SLA dedicado</li>
-        </ul>
-      </div>
+      <div class="price reveal d1"><div class="price-range">1–10 zonas</div><div class="price-amount">$13.200<small>por zona / mes</small></div><ul class="price-features"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Balance hídrico semanal</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Entrega por WhatsApp</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Soporte técnico</li></ul></div>
+      <div class="price popular reveal d2"><span class="popular-tag">Más popular</span><div class="price-range">11–20 zonas</div><div class="price-amount">$11.200<small>por zona / mes</small></div><ul class="price-features"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Validación en terreno</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Ajustes por zona</li></ul></div>
+      <div class="price reveal d3"><div class="price-range">21–40 zonas</div><div class="price-amount">$10.200<small>por zona / mes</small></div><ul class="price-features"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Reporte ejecutivo mensual</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Coordinación con jefe de campo</li></ul></div>
+      <div class="price reveal d4"><div class="price-range">+41 zonas</div><div class="price-amount">$9.200<small>por zona / mes</small></div><ul class="price-features"><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Gestión multi-predio</li><li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>SLA dedicado</li></ul></div>
     </div>
-    <div class="pricing-example reveal">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>
-      <div>Ejemplo: <strong>Predio de 15 zonas</strong> → <strong>$168.000/mes</strong> + IVA</div>
+    <div class="pricing-example reveal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg><div>Ejemplo: <strong>Predio de 15 zonas</strong> → <strong>$168.000/mes</strong> + IVA</div></div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section class="clients" id="clientes">
+  <div class="container">
+    <div class="section-head reveal"><span class="eyebrow">Clientes</span><h2 class="section-title">Empresas que ya optimizan su riego con CRONORIEGO</h2><p class="section-lead">Desde nogales hasta cerezas, en Chile y el extranjero.</p></div>
+    <div class="clients-grid">
+      <div class="client reveal d1"><div class="client-mark">AA</div><div><h4>Agrícola Alma SpA</h4><p>Nogales y vivero · Los Andes, Chile</p></div></div>
+      <div class="client reveal d2"><div class="client-mark">OM</div><div><h4>Odette Monsalve</h4><p>Nogales · San Bernardo, Chile</p></div></div>
+      <div class="client reveal d3"><div class="client-mark">LB</div><div><h4>Las Brumas SpA</h4><p>Cerezos y ciruelos · Chimbarongo, Chile</p></div></div>
+      <div class="client reveal d1"><div class="client-mark">AC</div><div><h4>Agrícola Carampangue SpA</h4><p>Cerezos · Talagante, Chile</p></div></div>
+      <div class="client reveal d2"><div class="client-mark">AF</div><div><h4>Asgard Farm Ltd.</h4><p>Avellanos y manzanos · Vancouver Island, Canadá</p></div></div>
+      <!-- Card CTA → lleva al formulario -->
+      <a href="#contacto" class="client reveal d3" style="background:var(--sage-50);border-style:dashed;">
+        <div class="client-mark" style="background:transparent;border:2px dashed var(--green-700);color:var(--green-700);">+</div>
+        <div><h4>¿El próximo eres tú?</h4><p>Sumemos tu predio a la red CronoRiego.</p></div>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- ===== CLIENTS ===== -->
-<section class="clients" id="clientes">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Clientes</span>
-      <h2 class="section-title">Empresas que ya optimizan su riego con CRONORIEGO</h2>
-      <p class="section-lead">Desde nogales hasta cerezas, en Chile y el extranjero.</p>
-    </div>
-    <div class="clients-grid">
-      <div class="client reveal d1">
-        <div class="client-mark">AA</div>
-        <div>
-          <h4>Agrícola Alma SpA</h4>
-          <p>Nogales y vivero · Los Andes, Chile</p>
-        </div>
-      </div>
-      <div class="client reveal d2">
-        <div class="client-mark">OM</div>
-        <div>
-          <h4>Odette Monsalve</h4>
-          <p>Nogales · San Bernardo, Chile</p>
-        </div>
-      </div>
-      <div class="client reveal d3">
-        <div class="client-mark">LB</div>
-        <div>
-          <h4>Las Brumas SpA</h4>
-          <p>Cerezos y ciruelos · Chimbarongo, Chile</p>
-        </div>
-      </div>
-      <div class="client reveal d1">
-        <div class="client-mark">AC</div>
-        <div>
-          <h4>Agrícola Carampangue SpA</h4>
-          <p>Cerezos · Talagante, Chile</p>
-        </div>
-      </div>
-      <div class="client reveal d2">
-        <div class="client-mark">AF</div>
-        <div>
-          <h4>Asgard Farm Ltd.</h4>
-          <p>Avellanos y manzanos · Vancouver Island, Canadá</p>
-        </div>
-      </div>
-<a href="#contacto" class="client reveal d3" style="background: var(--sage-50); border-style: dashed;">
-  <div class="client-mark" style="background: transparent; border: 2px dashed var(--green-700); color: var(--green-700);">+</div>
-  <div>
-    <h4>¿El próximo eres tú?</h4>
-    <p>Sumemos tu predio a la red CronoRiego.</p>
-  </div>
-</a>
-    
-
-<!-- ===== CTA FINAL / CONTACT ===== -->
+<!-- CONTACT -->
 <section class="cta-final" id="contacto">
   <div class="container cta-grid">
     <div class="cta-copy reveal">
@@ -1006,76 +358,39 @@
       <h2 class="section-title">¿Listo para regar<br/>con precisión?</h2>
       <p>Cuéntanos sobre tu huerto y te preparamos una propuesta hecha a medida.</p>
       <div class="cta-info">
-        <div class="cta-info-row">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <a href="mailto:montti.manuel@gmail.com">montti.manuel@gmail.com</a>
-        </div>
-        <div class="cta-info-row">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          Recomendaciones vía WhatsApp
-        </div>
-        <div class="cta-info-row">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Chile · Canadá
-        </div>
+        <div class="cta-info-row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><a href="mailto:montti.manuel@gmail.com">montti.manuel@gmail.com</a></div>
+        <div class="cta-info-row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Recomendaciones vía WhatsApp</div>
+        <div class="cta-info-row"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Chile · Canadá</div>
       </div>
     </div>
 
-    <form class="form-card reveal d2" id="contactForm" novalidate>
+    <!-- Formulario Formspree -->
+    <form class="form-card reveal d2" id="contactForm" action="https://formspree.io/f/mykopdpr" method="POST" novalidate>
       <h3>Contáctanos hoy</h3>
       <p class="hint">Respondemos en menos de 24 horas hábiles.</p>
       <div class="field-row">
-        <div class="field">
-          <label for="f-name">Nombre</label>
-          <input id="f-name" name="name" type="text" required placeholder="Tu nombre" />
-        </div>
-        <div class="field">
-          <label for="f-company">Empresa o predio</label>
-          <input id="f-company" name="company" type="text" placeholder="Agrícola..." />
-        </div>
+        <div class="field"><label for="f-name">Nombre</label><input id="f-name" name="name" type="text" required placeholder="Tu nombre" /></div>
+        <div class="field"><label for="f-company">Empresa o predio</label><input id="f-company" name="company" type="text" placeholder="Agrícola..." /></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label for="f-email">Email</label>
-          <input id="f-email" name="email" type="email" required placeholder="tu@correo.com" />
-        </div>
-        <div class="field">
-          <label for="f-phone">Teléfono / WhatsApp</label>
-          <input id="f-phone" name="phone" type="tel" placeholder="+56 9 ..." />
-        </div>
+        <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" required placeholder="tu@correo.com" /></div>
+        <div class="field"><label for="f-phone">Teléfono / WhatsApp</label><input id="f-phone" name="phone" type="tel" placeholder="+56 9 ..." /></div>
       </div>
       <div class="field-row">
-        <div class="field">
-          <label for="f-zones">Zonas de riego</label>
-          <select id="f-zones" name="zones">
-            <option value="">Selecciona...</option>
-            <option>1–10 zonas</option>
-            <option>11–20 zonas</option>
-            <option>21–40 zonas</option>
-            <option>+41 zonas</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f-crop">Cultivo principal</label>
-          <input id="f-crop" name="crop" type="text" placeholder="Cerezos, nogales, etc." />
-        </div>
+        <div class="field"><label for="f-zones">Zonas de riego</label><select id="f-zones" name="zones"><option value="">Selecciona...</option><option>1–10 zonas</option><option>11–20 zonas</option><option>21–40 zonas</option><option>+41 zonas</option></select></div>
+        <div class="field"><label for="f-crop">Cultivo principal</label><input id="f-crop" name="crop" type="text" placeholder="Cerezos, nogales, etc." /></div>
       </div>
-      <div class="field">
-        <label for="f-message">Mensaje</label>
-        <textarea id="f-message" name="message" placeholder="Cuéntanos sobre tu huerto y tus necesidades..."></textarea>
-      </div>
+      <div class="field"><label for="f-message">Mensaje</label><textarea id="f-message" name="message" placeholder="Cuéntanos sobre tu huerto y tus necesidades..."></textarea></div>
       <button type="submit" class="btn-primary form-submit">
         Enviar solicitud
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
-      <div class="form-ok" id="formOk">
-        ¡Listo! Se abrirá tu cliente de correo con el mensaje preparado. Si no se abre, escríbenos directamente a <strong>montti.manuel@gmail.com</strong>.
-      </div>
+      <div class="form-ok" id="formOk">✅ Tu solicitud ha sido enviada. ¡Te contactaremos a la brevedad!</div>
     </form>
   </div>
 </section>
 
-<!-- ===== FOOTER ===== -->
+<!-- FOOTER -->
 <footer class="footer">
   <div class="container footer-row">
     <div>© <span id="year"></span> CronoRiego · Estrategias de riego para tu huerto</div>
@@ -1086,51 +401,37 @@
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
 
+  // Header scroll
   const header = document.getElementById('header');
   const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
 
+  // Mobile nav
   const hamburger = document.getElementById('hamburger');
-  const navLinks = document.getElementById('navLinks');
+  const navLinks  = document.getElementById('navLinks');
   hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
   navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
+  // Reveal on scroll
   const reveals = document.querySelectorAll('.reveal');
-  const markVisible = (el) => el.classList.add('visible');
-  const inView = (el) => {
-    const r = el.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    return r.top < vh * 0.92 && r.bottom > 0;
-  };
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { markVisible(e.target); io.unobserve(e.target); } });
-  }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
-  reveals.forEach(el => { io.observe(el); if (inView(el)) markVisible(el); });
-  const safety = () => reveals.forEach(el => { if (!el.classList.contains('visible') && inView(el)) markVisible(el); });
-  window.addEventListener('scroll', safety, { passive: true });
-  window.addEventListener('resize', safety);
-  window.addEventListener('load', safety);
+  const inView  = el => { const r = el.getBoundingClientRect(); return r.top < (window.innerHeight||document.documentElement.clientHeight)*0.92 && r.bottom > 0; };
+  const markV   = el => el.classList.add('visible');
+  const io = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting){ markV(e.target); io.unobserve(e.target); } }), {threshold:0.08,rootMargin:'0px 0px -6% 0px'});
+  reveals.forEach(el => { io.observe(el); if(inView(el)) markV(el); });
+  const safety = () => reveals.forEach(el => { if(!el.classList.contains('visible') && inView(el)) markV(el); });
+  ['scroll','resize','load'].forEach(ev => window.addEventListener(ev, safety, {passive:true}));
 
+  // Formspree submit (sin recargar página)
   const form = document.getElementById('contactForm');
-  const ok = document.getElementById('formOk');
-  form.addEventListener('submit', (e) => {
+  const ok   = document.getElementById('formOk');
+  form.addEventListener('submit', async e => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    if (!data.name || !data.email) { form.querySelector('#f-name').focus(); return; }
-    const subject = encodeURIComponent(`Solicitud CronoRiego — ${data.company || data.name}`);
-    const body = encodeURIComponent(
-`Nombre: ${data.name}
-Empresa / predio: ${data.company || '-'}
-Email: ${data.email}
-Teléfono: ${data.phone || '-'}
-Zonas: ${data.zones || '-'}
-Cultivo: ${data.crop || '-'}
-
-Mensaje:
-${data.message || '-'}`);
-    window.location.href = `mailto:montti.manuel@gmail.com?subject=${subject}&body=${body}`;
-    ok.classList.add('show');
+    if (!form.name.value || !form.email.value) { form.name.focus(); return; }
+    try {
+      const res = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{Accept:'application/json'} });
+      if (res.ok) { ok.classList.add('show'); form.reset(); }
+      else { alert('Error al enviar. Escríbenos a montti.manuel@gmail.com'); }
+    } catch { alert('Error de conexión. Escríbenos a montti.manuel@gmail.com'); }
   });
 </script>
 </body>
