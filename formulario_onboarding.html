@@ -479,11 +479,82 @@ function construirResumen() {
   document.getElementById('resumen-content').innerHTML = html;
 }
 
+function validarCamposNumericos() {
+  const errores = [];
+  for (let n = 1; n <= eqCount; n++) {
+    if (!document.getElementById('equipo-'+n)) continue;
+    const nom = g('eq'+n+'-nombre') || 'Equipo '+n;
+
+    const checks = [
+      ['eq'+n+'-hp',            0,    500,  'HP bomba'],
+      ['eq'+n+'-kwh',           0,  99999,  'Precio KWH'],
+      ['eq'+n+'-ce',            0,     50,  'CE del agua (dS/m)'],
+      ['eq'+n+'-caudal-bomba',  0,  99999,  'Caudal bomba'],
+      ['eq'+n+'-superficie',    0,   9999,  'Superficie'],
+      ['eq'+n+'-sombra',        0,    100,  '% Cobertura suelo (máx 100)'],
+      ['eq'+n+'-eficiencia',    0,    100,  'Eficiencia sistema (máx 100)'],
+      ['eq'+n+'-caudal-emisor', 0,   9999,  'Caudal emisor'],
+      ['eq'+n+'-dist-h',        0,    200,  'Distancia entre hileras'],
+      ['eq'+n+'-dist-s',        0,    200,  'Distancia sobre hilera'],
+      ['eq'+n+'-emisores',      0,    100,  'Emisores por árbol'],
+      ['eq'+n+'-dist-goteros',  0,     50,  'Distancia entre goteros'],
+      ['eq'+n+'-cc',            0,    100,  'CC Perfil 1 (máx 100%)'],
+      ['eq'+n+'-pmp',           0,    100,  'PMP Perfil 1 (máx 100%)'],
+      ['eq'+n+'-da',            0,      5,  'Densidad aparente (máx 5 g/cc)'],
+      ['eq'+n+'-prof',          0,     20,  'Profundidad perfil (máx 20m)'],
+    ];
+
+    for (const [id, min, max, label] of checks) {
+      const el = document.getElementById(id);
+      if (!el || el.value === '') continue;
+      const val = parseFloat(el.value);
+      if (isNaN(val)) {
+        errores.push(`${nom} → ${label}: valor no es un número válido`);
+        el.style.borderColor = '#c0392b';
+      } else if (val < min || val > max) {
+        errores.push(`${nom} → ${label}: ${val} está fuera del rango permitido (${min}–${max})`);
+        el.style.borderColor = '#c0392b';
+      } else {
+        el.style.borderColor = '';
+      }
+    }
+
+    // Validar zonas
+    const rango = eqRangos[n] || {};
+    for (let i = rango.desde; i <= rango.hasta; i++) {
+      const supEl = document.getElementById(`eq${n}-z${i}-superficie`);
+      const somEl = document.getElementById(`eq${n}-z${i}-sombra`);
+      if (supEl && supEl.value) {
+        const v = parseFloat(supEl.value);
+        if (v > 9999) { errores.push(`Zona ${i} → Superficie: ${v} ha parece muy grande`); supEl.style.borderColor='#c0392b'; }
+        else supEl.style.borderColor='';
+      }
+      if (somEl && somEl.value) {
+        const v = parseFloat(somEl.value);
+        if (v > 100) { errores.push(`Zona ${i} → % Sombra: no puede superar 100`); somEl.style.borderColor='#c0392b'; }
+        else somEl.style.borderColor='';
+      }
+    }
+  }
+  return errores;
+}
+
 async function enviar() {
   const btn = document.getElementById('btn-submit');
   const err = document.getElementById('err-4');
-  btn.disabled = true; btn.textContent = 'Guardando...';
   err.classList.remove('show');
+
+  // Validar campos numéricos antes de enviar
+  const erroresValidacion = validarCamposNumericos();
+  if (erroresValidacion.length > 0) {
+    err.innerHTML = '⚠️ Corrige los siguientes campos antes de enviar:<br><br>' +
+      erroresValidacion.map(e => '• ' + e).join('<br>');
+    err.style.display = 'block';
+    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
 
   try {
     const ts = Date.now();
