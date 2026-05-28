@@ -559,9 +559,20 @@ async function enviar() {
   btn.disabled = true; btn.textContent = 'Guardando...';
 
   try {
-    const ts = Date.now();
-    const rsId = 'RS-ON-'+ts;
-    const prId = 'PR-ON-'+ts;
+    // Obtener siguiente número correlativo
+    function nextCode(prefix, count) {
+      return prefix + String(count + 1).padStart(2, '0');
+    }
+    const [rsRes, prRes, eqRes, znRes] = await Promise.all([
+      db.from('razones_sociales').select('*', {count: 'exact', head: true}),
+      db.from('predios').select('*',           {count: 'exact', head: true}),
+      db.from('equipos').select('*',           {count: 'exact', head: true}),
+      db.from('zonas').select('*',             {count: 'exact', head: true}),
+    ]);
+    const rsId   = nextCode('RS-', rsRes.count || 0);
+    const prId   = nextCode('PR-', prRes.count || 0);
+    let nextEqN  = (eqRes.count || 0) + 1;
+    let nextZnN  = (znRes.count || 0) + 1;
 
     console.log('Iniciando inserción RS:', rsId);
     const { error: e1 } = await db.from('razones_sociales').insert({
@@ -591,7 +602,8 @@ async function enviar() {
     const eqs = getEquipos();
     for (let i = 0; i < eqs.length; i++) {
       const eq = eqs[i];
-      const eqId = `EQ-ON-${ts}-${i+1}`;
+      const eqId = 'EQ-' + String(nextEqN).padStart(2, '0');
+      nextEqN++;
 
       const eqData = {
         'ID Equipo (PK)':  eqId,
@@ -610,7 +622,7 @@ async function enviar() {
       for (let j = 0; j < eq.zonas.length; j++) {
         const z = eq.zonas[j];
         const zonaData = {
-          'ID Zona Relacional (PK)':                      `ZN-ON-${ts}-${i+1}-${j+1}`,
+          'ID Zona Relacional (PK)':                      'ZN-' + String(nextZnN++).padStart(2, '0'),
           'ID Equipo de Riego (FK)':                      eqId,
           'Nombre de la Zona':                            z.nombre,
           'Activa':                                       'Sí',
