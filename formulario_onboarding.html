@@ -380,13 +380,17 @@ function generarZonas(n) {
       <tbody>`;
 
   for (let i = desde; i <= hasta; i++) {
+    const supVal     = sup     ? `value="${sup}"`     : '';
+    const sombraVal  = sombra  ? `value="${sombra}"`  : '';
+    const espPlh     = especie  || '(igual al equipo)';
+    const varPlh     = variedad || '(igual)';
     html += `<tr>
       <td class="zona-num">Zona ${i}</td>
       <td><input type="text"   id="eq${n}-z${i}-nombre"     placeholder="Zona ${i}"/></td>
-      <td><input type="number" id="eq${n}-z${i}-superficie"  step="0.01" value="${sup}" placeholder="${sup||'2.5'}"/></td>
-      <td><input type="number" id="eq${n}-z${i}-sombra"      step="1"    value="${sombra}" placeholder="${sombra||'70'}"/></td>
-      <td><input type="text"   id="eq${n}-z${i}-especie"     placeholder="${especie||'(igual al equipo)'}"/></td>
-      <td><input type="text"   id="eq${n}-z${i}-variedad"    placeholder="${variedad||'(igual)'}"/></td>
+      <td><input type="number" id="eq${n}-z${i}-superficie"  step="0.01" ${supVal}    placeholder="2.5"/></td>
+      <td><input type="number" id="eq${n}-z${i}-sombra"      step="1"    ${sombraVal} placeholder="70"/></td>
+      <td><input type="text"   id="eq${n}-z${i}-especie"     placeholder="${espPlh}"/></td>
+      <td><input type="text"   id="eq${n}-z${i}-variedad"    placeholder="${varPlh}"/></td>
     </tr>`;
   }
 
