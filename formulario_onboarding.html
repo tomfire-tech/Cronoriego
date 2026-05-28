@@ -294,10 +294,14 @@ function agregarEquipo() {
       <div class="field"><label>Dist. sobre hilera (m)</label><input type="number" id="eq${n}-dist-s" step="0.1" placeholder="5"/></div>
       <div class="field"><label>Emisores/árbol</label><input type="number" id="eq${n}-emisores" step="1" placeholder="2"/></div>
     </div>
+    
     <div class="grid-4">
+      <div class="field"><label>Superficie común (ha)</label><input type="number" id="eq${n}-superficie" step="0.01" placeholder="2.5"/><div class="hint">Se aplica a todas las zonas</div></div>
       <div class="field"><label>Eficiencia (%)</label><input type="number" id="eq${n}-eficiencia" step="1" placeholder="90"/></div>
       <div class="field"><label>% Cobertura suelo</label><input type="number" id="eq${n}-sombra" step="1" placeholder="70"/></div>
       <div class="field"><label>CC Perfil 1 (%)</label><input type="number" id="eq${n}-cc" step="0.1" placeholder="22"/></div>
+    </div>
+    <div class="grid-4">
       <div class="field"><label>PMP Perfil 1 (%)</label><input type="number" id="eq${n}-pmp" step="0.1" placeholder="10"/></div>
     </div>
 
@@ -332,8 +336,9 @@ function generarZonas(n) {
 
   const especie  = document.getElementById('eq'+n+'-especie').value;
   const variedad = document.getElementById('eq'+n+'-variedad').value;
-  const sombra   = document.getElementById('eq'+n+'-sombra').value;
-
+  const sombra = document.getElementById('eq'+n+'-sombra').value;
+  const superficie = document.getElementById('eq'+n+'-superficie').value;
+  
   const info = document.getElementById('eq'+n+'-rango-info');
   info.style.display = 'block';
   info.textContent = `✓ Generando zonas ${desde} al ${hasta} (${hasta-desde+1} zonas). Los campos en blanco heredan los datos comunes del equipo.`;
@@ -353,7 +358,7 @@ function generarZonas(n) {
     tbody += `<tr>
       <td class="zona-num-td">Zona ${i}</td>
       <td><input type="text"   id="eq${n}-z${i}-nombre"    placeholder="Zona ${i}"/></td>
-      <td><input type="number" id="eq${n}-z${i}-superficie" step="0.01" placeholder="—"/></td>
+      <input type="number" id="eq${n}-z${i}-superficie" step="0.01" placeholder="${superficie||'—'}" value="${superficie||''}"/>
       <td><input type="number" id="eq${n}-z${i}-sombra"     step="1"    placeholder="${sombra||70}"/></td>
       <td><input type="text"   id="eq${n}-z${i}-especie"    placeholder="${especie||'(igual al equipo)'}"/></td>
       <td><input type="text"   id="eq${n}-z${i}-variedad"   placeholder="${variedad||'(igual)'}"/></td>
