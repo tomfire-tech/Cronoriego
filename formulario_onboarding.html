@@ -26,299 +26,91 @@
     --danger-bg: #fdf2f2;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Manrope', sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    min-height: 100vh;
-  }
+  body { font-family: 'Manrope', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
 
-  /* Header */
-  .header {
-    background: var(--white);
-    border-bottom: 1px solid var(--line);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .header { background: var(--white); border-bottom: 1px solid var(--line); padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
   .brand { font-size: 18px; font-weight: 800; }
   .brand span:first-child { color: var(--teal-700); }
   .brand span:last-child  { color: var(--green-700); }
   .header-sub { font-size: 13px; color: var(--muted); margin-left: 8px; }
 
-  /* Layout */
-  .layout {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 32px 20px 60px;
-  }
+  .layout { max-width: 800px; margin: 0 auto; padding: 32px 20px 60px; }
 
-  /* Progress */
-  .progress-wrap { margin-bottom: 32px; }
-  .progress-steps {
-    display: flex;
-    gap: 0;
-    margin-bottom: 12px;
-  }
-  .step-pill {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    border-bottom: 2px solid var(--line);
-    cursor: default;
-    transition: all .2s;
-  }
-  .step-pill.active {
-    color: var(--teal-700);
-    border-bottom-color: var(--teal-700);
-  }
-  .step-pill.done {
-    color: var(--green-700);
-    border-bottom-color: var(--green-500);
-  }
-  .step-num {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--line);
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
+  .progress-steps { display: flex; margin-bottom: 28px; }
+  .step-pill { flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--line); transition: all .2s; }
+  .step-pill.active { color: var(--teal-700); border-bottom-color: var(--teal-700); }
+  .step-pill.done   { color: var(--green-700); border-bottom-color: var(--green-500); }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--line); color: var(--muted); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .step-pill.active .step-num { background: var(--teal-700); color: #fff; }
-  .step-pill.done .step-num   { background: var(--green-500); color: #fff; }
+  .step-pill.done   .step-num { background: var(--green-500); color: #fff; }
 
-  /* Card */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(15,58,82,0.05);
-  }
-  .card-title {
-    font-family: 'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--teal-900);
-    margin-bottom: 4px;
-  }
-  .card-desc {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 22px;
-  }
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 28px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(15,58,82,0.05); }
+  .card-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: var(--teal-900); margin-bottom: 4px; }
+  .card-desc  { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
 
-  /* Sección dentro de card */
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--teal-700);
-    padding: 0 0 8px;
-    border-bottom: 1px solid var(--teal-50);
-    margin: 20px 0 16px;
-  }
-  .section-label:first-of-type { margin-top: 0; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--teal-700); padding: 0 0 8px; border-bottom: 1px solid var(--teal-50); margin: 20px 0 16px; }
 
-  /* Campos */
   .field { margin-bottom: 14px; }
-  .field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ink-2);
-    margin-bottom: 5px;
-    letter-spacing: .02em;
-  }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
   .field label .req { color: var(--danger); margin-left: 2px; }
-  .field input, .field select, .field textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--ink);
-    background: var(--white);
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    outline: none;
-    border-color: var(--teal-700);
-    box-shadow: 0 0 0 3px rgba(26,82,118,.1);
-  }
-  .field textarea { min-height: 80px; resize: vertical; }
+  .field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--ink); background: var(--white); transition: border-color .2s, box-shadow .2s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--teal-700); box-shadow: 0 0 0 3px rgba(26,82,118,.1); }
   .field .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 560px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 600px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
   }
 
-  /* Zona card */
-  .zona-card {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 12px;
-    position: relative;
-  }
-  .zona-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .zona-num {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--teal-700);
-    background: var(--teal-50);
-    padding: 3px 10px;
-    border-radius: 999px;
-  }
-  .btn-remove-zona {
-    background: none;
-    border: 1px solid var(--line);
-    color: var(--danger);
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background .2s;
-  }
-  .btn-remove-zona:hover { background: var(--danger-bg); }
+  /* Equipo card */
+  .equipo-card { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .equipo-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .equipo-num { font-size: 13px; font-weight: 700; color: var(--teal-700); background: var(--teal-50); padding: 4px 12px; border-radius: 999px; }
+  .btn-remove { background: none; border: 1px solid var(--line); color: var(--danger); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  .btn-remove:hover { background: var(--danger-bg); }
 
-  .btn-add-zona {
-    width: 100%;
-    padding: 12px;
-    border: 1.5px dashed var(--teal-500);
-    border-radius: 10px;
-    background: none;
-    color: var(--teal-700);
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background .2s;
-    margin-top: 4px;
-  }
-  .btn-add-zona:hover { background: var(--teal-50); }
+  /* Zonas tabla */
+  .zonas-table-wrap { margin-top: 16px; }
+  .zonas-table-label { font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 8px; }
+  .zona-row { display: grid; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .zona-row input, .zona-row select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-family: inherit; font-size: 13px; color: var(--ink); background: var(--white); width: 100%; }
+  .zona-row input:focus, .zona-row select:focus { outline: none; border-color: var(--teal-700); }
+  .zona-row-header { display: grid; gap: 8px; }
+  .zona-col-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .zona-num-badge { width: 24px; height: 24px; border-radius: 50%; background: var(--teal-50); color: var(--teal-700); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 8px; }
 
-  /* Botones navegación */
-  .nav-btns {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    gap: 12px;
-  }
-  .btn-back {
-    padding: 12px 20px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--white);
-    color: var(--ink-2);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color .2s;
-  }
+  .btn-add { width: 100%; padding: 12px; border: 1.5px dashed var(--teal-500); border-radius: 10px; background: none; color: var(--teal-700); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background .2s; margin-top: 4px; }
+  .btn-add:hover { background: var(--teal-50); }
+
+  .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+  .btn-back { padding: 12px 20px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); color: var(--ink-2); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color .2s; }
   .btn-back:hover { border-color: var(--teal-700); color: var(--teal-700); }
-  .btn-next {
-    padding: 12px 28px;
-    border: none;
-    border-radius: 999px;
-    background: var(--teal-700);
-    color: #fff;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 16px rgba(26,82,118,0.22);
-    transition: background .2s, transform .2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .btn-next { padding: 12px 28px; border: none; border-radius: 999px; background: var(--teal-700); color: #fff; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px rgba(26,82,118,0.22); transition: background .2s, transform .2s; display: flex; align-items: center; gap: 8px; }
   .btn-next:hover { background: var(--teal-900); transform: translateY(-1px); }
-  .btn-next:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-  .btn-submit {
-    padding: 14px 32px;
-    border: none;
-    border-radius: 999px;
-    background: var(--green-700);
-    color: #fff;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 16px rgba(30,132,73,0.25);
-    transition: background .2s, transform .2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .btn-submit:hover { background: #155a33; transform: translateY(-1px); }
-  .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .btn-submit { padding: 14px 32px; border: none; border-radius: 999px; background: var(--green-700); color: #fff; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px rgba(30,132,73,0.25); transition: background .2s; display: flex; align-items: center; gap: 8px; }
+  .btn-submit:hover { background: #155a33; }
+  .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
 
-  /* Pantallas */
   .screen { display: none; }
   .screen.active { display: block; }
 
-  /* Success */
-  .success-wrap {
-    text-align: center;
-    padding: 48px 24px;
-  }
-  .success-icon {
-    font-size: 56px;
-    display: block;
-    margin-bottom: 16px;
-  }
-  .success-wrap h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 26px;
-    color: var(--green-700);
-    margin-bottom: 10px;
-  }
-  .success-wrap p {
-    font-size: 15px;
-    color: var(--muted);
-    max-width: 400px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  /* Error */
-  .error-msg {
-    background: var(--danger-bg);
-    border: 1px solid rgba(192,57,43,.2);
-    color: var(--danger);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-top: 12px;
-    display: none;
-  }
+  .error-msg { background: var(--danger-bg); border: 1px solid rgba(192,57,43,.2); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 12px; display: none; }
   .error-msg.show { display: block; }
+
+  .success-wrap { text-align: center; padding: 48px 24px; }
+  .success-icon { font-size: 56px; display: block; margin-bottom: 16px; }
+  .success-wrap h2 { font-family: 'Fraunces', serif; font-size: 26px; color: var(--green-700); margin-bottom: 10px; }
+  .success-wrap p { font-size: 15px; color: var(--muted); max-width: 400px; margin: 0 auto; line-height: 1.6; }
+
+  /* Resumen */
+  .resumen-bloque { margin-bottom: 16px; }
+  .resumen-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--teal-700); border-bottom: 1px solid var(--teal-50); padding-bottom: 6px; margin-bottom: 10px; }
+  .resumen-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+  .resumen-row:last-child { border: none; }
+  .resumen-row span:first-child { color: var(--muted); }
+  .resumen-row span:last-child  { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -330,22 +122,11 @@
 
 <div class="layout">
 
-  <!-- PROGRESO -->
-  <div class="progress-wrap">
-    <div class="progress-steps">
-      <div class="step-pill active" id="pill-1">
-        <span class="step-num">1</span> Tu empresa
-      </div>
-      <div class="step-pill" id="pill-2">
-        <span class="step-num">2</span> Predio y equipo
-      </div>
-      <div class="step-pill" id="pill-3">
-        <span class="step-num">3</span> Zonas de riego
-      </div>
-      <div class="step-pill" id="pill-4">
-        <span class="step-num">4</span> Confirmación
-      </div>
-    </div>
+  <div class="progress-steps">
+    <div class="step-pill active" id="pill-1"><span class="step-num">1</span> Tu empresa</div>
+    <div class="step-pill" id="pill-2"><span class="step-num">2</span> Predio</div>
+    <div class="step-pill" id="pill-3"><span class="step-num">3</span> Equipos y zonas</div>
+    <div class="step-pill" id="pill-4"><span class="step-num">4</span> Confirmación</div>
   </div>
 
   <!-- PANTALLA 1: Razón Social -->
@@ -353,81 +134,44 @@
     <div class="card">
       <div class="card-title">Tu empresa</div>
       <div class="card-desc">Datos de la razón social o empresa titular del predio.</div>
-
       <div class="grid-2">
-        <div class="field">
-          <label>Nombre empresa / razón social <span class="req">*</span></label>
-          <input type="text" id="rs-nombre" placeholder="Agrícola Ejemplo SpA" />
-        </div>
-        <div class="field">
-          <label>RUT</label>
-          <input type="text" id="rs-rut" placeholder="77.123.456-7" />
-        </div>
+        <div class="field"><label>Nombre empresa <span class="req">*</span></label><input type="text" id="rs-nombre" placeholder="Agrícola Ejemplo SpA" /></div>
+        <div class="field"><label>RUT</label><input type="text" id="rs-rut" placeholder="77.123.456-7" /></div>
       </div>
       <div class="grid-2">
-        <div class="field">
-          <label>Correo electrónico <span class="req">*</span></label>
-          <input type="email" id="rs-email" placeholder="contacto@empresa.cl" />
-        </div>
-        <div class="field">
-          <label>Teléfono de contacto</label>
-          <input type="tel" id="rs-telefono" placeholder="+56 9 1234 5678" />
-        </div>
+        <div class="field"><label>Correo electrónico <span class="req">*</span></label><input type="email" id="rs-email" placeholder="contacto@empresa.cl" /></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="rs-telefono" placeholder="+56 9 1234 5678" /></div>
       </div>
       <div class="grid-2">
         <div class="field">
           <label>País <span class="req">*</span></label>
           <select id="rs-pais">
             <option value="">Selecciona...</option>
-            <option value="Chile">Chile</option>
-            <option value="Canadá">Canadá</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Perú">Perú</option>
-            <option value="Otro">Otro</option>
+            <option>Chile</option><option>Canadá</option><option>Argentina</option><option>Perú</option><option>Otro</option>
           </select>
         </div>
-        <div class="field">
-          <label>Dirección de facturación</label>
-          <input type="text" id="rs-direccion" placeholder="Av. Ejemplo 123, Santiago" />
-        </div>
+        <div class="field"><label>Dirección de facturación</label><input type="text" id="rs-direccion" placeholder="Av. Ejemplo 123" /></div>
       </div>
     </div>
-
-    <div class="error-msg" id="err-1">Por favor completa los campos obligatorios.</div>
+    <div class="error-msg" id="err-1">Completa los campos obligatorios.</div>
     <div class="nav-btns">
       <div></div>
-      <button class="btn-next" onclick="ir(2)">
-        Siguiente: Predio y equipo
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
+      <button class="btn-next" onclick="ir(2)">Siguiente: Predio <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
     </div>
   </div>
 
-  <!-- PANTALLA 2: Predio y Equipo -->
+  <!-- PANTALLA 2: Predio -->
   <div class="screen" id="screen-2">
     <div class="card">
       <div class="card-title">Datos del predio</div>
       <div class="card-desc">Información general del campo o fundo.</div>
-
       <div class="grid-2">
-        <div class="field">
-          <label>Nombre del predio <span class="req">*</span></label>
-          <input type="text" id="pr-nombre" placeholder="Fundo El Ejemplo" />
-        </div>
-        <div class="field">
-          <label>Comuna</label>
-          <input type="text" id="pr-comuna" placeholder="Curicó" />
-        </div>
+        <div class="field"><label>Nombre del predio <span class="req">*</span></label><input type="text" id="pr-nombre" placeholder="Fundo El Ejemplo" /></div>
+        <div class="field"><label>Encargado</label><input type="text" id="pr-encargado" placeholder="Nombre del encargado" /></div>
       </div>
       <div class="grid-2">
-        <div class="field">
-          <label>Región</label>
-          <input type="text" id="pr-region" placeholder="VII Región del Maule" />
-        </div>
-        <div class="field">
-          <label>Encargado / Contacto</label>
-          <input type="text" id="pr-encargado" placeholder="Nombre del encargado" />
-        </div>
+        <div class="field"><label>Comuna</label><input type="text" id="pr-comuna" placeholder="Curicó" /></div>
+        <div class="field"><label>Región</label><input type="text" id="pr-region" placeholder="VII Región del Maule" /></div>
       </div>
       <div class="grid-2">
         <div class="field">
@@ -441,99 +185,37 @@
           <label>Tipo de clima</label>
           <select id="pr-clima">
             <option value="">Selecciona...</option>
-            <option value="Templado / Mediterráneo">Templado / Mediterráneo</option>
-            <option value="Húmedo / Lluvioso">Húmedo / Lluvioso</option>
-            <option value="Semiárido">Semiárido</option>
-            <option value="Árido">Árido</option>
+            <option>Templado / Mediterráneo</option>
+            <option>Húmedo / Lluvioso</option>
+            <option>Semiárido</option>
+            <option>Árido</option>
           </select>
         </div>
       </div>
       <div class="grid-2">
-        <div class="field">
-          <label>Latitud</label>
-          <input type="number" id="pr-lat" step="0.000001" placeholder="-34.123456" />
-          <div class="hint">Negativo para hemisferio Sur</div>
-        </div>
-        <div class="field">
-          <label>Longitud</label>
-          <input type="number" id="pr-lon" step="0.000001" placeholder="-71.123456" />
-        </div>
+        <div class="field"><label>Latitud</label><input type="number" id="pr-lat" step="0.000001" placeholder="-34.123456" /><div class="hint">Negativo para hemisferio Sur</div></div>
+        <div class="field"><label>Longitud</label><input type="number" id="pr-lon" step="0.000001" placeholder="-71.123456" /></div>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">Equipo de riego</div>
-      <div class="card-desc">Datos del sistema de bombeo y fuente de agua.</div>
-
-      <div class="grid-2">
-        <div class="field">
-          <label>Nombre del equipo <span class="req">*</span></label>
-          <input type="text" id="eq-nombre" placeholder="Bomba Principal" />
-        </div>
-        <div class="field">
-          <label>Tipo de fuente</label>
-          <select id="eq-fuente">
-            <option value="">Selecciona...</option>
-            <option value="Pozo">Pozo</option>
-            <option value="Canal">Canal</option>
-            <option value="Lluvia">Lluvia</option>
-            <option value="Estanque">Estanque</option>
-          </select>
-        </div>
-      </div>
-      <div class="grid-3">
-        <div class="field">
-          <label>Horse Power (HP)</label>
-          <input type="number" id="eq-hp" step="0.1" placeholder="15" />
-        </div>
-        <div class="field">
-          <label>Precio KWH ($)</label>
-          <input type="number" id="eq-kwh" step="0.01" placeholder="120" />
-        </div>
-        <div class="field">
-          <label>CE del agua (dS/m)</label>
-          <input type="number" id="eq-ce" step="0.01" placeholder="1.2" />
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="field">
-          <label>Caudal bomba (L/s)</label>
-          <input type="number" id="eq-caudal" step="0.1" placeholder="5.5" />
-        </div>
-        <div class="field">
-          <label>Capacidad estanque (m³)</label>
-          <input type="number" id="eq-estanque" step="1" placeholder="1000" />
-        </div>
-      </div>
-    </div>
-
-    <div class="error-msg" id="err-2">Por favor completa los campos obligatorios.</div>
+    <div class="error-msg" id="err-2">Completa el nombre del predio.</div>
     <div class="nav-btns">
       <button class="btn-back" onclick="ir(1)">← Atrás</button>
-      <button class="btn-next" onclick="ir(3)">
-        Siguiente: Zonas de riego
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
+      <button class="btn-next" onclick="ir(3)">Siguiente: Equipos y zonas <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
     </div>
   </div>
 
-  <!-- PANTALLA 3: Zonas -->
+  <!-- PANTALLA 3: Equipos y Zonas -->
   <div class="screen" id="screen-3">
     <div class="card">
-      <div class="card-title">Zonas de riego</div>
-      <div class="card-desc">Agrega cada zona de riego del predio. Puedes agregar tantas como necesites.</div>
-
-      <div id="zonas-container"></div>
-      <button class="btn-add-zona" onclick="agregarZona()">+ Agregar zona</button>
+      <div class="card-title">Equipos de riego y zonas</div>
+      <div class="card-desc">Agrega cada equipo de riego con sus zonas. Los datos comunes se aplican a todas las zonas del equipo — solo ajusta lo que difiere en cada una.</div>
+      <div id="equipos-container"></div>
+      <button class="btn-add" onclick="agregarEquipo()">+ Agregar equipo de riego</button>
     </div>
-
-    <div class="error-msg" id="err-3">Agrega al menos una zona de riego.</div>
+    <div class="error-msg" id="err-3">Agrega al menos un equipo con una zona.</div>
     <div class="nav-btns">
       <button class="btn-back" onclick="ir(2)">← Atrás</button>
-      <button class="btn-next" onclick="ir(4)">
-        Revisar y enviar
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </button>
+      <button class="btn-next" onclick="ir(4)">Revisar y enviar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
     </div>
   </div>
 
@@ -544,13 +226,10 @@
       <div class="card-desc">Revisa los datos antes de enviar.</div>
       <div id="resumen-content"></div>
     </div>
-
-    <div class="error-msg" id="err-4">Hubo un error al guardar. Por favor intenta nuevamente.</div>
+    <div class="error-msg" id="err-4">Error al guardar. Por favor intenta nuevamente.</div>
     <div class="nav-btns">
-      <button class="btn-back" onclick="ir(3)">← Editar zonas</button>
-      <button class="btn-submit" id="btn-submit" onclick="enviar()">
-        ✓ Enviar registro
-      </button>
+      <button class="btn-back" onclick="ir(3)">← Editar</button>
+      <button class="btn-submit" id="btn-submit" onclick="enviar()">✓ Enviar registro</button>
     </div>
   </div>
 
@@ -560,7 +239,7 @@
       <div class="success-wrap">
         <span class="success-icon">🌿</span>
         <h2>¡Registro enviado!</h2>
-        <p>Tus datos han sido recibidos correctamente. El equipo de CronoRiego los revisará y te contactará dentro de 24 horas hábiles para activar tu servicio.</p>
+        <p>Tus datos han sido recibidos. El equipo de CronoRiego los revisará y te contactará dentro de 24 horas hábiles para activar tu servicio.</p>
         <br>
         <p style="color:var(--teal-700);font-weight:600">contacto@cronoriego.com</p>
       </div>
@@ -570,205 +249,221 @@
 </div>
 
 <script>
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://lmexinxdmkgexpthuosn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let zonaCount = 0;
+let eqCount = 0;
 
 // ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
 function ir(num) {
   if (num > 1 && !validar(num - 1)) return;
-
-  // Actualizar pantallas
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + num).classList.add('active');
-
-  // Actualizar pills
   document.querySelectorAll('.step-pill').forEach((p, i) => {
     p.classList.remove('active', 'done');
     if (i + 1 === num) p.classList.add('active');
     if (i + 1 < num)  p.classList.add('done');
   });
-
   if (num === 4) construirResumen();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function v(id) { const el = document.getElementById(id); return el && el.value.trim() !== ''; }
+
 function validar(step) {
   const err = document.getElementById('err-' + step);
   err.classList.remove('show');
-
-  if (step === 1) {
-    if (!v('rs-nombre') || !v('rs-email') || !v('rs-pais')) {
-      err.classList.add('show'); return false;
-    }
-  }
-  if (step === 2) {
-    if (!v('pr-nombre') || !v('eq-nombre')) {
-      err.classList.add('show'); return false;
-    }
-  }
-  if (step === 3) {
-    if (zonaCount === 0) {
-      err.classList.add('show'); return false;
-    }
-  }
+  if (step === 1 && (!v('rs-nombre') || !v('rs-email') || !v('rs-pais'))) { err.classList.add('show'); return false; }
+  if (step === 2 && !v('pr-nombre')) { err.classList.add('show'); return false; }
+  if (step === 3 && eqCount === 0)   { err.classList.add('show'); return false; }
   return true;
 }
 
-function v(id) {
-  const el = document.getElementById(id);
-  return el && el.value.trim() !== '';
-}
-
-// ── ZONAS ─────────────────────────────────────────────────────────────────────
-function agregarZona() {
-  zonaCount++;
-  const n = zonaCount;
-  const container = document.getElementById('zonas-container');
-
+// ── EQUIPOS Y ZONAS ───────────────────────────────────────────────────────────
+function agregarEquipo() {
+  eqCount++;
+  const n = eqCount;
   const div = document.createElement('div');
-  div.className = 'zona-card';
-  div.id = 'zona-' + n;
+  div.className = 'equipo-card';
+  div.id = 'equipo-' + n;
   div.innerHTML = `
-    <div class="zona-header">
-      <span class="zona-num">Zona ${n}</span>
-      ${n > 1 ? `<button class="btn-remove-zona" onclick="quitarZona(${n})">Eliminar</button>` : ''}
+    <div class="equipo-header">
+      <span class="equipo-num">Equipo ${n}</span>
+      ${n > 1 ? `<button class="btn-remove" onclick="quitarEquipo(${n})">Eliminar equipo</button>` : ''}
     </div>
+
+    <div class="section-label">Datos del equipo</div>
     <div class="grid-2">
-      <div class="field">
-        <label>Nombre de la zona <span class="req">*</span></label>
-        <input type="text" id="z${n}-nombre" placeholder="Zona 1 / Sector Norte / etc." />
-      </div>
-      <div class="field">
-        <label>Especie</label>
-        <select id="z${n}-especie">
+      <div class="field"><label>Nombre del equipo <span class="req">*</span></label><input type="text" id="eq${n}-nombre" placeholder="Bomba Principal" /></div>
+      <div class="field"><label>Tipo de fuente</label>
+        <select id="eq${n}-fuente">
           <option value="">Selecciona...</option>
-          <option>Cerezo</option>
-          <option>Nogal</option>
-          <option>Ciruelo</option>
-          <option>Avellano Europeo</option>
-          <option>Manzano</option>
-          <option>Uva de Mesa</option>
-          <option>Palto</option>
-          <option>Arándano</option>
-          <option>Repollo</option>
-          <option>Bunching</option>
-          <option>Otro</option>
+          <option>Pozo</option><option>Canal</option><option>Estanque</option><option>Lluvia</option>
         </select>
       </div>
     </div>
+    <div class="grid-4">
+      <div class="field"><label>HP bomba</label><input type="number" id="eq${n}-hp" step="0.1" placeholder="15" /></div>
+      <div class="field"><label>Precio KWH ($)</label><input type="number" id="eq${n}-kwh" step="0.01" placeholder="120" /></div>
+      <div class="field"><label>CE agua (dS/m)</label><input type="number" id="eq${n}-ce" step="0.01" placeholder="1.2" /></div>
+      <div class="field"><label>Caudal (L/s)</label><input type="number" id="eq${n}-caudal" step="0.1" placeholder="5.5" /></div>
+    </div>
+
+    <div class="section-label">Datos comunes de todas las zonas de este equipo</div>
     <div class="grid-3">
-      <div class="field">
-        <label>Variedad</label>
-        <input type="text" id="z${n}-variedad" placeholder="Santina, Chandler, etc." />
-      </div>
-      <div class="field">
-        <label>Superficie (ha)</label>
-        <input type="number" id="z${n}-superficie" step="0.01" placeholder="2.5" />
-      </div>
-      <div class="field">
-        <label>Tipo de riego</label>
-        <select id="z${n}-tipo-riego">
+      <div class="field"><label>Especie</label>
+        <select id="eq${n}-especie">
           <option value="">Selecciona...</option>
-          <option>Goteros integrados</option>
-          <option>Goteros tipo botón</option>
-          <option>Cintas de riego</option>
-          <option>Microaspersión</option>
-          <option>Aspersión</option>
+          <option>Cerezo</option><option>Nogal</option><option>Ciruelo</option>
+          <option>Avellano Europeo</option><option>Manzano</option><option>Uva de Mesa</option>
+          <option>Palto</option><option>Arándano</option><option>Repollo</option>
+          <option>Bunching</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Variedad</label><input type="text" id="eq${n}-variedad" placeholder="Santina, Chandler..." /></div>
+      <div class="field"><label>Tipo de riego</label>
+        <select id="eq${n}-tipo-riego">
+          <option value="">Selecciona...</option>
+          <option>Goteros integrados</option><option>Goteros tipo botón</option>
+          <option>Cintas de riego</option><option>Microaspersión</option>
         </select>
       </div>
     </div>
-    <div class="grid-3">
-      <div class="field">
-        <label>Caudal emisor (L/h)</label>
-        <input type="number" id="z${n}-caudal" step="0.1" placeholder="6" />
-      </div>
-      <div class="field">
-        <label>Dist. entre hileras (m)</label>
-        <input type="number" id="z${n}-dist-h" step="0.1" placeholder="6" />
-      </div>
-      <div class="field">
-        <label>Dist. sobre hilera (m)</label>
-        <input type="number" id="z${n}-dist-s" step="0.1" placeholder="5" />
-      </div>
+    <div class="grid-4">
+      <div class="field"><label>Caudal emisor (L/h)</label><input type="number" id="eq${n}-caudal-emisor" step="0.1" placeholder="6" /></div>
+      <div class="field"><label>Dist. hileras (m)</label><input type="number" id="eq${n}-dist-h" step="0.1" placeholder="6" /></div>
+      <div class="field"><label>Dist. sobre hilera (m)</label><input type="number" id="eq${n}-dist-s" step="0.1" placeholder="5" /></div>
+      <div class="field"><label>Emisores/árbol</label><input type="number" id="eq${n}-emisores" step="1" placeholder="2" /></div>
     </div>
-    <div class="grid-3">
-      <div class="field">
-        <label>Emisores por árbol</label>
-        <input type="number" id="z${n}-emisores" step="1" placeholder="2" />
-      </div>
-      <div class="field">
-        <label>Eficiencia sistema (%)</label>
-        <input type="number" id="z${n}-eficiencia" step="1" placeholder="90" />
-      </div>
-      <div class="field">
-        <label>% Cobertura de suelo</label>
-        <input type="number" id="z${n}-sombra" step="1" placeholder="70" />
-      </div>
+    <div class="grid-4">
+      <div class="field"><label>Eficiencia (%)</label><input type="number" id="eq${n}-eficiencia" step="1" placeholder="90" /></div>
+      <div class="field"><label>% Cobertura suelo</label><input type="number" id="eq${n}-sombra" step="1" placeholder="70" /></div>
+      <div class="field"><label>CC Perfil 1 (%)</label><input type="number" id="eq${n}-cc" step="0.1" placeholder="22" /></div>
+      <div class="field"><label>PMP Perfil 1 (%)</label><input type="number" id="eq${n}-pmp" step="0.1" placeholder="10" /></div>
     </div>
+
+    <div class="section-label">Zonas de este equipo</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Agrega cada zona. Solo completa lo que difiere entre zonas — los campos en blanco heredan los datos comunes del equipo.</div>
+
+    <div class="zona-row-header" style="grid-template-columns:28px 1fr 90px 90px 90px 80px;" id="zona-header-${n}">
+      <div></div>
+      <div class="zona-col-label">Nombre de la zona</div>
+      <div class="zona-col-label">Superficie (ha)</div>
+      <div class="zona-col-label">% Sombra</div>
+      <div class="zona-col-label">Especie (si difiere)</div>
+      <div class="zona-col-label">Variedad</div>
+    </div>
+    <div id="zonas-eq-${n}"></div>
+    <button class="btn-add" style="margin-top:8px;" onclick="agregarZona(${n})">+ Agregar zona al equipo ${n}</button>
   `;
-  container.appendChild(div);
+  document.getElementById('equipos-container').appendChild(div);
+  agregarZona(n); // agregar primera zona automáticamente
 }
 
-function quitarZona(n) {
-  const el = document.getElementById('zona-' + n);
+let zonaCounters = {};
+function agregarZona(eqN) {
+  if (!zonaCounters[eqN]) zonaCounters[eqN] = 0;
+  zonaCounters[eqN]++;
+  const zn = zonaCounters[eqN];
+  const container = document.getElementById('zonas-eq-' + eqN);
+  const row = document.createElement('div');
+  row.className = 'zona-row';
+  row.id = `zona-row-${eqN}-${zn}`;
+  row.style.gridTemplateColumns = '28px 1fr 90px 90px 90px 80px';
+  row.innerHTML = `
+    <div class="zona-num-badge">${zn}</div>
+    <input type="text"   id="z${eqN}-${zn}-nombre"     placeholder="Zona ${zn} / Sector..." />
+    <input type="number" id="z${eqN}-${zn}-superficie"  step="0.01" placeholder="2.5" />
+    <input type="number" id="z${eqN}-${zn}-sombra"      step="1"    placeholder="70" />
+    <input type="text"   id="z${eqN}-${zn}-especie"     placeholder="(igual al equipo)" />
+    <input type="text"   id="z${eqN}-${zn}-variedad"    placeholder="(igual)" />
+  `;
+  container.appendChild(row);
+}
+
+function quitarEquipo(n) {
+  const el = document.getElementById('equipo-' + n);
   if (el) el.remove();
 }
 
-function getZonas() {
-  const zonas = [];
-  for (let i = 1; i <= zonaCount; i++) {
-    const el = document.getElementById('zona-' + i);
-    if (!el) continue;
-    const nombre = document.getElementById('z' + i + '-nombre')?.value.trim();
+function getEquipos() {
+  const equipos = [];
+  for (let n = 1; n <= eqCount; n++) {
+    if (!document.getElementById('equipo-' + n)) continue;
+    const nombre = document.getElementById('eq' + n + '-nombre')?.value.trim();
     if (!nombre) continue;
-    zonas.push({
-      nombre:    nombre,
-      especie:   document.getElementById('z' + i + '-especie')?.value || null,
-      variedad:  document.getElementById('z' + i + '-variedad')?.value || null,
-      tipoRiego: document.getElementById('z' + i + '-tipo-riego')?.value || null,
-      superficie:parseFloat(document.getElementById('z' + i + '-superficie')?.value) || null,
-      caudal:    parseFloat(document.getElementById('z' + i + '-caudal')?.value) || null,
-      distH:     parseFloat(document.getElementById('z' + i + '-dist-h')?.value) || null,
-      distS:     parseFloat(document.getElementById('z' + i + '-dist-s')?.value) || null,
-      emisores:  parseFloat(document.getElementById('z' + i + '-emisores')?.value) || null,
-      eficiencia:parseFloat(document.getElementById('z' + i + '-eficiencia')?.value) || null,
-      sombra:    parseFloat(document.getElementById('z' + i + '-sombra')?.value) || null,
+
+    const zonas = [];
+    const zc = zonaCounters[n] || 0;
+    for (let z = 1; z <= zc; z++) {
+      const znNombre = document.getElementById(`z${n}-${z}-nombre`)?.value.trim();
+      if (!znNombre) continue;
+      zonas.push({
+        nombre:     znNombre,
+        superficie: parseFloat(document.getElementById(`z${n}-${z}-superficie`)?.value) || null,
+        sombra:     parseFloat(document.getElementById(`z${n}-${z}-sombra`)?.value) || parseFloat(document.getElementById('eq' + n + '-sombra')?.value) || null,
+        especie:    document.getElementById(`z${n}-${z}-especie`)?.value.trim() || document.getElementById('eq' + n + '-especie')?.value || null,
+        variedad:   document.getElementById(`z${n}-${z}-variedad`)?.value.trim() || document.getElementById('eq' + n + '-variedad')?.value || null,
+      });
+    }
+
+    equipos.push({
+      nombre:       nombre,
+      fuente:       document.getElementById('eq' + n + '-fuente')?.value || null,
+      hp:           parseFloat(document.getElementById('eq' + n + '-hp')?.value) || null,
+      kwh:          parseFloat(document.getElementById('eq' + n + '-kwh')?.value) || null,
+      ce:           parseFloat(document.getElementById('eq' + n + '-ce')?.value) || null,
+      caudal:       parseFloat(document.getElementById('eq' + n + '-caudal')?.value) || null,
+      especie:      document.getElementById('eq' + n + '-especie')?.value || null,
+      variedad:     document.getElementById('eq' + n + '-variedad')?.value || null,
+      tipoRiego:    document.getElementById('eq' + n + '-tipo-riego')?.value || null,
+      caudalEmisor: parseFloat(document.getElementById('eq' + n + '-caudal-emisor')?.value) || null,
+      distH:        parseFloat(document.getElementById('eq' + n + '-dist-h')?.value) || null,
+      distS:        parseFloat(document.getElementById('eq' + n + '-dist-s')?.value) || null,
+      emisores:     parseFloat(document.getElementById('eq' + n + '-emisores')?.value) || null,
+      eficiencia:   parseFloat(document.getElementById('eq' + n + '-eficiencia')?.value) || null,
+      sombra:       parseFloat(document.getElementById('eq' + n + '-sombra')?.value) || null,
+      cc:           parseFloat(document.getElementById('eq' + n + '-cc')?.value) || null,
+      pmp:          parseFloat(document.getElementById('eq' + n + '-pmp')?.value) || null,
+      zonas:        zonas,
     });
   }
-  return zonas;
+  return equipos;
 }
 
 // ── RESUMEN ───────────────────────────────────────────────────────────────────
 function construirResumen() {
-  const zonas = getZonas();
-  const html = `
-    <div class="section-label">Empresa</div>
-    <div class="grid-2">
-      <div><strong>${document.getElementById('rs-nombre').value}</strong></div>
-      <div>${document.getElementById('rs-email').value}</div>
+  const equipos = getEquipos();
+  const totalZonas = equipos.reduce((s, e) => s + e.zonas.length, 0);
+  let html = `
+    <div class="resumen-bloque">
+      <div class="resumen-titulo">Empresa</div>
+      <div class="resumen-row"><span>Nombre</span><span>${document.getElementById('rs-nombre').value}</span></div>
+      <div class="resumen-row"><span>Email</span><span>${document.getElementById('rs-email').value}</span></div>
+      <div class="resumen-row"><span>País</span><span>${document.getElementById('rs-pais').value}</span></div>
     </div>
-    <div class="section-label">Predio</div>
-    <div class="grid-2">
-      <div><strong>${document.getElementById('pr-nombre').value}</strong></div>
-      <div>${document.getElementById('pr-comuna').value} · ${document.getElementById('pr-region').value}</div>
+    <div class="resumen-bloque">
+      <div class="resumen-titulo">Predio</div>
+      <div class="resumen-row"><span>Nombre</span><span>${document.getElementById('pr-nombre').value}</span></div>
+      <div class="resumen-row"><span>Ubicación</span><span>${document.getElementById('pr-comuna').value} · ${document.getElementById('pr-region').value}</span></div>
     </div>
-    <div class="section-label">Equipo de riego</div>
-    <div class="grid-2">
-      <div><strong>${document.getElementById('eq-nombre').value}</strong></div>
-      <div>${document.getElementById('eq-fuente').value || '—'} · ${document.getElementById('eq-hp').value || '—'} HP</div>
+    <div class="resumen-bloque">
+      <div class="resumen-titulo">${equipos.length} equipo(s) · ${totalZonas} zona(s) en total</div>
+      ${equipos.map((eq, i) => `
+        <div style="margin-bottom:10px;">
+          <div style="font-weight:700;font-size:13px;color:var(--teal-700);margin-bottom:4px;">Equipo ${i+1}: ${eq.nombre} (${eq.zonas.length} zonas)</div>
+          <div style="font-size:12px;color:var(--muted);">${eq.especie || '—'} ${eq.variedad || ''} · ${eq.tipoRiego || '—'}</div>
+          ${eq.zonas.map((z, j) => `
+            <div class="resumen-row" style="font-size:12px;">
+              <span>Zona ${j+1}: ${z.nombre}</span>
+              <span>${z.especie || eq.especie || '—'} · ${z.superficie || '—'} ha</span>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
     </div>
-    <div class="section-label">Zonas (${zonas.length})</div>
-    ${zonas.map((z, i) => `
-      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px;">
-        <strong>Zona ${i+1}: ${z.nombre}</strong>
-        <span style="color:var(--muted)">${z.especie || '—'} ${z.variedad || ''} · ${z.superficie || '—'} ha</span>
-      </div>
-    `).join('')}
   `;
   document.getElementById('resumen-content').innerHTML = html;
 }
@@ -782,13 +477,10 @@ async function enviar() {
   err.classList.remove('show');
 
   try {
-    // Generar códigos únicos
     const ts = Date.now();
     const rsId = 'RS-ON-' + ts;
     const prId = 'PR-ON-' + ts;
-    const eqId = 'EQ-ON-' + ts;
 
-    // 1. Razón Social
     await db.from('razones_sociales').insert({
       'ID Razón Social (PK)':                rsId,
       'Nombre Razón Social':                  document.getElementById('rs-nombre').value.trim(),
@@ -799,7 +491,6 @@ async function enviar() {
       'Dirección de Facturación':             document.getElementById('rs-direccion').value.trim() || null,
     });
 
-    // 2. Predio
     await db.from('predios').insert({
       'ID Predio (PK)':       prId,
       'ID Razón Social (FK)': rsId,
@@ -812,56 +503,58 @@ async function enviar() {
       'Longitud':             parseFloat(document.getElementById('pr-lon').value) || null,
     });
 
-    // 3. Equipo
-    await db.from('equipos').insert({
-      'ID Equipo (PK)':                          eqId,
-      'ID Predio (FK)':                          prId,
-      'Nombre Equipo':                           document.getElementById('eq-nombre').value.trim(),
-      'Tipo de Fuente [Pozo, Canal o lluvia]':   document.getElementById('eq-fuente').value || null,
-      'Horse Power Bomba de Riego':              parseFloat(document.getElementById('eq-hp').value) || null,
-      'Precio KWH':                              parseFloat(document.getElementById('eq-kwh').value) || null,
-      'Conductividad Eléctrica Agua (dS/m)':     parseFloat(document.getElementById('eq-ce').value) || null,
-      'Caudal de Bomba de Riego (L/s) [Salida a válvulas]': parseFloat(document.getElementById('eq-caudal').value) || null,
-      'Capacidad Útil Estanque (m3) [Ambos]':    parseFloat(document.getElementById('eq-estanque').value) || null,
-    });
+    const equipos = getEquipos();
+    for (let i = 0; i < equipos.length; i++) {
+      const eq = equipos[i];
+      const eqId = `EQ-ON-${ts}-${i+1}`;
 
-    // 4. Zonas
-    const zonas = getZonas();
-    for (let i = 0; i < zonas.length; i++) {
-      const z = zonas[i];
-      const znId = `ZN-ON-${ts}-${i+1}`;
-      await db.from('zonas').insert({
-        'ID Zona Relacional (PK)':              znId,
-        'ID Equipo de Riego (FK)':              eqId,
-        'Nombre de la Zona':                    z.nombre,
-        'Activa':                               'Sí',
-        'Especie':                              z.especie,
-        'Variedad':                             z.variedad,
-        'Tipo de Riego':                        z.tipoRiego,
-        'Superficie (Hectáreas)':               z.superficie,
-        'Caudal del Emisor (L/h)':              z.caudal,
-        'Distancia entre hilera (metros)':      z.distH,
-        'Distancia sobre hilera (metros)':      z.distS,
-        'Cantidad de emisores por árbol':       z.emisores,
-        'Eficiencia del Sistema (%)':           z.eficiencia,
-        'Porcentaje de sombra (%)':             z.sombra,
+      await db.from('equipos').insert({
+        'ID Equipo (PK)':                                         eqId,
+        'ID Predio (FK)':                                         prId,
+        'Nombre Equipo':                                          eq.nombre,
+        'Tipo de Fuente [Pozo, Canal o lluvia]':                  eq.fuente,
+        'Horse Power Bomba de Riego':                             eq.hp,
+        'Precio KWH':                                             eq.kwh,
+        'Conductividad Eléctrica Agua (dS/m)':                    eq.ce,
+        'Caudal de Bomba de Riego (L/s) [Salida a válvulas]':    eq.caudal,
       });
+
+      for (let j = 0; j < eq.zonas.length; j++) {
+        const z = eq.zonas[j];
+        await db.from('zonas').insert({
+          'ID Zona Relacional (PK)':                      `ZN-ON-${ts}-${i+1}-${j+1}`,
+          'ID Equipo de Riego (FK)':                      eqId,
+          'Nombre de la Zona':                            z.nombre,
+          'Activa':                                       'Sí',
+          'Especie':                                      z.especie || eq.especie,
+          'Variedad':                                     z.variedad || eq.variedad,
+          'Tipo de Riego':                                eq.tipoRiego,
+          'Superficie (Hectáreas)':                       z.superficie,
+          'Caudal del Emisor (L/h)':                      eq.caudalEmisor,
+          'Distancia entre hilera (metros)':              eq.distH,
+          'Distancia sobre hilera (metros)':              eq.distS,
+          'Cantidad de emisores por árbol':               eq.emisores,
+          'Eficiencia del Sistema (%)':                   eq.eficiencia,
+          'Porcentaje de sombra (%)':                     z.sombra || eq.sombra,
+          'Capacidad de Campo Primer Perfil (%)':         eq.cc,
+          'Punto Marchitez Permanente Primer Perfil (%)': eq.pmp,
+        });
+      }
     }
 
-    // ✅ Éxito
     ir(5);
 
   } catch (e) {
     console.error(e);
-    err.textContent = 'Error al guardar: ' + (e.message || 'Por favor intenta nuevamente.');
+    err.textContent = 'Error: ' + (e.message || 'Intenta nuevamente.');
     err.classList.add('show');
     btn.disabled = false;
     btn.textContent = '✓ Enviar registro';
   }
 }
 
-// Iniciar con una zona vacía
-agregarZona();
+// Iniciar con un equipo vacío
+agregarEquipo();
 </script>
 </body>
 </html>
