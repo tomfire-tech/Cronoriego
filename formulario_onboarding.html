@@ -562,7 +562,22 @@ async function enviar() {
 
   } catch(e) {
     console.error(e);
-    err.textContent = 'Error: ' + (e.message || e.details || 'Intenta nuevamente.');
+    let msg = 'Error al guardar. Intenta nuevamente.';
+    const raw = e.message || e.details || '';
+    if (raw.includes('numeric field overflow')) {
+      msg = '⚠️ Un valor numérico es demasiado grande. Revisa que los porcentajes no superen 100, las distancias estén en metros (ej: 6) y la profundidad en metros (ej: 0.6).';
+    } else if (raw.includes('violates foreign key')) {
+      msg = '⚠️ Error de referencia entre tablas. Contacta a soporte.';
+    } else if (raw.includes('duplicate key')) {
+      msg = '⚠️ Ya existe un registro con ese código. Intenta nuevamente en unos segundos.';
+    } else if (raw.includes('not-null')) {
+      msg = '⚠️ Falta un campo obligatorio. Revisa que todo esté completo.';
+    } else if (raw.includes('invalid input syntax')) {
+      msg = '⚠️ Formato incorrecto en algún campo. Revisa que los números no tengan letras.';
+    } else if (raw) {
+      msg = '⚠️ ' + raw;
+    }
+    err.textContent = msg;
     err.classList.add('show');
     btn.disabled = false;
     btn.textContent = '✓ Enviar registro';
