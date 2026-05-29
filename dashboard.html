@@ -208,14 +208,14 @@ function initFecha() {
 // ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function cargarPredios(rsId) {
   const { data } = await db.from('predios')
-    .select('ID Predio (PK),Nombre Predio,ID Razón Social (FK)')
+    .select('*')
     .eq('ID Razón Social (FK)', rsId);
   return data || [];
 }
 
 async function cargarEquipos(prId) {
   const { data } = await db.from('equipos')
-    .select('ID Equipo (PK),Nombre Equipo')
+    .select('*')
     .eq('ID Predio (FK)', prId);
   return data || [];
 }
@@ -268,7 +268,7 @@ async function init() {
 
   // Buscar RS del usuario por email
   const { data: usuarios } = await db.from('usuarios')
-    .select('ID Razón Social (FK)')
+    .select('*')
     .eq('Correo del Usuario', email)
     .limit(1);
 
