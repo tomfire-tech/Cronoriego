@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CronoRiego — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --teal-900:#0f3a52;--teal-700:#1A5276;--teal-500:#2E86AB;--teal-50:#eaf3f8;
+    --green-900:#154a29;--green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;
+    --amber:#d29922;--amber-bg:#fff8e6;
+    --ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;
+    --bg:#f7faf9;--white:#ffffff;--danger:#c0392b;--danger-bg:#fdf2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+  /* ── TOPBAR ── */
+  .topbar{background:var(--white);border-bottom:1px solid var(--line);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .brand{font-size:16px;font-weight:800;}
+  .brand span:first-child{color:var(--teal-700);}
+  .brand span:last-child{color:var(--green-700);}
+  .topbar-right{display:flex;align-items:center;gap:16px;}
+  .topbar-date{font-size:12px;color:var(--muted);}
+  .topbar-semana{font-size:11px;font-weight:600;background:var(--teal-50);color:var(--teal-700);padding:3px 10px;border-radius:999px;}
+  .user-btn{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--white);transition:background .2s;}
+  .user-btn:hover{background:var(--bg);}
+  .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--teal-700);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+  /* ── SELECTORS ── */
+  .selectors{background:var(--white);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .sel-group{display:flex;align-items:center;gap:6px;}
+  .sel-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .sel-group select{padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;color:var(--ink);background:var(--white);cursor:pointer;}
+  .sel-group select:focus{outline:none;border-color:var(--teal-700);}
+  .ndvi-chip{font-size:11px;font-weight:600;background:var(--green-50);color:var(--green-700);padding:4px 10px;border-radius:999px;border:1px solid rgba(30,132,73,.2);margin-left:auto;}
+
+  /* ── LAYOUT ── */
+  .main{padding:20px 24px;max-width:1400px;margin:0 auto;}
+
+  /* ── KPIs ── */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
+  .kpi{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px;transition:border-color .2s;}
+  .kpi:hover{border-color:var(--teal-500);}
+  .kpi-label{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .kpi-val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1;}
+  .kpi-unit{font-size:11px;color:var(--muted);margin-top:3px;}
+  .kpi-val.green{color:var(--green-700);}
+  .kpi-val.teal{color:var(--teal-700);}
+  .kpi-val.amber{color:var(--amber);}
+  @media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:600px){.kpis{grid-template-columns:repeat(2,1fr);}}
+
+  /* ── GRID ── */
+  .grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  @media(max-width:1000px){.grid-3,.grid-2{grid-template-columns:1fr;}}
+
+  /* ── CARD ── */
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+  .card-title i{font-size:16px;color:var(--teal-500);}
+
+  /* ── MÉTRICAS ── */
+  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);}
+  .metric-row:last-child{border-bottom:none;}
+  .metric-key{font-size:12px;color:var(--ink-2);}
+  .metric-val{font-size:13px;font-weight:600;}
+  .metric-val.green{color:var(--green-700);}
+  .metric-val.teal{color:var(--teal-700);}
+  .metric-val.amber{color:var(--amber);}
+  .metric-val.danger{color:var(--danger);}
+
+  /* ── CALENDARIO ── */
+  .cal-grid{display:grid;grid-template-columns:28px repeat(7,1fr);gap:2px;font-size:11px;}
+  .cal-dh{text-align:center;color:var(--muted);padding:3px 0;font-weight:600;}
+  .cal-wn{color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:10px;}
+  .cal-cell{background:var(--bg);border:0.5px solid var(--line);border-radius:4px;padding:3px 4px;min-height:40px;}
+  .cal-cell.hoy{border-color:var(--teal-700) !important;}
+  .cal-cell.riego{background:var(--green-50);border-color:rgba(30,132,73,.3);}
+  .cal-cell.ferti{background:var(--teal-50);border-color:rgba(46,134,171,.3);}
+  .cal-cell.otro-mes{opacity:.3;}
+  .cal-dn{font-size:10px;font-weight:600;color:var(--ink-2);}
+  .cal-cell.hoy .cal-dn{color:var(--teal-700);}
+  .cal-ev{font-size:9px;color:var(--green-700);margin-top:2px;font-weight:600;}
+  .cal-fe{font-size:9px;color:var(--teal-700);margin-top:1px;}
+  .cal-pp{font-size:9px;color:var(--teal-500);margin-top:1px;}
+  .cal-legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
+  .cal-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
+  .cal-leg-dot{width:8px;height:8px;border-radius:2px;}
+
+  /* ── NUTRICIÓN ── */
+  .nut-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .nut-item{background:var(--bg);border-radius:8px;padding:10px;}
+  .nut-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+  .nut-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
+  .nut-unit{font-size:10px;color:var(--muted);}
+  .nut-N .nut-val{color:#185FA5;}
+  .nut-P .nut-val{color:#854F0B;}
+  .nut-K .nut-val{color:var(--green-700);}
+
+  /* ── FENOLOGÍA ── */
+  .prog-wrap{margin:8px 0;}
+  .prog-header{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .prog-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:3px;}
+  .prog-fill.hf{background:var(--teal-500);}
+  .prog-fill.gd{background:var(--amber);}
+
+  /* ── ALERTAS ── */
+  .alerta{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;}
+  .alerta:last-child{margin-bottom:0;}
+  .alerta.warn{background:var(--amber-bg);color:#633806;border:1px solid rgba(210,153,34,.2);}
+  .alerta.ok{background:var(--green-50);color:var(--green-900);border:1px solid rgba(30,132,73,.2);}
+  .alerta.info{background:var(--teal-50);color:var(--teal-900);border:1px solid rgba(46,134,171,.2);}
+  .alerta i{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+  /* ── NDVI CHART ── */
+  .ndvi-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px;}
+  .ndvi-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .ndvi-bar-item{width:100%;background:var(--green-500);border-radius:2px 2px 0 0;transition:height .3s;}
+  .ndvi-date{font-size:9px;color:var(--muted);}
+
+  /* ── LOADING ── */
+  .loading{text-align:center;padding:40px;color:var(--muted);font-size:14px;}
+
+  /* ── LOGOUT ── */
+  .logout-btn{background:none;border:none;color:var(--danger);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span>CRONO</span><span>RIEGO</span></div>
+  <div class="topbar-right">
+    <span class="topbar-date" id="top-fecha">—</span>
+    <span class="topbar-semana" id="top-semana">Semana ISO —</span>
+    <button class="user-btn" onclick="logout()">
+      <div class="user-avatar" id="user-ini">—</div>
+      <span id="user-email">—</span>
+      <i class="ti ti-logout" style="font-size:14px;color:var(--muted)"></i>
+    </button>
+  </div>
+</div>
+
+<div class="selectors">
+  <div class="sel-group">
+    <span class="sel-label">Predio</span>
+    <select id="sel-predio" onchange="onPredioChange()"><option>Cargando...</option></select>
+  </div>
+  <div class="sel-group">
+    <span class="sel-label">Equipo</span>
+    <select id="sel-equipo" onchange="onEquipoChange()"><option>Cargando...</option></select>
+  </div>
+  <div class="sel-group">
+    <span class="sel-label">Zona</span>
+    <select id="sel-zona" onchange="onZonaChange()"><option>Cargando...</option></select>
+  </div>
+  <div class="ndvi-chip" id="ndvi-chip">NDVI —</div>
+</div>
+
+<div class="main" id="main-content">
+  <div class="loading"><i class="ti ti-loader" style="font-size:24px"></i><br>Cargando datos...</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://lmexinxdmkgexpthuosn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentZona = null;
+let allData = {};
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function checkAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return null; }
+  return session;
+}
+
+async function logout() {
+  await db.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ── FECHA ─────────────────────────────────────────────────────────────────────
+function isoWeek(d) {
+  const dc = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  dc.setUTCDate(dc.getUTCDate()+4-(dc.getUTCDay()||7));
+  const y = new Date(Date.UTC(dc.getUTCFullYear(),0,1));
+  return Math.ceil(((dc-y)/86400000+1)/7);
+}
+
+function initFecha() {
+  const today = new Date();
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('top-fecha').textContent =
+    `${dias[today.getDay()]} ${today.getDate()} de ${meses[today.getMonth()]} de ${today.getFullYear()}`;
+  document.getElementById('top-semana').textContent = `Semana ISO ${isoWeek(today)}`;
+}
+
+// ── CARGA DE DATOS ────────────────────────────────────────────────────────────
+async function cargarPredios(rsId) {
+  const { data } = await db.from('predios')
+    .select('"ID Predio (PK)","Nombre Predio","ID Razón Social (FK)"')
+    .eq('"ID Razón Social (FK)"', rsId);
+  return data || [];
+}
+
+async function cargarEquipos(prId) {
+  const { data } = await db.from('equipos')
+    .select('"ID Equipo (PK)","Nombre Equipo"')
+    .eq('"ID Predio (FK)"', prId);
+  return data || [];
+}
+
+async function cargarZonas(eqId) {
+  const { data } = await db.from('zonas')
+    .select('*')
+    .eq('"ID Equipo de Riego (FK)"', eqId)
+    .eq('"Activa"', 'Sí');
+  return data || [];
+}
+
+async function cargarEto(prId) {
+  const { data } = await db.from('eto_pronostico')
+    .select('*')
+    .eq('"ID Predio"', prId)
+    .order('"Fecha_Pronostico"', { ascending: false })
+    .limit(7);
+  return data || [];
+}
+
+async function cargarNdvi(zId) {
+  const { data } = await db.from('ndvi_registros')
+    .select('*')
+    .eq('"ID Zona Relacional (PK)"', zId)
+    .order('"Fecha"', { ascending: false })
+    .limit(8);
+  return data || [];
+}
+
+async function cargarRecomendacion(zId) {
+  const { data } = await db.from('recomendaciones')
+    .select('*')
+    .eq('"ID Zona Relacional (PK)"', zId)
+    .order('"Fecha Calculo"', { ascending: false })
+    .limit(1);
+  return data?.[0] || null;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const session = await checkAuth();
+  if (!session) return;
+
+  initFecha();
+
+  const email = session.user.email;
+  document.getElementById('user-email').textContent = email.split('@')[0];
+  document.getElementById('user-ini').textContent = email[0].toUpperCase();
+
+  // Buscar RS del usuario por email
+  const { data: usuarios } = await db.from('usuarios')
+    .select('"ID Razón Social (FK)"')
+    .eq('"Correo del Usuario"', email)
+    .limit(1);
+
+  let rsId = null;
+  if (usuarios && usuarios.length > 0) {
+    rsId = usuarios[0]['ID Razón Social (FK)'];
+  }
+
+  // Si no hay RS asignada, mostrar todos los predios (para admin/prueba)
+  let predios = [];
+  if (rsId) {
+    predios = await cargarPredios(rsId);
+  } else {
+    const { data } = await db.from('predios').select('"ID Predio (PK)","Nombre Predio"').limit(20);
+    predios = data || [];
+  }
+
+  allData.predios = predios;
+
+  const selPredio = document.getElementById('sel-predio');
+  selPredio.innerHTML = predios.map(p =>
+    `<option value="${p['ID Predio (PK)']}">${p['Nombre Predio']}</option>`
+  ).join('');
+
+  if (predios.length > 0) await onPredioChange();
+}
+
+async function onPredioChange() {
+  const prId = document.getElementById('sel-predio').value;
+  const equipos = await cargarEquipos(prId);
+  allData.equipos = equipos;
+
+  const selEq = document.getElementById('sel-equipo');
+  selEq.innerHTML = equipos.length
+    ? equipos.map(e => `<option value="${e['ID Equipo (PK)']}">${e['Nombre Equipo']}</option>`).join('')
+    : '<option value="">Sin equipos</option>';
+
+  if (equipos.length > 0) await onEquipoChange();
+}
+
+async function onEquipoChange() {
+  const eqId = document.getElementById('sel-equipo').value;
+  const zonas = await cargarZonas(eqId);
+  allData.zonas = zonas;
+
+  const selZona = document.getElementById('sel-zona');
+  selZona.innerHTML = zonas.length
+    ? zonas.map(z => `<option value="${z['ID Zona Relacional (PK)']}">${z['ID Zona Relacional (PK)']} — ${z['Nombre de la Zona']} (${z['Especie']})</option>`).join('')
+    : '<option value="">Sin zonas</option>';
+
+  if (zonas.length > 0) await onZonaChange();
+}
+
+async function onZonaChange() {
+  const zId = document.getElementById('sel-zona').value;
+  const prId = document.getElementById('sel-predio').value;
+  const zona = allData.zonas?.find(z => z['ID Zona Relacional (PK)'] === zId);
+  if (!zona) return;
+
+  currentZona = zona;
+  document.getElementById('main-content').innerHTML = '<div class="loading">Cargando datos de la zona...</div>';
+
+  const [eto, ndvi, rec] = await Promise.all([
+    cargarEto(prId),
+    cargarNdvi(zId),
+    cargarRecomendacion(zId),
+  ]);
+
+  const ndviActual = ndvi[0];
+  if (ndviActual) {
+    document.getElementById('ndvi-chip').textContent =
+      `NDVI ${ndviActual['NDVI']} · ${ndviActual['Fecha']}`;
+  }
+
+  renderDashboard(zona, eto, ndvi, rec);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function hm(h) {
+  if (!h || h <= 0) return '—';
+  const hh = Math.floor(h), mm = Math.round((h-hh)*60);
+  return mm===60 ? `${hh+1}h 00min` : `${hh}h ${String(mm).padStart(2,'0')}min`;
+}
+
+function renderDashboard(zona, eto, ndvi, rec) {
+  const etoAcum = eto.reduce((s,e) => s + (parseFloat(e['ETo_Proyectada (mm)'])||0), 0);
+  const precipAcum = eto.reduce((s,e) => s + (parseFloat(e['Precipitacion_Probable (mm)'])||0), 0);
+  const tmaxProm = eto.length ? eto.reduce((s,e) => s+(parseFloat(e['Tmax_Proy (C)'])||0),0)/eto.length : null;
+  const tminProm = eto.length ? eto.reduce((s,e) => s+(parseFloat(e['Tmin_Proy (C)'])||0),0)/eto.length : null;
+
+  const ndviVal  = ndvi[0] ? parseFloat(ndvi[0]['NDVI']) : null;
+  const kcAj     = rec ? parseFloat(rec['Kc ajustado']) : null;
+  const etcNeta  = rec ? parseFloat(rec['ETc neta c/lluvia (mm/día)']) : null;
+  const frec     = rec ? parseFloat(rec['Frecuencia de riego (días)']) : null;
+  const tRiego   = rec ? parseFloat(rec['Tiempo de riego (h)']) : null;
+  const consumoEv= rec ? parseFloat(rec['Consumo por evento (m³)']) : null;
+  const perdida  = etoAcum && zona['Superficie (Hectáreas)']
+    ? (etoAcum * parseFloat(zona['Superficie (Hectáreas)']) * 10).toFixed(0)
+    : '—';
+
+  const riegos = frec ? Math.max(1, Math.round(7/frec)) : 0;
+
+  // Fenología
+  const FENO = {
+    'Nogales':{etapa:'Dormancia / inicio brotación',hf:420,hfReq:'700-1000',gd:180},
+    'Nogal':{etapa:'Dormancia / inicio brotación',hf:420,hfReq:'700-1000',gd:180},
+    'Cerezo':{etapa:'Post-cosecha / inducción floral',hf:510,hfReq:'800-1200',gd:210},
+    'Ciruelos':{etapa:'Dormancia',hf:380,hfReq:'600-900',gd:155},
+    'Ciruelo':{etapa:'Dormancia',hf:380,hfReq:'600-900',gd:155},
+    'Avellano Europeo':{etapa:'Floración / cuaje',hf:890,hfReq:'1000-1400',gd:320},
+    'Avellanos':{etapa:'Dormancia',hf:420,hfReq:'1000-1400',gd:160},
+    'Apple':{etapa:'Floración / cuaje',hf:750,hfReq:'800-1200',gd:290},
+    'Manzano':{etapa:'Floración / cuaje',hf:750,hfReq:'800-1200',gd:290},
+    'Repollo':{etapa:'Desarrollo vegetativo',hf:null,hfReq:null,gd:85},
+    'Bunching':{etapa:'Desarrollo vegetativo',hf:null,hfReq:null,gd:90},
+  };
+  const fen = FENO[zona['Especie']] || {etapa:'Sin datos',hf:null,hfReq:null,gd:0};
+  const hfPct = fen.hf && fen.hfReq ? Math.min(100, Math.round(fen.hf/parseFloat(fen.hfReq)*100)) : 0;
+
+  // Nutrición desde recomendacion
+  const nMes = rec ? parseFloat(rec['N a aplicar (kg/zona)']) : null;
+  const pMes = rec ? parseFloat(rec['P₂O₅ a aplicar (kg/zona)']) : null;
+  const kMes = rec ? parseFloat(rec['K₂O a aplicar (kg/zona)']) : null;
+
+  // Alertas
+  const alertas = [];
+  if (!zona['Superficie (Hectáreas)']) alertas.push({tipo:'warn', msg:'Superficie no ingresada — los cálculos de consumo no están disponibles.'});
+  if (!zona['Capacidad de Campo Primer Perfil (%)']) alertas.push({tipo:'warn', msg:'CC/PMP del suelo no ingresados — se usarán valores por defecto de tabla.'});
+  if (ndviVal && ndvi.length >= 2) {
+    const ndviPrev = parseFloat(ndvi[1]['NDVI']);
+    const diff = ((ndviVal - ndviPrev)/ndviPrev*100).toFixed(1);
+    if (diff < -10) alertas.push({tipo:'warn', msg:`NDVI bajó ${Math.abs(diff)}% respecto a la semana anterior — revisa el estado del cultivo.`});
+  }
+  if (precipAcum > 10) alertas.push({tipo:'info', msg:`Precipitación probable de ${precipAcum.toFixed(1)} mm esta semana — considera suspender o reducir el riego.`});
+  if (alertas.length === 0) alertas.push({tipo:'ok', msg:'Sin alertas activas para esta zona.'});
+
+  document.getElementById('main-content').innerHTML = `
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">ETo acum. 7d</div>
+        <div class="kpi-val green">${etoAcum.toFixed(1)}</div>
+        <div class="kpi-unit">mm</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">ETc neta diaria</div>
+        <div class="kpi-val teal">${etcNeta ? etcNeta.toFixed(2) : '—'}</div>
+        <div class="kpi-unit">mm/día</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Precipitación 7d</div>
+        <div class="kpi-val">${precipAcum.toFixed(1)}</div>
+        <div class="kpi-unit">mm</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Pérdida ETo</div>
+        <div class="kpi-val amber">${perdida}</div>
+        <div class="kpi-unit">m³/ha · sem</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Próx. riego</div>
+        <div class="kpi-val">${frec ? frec.toFixed(1) : '—'}</div>
+        <div class="kpi-unit">días entre eventos</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Tiempo / evento</div>
+        <div class="kpi-val green">${hm(tRiego)}</div>
+        <div class="kpi-unit">${riegos} riego${riegos!==1?'s':''}/semana</div>
+      </div>
+    </div>
+
+    <!-- Fila 1: Calendario + Riego + Fenología -->
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-calendar"></i>Calendario de riego — ${new Date().toLocaleString('es-CL',{month:'long',year:'numeric'})}</div>
+        ${renderCalendario(frec, tRiego, precipAcum, nMes)}
+        <div class="cal-legend">
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--green-50);border:1px solid rgba(30,132,73,.3)"></div>Riego</div>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--teal-50);border:1px solid rgba(46,134,171,.3)"></div>Riego + Ferti</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-droplet"></i>Estado de riego</div>
+        <div class="metric-row"><span class="metric-key">Kc ajustado</span><span class="metric-val green">${kcAj ? kcAj.toFixed(3) : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">ETc diaria</span><span class="metric-val">${etcNeta ? etcNeta.toFixed(2)+' mm/día' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Tmax / Tmin</span><span class="metric-val">${tmaxProm ? tmaxProm.toFixed(1)+'° / '+tminProm.toFixed(1)+'°C' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Lámina neta</span><span class="metric-val">${rec ? parseFloat(rec['Lámina neta (mm)']).toFixed(1)+' mm' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Lámina umbral</span><span class="metric-val amber">${rec ? parseFloat(rec['Lámina umbral (mm)']).toFixed(1)+' mm' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Frecuencia</span><span class="metric-val">${frec ? frec.toFixed(1)+' días' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Consumo / evento</span><span class="metric-val">${consumoEv ? consumoEv.toFixed(1)+' m³' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Superficie</span><span class="metric-val">${zona['Superficie (Hectáreas)'] || '—'} ha</span></div>
+        <div class="metric-row"><span class="metric-key">Especie</span><span class="metric-val">${zona['Especie']||'—'} ${zona['Variedad']||''}</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-plant"></i>Fenología</div>
+        <div style="font-size:14px;font-weight:700;color:var(--green-700);margin-bottom:4px">${fen.etapa}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${zona['Especie']||'—'} ${zona['Variedad']||''}</div>
+        ${fen.hf ? `
+        <div class="prog-wrap">
+          <div class="prog-header"><span>Horas frío acum.</span><span>${fen.hf} hf</span></div>
+          <div class="prog-bar"><div class="prog-fill hf" style="width:${hfPct}%"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Req: ${fen.hfReq} hf</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-header"><span>Días grado acum.</span><span>${fen.gd} GD</span></div>
+          <div class="prog-bar"><div class="prog-fill gd" style="width:${Math.min(100,fen.gd/5)}%"></div></div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="metric-row"><span class="metric-key">NDVI actual</span><span class="metric-val green">${ndviVal ? ndviVal.toFixed(3) : '—'}</span></div>
+          <div class="metric-row"><span class="metric-key">Fecha NDVI</span><span class="metric-val">${ndvi[0] ? ndvi[0]['Fecha'] : '—'}</span></div>
+        </div>` : `<div style="font-size:12px;color:var(--muted)">Sin requerimiento de horas frío</div>`}
+        ${renderNdviChart(ndvi)}
+      </div>
+    </div>
+
+    <!-- Fila 2: Nutrición + Alertas -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-leaf"></i>Nutrición — ${new Date().toLocaleString('es-CL',{month:'long'})}</div>
+        ${nMes || pMes || kMes ? `
+        <div style="font-size:12px;background:var(--green-50);color:var(--green-900);padding:6px 10px;border-radius:6px;margin-bottom:12px;border:1px solid rgba(30,132,73,.2)">✓ Fertirriego activo este mes</div>
+        <div class="nut-grid">
+          <div class="nut-item nut-N"><div class="nut-label">Nitrógeno N</div><div class="nut-val">${nMes ? nMes.toFixed(1) : '—'}</div><div class="nut-unit">kg/zona</div></div>
+          <div class="nut-item nut-P"><div class="nut-label">P₂O₅</div><div class="nut-val">${pMes ? pMes.toFixed(1) : '—'}</div><div class="nut-unit">kg/zona</div></div>
+          <div class="nut-item nut-K"><div class="nut-label">K₂O</div><div class="nut-val">${kMes ? kMes.toFixed(1) : '—'}</div><div class="nut-unit">kg/zona</div></div>
+        </div>` : `<div style="font-size:13px;color:var(--muted)">Sin recomendación de nutrición disponible para esta zona. Genera las recomendaciones primero.</div>`}
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-bell"></i>Alertas y notificaciones</div>
+        ${alertas.map(a => `
+          <div class="alerta ${a.tipo}">
+            <i class="ti ti-${a.tipo==='ok'?'check':a.tipo==='info'?'info-circle':'alert-triangle'}"></i>
+            <span>${a.msg}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCalendario(frec, tRiego, precipAcum, hayFerti) {
+  const today = new Date();
+  const mes = today.getMonth();
+  const año = today.getFullYear();
+  const diasMes = new Date(año, mes+1, 0).getDate();
+  const primerDia = new Date(año, mes, 1).getDay();
+  const offset = primerDia === 0 ? 6 : primerDia - 1;
+
+  const riegoDias = new Set();
+  if (frec && frec > 0) {
+    for (let d = today.getDate(); d <= diasMes; d += Math.max(1, Math.round(frec))) riegoDias.add(d);
+    for (let d = today.getDate() - Math.round(frec); d >= 1; d -= Math.max(1, Math.round(frec))) riegoDias.add(d);
+  }
+
+  const diasSem = ['L','M','X','J','V','S','D'];
+  let html = `<div class="cal-grid"><div></div>${diasSem.map(d=>`<div class="cal-dh">${d}</div>`).join('')}`;
+
+  let dia = 1 - offset;
+  for (let s = 0; s < 5; s++) {
+    const fw = new Date(año, mes, Math.max(1, dia+offset));
+    html += `<div class="cal-wn">${isoWeek(fw)}</div>`;
+    for (let d = 0; d < 7; d++, dia++) {
+      const ok = dia >= 1 && dia <= diasMes;
+      const esHoy = dia === today.getDate();
+      const esR = ok && riegoDias.has(dia);
+      const esF = esR && hayFerti;
+      let cls = 'cal-cell' + (!ok?' otro-mes':'') + (esHoy?' hoy':'') + (esF?' ferti':esR?' riego':'');
+      html += `<div class="${cls}">
+        <div class="cal-dn">${ok?dia:''}</div>
+        ${esR?`<div class="cal-ev">${hm(tRiego)}</div>`:''}
+        ${esF?`<div class="cal-fe">Ferti</div>`:''}
+        ${dia>=today.getDate()&&dia<=today.getDate()+6&&precipAcum>0&&ok?`<div class="cal-pp">${(precipAcum/7).toFixed(1)}mm</div>`:''}
+      </div>`;
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderNdviChart(ndvi) {
+  if (!ndvi || ndvi.length < 2) return '';
+  const vals = ndvi.slice(0,6).reverse();
+  const max = Math.max(...vals.map(v => parseFloat(v['NDVI'])||0));
+  return `<div style="margin-top:12px;font-size:10px;color:var(--muted);margin-bottom:4px">NDVI histórico</div>
+    <div class="ndvi-chart">
+      ${vals.map(v => {
+        const pct = max > 0 ? (parseFloat(v['NDVI'])/max*100) : 0;
+        return `<div class="ndvi-bar-wrap">
+          <div class="ndvi-bar-item" style="height:${pct}%"></div>
+          <div class="ndvi-date">${v['Fecha']?.slice(5)||''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
