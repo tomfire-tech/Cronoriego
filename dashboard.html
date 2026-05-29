@@ -208,31 +208,31 @@ function initFecha() {
 // ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function cargarPredios(rsId) {
   const { data } = await db.from('predios')
-    .select('"ID Predio (PK)","Nombre Predio","ID Razón Social (FK)"')
-    .eq('"ID Razón Social (FK)"', rsId);
+    .select('ID Predio (PK),Nombre Predio,ID Razón Social (FK)')
+    .eq('ID Razón Social (FK)', rsId);
   return data || [];
 }
 
 async function cargarEquipos(prId) {
   const { data } = await db.from('equipos')
-    .select('"ID Equipo (PK)","Nombre Equipo"')
-    .eq('"ID Predio (FK)"', prId);
+    .select('ID Equipo (PK),Nombre Equipo')
+    .eq('ID Predio (FK)', prId);
   return data || [];
 }
 
 async function cargarZonas(eqId) {
   const { data } = await db.from('zonas')
     .select('*')
-    .eq('"ID Equipo de Riego (FK)"', eqId)
-    .eq('"Activa"', 'Sí');
+    .eq('ID Equipo de Riego (FK)', eqId)
+    .eq('Activa', 'Sí');
   return data || [];
 }
 
 async function cargarEto(prId) {
   const { data } = await db.from('eto_pronostico')
     .select('*')
-    .eq('"ID Predio"', prId)
-    .order('"Fecha_Pronostico"', { ascending: false })
+    .eq('ID Predio', prId)
+    .order('Fecha_Pronostico', { ascending: false })
     .limit(7);
   return data || [];
 }
@@ -240,8 +240,8 @@ async function cargarEto(prId) {
 async function cargarNdvi(zId) {
   const { data } = await db.from('ndvi_registros')
     .select('*')
-    .eq('"ID Zona Relacional (PK)"', zId)
-    .order('"Fecha"', { ascending: false })
+    .eq('ID Zona Relacional (PK)', zId)
+    .order('Fecha', { ascending: false })
     .limit(8);
   return data || [];
 }
@@ -249,8 +249,8 @@ async function cargarNdvi(zId) {
 async function cargarRecomendacion(zId) {
   const { data } = await db.from('recomendaciones')
     .select('*')
-    .eq('"ID Zona Relacional (PK)"', zId)
-    .order('"Fecha Calculo"', { ascending: false })
+    .eq('ID Zona Relacional (PK)', zId)
+    .order('Fecha Calculo', { ascending: false })
     .limit(1);
   return data?.[0] || null;
 }
@@ -268,8 +268,8 @@ async function init() {
 
   // Buscar RS del usuario por email
   const { data: usuarios } = await db.from('usuarios')
-    .select('"ID Razón Social (FK)"')
-    .eq('"Correo del Usuario"', email)
+    .select('ID Razón Social (FK)')
+    .eq('Correo del Usuario', email)
     .limit(1);
 
   let rsId = null;
