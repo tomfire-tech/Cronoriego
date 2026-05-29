@@ -207,24 +207,24 @@ function initFecha() {
 
 // ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 async function cargarPredios(rsId) {
-  const { data } = await db.from('predios')
+  const { data } = await db.from('v_predios')
     .select('*')
-    .eq('ID Razón Social (FK)', rsId);
+    .eq('id_rs', rsId);
   return data || [];
 }
 
 async function cargarEquipos(prId) {
-  const { data } = await db.from('equipos')
+  const { data } = await db.from('v_equipos')
     .select('*')
-    .eq('ID Predio (FK)', prId);
+    .eq('id_predio', prId);
   return data || [];
 }
 
 async function cargarZonas(eqId) {
-  const { data } = await db.from('zonas')
+  const { data } = await db.from('v_zonas')
     .select('*')
-    .eq('ID Equipo de Riego (FK)', eqId)
-    .eq('Activa', 'Sí');
+    .eq('id_equipo', eqId)
+    .eq('activa', 'Sí');
   return data || [];
 }
 
@@ -267,14 +267,14 @@ async function init() {
   document.getElementById('user-ini').textContent = email[0].toUpperCase();
 
   // Buscar RS del usuario por email
-  const { data: usuarios } = await db.from('usuarios')
+  const { data: usuarios } = await db.from('v_usuarios')
     .select('*')
-    .eq('Correo del Usuario', email)
+    .eq('email', email)
     .limit(1);
 
   let rsId = null;
   if (usuarios && usuarios.length > 0) {
-    rsId = usuarios[0]['ID Razón Social (FK)'];
+    rsId = usuarios[0]['id_rs'];
   }
 
   // Si no hay RS asignada, mostrar todos los predios (para admin/prueba)
@@ -290,7 +290,7 @@ async function init() {
 
   const selPredio = document.getElementById('sel-predio');
   selPredio.innerHTML = predios.map(p =>
-    `<option value="${p['ID Predio (PK)']}">${p['Nombre Predio']}</option>`
+    `<option value="${p['id_predio']}">${p['nombre']}</option>`
   ).join('');
 
   if (predios.length > 0) await onPredioChange();
@@ -303,7 +303,7 @@ async function onPredioChange() {
 
   const selEq = document.getElementById('sel-equipo');
   selEq.innerHTML = equipos.length
-    ? equipos.map(e => `<option value="${e['ID Equipo (PK)']}">${e['Nombre Equipo']}</option>`).join('')
+    ? equipos.map(e => `<option value="${e['id_equipo']}">${e['nombre']}</option>`).join('')
     : '<option value="">Sin equipos</option>';
 
   if (equipos.length > 0) await onEquipoChange();
@@ -316,7 +316,7 @@ async function onEquipoChange() {
 
   const selZona = document.getElementById('sel-zona');
   selZona.innerHTML = zonas.length
-    ? zonas.map(z => `<option value="${z['ID Zona Relacional (PK)']}">${z['ID Zona Relacional (PK)']} — ${z['Nombre de la Zona']} (${z['Especie']})</option>`).join('')
+    ? zonas.map(z => `<option value="${z['id_zona']}">${z['id_zona']} — ${z['nombre']} (${z['especie']})</option>`).join('')
     : '<option value="">Sin zonas</option>';
 
   if (zonas.length > 0) await onZonaChange();
@@ -325,7 +325,7 @@ async function onEquipoChange() {
 async function onZonaChange() {
   const zId = document.getElementById('sel-zona').value;
   const prId = document.getElementById('sel-predio').value;
-  const zona = allData.zonas?.find(z => z['ID Zona Relacional (PK)'] === zId);
+  const zona = allData.zonas?.find(z => z['id_zona'] === zId);
   if (!zona) return;
 
   currentZona = zona;
@@ -365,8 +365,8 @@ function renderDashboard(zona, eto, ndvi, rec) {
   const frec     = rec ? parseFloat(rec['Frecuencia de riego (días)']) : null;
   const tRiego   = rec ? parseFloat(rec['Tiempo de riego (h)']) : null;
   const consumoEv= rec ? parseFloat(rec['Consumo por evento (m³)']) : null;
-  const perdida  = etoAcum && zona['Superficie (Hectáreas)']
-    ? (etoAcum * parseFloat(zona['Superficie (Hectáreas)']) * 10).toFixed(0)
+  const perdida  = etoAcum && zona['superficie_ha']
+    ? (etoAcum * parseFloat(zona['superficie_ha']) * 10).toFixed(0)
     : '—';
 
   const riegos = frec ? Math.max(1, Math.round(7/frec)) : 0;
@@ -385,7 +385,7 @@ function renderDashboard(zona, eto, ndvi, rec) {
     'Repollo':{etapa:'Desarrollo vegetativo',hf:null,hfReq:null,gd:85},
     'Bunching':{etapa:'Desarrollo vegetativo',hf:null,hfReq:null,gd:90},
   };
-  const fen = FENO[zona['Especie']] || {etapa:'Sin datos',hf:null,hfReq:null,gd:0};
+  const fen = FENO[zona['especie']] || {etapa:'Sin datos',hf:null,hfReq:null,gd:0};
   const hfPct = fen.hf && fen.hfReq ? Math.min(100, Math.round(fen.hf/parseFloat(fen.hfReq)*100)) : 0;
 
   // Nutrición desde recomendacion
@@ -395,8 +395,8 @@ function renderDashboard(zona, eto, ndvi, rec) {
 
   // Alertas
   const alertas = [];
-  if (!zona['Superficie (Hectáreas)']) alertas.push({tipo:'warn', msg:'Superficie no ingresada — los cálculos de consumo no están disponibles.'});
-  if (!zona['Capacidad de Campo Primer Perfil (%)']) alertas.push({tipo:'warn', msg:'CC/PMP del suelo no ingresados — se usarán valores por defecto de tabla.'});
+  if (!zona['superficie_ha']) alertas.push({tipo:'warn', msg:'Superficie no ingresada — los cálculos de consumo no están disponibles.'});
+  if (!zona['cc']) alertas.push({tipo:'warn', msg:'CC/PMP del suelo no ingresados — se usarán valores por defecto de tabla.'});
   if (ndviVal && ndvi.length >= 2) {
     const ndviPrev = parseFloat(ndvi[1]['NDVI']);
     const diff = ((ndviVal - ndviPrev)/ndviPrev*100).toFixed(1);
@@ -459,13 +459,13 @@ function renderDashboard(zona, eto, ndvi, rec) {
         <div class="metric-row"><span class="metric-key">Lámina umbral</span><span class="metric-val amber">${rec ? parseFloat(rec['Lámina umbral (mm)']).toFixed(1)+' mm' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Frecuencia</span><span class="metric-val">${frec ? frec.toFixed(1)+' días' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Consumo / evento</span><span class="metric-val">${consumoEv ? consumoEv.toFixed(1)+' m³' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Superficie</span><span class="metric-val">${zona['Superficie (Hectáreas)'] || '—'} ha</span></div>
-        <div class="metric-row"><span class="metric-key">Especie</span><span class="metric-val">${zona['Especie']||'—'} ${zona['Variedad']||''}</span></div>
+        <div class="metric-row"><span class="metric-key">Superficie</span><span class="metric-val">${zona['superficie_ha'] || '—'} ha</span></div>
+        <div class="metric-row"><span class="metric-key">Especie</span><span class="metric-val">${zona['especie']||'—'} ${zona['variedad']||''}</span></div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-plant"></i>Fenología</div>
         <div style="font-size:14px;font-weight:700;color:var(--green-700);margin-bottom:4px">${fen.etapa}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${zona['Especie']||'—'} ${zona['Variedad']||''}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${zona['especie']||'—'} ${zona['variedad']||''}</div>
         ${fen.hf ? `
         <div class="prog-wrap">
           <div class="prog-header"><span>Horas frío acum.</span><span>${fen.hf} hf</span></div>
