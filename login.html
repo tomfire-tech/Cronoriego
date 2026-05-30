@@ -24,6 +24,8 @@
   .logo-brand span:first-child{color:var(--teal-700);}
   .logo-brand span:last-child{color:var(--green-700);}
   .logo-sub{font-size:13px;color:var(--muted);margin-top:4px;}
+  .logo-back{display:inline-block;margin-top:10px;font-size:12px;color:var(--muted);text-decoration:none;}
+  .logo-back:hover{color:var(--teal-700);}
 
   .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:0 4px 16px rgba(15,58,82,0.08);}
   .card-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--teal-900);margin-bottom:4px;}
@@ -49,6 +51,7 @@
   <div class="logo">
     <div class="logo-brand"><span>CRONO</span><span>RIEGO</span></div>
     <div class="logo-sub">Gestión inteligente de riego y nutrición</div>
+    <a href="index.html" class="logo-back">← Volver al inicio</a>
   </div>
   <div class="card">
     <div class="card-title">Iniciar sesión</div>
@@ -73,9 +76,21 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Si ya hay sesión activa, redirigir al dashboard
-db.auth.getSession().then(({ data: { session } }) => {
-  if (session) window.location.href = 'dashboard.html';
+function redirigirSegunRol(rol) {
+  if (rol === 'super_admin' || rol === 'admin') {
+    window.location.href = 'admin.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}
+
+// Si ya hay sesión activa, redirigir según rol (no a index)
+db.auth.getSession().then(async ({ data: { session } }) => {
+  if (session) {
+    const { data: u } = await db.from('v_usuarios').select('rol').eq('email', session.user.email).limit(1);
+    const rol = u?.[0]?.rol || 'tecnico';
+    redirigirSegunRol(rol);
+  }
 });
 
 async function login() {
@@ -102,11 +117,12 @@ async function login() {
     btn.disabled = false;
     btn.textContent = 'Ingresar';
   } else {
-    window.location.href = 'dashboard.html';
+    const { data: u } = await db.from('v_usuarios').select('rol').eq('email', email).limit(1);
+    const rol = u?.[0]?.rol || 'tecnico';
+    redirigirSegunRol(rol);
   }
 }
 
-// Enter para login
 document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 </script>
 </body>
