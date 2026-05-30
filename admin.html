@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CronoRiego — Panel Administrador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --teal-900:#0f3a52;--teal-700:#1A5276;--teal-500:#2E86AB;--teal-50:#eaf3f8;
+    --green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;
+    --amber:#d29922;--amber-bg:#fff8e6;
+    --ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;
+    --bg:#f7faf9;--white:#ffffff;--danger:#c0392b;--danger-bg:#fdf2f2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+  .topbar{background:var(--teal-900);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .brand{font-size:16px;font-weight:800;color:#fff;}
+  .brand span:last-child{color:#7EC8A0;}
+  .admin-badge{background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.08em;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .btn-logout{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+  .btn-logout:hover{background:rgba(255,255,255,.1);}
+
+  .main{padding:24px;max-width:1400px;margin:0 auto;}
+
+  /* Acciones principales */
+  .acciones{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+  .accion-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+  .accion-title{font-size:13px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;}
+  .accion-title i{font-size:18px;}
+  .accion-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+  .btn-accion{padding:10px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+  .btn-accion.verde{background:var(--green-700);color:#fff;}
+  .btn-accion.verde:hover{background:#155a33;}
+  .btn-accion.azul{background:var(--teal-700);color:#fff;}
+  .btn-accion.azul:hover{background:var(--teal-900);}
+  .btn-accion.naranja{background:#E67E22;color:#fff;}
+  .btn-accion.naranja:hover{background:#CA6F1E;}
+  .btn-accion:disabled{opacity:.6;cursor:not-allowed;}
+
+  /* Log de ejecución */
+  .log-box{background:#0e1f26;border-radius:8px;padding:12px 16px;font-size:11px;font-family:monospace;color:#7EC8A0;max-height:120px;overflow-y:auto;line-height:1.6;display:none;}
+  .log-box.show{display:block;}
+  .log-line.err{color:#F1948A;}
+  .log-line.ok{color:#7EC8A0;}
+  .log-line.info{color:#85C1E9;}
+
+  /* KPIs globales */
+  .kpis-admin{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px;}
+  .kpi-a{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px;}
+  .kpi-a-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .kpi-a-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--teal-700);}
+  .kpi-a-unit{font-size:11px;color:var(--muted);}
+  @media(max-width:900px){.kpis-admin{grid-template-columns:repeat(3,1fr);}.acciones{grid-template-columns:1fr;}}
+
+  /* Tabla de clientes */
+  .section-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--teal-900);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .table-wrap{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:24px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--teal-900);color:#fff;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--line);transition:background .15s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--teal-50);}
+  tbody td{padding:10px 14px;color:var(--ink-2);}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;}
+  .badge.ok{background:var(--green-50);color:var(--green-700);}
+  .badge.warn{background:var(--amber-bg);color:#7D6608;}
+  .badge.err{background:var(--danger-bg);color:var(--danger);}
+  .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .dot.ok{background:var(--green-500);}
+  .dot.warn{background:var(--amber);}
+  .dot.err{background:var(--danger);}
+
+  /* Detalle cliente */
+  .cliente-detail{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px;display:none;}
+  .cliente-detail.show{display:block;}
+  .detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .detail-title{font-size:16px;font-weight:700;color:var(--teal-900);}
+  .btn-close-detail{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);}
+
+  .zonas-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
+  .zona-mini{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+  .zona-mini-id{font-size:10px;font-weight:700;color:var(--teal-700);}
+  .zona-mini-nom{font-size:12px;font-weight:600;color:var(--ink);}
+  .zona-mini-esp{font-size:11px;color:var(--muted);}
+  .zona-mini-ndvi{font-size:11px;margin-top:4px;}
+
+  .loading{text-align:center;padding:40px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand"><span>CRONO</span><span>RIEGO</span></div>
+    <span class="admin-badge">ADMINISTRADOR</span>
+  </div>
+  <div class="topbar-right">
+    <span style="font-size:12px;color:rgba(255,255,255,.6)" id="top-fecha"></span>
+    <button class="btn-logout" onclick="logout()"><i class="ti ti-logout"></i> Salir</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ACCIONES -->
+  <div class="acciones">
+    <div class="accion-card">
+      <div class="accion-title" style="color:var(--green-700)"><i class="ti ti-satellite"></i> Descarga semanal</div>
+      <div class="accion-desc">Descarga ETo desde Open-Meteo y NDVI desde Sentinel-2 para todos los predios y zonas activas. Ejecutar cada domingo.</div>
+      <button class="btn-accion verde" id="btn-descarga" onclick="ejecutarDescarga()">
+        <i class="ti ti-player-play"></i> Ejecutar descarga
+      </button>
+      <div class="log-box" id="log-descarga"></div>
+    </div>
+
+    <div class="accion-card">
+      <div class="accion-title" style="color:var(--teal-700)"><i class="ti ti-calculator"></i> Generar recomendaciones</div>
+      <div class="accion-desc">Calcula ETc, frecuencia de riego, tiempos y nutrición para todas las zonas activas con NDVI disponible.</div>
+      <button class="btn-accion azul" id="btn-reco" onclick="ejecutarRecomendaciones()">
+        <i class="ti ti-player-play"></i> Generar recomendaciones
+      </button>
+      <div class="log-box" id="log-reco"></div>
+    </div>
+
+    <div class="accion-card">
+      <div class="accion-title" style="color:#E67E22"><i class="ti ti-user-plus"></i> Nuevo cliente</div>
+      <div class="accion-desc">Genera el link de onboarding para que un agricultor nuevo ingrese sus datos directamente.</div>
+      <button class="btn-accion naranja" onclick="copiarLink()">
+        <i class="ti ti-link"></i> Copiar link de onboarding
+      </button>
+      <div id="link-ok" style="display:none;font-size:12px;color:var(--green-700);margin-top:4px;">✓ Link copiado al portapapeles</div>
+    </div>
+  </div>
+
+  <!-- KPIs GLOBALES -->
+  <div class="kpis-admin" id="kpis-admin">
+    <div class="kpi-a"><div class="kpi-a-label">Clientes activos</div><div class="kpi-a-val" id="k-rs">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Predios</div><div class="kpi-a-val" id="k-pr">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Zonas activas</div><div class="kpi-a-val" id="k-zn">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Con NDVI reciente</div><div class="kpi-a-val" id="k-ndvi">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Con recomendación</div><div class="kpi-a-val" id="k-rec">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Último cálculo</div><div class="kpi-a-val" style="font-size:14px" id="k-fecha">—</div></div>
+  </div>
+
+  <!-- TABLA DE CLIENTES -->
+  <div class="section-title"><i class="ti ti-building" style="color:var(--teal-500)"></i> Clientes</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Razón Social</th>
+          <th>País</th>
+          <th>Predios</th>
+          <th>Zonas activas</th>
+          <th>NDVI reciente</th>
+          <th>Recomendación</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-clientes">
+        <tr><td colspan="8" class="loading">Cargando clientes...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DETALLE CLIENTE -->
+  <div class="cliente-detail" id="cliente-detail">
+    <div class="detail-header">
+      <div class="detail-title" id="detail-nombre">—</div>
+      <button class="btn-close-detail" onclick="cerrarDetalle()">×</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://lmexinxdmkgexpthuosn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function checkAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return null; }
+  // Verificar que es admin
+  const { data: u } = await db.from('v_usuarios').select('*').eq('email', session.user.email).limit(1);
+  if (!u || !u[0] || !['super_admin','admin','gerencia'].includes(u[0].rol)) {
+    window.location.href = 'dashboard.html';
+    return null;
+  }
+  return session;
+}
+
+async function logout() {
+  await db.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ── FECHA ─────────────────────────────────────────────────────────────────────
+function initFecha() {
+  const today = new Date();
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('top-fecha').textContent =
+    `${dias[today.getDay()]} ${today.getDate()} de ${meses[today.getMonth()]} de ${today.getFullYear()}`;
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function log(boxId, msg, tipo='info') {
+  const box = document.getElementById(boxId);
+  box.classList.add('show');
+  const line = document.createElement('div');
+  line.className = `log-line ${tipo}`;
+  const hora = new Date().toLocaleTimeString('es-CL');
+  line.textContent = `[${hora}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── ACCIONES ──────────────────────────────────────────────────────────────────
+async function ejecutarDescarga() {
+  const btn = document.getElementById('btn-descarga');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> Ejecutando...';
+  const box = document.getElementById('log-descarga');
+  box.innerHTML = '';
+
+  log('log-descarga', 'Iniciando descarga de ETo y NDVI...', 'info');
+  log('log-descarga', '⚠️ Este proceso corre en tu PC con el script Python.', 'warn');
+  log('log-descarga', 'Abre VS Code y ejecuta: python cronoriego_descarga_supabase.py', 'info');
+  log('log-descarga', 'Los datos se actualizarán en Supabase automáticamente.', 'ok');
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-player-play"></i> Ejecutar descarga';
+  }, 3000);
+}
+
+async function ejecutarRecomendaciones() {
+  const btn = document.getElementById('btn-reco');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> Ejecutando...';
+  const box = document.getElementById('log-reco');
+  box.innerHTML = '';
+
+  log('log-reco', 'Iniciando cálculo de recomendaciones...', 'info');
+  log('log-reco', '⚠️ Este proceso corre en tu PC con el script Python.', 'warn');
+  log('log-reco', 'Abre VS Code y ejecuta: python cronoriego_recomendaciones.py', 'info');
+  log('log-reco', 'Luego ejecuta: python subir_recomendaciones.py', 'info');
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-player-play"></i> Generar recomendaciones';
+  }, 3000);
+}
+
+function copiarLink() {
+  const link = `${window.location.origin}/formulario_onboarding.html`;
+  navigator.clipboard.writeText(link).then(() => {
+    document.getElementById('link-ok').style.display = 'block';
+    setTimeout(() => document.getElementById('link-ok').style.display = 'none', 3000);
+  });
+}
+
+// ── CARGAR DATOS ──────────────────────────────────────────────────────────────
+async function cargarDatos() {
+  // RS
+  const { data: rs } = await db.from('razones_sociales').select('*');
+  const { data: predios } = await db.from('v_predios').select('*');
+  const { data: zonas } = await db.from('v_zonas').select('*').eq('activa','Sí');
+  const { data: ndvis } = await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha"').order('Fecha', {ascending:false});
+  const { data: recs } = await db.from('v_recomendaciones').select('id_zona,fecha_calculo').order('fecha_calculo',{ascending:false});
+  const { data: rss2 } = await db.from('razones_sociales').select('"ID Razón Social (PK)","Nombre Razón Social","País"');
+
+  // Último NDVI por zona
+  const ultimoNdvi = {};
+  for (const n of (ndvis||[])) {
+    const zid = n['ID Zona Relacional (PK)'];
+    if (!ultimoNdvi[zid]) ultimoNdvi[zid] = n['Fecha']?.slice(0,10);
+  }
+
+  // Última recomendación por zona
+  const ultimoRec = {};
+  for (const r of (recs||[])) {
+    if (!ultimoRec[r.id_zona]) ultimoRec[r.id_zona] = r.fecha_calculo;
+  }
+
+  // KPIs
+  const hoy = new Date();
+  const hace7 = new Date(hoy - 7*86400000).toISOString().slice(0,10);
+  const zonasIds = (zonas||[]).map(z => z.id_zona);
+  const conNdvi = zonasIds.filter(z => ultimoNdvi[z] && ultimoNdvi[z] >= hace7).length;
+  const conRec  = zonasIds.filter(z => ultimoRec[z]).length;
+  const fechas  = Object.values(ultimoRec).sort().reverse();
+
+  document.getElementById('k-rs').textContent   = (rs||[]).length;
+  document.getElementById('k-pr').textContent   = (predios||[]).length;
+  document.getElementById('k-zn').textContent   = zonasIds.length;
+  document.getElementById('k-ndvi').textContent = `${conNdvi}/${zonasIds.length}`;
+  document.getElementById('k-rec').textContent  = `${conRec}/${zonasIds.length}`;
+  document.getElementById('k-fecha').textContent = fechas[0] || '—';
+
+  // Agrupar por RS
+  const rsMap = {};
+  for (const r of (rss2||[])) {
+    rsMap[r['ID Razón Social (PK)']] = { nombre: r['Nombre Razón Social'], pais: r['País'], predios:[], zonas:[] };
+  }
+  for (const p of (predios||[])) {
+    if (rsMap[p.id_rs]) rsMap[p.id_rs].predios.push(p);
+  }
+  for (const z of (zonas||[])) {
+    // find predio of this zona
+    const eq_id = z.id_equipo;
+    for (const rsId in rsMap) {
+      const rsObj = rsMap[rsId];
+      rsObj.zonas.push({...z, ndvi: ultimoNdvi[z.id_zona], rec: ultimoRec[z.id_zona]});
+      break; // simplified - just count
+    }
+  }
+
+  // Tabla
+  const tbody = document.getElementById('tabla-clientes');
+  tbody.innerHTML = '';
+
+  for (const [rsId, rsObj] of Object.entries(rsMap)) {
+    // Zonas de este RS (via predios)
+    const prIds = rsObj.predios.map(p => p.id_predio);
+    const { data: eqs } = await db.from('v_equipos').select('id_equipo,id_predio').in('id_predio', prIds.length ? prIds : ['NONE']);
+    const eqIds = (eqs||[]).map(e => e.id_equipo);
+    const { data: zns } = await db.from('v_zonas').select('*').eq('activa','Sí').in('id_equipo', eqIds.length ? eqIds : ['NONE']);
+    const znIds = (zns||[]).map(z => z.id_zona);
+
+    const nNdvi  = znIds.filter(z => ultimoNdvi[z] && ultimoNdvi[z] >= hace7).length;
+    const nRec   = znIds.filter(z => ultimoRec[z]).length;
+    const total  = znIds.length;
+
+    const estadoNdvi = nNdvi === total ? 'ok' : nNdvi > 0 ? 'warn' : 'err';
+    const estadoRec  = nRec  === total ? 'ok' : nRec  > 0 ? 'warn' : 'err';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:700;color:var(--teal-700)">${rsId}</td>
+      <td style="font-weight:600">${rsObj.nombre}</td>
+      <td>${rsObj.pais||'—'}</td>
+      <td>${rsObj.predios.length}</td>
+      <td>${total}</td>
+      <td><span class="badge ${estadoNdvi}"><span class="dot ${estadoNdvi}"></span>${nNdvi}/${total} zonas</span></td>
+      <td><span class="badge ${estadoRec}"><span class="dot ${estadoRec}"></span>${nRec}/${total} zonas</span></td>
+      <td><button onclick="verDetalle('${rsId}','${rsObj.nombre}')" style="background:var(--teal-50);border:1px solid var(--teal-500);color:var(--teal-700);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Ver zonas</button></td>
+    `;
+    tbody.appendChild(tr);
+
+    // Guardar zonas para detalle
+    window._rsZonas = window._rsZonas || {};
+    window._rsZonas[rsId] = { nombre: rsObj.nombre, zonas: zns||[], ultimoNdvi, ultimoRec };
+  }
+}
+
+async function verDetalle(rsId, nombre) {
+  const data = window._rsZonas?.[rsId];
+  if (!data) return;
+
+  document.getElementById('detail-nombre').textContent = nombre;
+  const { zonas, ultimoNdvi, ultimoRec } = data;
+
+  const hoy = new Date().toISOString().slice(0,10);
+  const hace7 = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+
+  let html = `<div class="zonas-mini">`;
+  for (const z of zonas) {
+    const ndvi = ultimoNdvi[z.id_zona];
+    const rec  = ultimoRec[z.id_zona];
+    const ndviOk = ndvi && ndvi >= hace7;
+    const recOk  = !!rec;
+    html += `
+      <div class="zona-mini">
+        <div class="zona-mini-id">${z.id_zona}</div>
+        <div class="zona-mini-nom">${z.nombre}</div>
+        <div class="zona-mini-esp">${z.especie||'—'} ${z.variedad||''} · ${z.superficie_ha||'—'} ha</div>
+        <div class="zona-mini-ndvi" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge ${ndviOk?'ok':'warn'}" style="font-size:10px"><span class="dot ${ndviOk?'ok':'warn'}"></span>NDVI ${ndvi||'sin datos'}</span>
+          <span class="badge ${recOk?'ok':'err'}" style="font-size:10px"><span class="dot ${recOk?'ok':'err'}"></span>${recOk?'Con rec.':'Sin rec.'}</span>
+        </div>
+      </div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('detail-content').innerHTML = html;
+  document.getElementById('cliente-detail').classList.add('show');
+  document.getElementById('cliente-detail').scrollIntoView({behavior:'smooth'});
+}
+
+function cerrarDetalle() {
+  document.getElementById('cliente-detail').classList.remove('show');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const session = await checkAuth();
+  if (!session) return;
+  initFecha();
+  await cargarDatos();
+}
+
+init();
+</script>
+</body>
+</html>
