@@ -84,6 +84,8 @@
   .cal-cell.riego{background:var(--green-50);border-color:rgba(30,132,73,.3);}
   .cal-cell.ferti{background:var(--teal-50);border-color:rgba(46,134,171,.3);}
   .cal-cell.otro-mes{opacity:.3;}
+  .cal-clickable{cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  .cal-clickable:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(30,132,73,.25);}
   .cal-dn{font-size:10px;font-weight:600;color:var(--ink-2);}
   .cal-cell.hoy .cal-dn{color:var(--teal-700);}
   .cal-ev{font-size:9px;color:var(--green-700);margin-top:2px;font-weight:600;}
@@ -133,6 +135,17 @@
 </style>
 </head>
 <body>
+
+<!-- Modal detalle día -->
+<div id="cal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)cerrarModal()">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div style="font-size:13px;font-weight:700;color:#6a8391;text-transform:uppercase;letter-spacing:.08em">Detalle del evento</div>
+      <button onclick="cerrarModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6a8391;line-height:1">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="brand"><span>CRONO</span><span>RIEGO</span></div>
@@ -343,6 +356,8 @@ async function onZonaChange() {
       `NDVI ${ndviActual['NDVI']} · ${ndviActual['Fecha']}`;
   }
 
+  _modalRec = rec;
+  _modalZona = zona;
   renderDashboard(zona, eto, ndvi, rec);
 }
 
@@ -444,7 +459,7 @@ function renderDashboard(zona, eto, ndvi, rec) {
     <div class="grid-3">
       <div class="card">
         <div class="card-title"><i class="ti ti-calendar"></i>Calendario de riego — ${new Date().toLocaleString('es-CL',{month:'long',year:'numeric'})}</div>
-        ${renderCalendario(frec, tRiego, precipAcum, nMes)}
+        ${renderCalendario(frec, tRiego, precipAcum, nMes, zona, rec)}
         <div class="cal-legend">
           <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--green-50);border:1px solid rgba(30,132,73,.3)"></div>Riego</div>
           <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--teal-50);border:1px solid rgba(46,134,171,.3)"></div>Riego + Ferti</div>
@@ -508,7 +523,7 @@ function renderDashboard(zona, eto, ndvi, rec) {
   `;
 }
 
-function renderCalendario(frec, tRiego, precipAcum, hayFerti) {
+function renderCalendario(frec, tRiego, precipAcum, hayFerti, zona, rec) {
   const today = new Date();
   const mes = today.getMonth();
   const año = today.getFullYear();
@@ -523,6 +538,7 @@ function renderCalendario(frec, tRiego, precipAcum, hayFerti) {
   }
 
   const diasSem = ['L','M','X','J','V','S','D'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   let html = `<div class="cal-grid"><div></div>${diasSem.map(d=>`<div class="cal-dh">${d}</div>`).join('')}`;
 
   let dia = 1 - offset;
@@ -534,17 +550,99 @@ function renderCalendario(frec, tRiego, precipAcum, hayFerti) {
       const esHoy = dia === today.getDate();
       const esR = ok && riegoDias.has(dia);
       const esF = esR && hayFerti;
+      const esFuturo = ok && dia >= today.getDate();
       let cls = 'cal-cell' + (!ok?' otro-mes':'') + (esHoy?' hoy':'') + (esF?' ferti':esR?' riego':'');
-      html += `<div class="${cls}">
+      if (esR) cls += ' cal-clickable';
+      const diaFecha = ok ? `${dia} de ${meses[mes]}` : '';
+      html += `<div class="${cls}" ${esR && ok ? `onclick="abrirDetalleDia(${dia}, '${diaFecha}', ${esF}, ${esFuturo})"` : ''}>
         <div class="cal-dn">${ok?dia:''}</div>
         ${esR?`<div class="cal-ev">${hm(tRiego)}</div>`:''}
         ${esF?`<div class="cal-fe">Ferti</div>`:''}
-        ${dia>=today.getDate()&&dia<=today.getDate()+6&&precipAcum>0&&ok?`<div class="cal-pp">${(precipAcum/7).toFixed(1)}mm</div>`:''}
       </div>`;
     }
   }
   html += '</div>';
   return html;
+}
+
+// Variables globales para el modal
+let _modalRec = null;
+let _modalZona = null;
+
+function abrirDetalleDia(dia, fecha, hayFerti, esFuturo) {
+  const rec = _modalRec;
+  const zona = _modalZona;
+  if (!rec && !zona) return;
+
+  const tHmin  = rec ? (rec['tiempo_hmin'] || '—') : '—';
+  const consumo = rec ? (rec['consumo_evento'] || '—') : '—';
+  const freq   = rec ? (rec['frecuencia_dias'] || '—') : '—';
+  const ibruta = rec ? (rec['i_bruta'] || '—') : '—';
+  const camino = rec ? (rec['camino'] || '—') : '—';
+  const nMes   = rec ? (rec['n_mes'] || null) : null;
+  const pMes   = rec ? (rec['p_mes'] || null) : null;
+  const kMes   = rec ? (rec['k_mes'] || null) : null;
+  const especie = zona ? (zona['especie'] || '—') : '—';
+  const variedad = zona ? (zona['variedad'] || '') : '';
+  const sup    = zona ? (zona['superficie_ha'] || '—') : '—';
+
+  const tipo = esFuturo ? 'Próximo riego' : 'Riego ejecutado';
+  const color = esFuturo ? '#1A5276' : '#27AE60';
+
+  let html = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div style="width:44px;height:44px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:700;flex-shrink:0">${dia}</div>
+      <div>
+        <div style="font-weight:700;font-size:16px;color:#0e1f26">${fecha}</div>
+        <div style="font-size:12px;color:#6a8391">${tipo} · ${especie} ${variedad}</div>
+      </div>
+    </div>
+
+    <div style="background:#eaf3f8;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1A5276;margin-bottom:10px">⏱ Instrucción de riego</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:11px;color:#6a8391">Tiempo de riego</div>
+          <div style="font-size:22px;font-weight:700;color:#1A5276">${tHmin}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#6a8391">Consumo de agua</div>
+          <div style="font-size:22px;font-weight:700;color:#1A5276">${typeof consumo === 'number' ? consumo.toFixed(1)+' m³' : consumo}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#6a8391">Superficie</div>
+          <div style="font-size:16px;font-weight:600">${sup} ha</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#6a8391">Frecuencia</div>
+          <div style="font-size:16px;font-weight:600">Cada ${freq} días</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f7faf9;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6a8391;margin-bottom:8px">Datos técnicos</div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #e4ecef"><span style="color:#6a8391">I. Bruta</span><span style="font-weight:600">${typeof ibruta === 'number' ? ibruta.toFixed(2)+' mm/h' : ibruta}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:#6a8391">Sistema</span><span style="font-weight:600">${camino}</span></div>
+    </div>
+
+    ${hayFerti && (nMes||pMes||kMes) ? `
+    <div style="background:#ecf7f0;border-radius:10px;padding:12px 16px;border:1px solid rgba(30,132,73,.2);">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1E8449;margin-bottom:10px">🌿 Fertirriego — aplicar hoy</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
+        <div><div style="font-size:10px;color:#6a8391">Nitrógeno N</div><div style="font-size:20px;font-weight:700;color:#185FA5">${nMes ? nMes.toFixed(1) : '—'}</div><div style="font-size:10px;color:#6a8391">kg/zona</div></div>
+        <div><div style="font-size:10px;color:#6a8391">P₂O₅</div><div style="font-size:20px;font-weight:700;color:#854F0B">${pMes ? pMes.toFixed(1) : '—'}</div><div style="font-size:10px;color:#6a8391">kg/zona</div></div>
+        <div><div style="font-size:10px;color:#6a8391">K₂O</div><div style="font-size:20px;font-weight:700;color:#1E8449">${kMes ? kMes.toFixed(1) : '—'}</div><div style="font-size:10px;color:#6a8391">kg/zona</div></div>
+      </div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('cal-modal').style.display = 'flex';
+}
+
+function cerrarModal() {
+  document.getElementById('cal-modal').style.display = 'none';
 }
 
 function renderNdviChart(ndvi) {
