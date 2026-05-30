@@ -247,10 +247,10 @@ async function cargarNdvi(zId) {
 }
 
 async function cargarRecomendacion(zId) {
-  const { data } = await db.from('recomendaciones')
+  const { data } = await db.from('v_recomendaciones')
     .select('*')
-    .eq('ID Zona Relacional (PK)', zId)
-    .order('Fecha Calculo', { ascending: false })
+    .eq('id_zona', zId)
+    .order('fecha_calculo', { ascending: false })
     .limit(1);
   return data?.[0] || null;
 }
@@ -360,11 +360,11 @@ function renderDashboard(zona, eto, ndvi, rec) {
   const tminProm = eto.length ? eto.reduce((s,e) => s+(parseFloat(e['Tmin_Proy (C)'])||0),0)/eto.length : null;
 
   const ndviVal  = ndvi[0] ? parseFloat(ndvi[0]['NDVI']) : null;
-  const kcAj     = rec ? parseFloat(rec['Kc ajustado']) : null;
-  const etcNeta  = rec ? parseFloat(rec['ETc neta c/lluvia (mm/día)']) : null;
-  const frec     = rec ? parseFloat(rec['Frecuencia de riego (días)']) : null;
-  const tRiego   = rec ? parseFloat(rec['Tiempo de riego (h)']) : null;
-  const consumoEv= rec ? parseFloat(rec['Consumo por evento (m³)']) : null;
+  const kcAj     = rec ? parseFloat(rec['kc_ajustado']) : null;
+  const etcNeta  = rec ? parseFloat(rec['etc_neta']) : null;
+  const frec     = rec ? parseFloat(rec['frecuencia_dias']) : null;
+  const tRiego   = rec ? parseFloat(rec['tiempo_h']) : null;
+  const consumoEv= rec ? parseFloat(rec['consumo_evento']) : null;
   const perdida  = etoAcum && zona['superficie_ha']
     ? (etoAcum * parseFloat(zona['superficie_ha']) * 10).toFixed(0)
     : '—';
@@ -389,9 +389,9 @@ function renderDashboard(zona, eto, ndvi, rec) {
   const hfPct = fen.hf && fen.hfReq ? Math.min(100, Math.round(fen.hf/parseFloat(fen.hfReq)*100)) : 0;
 
   // Nutrición desde recomendacion
-  const nMes = rec ? parseFloat(rec['N a aplicar (kg/zona)']) : null;
-  const pMes = rec ? parseFloat(rec['P₂O₅ a aplicar (kg/zona)']) : null;
-  const kMes = rec ? parseFloat(rec['K₂O a aplicar (kg/zona)']) : null;
+  const nMes = rec ? parseFloat(rec['n_mes']) : null;
+  const pMes = rec ? parseFloat(rec['p_mes']) : null;
+  const kMes = rec ? parseFloat(rec['k_mes']) : null;
 
   // Alertas
   const alertas = [];
@@ -455,8 +455,8 @@ function renderDashboard(zona, eto, ndvi, rec) {
         <div class="metric-row"><span class="metric-key">Kc ajustado</span><span class="metric-val green">${kcAj ? kcAj.toFixed(3) : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">ETc diaria</span><span class="metric-val">${etcNeta ? etcNeta.toFixed(2)+' mm/día' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Tmax / Tmin</span><span class="metric-val">${tmaxProm ? tmaxProm.toFixed(1)+'° / '+tminProm.toFixed(1)+'°C' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Lámina neta</span><span class="metric-val">${rec ? parseFloat(rec['Lámina neta (mm)']).toFixed(1)+' mm' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Lámina umbral</span><span class="metric-val amber">${rec ? parseFloat(rec['Lámina umbral (mm)']).toFixed(1)+' mm' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Lámina neta</span><span class="metric-val">${rec ? parseFloat(rec['lamina_neta']).toFixed(1)+' mm' : '—'}</span></div>
+        <div class="metric-row"><span class="metric-key">Lámina umbral</span><span class="metric-val amber">${rec ? parseFloat(rec['lamina_umbral']).toFixed(1)+' mm' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Frecuencia</span><span class="metric-val">${frec ? frec.toFixed(1)+' días' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Consumo / evento</span><span class="metric-val">${consumoEv ? consumoEv.toFixed(1)+' m³' : '—'}</span></div>
         <div class="metric-row"><span class="metric-key">Superficie</span><span class="metric-val">${zona['superficie_ha'] || '—'} ha</span></div>
