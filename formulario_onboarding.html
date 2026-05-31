@@ -13,18 +13,16 @@
     --green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;
     --ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;
     --bg:#f7faf9;--white:#ffffff;--danger:#c0392b;--danger-bg:#fdf2f2;
+    --amber:#d4860a;--amber-bg:#fef9ec;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
-
   .header{background:var(--white);border-bottom:1px solid var(--line);padding:16px 24px;display:flex;align-items:center;gap:12px;}
   .brand{font-size:18px;font-weight:800;}
   .brand span:first-child{color:var(--teal-700);}
   .brand span:last-child{color:var(--green-700);}
   .header-sub{font-size:13px;color:var(--muted);margin-left:8px;}
-
-  .layout{max-width:860px;margin:0 auto;padding:32px 20px 60px;}
-
+  .layout{max-width:900px;margin:0 auto;padding:32px 20px 60px;}
   .progress-steps{display:flex;margin-bottom:28px;}
   .step-pill{flex:1;display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--line);transition:all .2s;}
   .step-pill.active{color:var(--teal-700);border-bottom-color:var(--teal-700);}
@@ -32,55 +30,47 @@
   .step-num{width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--muted);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
   .step-pill.active .step-num{background:var(--teal-700);color:#fff;}
   .step-pill.done .step-num{background:var(--green-500);color:#fff;}
-
   .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:28px;margin-bottom:16px;box-shadow:0 2px 8px rgba(15,58,82,0.05);}
   .card-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--teal-900);margin-bottom:4px;}
   .card-desc{font-size:13px;color:var(--muted);margin-bottom:22px;}
-
   .section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-700);padding:0 0 8px;border-bottom:1px solid var(--teal-50);margin:20px 0 14px;}
-
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:5px;}
   .field label .req{color:var(--danger);margin-left:2px;}
   .field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;color:var(--ink);background:var(--white);transition:border-color .2s,box-shadow .2s;}
   .field input:focus,.field select:focus{outline:none;border-color:var(--teal-700);box-shadow:0 0 0 3px rgba(26,82,118,.1);}
   .field .hint{font-size:11px;color:var(--muted);margin-top:4px;}
-
+  .field input.autofilled{background:var(--amber-bg);border-color:var(--amber);}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
   .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
-  @media(max-width:640px){
-    .grid-2{grid-template-columns:1fr 1fr;}
-    .grid-3{grid-template-columns:1fr 1fr;}
-    .grid-4{grid-template-columns:1fr 1fr;}
-  }
-
+  @media(max-width:640px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
   .equipo-card{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px;}
   .equipo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
   .equipo-tag{font-size:13px;font-weight:700;color:var(--teal-700);background:var(--teal-50);padding:4px 12px;border-radius:999px;}
   .btn-remove{background:none;border:1px solid var(--line);color:var(--danger);font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;}
   .btn-remove:hover{background:var(--danger-bg);}
-
   .rango-row{display:grid;grid-template-columns:160px 160px 1fr;gap:10px;align-items:flex-end;margin-bottom:10px;}
   .rango-row .field{margin-bottom:0;}
   .btn-generar{padding:10px 18px;background:var(--teal-700);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;height:42px;}
   .btn-generar:hover{background:var(--teal-900);}
-
   .rango-info{font-size:12px;color:var(--teal-700);padding:8px 12px;background:var(--teal-50);border-radius:6px;margin-bottom:12px;border:1px solid rgba(26,82,118,.1);}
-
-  .zonas-tabla{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
-  .zonas-tabla th{text-align:left;padding:7px 8px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--line);background:var(--white);white-space:nowrap;}
-  .zonas-tabla td{padding:4px 4px;border-bottom:1px solid var(--line);}
-  .zonas-tabla tr:last-child td{border-bottom:none;}
-  .zonas-tabla tr:nth-child(even) td{background:#f9fbfc;}
-  .zona-num{font-weight:700;color:var(--teal-700);font-size:11px;white-space:nowrap;padding:4px 8px;}
-  .zonas-tabla input,.zonas-tabla select{width:100%;padding:7px 8px;border:1px solid transparent;border-radius:6px;font-family:inherit;font-size:12px;color:var(--ink);background:transparent;}
-  .zonas-tabla input:focus,.zonas-tabla select:focus{outline:none;border-color:var(--teal-500);background:var(--white);}
-  .zonas-tabla input:not(:placeholder-shown){border-color:var(--line);}
-
+  .zonas-header{display:grid;grid-template-columns:80px 1fr 110px 90px 130px 110px 36px;gap:6px;padding:6px 4px;background:var(--bg);}
+  .zonas-header span{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  .zona-row-header{display:grid;grid-template-columns:80px 1fr 110px 90px 130px 110px 36px;gap:6px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);cursor:default;}
+  .zona-row-header:hover{background:var(--teal-50);}
+  .zona-num{font-weight:700;color:var(--teal-700);font-size:12px;}
+  .zona-row-header input,.zona-row-header select{padding:6px 8px;border:1px solid transparent;border-radius:6px;font-family:inherit;font-size:12px;color:var(--ink);background:transparent;width:100%;}
+  .zona-row-header input:focus,.zona-row-header select:focus{outline:none;border-color:var(--teal-500);background:var(--white);}
+  .btn-expand{background:none;border:1px solid var(--line);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .2s;}
+  .btn-expand:hover{border-color:var(--teal-500);color:var(--teal-700);}
+  .zona-detalle{display:none;border:1px solid var(--teal-50);border-top:none;border-radius:0 0 10px 10px;padding:16px;background:#f0f7fb;margin-bottom:2px;}
+  .zona-detalle.open{display:block;}
+  .perfil-block{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px;}
+  .perfil-title{font-size:11px;font-weight:700;color:var(--teal-700);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+  .autofill-note{font-size:10px;color:var(--amber);font-weight:600;margin-left:8px;text-transform:none;letter-spacing:0;}
   .btn-add{width:100%;padding:12px;border:1.5px dashed var(--teal-500);border-radius:10px;background:none;color:var(--teal-700);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s;margin-top:4px;}
   .btn-add:hover{background:var(--teal-50);}
-
   .nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px;}
   .btn-back{padding:12px 20px;border:1px solid var(--line);border-radius:999px;background:var(--white);color:var(--ink-2);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
   .btn-back:hover{border-color:var(--teal-700);color:var(--teal-700);}
@@ -89,17 +79,14 @@
   .btn-submit{padding:14px 32px;border:none;border-radius:999px;background:var(--green-700);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 16px rgba(30,132,73,.25);display:flex;align-items:center;gap:8px;transition:background .2s;}
   .btn-submit:hover{background:#155a33;}
   .btn-submit:disabled{opacity:.6;cursor:not-allowed;}
-
   .screen{display:none;}
   .screen.active{display:block;}
   .error-msg{background:var(--danger-bg);border:1px solid rgba(192,57,43,.2);color:var(--danger);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;display:none;}
   .error-msg.show{display:block;}
-
   .success-wrap{text-align:center;padding:48px 24px;}
   .success-icon{font-size:56px;display:block;margin-bottom:16px;}
   .success-wrap h2{font-family:'Fraunces',serif;font-size:26px;color:var(--green-700);margin-bottom:10px;}
   .success-wrap p{font-size:15px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.6;}
-
   .res-bloque{margin-bottom:14px;}
   .res-titulo{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--teal-700);border-bottom:1px solid var(--teal-50);padding-bottom:6px;margin-bottom:8px;}
   .res-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dashed var(--line);}
@@ -109,12 +96,10 @@
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="brand"><span>CRONO</span><span>RIEGO</span></div>
   <span class="header-sub">Registro de nuevo predio</span>
 </div>
-
 <div class="layout">
   <div class="progress-steps">
     <div class="step-pill active" id="pill-1"><span class="step-num">1</span> Tu empresa</div>
@@ -190,7 +175,7 @@
   <div class="screen" id="screen-3">
     <div class="card">
       <div class="card-title">Equipos de riego y zonas</div>
-      <div class="card-desc">Para cada equipo define los datos comunes, indica el rango de zonas y el sistema las genera todas iguales. Edita solo las que difieren.</div>
+      <div class="card-desc">Define los datos comunes por equipo, genera las zonas y usa el botón ▼ de cada zona para ingresar datos de suelo específicos.</div>
       <div id="equipos-container"></div>
       <button class="btn-add" onclick="agregarEquipo()">+ Agregar otro equipo de riego</button>
     </div>
@@ -210,7 +195,7 @@
       <div class="card-desc">Revisa los datos antes de enviar.</div>
       <div id="resumen-content"></div>
     </div>
-    <div class="error-msg" id="err-4">Error al guardar. Intenta nuevamente.</div>
+    <div class="error-msg" id="err-4"></div>
     <div class="nav-btns">
       <button class="btn-back" onclick="ir(3)">← Editar</button>
       <button class="btn-submit" id="btn-submit" onclick="enviar()">✓ Enviar registro</button>
@@ -238,32 +223,49 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let eqCount = 0;
 const eqRangos = {};
+let refSuelo = {};
 
-function ir(num) {
-  if (num > 1 && !validar(num-1)) return;
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-'+num).classList.add('active');
-  document.querySelectorAll('.step-pill').forEach((p,i) => {
-    p.classList.remove('active','done');
-    if (i+1===num) p.classList.add('active');
-    if (i+1<num) p.classList.add('done');
-  });
-  if (num===4) construirResumen();
-  window.scrollTo({top:0,behavior:'smooth'});
+const TEXTURAS = ['Arena','Arena Franca','Franco Arenoso','Franco','Franco Limoso','Limo',
+  'Franco Arcillo Arenoso','Franco Arcilloso','Franco Arcillo Limoso','Arcilla Arenosa','Arcilla Limosa','Arcilla'];
+
+async function cargarRefSuelo() {
+  const { data } = await db.from('ref_tabla_suelo').select('*');
+  if (data) data.forEach(r => { refSuelo[r.textura] = { cc: r.cc, pmp: r.pmp, da: r.da }; });
+}
+cargarRefSuelo();
+
+function texturasOptions() {
+  return '<option value="">Selecciona...</option>' + TEXTURAS.map(t => '<option value="'+t+'">'+t+'</option>').join('');
 }
 
-function v(id) { const el=document.getElementById(id); return el&&el.value.trim()!==''; }
-
-function validar(step) {
-  const err = document.getElementById('err-'+step);
-  err.classList.remove('show');
-  if (step===1 && (!v('rs-nombre')||!v('rs-email')||!v('rs-pais'))) { err.classList.add('show'); return false; }
-  if (step===2 && !v('pr-nombre')) { err.classList.add('show'); return false; }
-  if (step===3) {
-    const eqs = getEquipos();
-    if (!eqs.length || !eqs.some(e => e.zonas.length > 0)) { err.classList.add('show'); return false; }
+function onTexturaCambio(selectEl, prefix) {
+  const ref = refSuelo[selectEl.value];
+  const ccEl = document.getElementById(prefix+'-cc');
+  const pmpEl = document.getElementById(prefix+'-pmp');
+  const daEl  = document.getElementById(prefix+'-da');
+  if (ref && ccEl) {
+    ccEl.value = ref.cc; pmpEl.value = ref.pmp; daEl.value = ref.da;
+    [ccEl,pmpEl,daEl].forEach(el => { el.classList.add('autofilled'); el.title='Valor por defecto según textura. Puedes editarlo.'; });
+  } else if (ccEl) {
+    [ccEl,pmpEl,daEl].forEach(el => { el.classList.remove('autofilled'); el.title=''; });
   }
-  return true;
+}
+
+function perfilHTML(prefix, label) {
+  return '<div class="perfil-block">' +
+    '<div class="perfil-title">'+label+' <span class="autofill-note">CC/PMP/Da se autocompletan al elegir textura</span></div>' +
+    '<div class="grid-4">' +
+      '<div class="field"><label>Textura</label><select id="'+prefix+'-textura" onchange="onTexturaCambio(this,\''+prefix+'\')">'+texturasOptions()+'</select></div>' +
+      '<div class="field"><label>Profundidad (m)</label><input type="number" id="'+prefix+'-prof" step="0.1" placeholder="0.6"/></div>' +
+      '<div class="field"><label>Pedregosidad (%)</label><input type="number" id="'+prefix+'-ped" step="1" placeholder="5"/></div>' +
+      '<div class="field"><label>CE suelo (dS/m)</label><input type="number" id="'+prefix+'-ce" step="0.1" placeholder="1.2"/></div>' +
+    '</div>' +
+    '<div class="grid-3">' +
+      '<div class="field"><label>CC (%)</label><input type="number" id="'+prefix+'-cc" step="0.1" placeholder="—"/><div class="hint">Autocompletado por textura — editable</div></div>' +
+      '<div class="field"><label>PMP (%)</label><input type="number" id="'+prefix+'-pmp" step="0.1" placeholder="—"/><div class="hint">Autocompletado por textura — editable</div></div>' +
+      '<div class="field"><label>Da (g/cc)</label><input type="number" id="'+prefix+'-da" step="0.01" placeholder="—"/><div class="hint">Autocompletado por textura — editable</div></div>' +
+    '</div>' +
+  '</div>';
 }
 
 function agregarEquipo() {
@@ -272,405 +274,270 @@ function agregarEquipo() {
   const div = document.createElement('div');
   div.className = 'equipo-card';
   div.id = 'equipo-'+n;
-  div.innerHTML = `
-    <div class="equipo-header">
-      <span class="equipo-tag">Equipo ${n}</span>
-      ${n>1?`<button class="btn-remove" onclick="document.getElementById('equipo-${n}').remove()">Eliminar</button>`:''}
-    </div>
-
-    <div class="section-label">Datos del equipo</div>
-    <div class="grid-2">
-      <div class="field"><label>Nombre del equipo <span class="req">*</span></label><input type="text" id="eq${n}-nombre" placeholder="Bomba Principal"/></div>
-      <div class="field"><label>Tipo de fuente</label>
-        <select id="eq${n}-fuente"><option value="">Selecciona...</option><option>Pozo</option><option>Canal</option><option>Estanque</option><option>Lluvia</option></select>
-      </div>
-    </div>
-    <div class="grid-4">
-      <div class="field"><label>HP bomba</label><input type="number" id="eq${n}-hp" step="0.1" placeholder="15"/></div>
-      <div class="field"><label>Precio KWH ($)</label><input type="number" id="eq${n}-kwh" step="0.01" placeholder="120"/></div>
-      <div class="field"><label>CE agua (dS/m)</label><input type="number" id="eq${n}-ce" step="0.01" placeholder="1.2"/></div>
-      <div class="field"><label>Caudal bomba (L/s)</label><input type="number" id="eq${n}-caudal-bomba" step="0.1" placeholder="5.5"/></div>
-    </div>
-
-    <div class="section-label">Datos comunes de todas las zonas de este equipo</div>
-    <div class="grid-3">
-      <div class="field"><label>Especie</label>
-        <select id="eq${n}-especie"><option value="">Selecciona...</option><option>Cerezo</option><option>Nogal</option><option>Ciruelo</option><option>Avellano Europeo</option><option>Manzano</option><option>Uva de Mesa</option><option>Palto</option><option>Arándano</option><option>Repollo</option><option>Bunching</option><option>Otro</option></select>
-      </div>
-      <div class="field"><label>Variedad</label><input type="text" id="eq${n}-variedad" placeholder="Santina, Chandler..."/></div>
-      <div class="field"><label>Tipo de riego</label>
-        <select id="eq${n}-tipo-riego"><option value="">Selecciona...</option><option>Goteros integrados</option><option>Goteros tipo botón</option><option>Cintas de riego</option><option>Microaspersión</option></select>
-      </div>
-    </div>
-    <div class="grid-4">
-      <div class="field"><label>Superficie común (ha)</label><input type="number" id="eq${n}-superficie" step="0.01" placeholder="2.5"/></div>
-      <div class="field"><label>% Cobertura suelo</label><input type="number" id="eq${n}-sombra" step="1" placeholder="70"/></div>
-      <div class="field"><label>Eficiencia sistema (%)</label><input type="number" id="eq${n}-eficiencia" step="1" placeholder="90"/></div>
-      <div class="field"><label>Caudal emisor (L/h)</label><input type="number" id="eq${n}-caudal-emisor" step="0.1" placeholder="6"/></div>
-    </div>
-    <div class="grid-4">
-      <div class="field"><label>Dist. entre hileras (m)</label><input type="number" id="eq${n}-dist-h" step="0.1" placeholder="6"/></div>
-      <div class="field"><label>Dist. sobre hilera (m)</label><input type="number" id="eq${n}-dist-s" step="0.1" placeholder="5"/></div>
-      <div class="field"><label>Emisores por árbol</label><input type="number" id="eq${n}-emisores" step="1" placeholder="2"/></div>
-      <div class="field"><label>Dist. entre goteros (m)</label><input type="number" id="eq${n}-dist-goteros" step="0.1" placeholder="0.5"/></div>
-    </div>
-    <div class="grid-4">
-      <div class="field"><label>CC Perfil 1 (%)</label><input type="number" id="eq${n}-cc" step="0.1" placeholder="22"/></div>
-      <div class="field"><label>PMP Perfil 1 (%)</label><input type="number" id="eq${n}-pmp" step="0.1" placeholder="10"/></div>
-      <div class="field"><label>Da Perfil 1 (g/cc)</label><input type="number" id="eq${n}-da" step="0.01" placeholder="1.4"/></div>
-      <div class="field"><label>Prof. Perfil 1 (m)</label><input type="number" id="eq${n}-prof" step="0.1" placeholder="0.6"/></div>
-    </div>
-
-    <div class="section-label">Rango de zonas</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Indica de qué número a qué número van las zonas de este equipo. El sistema las genera todas con los datos comunes de arriba. Luego edita solo las que difieren.</p>
-    <div class="rango-row">
-      <div class="field"><label>Desde zona N°</label><input type="number" id="eq${n}-desde" min="1" placeholder="1"/></div>
-      <div class="field"><label>Hasta zona N°</label><input type="number" id="eq${n}-hasta" min="1" placeholder="20"/></div>
-      <div><button class="btn-generar" onclick="generarZonas(${n})">Generar zonas</button></div>
-    </div>
-    <div id="eq${n}-info" style="display:none" class="rango-info"></div>
-    <div id="eq${n}-tabla"></div>
-  `;
+  div.innerHTML =
+    '<div class="equipo-header">' +
+      '<span class="equipo-tag">Equipo '+n+'</span>' +
+      (n>1 ? '<button class="btn-remove" onclick="document.getElementById(\'equipo-'+n+'\').remove()">Eliminar</button>' : '') +
+    '</div>' +
+    '<div class="section-label">Datos del equipo</div>' +
+    '<div class="grid-2">' +
+      '<div class="field"><label>Nombre del equipo <span class="req">*</span></label><input type="text" id="eq'+n+'-nombre" placeholder="Bomba Principal"/></div>' +
+      '<div class="field"><label>Tipo de fuente</label><select id="eq'+n+'-fuente"><option value="">Selecciona...</option><option>Pozo</option><option>Canal</option><option>Estanque</option><option>Lluvia</option></select></div>' +
+    '</div>' +
+    '<div class="grid-4">' +
+      '<div class="field"><label>HP bomba</label><input type="number" id="eq'+n+'-hp" step="0.1" placeholder="15"/></div>' +
+      '<div class="field"><label>Precio KWH ($)</label><input type="number" id="eq'+n+'-kwh" step="0.01" placeholder="120"/></div>' +
+      '<div class="field"><label>CE agua (dS/m)</label><input type="number" id="eq'+n+'-ce" step="0.01" placeholder="1.2"/></div>' +
+      '<div class="field"><label>Caudal bomba (L/s)</label><input type="number" id="eq'+n+'-caudal-bomba" step="0.1" placeholder="5.5"/></div>' +
+    '</div>' +
+    '<div class="section-label">Datos comunes de zonas</div>' +
+    '<div class="grid-3">' +
+      '<div class="field"><label>Especie</label><select id="eq'+n+'-especie"><option value="">Selecciona...</option><option>Cerezo</option><option>Nogal</option><option>Ciruelo</option><option>Avellano Europeo</option><option>Manzano</option><option>Uva de Mesa</option><option>Palto</option><option>Arándano</option><option>Repollo</option><option>Bunching</option><option>Otro</option></select></div>' +
+      '<div class="field"><label>Variedad</label><input type="text" id="eq'+n+'-variedad" placeholder="Santina, Chandler..."/></div>' +
+      '<div class="field"><label>Patrón</label><input type="text" id="eq'+n+'-patron" placeholder="Gisela 6, Colt..."/></div>' +
+    '</div>' +
+    '<div class="grid-3">' +
+      '<div class="field"><label>Tipo de riego</label><select id="eq'+n+'-tipo-riego"><option value="">Selecciona...</option><option>Goteros integrados</option><option>Goteros tipo botón</option><option>Cintas de riego</option><option>Microaspersión</option></select></div>' +
+      '<div class="field"><label>Clase de Suelo</label><input type="text" id="eq'+n+'-clase-suelo" placeholder="Clase II, III..."/></div>' +
+      '<div class="field"><label>Serie de Suelos</label><input type="text" id="eq'+n+'-serie-suelo" placeholder="Ej: Serie Talca"/></div>' +
+    '</div>' +
+    '<div class="grid-4">' +
+      '<div class="field"><label>Superficie común (ha)</label><input type="number" id="eq'+n+'-superficie" step="0.01" placeholder="2.5"/></div>' +
+      '<div class="field"><label>% Cobertura suelo</label><input type="number" id="eq'+n+'-sombra" step="1" placeholder="70"/></div>' +
+      '<div class="field"><label>Eficiencia sistema (%)</label><input type="number" id="eq'+n+'-eficiencia" step="1" placeholder="90"/></div>' +
+      '<div class="field"><label>Caudal emisor (L/h)</label><input type="number" id="eq'+n+'-caudal-emisor" step="0.1" placeholder="6"/></div>' +
+    '</div>' +
+    '<div class="grid-4">' +
+      '<div class="field"><label>Dist. entre hileras (m)</label><input type="number" id="eq'+n+'-dist-h" step="0.1" placeholder="6"/></div>' +
+      '<div class="field"><label>Dist. sobre hilera (m)</label><input type="number" id="eq'+n+'-dist-s" step="0.1" placeholder="5"/></div>' +
+      '<div class="field"><label>Emisores por árbol</label><input type="number" id="eq'+n+'-emisores" step="1" placeholder="2"/></div>' +
+      '<div class="field"><label>Dist. entre goteros (m)</label><input type="number" id="eq'+n+'-dist-goteros" step="0.1" placeholder="0.5"/></div>' +
+    '</div>' +
+    '<div class="grid-4">' +
+      '<div class="field"><label>Ancho suelo húmedo hilera (m)</label><input type="number" id="eq'+n+'-ancho-humedo" step="0.1" placeholder="1.2"/></div>' +
+      '<div class="field"><label>Laterales por hilera</label><input type="number" id="eq'+n+'-laterales" step="1" placeholder="1"/></div>' +
+      '<div class="field"><label>Pendiente Máx (%)</label><input type="number" id="eq'+n+'-pendiente" step="0.1" placeholder="5"/></div>' +
+      '<div class="field"><label>Precio por Kg (USD)</label><input type="number" id="eq'+n+'-precio-kg" step="0.01" placeholder="1.50"/></div>' +
+    '</div>' +
+    '<div class="grid-2">' +
+      '<div class="field"><label>Fecha Inicio Acum. Horas Frío</label><input type="date" id="eq'+n+'-fecha-frio"/></div>' +
+      '<div class="field"><label>Fecha Inicio Acum. Grados Día</label><input type="date" id="eq'+n+'-fecha-grados"/></div>' +
+    '</div>' +
+    '<div class="section-label">Perfiles de suelo comunes (se heredan por todas las zonas)</div>' +
+    perfilHTML('eq'+n+'-p1','Primer Perfil') +
+    perfilHTML('eq'+n+'-p2','Segundo Perfil') +
+    perfilHTML('eq'+n+'-p3','Tercer Perfil') +
+    '<div class="section-label">Rango de zonas</div>' +
+    '<p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Indica el rango de zonas. Usa ▼ en cada zona para datos de suelo o coordenadas específicos.</p>' +
+    '<div class="rango-row">' +
+      '<div class="field"><label>Desde zona N°</label><input type="number" id="eq'+n+'-desde" min="1" placeholder="1"/></div>' +
+      '<div class="field"><label>Hasta zona N°</label><input type="number" id="eq'+n+'-hasta" min="1" placeholder="20"/></div>' +
+      '<div><button class="btn-generar" onclick="generarZonas('+n+')">Generar zonas</button></div>' +
+    '</div>' +
+    '<div id="eq'+n+'-info" style="display:none" class="rango-info"></div>' +
+    '<div id="eq'+n+'-tabla"></div>';
   document.getElementById('equipos-container').appendChild(div);
 }
 
-function g(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-function gf(id) {
-  const el = document.getElementById(id);
-  if (!el || el.value.trim() === '') return null;
-  const v = parseFloat(el.value.replace(',', '.'));
-  return isNaN(v) ? null : v;
-}
+function g(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
+function gf(id) { const el=document.getElementById(id); if(!el||el.value.trim()==='')return null; const v=parseFloat(el.value.replace(',','.')); return isNaN(v)?null:v; }
+function gd(id) { const el=document.getElementById(id); return (el&&el.value)?el.value:null; }
 
 function generarZonas(n) {
   const desde = parseInt(document.getElementById('eq'+n+'-desde').value);
   const hasta  = parseInt(document.getElementById('eq'+n+'-hasta').value);
-
-  if (!desde || !hasta || desde > hasta || hasta - desde > 199) {
-    alert('Ingresa un rango válido (máximo 200 zonas por equipo).');
-    return;
+  if (!desde||!hasta||desde>hasta||hasta-desde>199) { alert('Ingresa un rango válido (máximo 200 zonas).'); return; }
+  const sup=g('eq'+n+'-superficie'), sombra=g('eq'+n+'-sombra');
+  const especie=g('eq'+n+'-especie'), variedad=g('eq'+n+'-variedad');
+  eqRangos[n]={desde,hasta};
+  const info=document.getElementById('eq'+n+'-info');
+  info.style.display='block';
+  info.innerHTML='✓ '+(hasta-desde+1)+' zonas generadas (Zona '+desde+' al '+hasta+'). Usa ▼ para ingresar datos de suelo por zona.';
+  const tabla=document.getElementById('eq'+n+'-tabla');
+  let html='<div class="zonas-header"><span>Zona</span><span>Nombre</span><span>Sup. (ha)</span><span>% Sombra</span><span>Especie (si difiere)</span><span>Variedad (si difiere)</span><span></span></div>';
+  for (let i=desde; i<=hasta; i++) {
+    html+='<div id="eq'+n+'-zona'+i+'-wrap">'+
+      '<div class="zona-row-header" id="eq'+n+'-zona'+i+'-header">'+
+        '<span class="zona-num">Zona '+i+'</span>'+
+        '<input type="text" id="eq'+n+'-z'+i+'-nombre" placeholder="Zona '+i+'"/>'+
+        '<input type="number" id="eq'+n+'-z'+i+'-superficie" step="0.01" '+(sup?'value="'+sup+'"':'')+' placeholder="2.5"/>'+
+        '<input type="number" id="eq'+n+'-z'+i+'-sombra" step="1" '+(sombra?'value="'+sombra+'"':'')+' placeholder="70"/>'+
+        '<input type="text" id="eq'+n+'-z'+i+'-especie" placeholder="'+(especie||'(igual al equipo)')+'"/>'+
+        '<input type="text" id="eq'+n+'-z'+i+'-variedad" placeholder="'+(variedad||'(igual)')+'"/>'+
+        '<button class="btn-expand" onclick="toggleZona('+n+','+i+')" title="Datos de suelo y coordenadas">▼</button>'+
+      '</div>'+
+      '<div class="zona-detalle" id="eq'+n+'-zona'+i+'-detalle">'+
+        '<div class="grid-2" style="margin-bottom:12px;">'+
+          '<div class="field"><label>Latitud zona</label><input type="number" id="eq'+n+'-z'+i+'-lat" step="0.000001" placeholder="-34.123456"/></div>'+
+          '<div class="field"><label>Longitud zona</label><input type="number" id="eq'+n+'-z'+i+'-lon" step="0.000001" placeholder="-71.123456"/></div>'+
+        '</div>'+
+        '<div class="grid-2" style="margin-bottom:12px;">'+
+          '<div class="field"><label>Clase de Suelo (si difiere)</label><input type="text" id="eq'+n+'-z'+i+'-clase-suelo" placeholder="Heredado del equipo"/></div>'+
+          '<div class="field"><label>Serie de Suelos (si difiere)</label><input type="text" id="eq'+n+'-z'+i+'-serie-suelo" placeholder="Heredado del equipo"/></div>'+
+        '</div>'+
+        '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Perfiles de suelo — si no se modifican, se usan los del equipo.</p>'+
+        perfilHTML('eq'+n+'-z'+i+'-p1','Primer Perfil')+
+        perfilHTML('eq'+n+'-z'+i+'-p2','Segundo Perfil')+
+        perfilHTML('eq'+n+'-z'+i+'-p3','Tercer Perfil')+
+      '</div>'+
+    '</div>';
   }
+  tabla.innerHTML=html;
+}
 
-  const sup      = g('eq'+n+'-superficie');
-  const sombra   = g('eq'+n+'-sombra');
-  const especie  = g('eq'+n+'-especie');
-  const variedad = g('eq'+n+'-variedad');
-  const total    = hasta - desde + 1;
+function toggleZona(n,i) {
+  const det=document.getElementById('eq'+n+'-zona'+i+'-detalle');
+  const btn=document.getElementById('eq'+n+'-zona'+i+'-header').querySelector('.btn-expand');
+  const open=det.classList.contains('open');
+  det.classList.toggle('open',!open);
+  btn.textContent=open?'▼':'▲';
+}
 
-  eqRangos[n] = { desde, hasta };
-
-  // Info
-  const info = document.getElementById('eq'+n+'-info');
-  info.style.display = 'block';
-  info.innerHTML = `✓ ${total} zonas generadas (Zona ${desde} al ${hasta}). Edita solo las que sean distintas — los demás heredan los datos comunes.`;
-
-  // Tabla
-  const tabla = document.getElementById('eq'+n+'-tabla');
-  let html = `<div style="overflow-x:auto;margin-top:8px;">
-    <table class="zonas-tabla">
-      <thead><tr>
-        <th>Zona N°</th>
-        <th>Nombre</th>
-        <th>Superficie (ha)</th>
-        <th>% Sombra</th>
-        <th>Especie (si difiere)</th>
-        <th>Variedad (si difiere)</th>
-      </tr></thead>
-      <tbody>`;
-
-  for (let i = desde; i <= hasta; i++) {
-    const supVal     = sup     ? `value="${sup}"`     : '';
-    const sombraVal  = sombra  ? `value="${sombra}"`  : '';
-    const espPlh     = especie  || '(igual al equipo)';
-    const varPlh     = variedad || '(igual)';
-    html += `<tr>
-      <td class="zona-num">Zona ${i}</td>
-      <td><input type="text"   id="eq${n}-z${i}-nombre"     placeholder="Zona ${i}"/></td>
-      <td><input type="number" id="eq${n}-z${i}-superficie"  step="0.01" ${supVal}    placeholder="2.5"/></td>
-      <td><input type="number" id="eq${n}-z${i}-sombra"      step="1"    ${sombraVal} placeholder="70"/></td>
-      <td><input type="text"   id="eq${n}-z${i}-especie"     placeholder="${espPlh}"/></td>
-      <td><input type="text"   id="eq${n}-z${i}-variedad"    placeholder="${varPlh}"/></td>
-    </tr>`;
-  }
-
-  html += `</tbody></table></div>`;
-  tabla.innerHTML = html;
+function getP(prefix) {
+  return { textura:g(prefix+'-textura')||null, prof:gf(prefix+'-prof'), ped:gf(prefix+'-ped'), ce:gf(prefix+'-ce'), cc:gf(prefix+'-cc'), pmp:gf(prefix+'-pmp'), da:gf(prefix+'-da') };
 }
 
 function getEquipos() {
-  const equipos = [];
-  for (let n = 1; n <= eqCount; n++) {
+  const equipos=[];
+  for (let n=1;n<=eqCount;n++) {
     if (!document.getElementById('equipo-'+n)) continue;
-    const nombre = g('eq'+n+'-nombre');
-    if (!nombre) continue;
-    const rango = eqRangos[n] || {};
-    const desde = rango.desde || 0;
-    const hasta  = rango.hasta || 0;
-    const zonas = [];
-    for (let i = desde; i <= hasta; i++) {
+    const nombre=g('eq'+n+'-nombre'); if (!nombre) continue;
+    const r=eqRangos[n]||{}, desde=r.desde||0, hasta=r.hasta||0;
+    const p1e=getP('eq'+n+'-p1'), p2e=getP('eq'+n+'-p2'), p3e=getP('eq'+n+'-p3');
+    const zonas=[];
+    for (let i=desde;i<=hasta;i++) {
+      const p1z=getP('eq'+n+'-z'+i+'-p1'), p2z=getP('eq'+n+'-z'+i+'-p2'), p3z=getP('eq'+n+'-z'+i+'-p3');
       zonas.push({
-        numero:     i,
-        nombre:     g('eq'+n+'-z'+i+'-nombre') || 'Zona '+i,
-        superficie: gf('eq'+n+'-z'+i+'-superficie') ?? gf('eq'+n+'-superficie'),
-        sombra:     gf('eq'+n+'-z'+i+'-sombra')     ?? gf('eq'+n+'-sombra'),
-        especie:    g('eq'+n+'-z'+i+'-especie')      || g('eq'+n+'-especie') || null,
-        variedad:   g('eq'+n+'-z'+i+'-variedad')     || g('eq'+n+'-variedad') || null,
+        numero:i, nombre:g('eq'+n+'-z'+i+'-nombre')||'Zona '+i,
+        superficie:gf('eq'+n+'-z'+i+'-superficie')??gf('eq'+n+'-superficie'),
+        sombra:gf('eq'+n+'-z'+i+'-sombra')??gf('eq'+n+'-sombra'),
+        especie:g('eq'+n+'-z'+i+'-especie')||g('eq'+n+'-especie')||null,
+        variedad:g('eq'+n+'-z'+i+'-variedad')||g('eq'+n+'-variedad')||null,
+        lat:gf('eq'+n+'-z'+i+'-lat'), lon:gf('eq'+n+'-z'+i+'-lon'),
+        claseSuelo:g('eq'+n+'-z'+i+'-clase-suelo')||g('eq'+n+'-clase-suelo')||null,
+        serieSuelo:g('eq'+n+'-z'+i+'-serie-suelo')||g('eq'+n+'-serie-suelo')||null,
+        t1:p1z.textura||p1e.textura, prof1:p1z.prof??p1e.prof, ped1:p1z.ped??p1e.ped, ce1:p1z.ce??p1e.ce, cc1:p1z.cc??p1e.cc, pmp1:p1z.pmp??p1e.pmp, da1:p1z.da??p1e.da,
+        t2:p2z.textura||p2e.textura, prof2:p2z.prof??p2e.prof, ped2:p2z.ped??p2e.ped, ce2:p2z.ce??p2e.ce, cc2:p2z.cc??p2e.cc, pmp2:p2z.pmp??p2e.pmp, da2:p2z.da??p2e.da,
+        t3:p3z.textura||p3e.textura, prof3:p3z.prof??p3e.prof, ped3:p3z.ped??p3e.ped, ce3:p3z.ce??p3e.ce, cc3:p3z.cc??p3e.cc, pmp3:p3z.pmp??p3e.pmp, da3:p3z.da??p3e.da,
       });
     }
-    equipos.push({
-      nombre,
-      fuente:        g('eq'+n+'-fuente')||null,
-      hp:            gf('eq'+n+'-hp'),
-      kwh:           gf('eq'+n+'-kwh'),
-      ce:            gf('eq'+n+'-ce'),
-      caudalBomba:   gf('eq'+n+'-caudal-bomba'),
-      especie:       g('eq'+n+'-especie')||null,
-      variedad:      g('eq'+n+'-variedad')||null,
-      tipoRiego:     g('eq'+n+'-tipo-riego')||null,
-      superficie:    gf('eq'+n+'-superficie'),
-      sombra:        gf('eq'+n+'-sombra'),
-      eficiencia:    gf('eq'+n+'-eficiencia'),
-      caudalEmisor:  gf('eq'+n+'-caudal-emisor'),
-      distH:         gf('eq'+n+'-dist-h'),
-      distS:         gf('eq'+n+'-dist-s'),
-      emisores:      gf('eq'+n+'-emisores'),
-      distGoteros:   gf('eq'+n+'-dist-goteros'),
-      cc:            gf('eq'+n+'-cc'),
-      pmp:           gf('eq'+n+'-pmp'),
-      da:            gf('eq'+n+'-da'),
-      prof:          gf('eq'+n+'-prof'),
-      zonas,
-    });
+    equipos.push({ nombre, fuente:g('eq'+n+'-fuente')||null, hp:gf('eq'+n+'-hp'), kwh:gf('eq'+n+'-kwh'), ce:gf('eq'+n+'-ce'), caudalBomba:gf('eq'+n+'-caudal-bomba'),
+      especie:g('eq'+n+'-especie')||null, variedad:g('eq'+n+'-variedad')||null, patron:g('eq'+n+'-patron')||null,
+      tipoRiego:g('eq'+n+'-tipo-riego')||null, claseSuelo:g('eq'+n+'-clase-suelo')||null, serieSuelo:g('eq'+n+'-serie-suelo')||null,
+      superficie:gf('eq'+n+'-superficie'), sombra:gf('eq'+n+'-sombra'), eficiencia:gf('eq'+n+'-eficiencia'), caudalEmisor:gf('eq'+n+'-caudal-emisor'),
+      distH:gf('eq'+n+'-dist-h'), distS:gf('eq'+n+'-dist-s'), emisores:gf('eq'+n+'-emisores'), distGoteros:gf('eq'+n+'-dist-goteros'),
+      anchoHumedo:gf('eq'+n+'-ancho-humedo'), laterales:gf('eq'+n+'-laterales'), pendiente:gf('eq'+n+'-pendiente'), precioKg:gf('eq'+n+'-precio-kg'),
+      fechaFrio:gd('eq'+n+'-fecha-frio'), fechaGrados:gd('eq'+n+'-fecha-grados'), zonas });
   }
   return equipos;
 }
 
 function construirResumen() {
-  const eqs = getEquipos();
-  const totalZ = eqs.reduce((s,e)=>s+e.zonas.length,0);
-  let html = `
-    <div class="res-bloque">
-      <div class="res-titulo">Empresa</div>
-      <div class="res-row"><span>Nombre</span><span>${g('rs-nombre')}</span></div>
-      <div class="res-row"><span>Email</span><span>${g('rs-email')}</span></div>
-      <div class="res-row"><span>País</span><span>${g('rs-pais')}</span></div>
-    </div>
-    <div class="res-bloque">
-      <div class="res-titulo">Predio</div>
-      <div class="res-row"><span>Nombre</span><span>${g('pr-nombre')}</span></div>
-      <div class="res-row"><span>Ubicación</span><span>${g('pr-comuna')} · ${g('pr-region')}</span></div>
-      <div class="res-row"><span>Clima</span><span>${g('pr-clima')||'—'}</span></div>
-    </div>
-    <div class="res-bloque">
-      <div class="res-titulo">${eqs.length} equipo(s) · ${totalZ} zona(s) en total</div>
-      ${eqs.map((eq,i)=>`
-        <div style="margin-bottom:10px;padding:10px;background:var(--bg);border-radius:8px;">
-          <div style="font-weight:700;font-size:13px;color:var(--teal-700);margin-bottom:4px;">Equipo ${i+1}: ${eq.nombre} — ${eq.zonas.length} zonas</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${eq.especie||'—'} ${eq.variedad||''} · ${eq.tipoRiego||'—'}</div>
-          ${eq.zonas.slice(0,5).map(z=>`
-            <div class="res-row" style="font-size:12px;">
-              <span>Zona ${z.numero}: ${z.nombre}</span>
-              <span>${z.especie||'—'} · ${z.superficie||'—'} ha</span>
-            </div>`).join('')}
-          ${eq.zonas.length>5?`<div style="font-size:11px;color:var(--muted);padding:4px 0;">... y ${eq.zonas.length-5} zonas más</div>`:''}
-        </div>`).join('')}
-    </div>`;
-  document.getElementById('resumen-content').innerHTML = html;
+  const eqs=getEquipos(), totalZ=eqs.reduce((s,e)=>s+e.zonas.length,0);
+  document.getElementById('resumen-content').innerHTML=
+    '<div class="res-bloque"><div class="res-titulo">Empresa</div>'+
+      '<div class="res-row"><span>Nombre</span><span>'+g('rs-nombre')+'</span></div>'+
+      '<div class="res-row"><span>Email</span><span>'+g('rs-email')+'</span></div>'+
+      '<div class="res-row"><span>País</span><span>'+g('rs-pais')+'</span></div></div>'+
+    '<div class="res-bloque"><div class="res-titulo">Predio</div>'+
+      '<div class="res-row"><span>Nombre</span><span>'+g('pr-nombre')+'</span></div>'+
+      '<div class="res-row"><span>Ubicación</span><span>'+g('pr-comuna')+' · '+g('pr-region')+'</span></div></div>'+
+    '<div class="res-bloque"><div class="res-titulo">'+eqs.length+' equipo(s) · '+totalZ+' zona(s)</div>'+
+      eqs.map((eq,i)=>'<div style="margin-bottom:10px;padding:10px;background:var(--bg);border-radius:8px;">'+
+        '<div style="font-weight:700;font-size:13px;color:var(--teal-700);margin-bottom:4px;">Equipo '+(i+1)+': '+eq.nombre+' — '+eq.zonas.length+' zonas</div>'+
+        '<div style="font-size:12px;color:var(--muted);">'+(eq.especie||'—')+' '+(eq.variedad||'')+' · '+(eq.patron||'')+' · '+(eq.tipoRiego||'—')+'</div>'+
+        eq.zonas.slice(0,5).map(z=>'<div class="res-row" style="font-size:12px;"><span>Zona '+z.numero+': '+z.nombre+'</span><span>'+(z.t1||'sin textura')+' · '+(z.superficie||'—')+' ha</span></div>').join('')+
+        (eq.zonas.length>5?'<div style="font-size:11px;color:var(--muted);">... y '+(eq.zonas.length-5)+' zonas más</div>':'')+
+      '</div>').join('')+
+    '</div>';
 }
 
-function validarCamposNumericos() {
-  const errores = [];
-  for (let n = 1; n <= eqCount; n++) {
-    if (!document.getElementById('equipo-'+n)) continue;
-    const nom = g('eq'+n+'-nombre') || 'Equipo '+n;
+function ir(num) {
+  if (num>1&&!validar(num-1)) return;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+num).classList.add('active');
+  document.querySelectorAll('.step-pill').forEach((p,i)=>{ p.classList.remove('active','done'); if(i+1===num)p.classList.add('active'); if(i+1<num)p.classList.add('done'); });
+  if (num===4) construirResumen();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-    const checks = [
-      ['eq'+n+'-hp',            0,    500,  'HP bomba'],
-      ['eq'+n+'-kwh',           0,  99999,  'Precio KWH'],
-      ['eq'+n+'-ce',            0,     50,  'CE del agua (dS/m)'],
-      ['eq'+n+'-caudal-bomba',  0,  99999,  'Caudal bomba'],
-      ['eq'+n+'-superficie',    0,   9999,  'Superficie'],
-      ['eq'+n+'-sombra',        0,    100,  '% Cobertura suelo (máx 100)'],
-      ['eq'+n+'-eficiencia',    0,    100,  'Eficiencia sistema (máx 100)'],
-      ['eq'+n+'-caudal-emisor', 0,   9999,  'Caudal emisor'],
-      ['eq'+n+'-dist-h',        0,    200,  'Distancia entre hileras'],
-      ['eq'+n+'-dist-s',        0,    200,  'Distancia sobre hilera'],
-      ['eq'+n+'-emisores',      0,    100,  'Emisores por árbol'],
-      ['eq'+n+'-dist-goteros',  0,     50,  'Distancia entre goteros'],
-      ['eq'+n+'-cc',            0,    100,  'CC Perfil 1 (máx 100%)'],
-      ['eq'+n+'-pmp',           0,    100,  'PMP Perfil 1 (máx 100%)'],
-      ['eq'+n+'-da',            0,      5,  'Densidad aparente (máx 5 g/cc)'],
-      ['eq'+n+'-prof',          0,     20,  'Profundidad perfil (máx 20m)'],
-    ];
+function v(id){const el=document.getElementById(id);return el&&el.value.trim()!=='';}
 
-    for (const [id, min, max, label] of checks) {
-      const el = document.getElementById(id);
-      if (!el || el.value === '') continue;
-      const val = parseFloat(el.value);
-      if (isNaN(val)) {
-        errores.push(`${nom} → ${label}: valor no es un número válido`);
-        el.style.borderColor = '#c0392b';
-      } else if (val < min || val > max) {
-        errores.push(`${nom} → ${label}: ${val} está fuera del rango permitido (${min}–${max})`);
-        el.style.borderColor = '#c0392b';
-      } else {
-        el.style.borderColor = '';
-      }
-    }
-
-    // Validar zonas
-    const rango = eqRangos[n] || {};
-    for (let i = rango.desde; i <= rango.hasta; i++) {
-      const supEl = document.getElementById(`eq${n}-z${i}-superficie`);
-      const somEl = document.getElementById(`eq${n}-z${i}-sombra`);
-      if (supEl && supEl.value) {
-        const v = parseFloat(supEl.value);
-        if (v > 9999) { errores.push(`Zona ${i} → Superficie: ${v} ha parece muy grande`); supEl.style.borderColor='#c0392b'; }
-        else supEl.style.borderColor='';
-      }
-      if (somEl && somEl.value) {
-        const v = parseFloat(somEl.value);
-        if (v > 100) { errores.push(`Zona ${i} → % Sombra: no puede superar 100`); somEl.style.borderColor='#c0392b'; }
-        else somEl.style.borderColor='';
-      }
-    }
-  }
-  return errores;
+function validar(step) {
+  const err=document.getElementById('err-'+step); err.classList.remove('show');
+  if (step===1&&(!v('rs-nombre')||!v('rs-email')||!v('rs-pais'))){err.classList.add('show');return false;}
+  if (step===2&&!v('pr-nombre')){err.classList.add('show');return false;}
+  if (step===3){const eqs=getEquipos();if(!eqs.length||!eqs.some(e=>e.zonas.length>0)){err.classList.add('show');return false;}}
+  return true;
 }
 
 async function enviar() {
-  const btn = document.getElementById('btn-submit');
-  const err = document.getElementById('err-4');
-  err.classList.remove('show');
-
-  // Validar campos numéricos antes de enviar
-  const erroresValidacion = validarCamposNumericos();
-  if (erroresValidacion.length > 0) {
-    err.innerHTML = '⚠️ Corrige los siguientes campos antes de enviar:<br><br>' +
-      erroresValidacion.map(e => '• ' + e).join('<br>');
-    err.style.display = 'block';
-    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Guardando...';
-
+  const btn=document.getElementById('btn-submit'), err=document.getElementById('err-4');
+  err.style.display='none'; btn.disabled=true; btn.textContent='Guardando...';
   try {
-    // Obtener siguiente número correlativo
-    function nextCode(prefix, count) {
-      return prefix + String(count + 1).padStart(2, '0');
-    }
-    const [rsRes, prRes, eqRes, znRes] = await Promise.all([
-      db.from('razones_sociales').select('*', {count: 'exact', head: true}),
-      db.from('predios').select('*',           {count: 'exact', head: true}),
-      db.from('equipos').select('*',           {count: 'exact', head: true}),
-      db.from('zonas').select('*',             {count: 'exact', head: true}),
+    const [rsRes,prRes,eqRes,znRes]=await Promise.all([
+      db.from('razones_sociales').select('*',{count:'exact',head:true}),
+      db.from('predios').select('*',{count:'exact',head:true}),
+      db.from('equipos').select('*',{count:'exact',head:true}),
+      db.from('zonas').select('*',{count:'exact',head:true}),
     ]);
-    const rsId   = nextCode('RS-', rsRes.count || 0);
-    const prId   = nextCode('PR-', prRes.count || 0);
-    let nextEqN  = (eqRes.count || 0) + 1;
-    let nextZnN  = (znRes.count || 0) + 1;
+    const rsId='RS-'+String((rsRes.count||0)+1).padStart(2,'0');
+    const prId='PR-'+String((prRes.count||0)+1).padStart(2,'0');
+    let nextEqN=(eqRes.count||0)+1, nextZnN=(znRes.count||0)+1;
 
-    console.log('Iniciando inserción RS:', rsId);
-    const { error: e1 } = await db.from('razones_sociales').insert({
-      'ID Razón Social (PK)': rsId,
-      'Nombre Razón Social':  g('rs-nombre'),
-      'RUT':                  g('rs-rut')||null,
-      'Correo Electrónico para Facturación': g('rs-email'),
-      'Teléfono de Contacto Facturación':    g('rs-telefono')||null,
-      'País':                 g('rs-pais'),
-      'Dirección de Facturación': g('rs-direccion')||null,
-    });
-    if (e1) throw e1;
+    let e; 
+    ({error:e}=await db.from('razones_sociales').insert({'ID Razón Social (PK)':rsId,'Nombre Razón Social':g('rs-nombre'),'RUT':g('rs-rut')||null,'Correo Electrónico para Facturación':g('rs-email'),'Teléfono de Contacto Facturación':g('rs-telefono')||null,'País':g('rs-pais'),'Dirección de Facturación':g('rs-direccion')||null}));
+    if (e) throw e;
+    ({error:e}=await db.from('predios').insert({'ID Predio (PK)':prId,'ID Razón Social (FK)':rsId,'Nombre Predio':g('pr-nombre'),'Comuna Predio':g('pr-comuna')||null,'Región Predio':g('pr-region')||null,'Encargado':g('pr-encargado')||null,'Hemisferio':g('pr-hemisferio'),'Latitud':gf('pr-lat'),'Longitud':gf('pr-lon')}));
+    if (e) throw e;
 
-    const { error: e2 } = await db.from('predios').insert({
-      'ID Predio (PK)':       prId,
-      'ID Razón Social (FK)': rsId,
-      'Nombre Predio':        g('pr-nombre'),
-      'Comuna Predio':        g('pr-comuna')||null,
-      'Región Predio':        g('pr-region')||null,
-      'Encargado':            g('pr-encargado')||null,
-      'Hemisferio':           g('pr-hemisferio'),
-      'Latitud':              gf('pr-lat'),
-      'Longitud':             gf('pr-lon'),
-    });
-    if (e2) throw e2;
-
-    const eqs = getEquipos();
-    for (let i = 0; i < eqs.length; i++) {
-      const eq = eqs[i];
-      const eqId = 'EQ-' + String(nextEqN).padStart(2, '0');
-      nextEqN++;
-
-      const eqData = {
-        'ID Equipo (PK)':  eqId,
-        'ID Predio (FK)':  prId,
-        'Nombre Equipo':   eq.nombre,
-        'Tipo de Fuente [Pozo, Canal o lluvia]':                  eq.fuente,
-        'Horse Power Bomba de Riego':                             eq.hp,
-        'Precio KWH':                                             eq.kwh,
-        'Conductividad Eléctrica Agua (dS/m)':                    eq.ce,
-        'Caudal de Bomba de Riego (L/s) [Salida a válvulas]':    eq.caudalBomba,
-      };
-      console.log('Insertando equipo:', JSON.stringify(eqData));
-      const { error: e3 } = await db.from('equipos').insert(eqData);
-      if (e3) { console.error('Error equipo:', e3); throw new Error('Equipo: ' + (e3.message||e3.details)); }
-
-      for (let j = 0; j < eq.zonas.length; j++) {
-        const z = eq.zonas[j];
-        const zonaData = {
-          'ID Zona Relacional (PK)':                      'ZN-' + String(nextZnN++).padStart(2, '0'),
-          'ID Equipo de Riego (FK)':                      eqId,
-          'Nombre de la Zona':                            z.nombre,
-          'Activa':                                       'Sí',
-          'Especie':                                      z.especie,
-          'Variedad':                                     z.variedad,
-          'Tipo de Riego':                                eq.tipoRiego,
-          'Superficie (Hectáreas)':                       z.superficie,
-          'Caudal del Emisor (L/h)':                      eq.caudalEmisor,
-          'Distancia entre hilera (metros)':              eq.distH,
-          'Distancia sobre hilera (metros)':              eq.distS,
-          'Cantidad de emisores por árbol':               eq.emisores,
-          'Distancia entre goteros (metros)':             eq.distGoteros,
-          'Eficiencia del Sistema (%)':                   eq.eficiencia,
-          'Porcentaje de sombra (%)':                     z.sombra,
-          'Capacidad de Campo Primer Perfil (%)':         eq.cc,
-          'Punto Marchitez Permanente Primer Perfil (%)': eq.pmp,
-          'Densidad Aparente Primer Perfil (g/cc)':       eq.da,
-          'Profundidad Primer Perfil (metros)':           eq.prof,
-        };
-        console.log('Insertando zona '+z.numero+':', JSON.stringify(zonaData));
-        const { error: e4 } = await db.from('zonas').insert(zonaData);
-        if (e4) { console.error('Error zona '+z.numero+':', e4); throw new Error('Zona '+z.numero+': ' + (e4.message||e4.details)); }
+    for (const eq of getEquipos()) {
+      const eqId='EQ-'+String(nextEqN++).padStart(2,'0');
+      ({error:e}=await db.from('equipos').insert({'ID Equipo (PK)':eqId,'ID Predio (FK)':prId,'Nombre Equipo':eq.nombre,'Tipo de Fuente [Pozo, Canal o lluvia]':eq.fuente,'Horse Power Bomba de Riego':eq.hp,'Precio KWH':eq.kwh,'Conductividad Eléctrica Agua (dS/m)':eq.ce,'Caudal de Bomba de Riego (L/s) [Salida a válvulas]':eq.caudalBomba}));
+      if (e) throw new Error('Equipo: '+(e.message||e.details));
+      for (const z of eq.zonas) {
+        ({error:e}=await db.from('zonas').insert({
+          'ID Zona Relacional (PK)':'ZN-'+String(nextZnN++).padStart(2,'0'),
+          'ID Equipo de Riego (FK)':eqId,
+          'Nombre de la Zona':z.nombre, 'Activa':'Sí',
+          'Especie':z.especie, 'Variedad':z.variedad, 'Patrón':eq.patron,
+          'Tipo de Riego':eq.tipoRiego, 'Superficie (Hectáreas)':z.superficie,
+          'Caudal del Emisor (L/h)':eq.caudalEmisor, 'Distancia entre hilera (metros)':eq.distH,
+          'Distancia sobre hilera (metros)':eq.distS, 'Cantidad de emisores por árbol':eq.emisores,
+          'Distancia entre goteros (metros)':eq.distGoteros, 'Laterales por hilera':eq.laterales,
+          'Ancho Suelo Húmedo Hilera (metros)':eq.anchoHumedo, 'Eficiencia del Sistema (%)':eq.eficiencia,
+          'Porcentaje de sombra (%)':z.sombra, 'Latitud':z.lat, 'Longitud':z.lon,
+          'Clase de Suelo':z.claseSuelo, 'Serie de Suelos':z.serieSuelo,
+          'Pendiente Max':eq.pendiente, 'Precio por Kg USD':eq.precioKg,
+          'Fecha de Inicio Acumulación Horas Frío':eq.fechaFrio,
+          'Fecha de Inicio Acumulación grados día':eq.fechaGrados,
+          'Textura Primer Perfil':z.t1, 'Profundidad Primer Perfil (metros)':z.prof1,
+          'Pedregosidad Primer Perfil (%)':z.ped1, 'Conductividad Eléctrica Primer Perfil (dS/m)':z.ce1,
+          'Capacidad de Campo Primer Perfil (%)':z.cc1, 'Punto Marchitez Permanente Primer Perfil (%)':z.pmp1,
+          'Densidad Aparente Primer Perfil (g/cc)':z.da1,
+          'Textura Segundo Perfil':z.t2, 'Profundidad Segundo Perfil (metros)':z.prof2,
+          'Pedregosidad Segundo Perfil (%)':z.ped2, 'Conductividad Eléctrica Segundo Perfil (dS/m)':z.ce2,
+          'Capacidad de Campo Segundo Perfil (%)':z.cc2, 'Punto Marchitez Permanente Segundo Perfil (%)':z.pmp2,
+          'Densidad Aparente Segundo Perfil (g/cc)':z.da2,
+          'Textura Tercer Perfil':z.t3, 'Profundidad Tercer Perfil (metros)':z.prof3,
+          'Pedregosidad Tercer Perfil (%)':z.ped3, 'Conductividad Eléctrica Tercer Perfil (dS/m)':z.ce3,
+          'Capacidad de Campo Tercer Perfil (%)':z.cc3, 'Punto Marchitez Permanente Tercer Perfil (%)':z.pmp3,
+          'Densidad Aparente Tercer Perfil (g/cc)':z.da3,
+        }));
+        if (e) throw new Error('Zona '+z.numero+': '+(e.message||e.details));
       }
     }
-
     ir(5);
-
-  } catch(e) {
-    console.error(e);
-    let msg = 'Error al guardar. Intenta nuevamente.';
-    const raw = e.message || e.details || '';
-    if (raw.includes('numeric field overflow')) {
-      msg = '⚠️ Un valor numérico es demasiado grande. Revisa que los porcentajes no superen 100, las distancias estén en metros (ej: 6) y la profundidad en metros (ej: 0.6).';
-    } else if (raw.includes('violates foreign key')) {
-      msg = '⚠️ Error de referencia entre tablas. Contacta a soporte.';
-    } else if (raw.includes('duplicate key')) {
-      msg = '⚠️ Ya existe un registro con ese código. Intenta nuevamente en unos segundos.';
-    } else if (raw.includes('not-null')) {
-      msg = '⚠️ Falta un campo obligatorio. Revisa que todo esté completo.';
-    } else if (raw.includes('invalid input syntax')) {
-      msg = '⚠️ Formato incorrecto en algún campo. Revisa que los números no tengan letras.';
-    } else if (raw) {
-      msg = '⚠️ ' + raw;
-    }
-    err.textContent = msg;
-    err.classList.add('show');
-    btn.disabled = false;
-    btn.textContent = '✓ Enviar registro';
+  } catch(ex) {
+    console.error(ex);
+    const raw=ex.message||ex.details||'';
+    let msg='⚠️ Error al guardar. Intenta nuevamente.';
+    if (raw.includes('numeric field overflow')) msg='⚠️ Un valor numérico es demasiado grande.';
+    else if (raw.includes('duplicate key')) msg='⚠️ Ya existe un registro con ese código. Intenta en unos segundos.';
+    else if (raw.includes('not-null')) msg='⚠️ Falta un campo obligatorio.';
+    else if (raw) msg='⚠️ '+raw;
+    err.textContent=msg; err.style.display='block';
+    btn.disabled=false; btn.textContent='✓ Enviar registro';
   }
 }
 
