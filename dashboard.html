@@ -181,11 +181,22 @@
   <div class="topbar-right">
     <span class="topbar-date" id="top-fecha">—</span>
     <span class="topbar-semana" id="top-semana">—</span>
-    <button class="user-btn" onclick="logout()">
-      <div class="user-avatar" id="user-ini">—</div>
-      <span id="user-email">—</span>
-      <i class="ti ti-logout" style="font-size:14px;color:var(--muted)"></i>
-    </button>
+    <div style="position:relative">
+      <button class="user-btn" onclick="toggleMenu()" id="user-menu-btn">
+        <div class="user-avatar" id="user-ini">—</div>
+        <span id="user-email">—</span>
+        <i class="ti ti-chevron-down" style="font-size:12px;color:var(--muted)"></i>
+      </button>
+      <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--white);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(14,31,38,.12);min-width:180px;overflow:hidden;z-index:200;">
+        <button onclick="abrirCambiarClave()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">
+          <i class="ti ti-lock" style="font-size:15px;color:var(--muted)"></i> Cambiar contraseña
+        </button>
+        <div style="height:1px;background:var(--line);margin:0 12px"></div>
+        <button onclick="logout()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--danger);cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='none'">
+          <i class="ti ti-logout" style="font-size:15px"></i> Cerrar sesión
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -330,8 +341,14 @@ async function init() {
   if (rsId) {
     predios = await cargarPredios(rsId);
   } else {
-    const { data } = await db.from('v_predios').select('*').limit(20);
-    predios = data || [];
+    // Sin RS asignada: mostrar error en vez de todos los predios
+    document.getElementById('main-content').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+        <i class="ti ti-alert-circle" style="font-size:40px;color:var(--amber);display:block;margin-bottom:12px"></i>
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px">Cuenta no configurada</div>
+        <div style="font-size:13px">Tu cuenta aún no tiene predios asignados.<br>Contacta al administrador de CronoRiego.</div>
+      </div>`;
+    return;
   }
   allData.predios = predios;
 
@@ -680,6 +697,158 @@ function renderNdviChart(ndvi) {
 }
 
 init();
+</script>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div id="modal-clave" style="display:none;position:fixed;inset:0;background:rgba(14,31,38,.5);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)cerrarCambiarClave()">
+  <div style="background:var(--white);border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(14,31,38,.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700">Cambiar contraseña</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Elige una contraseña segura</div>
+      </div>
+      <button onclick="cerrarCambiarClave()" style="border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:grid;place-items:center;">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Nueva contraseña</label>
+      <div style="position:relative">
+        <input type="password" id="inp-nueva" placeholder="Mínimo 8 caracteres"
+          style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;"
+          oninput="validarClave()" onfocus="this.style.borderColor='var(--teal-700)'" onblur="this.style.borderColor='var(--line)'">
+        <button onclick="toggleVer('inp-nueva')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);font-size:16px;">
+          <i class="ti ti-eye" id="ico-nueva"></i>
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:6px;">
+      <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Confirmar contraseña</label>
+      <div style="position:relative">
+        <input type="password" id="inp-confirmar" placeholder="Repite la contraseña"
+          style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;"
+          oninput="validarClave()" onfocus="this.style.borderColor='var(--teal-700)'" onblur="this.style.borderColor='var(--line)'">
+        <button onclick="toggleVer('inp-confirmar')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);font-size:16px;">
+          <i class="ti ti-eye" id="ico-confirmar"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Indicadores de seguridad -->
+    <div id="clave-requisitos" style="margin:10px 0 16px;display:flex;flex-direction:column;gap:4px;">
+      <div id="req-len" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Mínimo 8 caracteres</div>
+      <div id="req-num" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Al menos un número</div>
+      <div id="req-may" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Al menos una mayúscula</div>
+      <div id="req-match" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Las contraseñas coinciden</div>
+    </div>
+
+    <div id="clave-msg" style="display:none;font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:14px;"></div>
+
+    <button id="btn-guardar-clave" onclick="guardarClave()" disabled
+      style="width:100%;padding:12px;background:var(--teal-700);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:not-allowed;opacity:.5;transition:opacity .2s,background .2s;">
+      Guardar nueva contraseña
+    </button>
+  </div>
+</div>
+
+<script>
+
+// ── MENÚ USUARIO ─────────────────────────────────────────────────────────────
+function toggleMenu() {
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', e => {
+  const btn = document.getElementById('user-menu-btn');
+  const menu = document.getElementById('user-menu');
+  if (btn && !btn.contains(e.target) && menu && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+// ── CAMBIAR CONTRASEÑA ────────────────────────────────────────────────────────
+function abrirCambiarClave() {
+  document.getElementById('user-menu').style.display = 'none';
+  document.getElementById('inp-nueva').value = '';
+  document.getElementById('inp-confirmar').value = '';
+  document.getElementById('clave-msg').style.display = 'none';
+  document.getElementById('btn-guardar-clave').disabled = true;
+  document.getElementById('btn-guardar-clave').style.opacity = '.5';
+  document.getElementById('btn-guardar-clave').style.cursor = 'not-allowed';
+  validarClave();
+  const modal = document.getElementById('modal-clave');
+  modal.style.display = 'flex';
+}
+function cerrarCambiarClave() {
+  document.getElementById('modal-clave').style.display = 'none';
+}
+
+function toggleVer(inputId) {
+  const inp = document.getElementById(inputId);
+  const ico = document.getElementById('ico-' + inputId.replace('inp-',''));
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.className = 'ti ti-eye-off';
+  } else {
+    inp.type = 'password';
+    ico.className = 'ti ti-eye';
+  }
+}
+
+function setReq(id, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.color = ok ? 'var(--green-700)' : 'var(--muted)';
+  el.querySelector('i').className = ok ? 'ti ti-circle-check' : 'ti ti-circle';
+}
+
+function validarClave() {
+  const nueva = document.getElementById('inp-nueva').value;
+  const confirmar = document.getElementById('inp-confirmar').value;
+  const lenOk  = nueva.length >= 8;
+  const numOk  = /\d/.test(nueva);
+  const mayOk  = /[A-Z]/.test(nueva);
+  const matchOk = nueva === confirmar && nueva.length > 0;
+  setReq('req-len', lenOk);
+  setReq('req-num', numOk);
+  setReq('req-may', mayOk);
+  setReq('req-match', matchOk);
+  const todo = lenOk && numOk && mayOk && matchOk;
+  const btn = document.getElementById('btn-guardar-clave');
+  btn.disabled = !todo;
+  btn.style.opacity = todo ? '1' : '.5';
+  btn.style.cursor = todo ? 'pointer' : 'not-allowed';
+  btn.style.background = todo ? 'var(--teal-700)' : 'var(--teal-700)';
+}
+
+async function guardarClave() {
+  const nueva = document.getElementById('inp-nueva').value;
+  const btn = document.getElementById('btn-guardar-clave');
+  const msg = document.getElementById('clave-msg');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const { error } = await db.auth.updateUser({ password: nueva });
+
+  if (error) {
+    msg.style.display = 'block';
+    msg.style.background = 'var(--danger-bg)';
+    msg.style.color = 'var(--danger)';
+    msg.style.border = '1px solid rgba(192,57,43,.2)';
+    msg.textContent = 'Error: ' + error.message;
+    btn.disabled = false;
+    btn.textContent = 'Guardar nueva contraseña';
+  } else {
+    msg.style.display = 'block';
+    msg.style.background = 'var(--green-50)';
+    msg.style.color = 'var(--green-900)';
+    msg.style.border = '1px solid rgba(30,132,73,.2)';
+    msg.textContent = '✓ Contraseña actualizada correctamente';
+    btn.textContent = '✓ Listo';
+    setTimeout(() => cerrarCambiarClave(), 2000);
+  }
+}
+
 </script>
 </body>
 </html>
