@@ -494,12 +494,14 @@ async function crearUsuario() {
   // Registrar en tabla usuarios vinculando a la RS
   const userId = signData.user?.id;
   if (userId) {
+    // Nombres exactos de columnas de la tabla public.usuarios
     await db.from('usuarios').upsert({
-      id: userId,
-      email,
-      rol,
-      'ID Razón Social (FK)': rsId,
-    });
+      'ID Usuario (PK)':        userId,
+      'Correo del Usuario':     email,
+      'Rol de Acceso':          rol,
+      'ID Razón Social (FK)':   rsId,
+      'activo':                 true,
+    }, { onConflict: 'ID Usuario (PK)' });
   }
 
   // Mostrar resultado
