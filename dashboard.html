@@ -26,10 +26,10 @@
   --r-sm:8px;--r:12px;--r-lg:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;}
+html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;}
 
 /* ═══ APP SHELL ═══ */
-.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.app{display:flex;flex-direction:column;min-height:100vh;}
 
 /* ═══ HEADER ═══ */
 .hdr{height:58px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:50;box-shadow:var(--shadow-sm);}
@@ -62,8 +62,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .dd-sep{height:1px;background:var(--line);margin:2px 0;}
 
 /* ═══ KPI BAR ═══ */
-.kpi-bar{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;height:104px;}
-.kpi-card{padding:14px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;transition:background .15s;}
+.kpi-bar{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:var(--white);border-bottom:1px solid var(--line);}
+.kpi-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
 .kpi-card:last-child{border-right:none;}
 .kpi-card:hover{background:#FAFBFC;}
 .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;}
@@ -81,12 +81,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .kpi-status-sub{font-size:11px;color:var(--muted);}
 
 /* ═══ BODY ═══ */
-.body{display:flex;flex:1;overflow:hidden;gap:0;}
+.body{display:flex;gap:0;align-items:flex-start;}
 
 /* ═══ CALENDARIO ═══ */
-.cal-zone{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.cal-scroll{flex:1;overflow:auto;padding:16px 16px 0;}
-.cal-tbl{width:100%;border-collapse:separate;border-spacing:0 8px;min-width:680px;}
+.cal-zone{flex:1;display:flex;flex-direction:column;min-width:0;}
+.cal-scroll{padding:16px 16px 0;}
+.cal-tbl{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:680px;}
 
 /* Header días */
 .cal-tbl thead tr th{padding:0 8px 8px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:2px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
@@ -102,7 +102,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .cal-tbl tbody tr td:last-child{border-radius:0 var(--r) var(--r) 0;}
 
 .zona-td{padding:0;width:150px;min-width:150px;}
-.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;height:92px;display:flex;flex-direction:column;justify-content:center;gap:3px;box-shadow:var(--shadow-sm);}
+.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;height:64px;display:flex;flex-direction:column;justify-content:center;gap:2px;box-shadow:var(--shadow-sm);}
 .zona-head{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);}
 .zona-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .zona-esp{font-size:11px;color:var(--muted);padding-left:15px;line-height:1.3;}
@@ -110,14 +110,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 .dia-td{padding:3px;vertical-align:top;min-width:100px;}
 .dia-td.hoy-col .riego-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
-.dia-inner{height:86px;display:flex;align-items:center;justify-content:center;}
+.dia-inner{height:64px;display:flex;align-items:center;justify-content:center;}
 
 /* TARJETA DE RIEGO — protagonista visual */
-.riego-card{width:100%;height:86px;border-radius:var(--r);padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
+.riego-card{width:100%;height:64px;border-radius:var(--r);padding:7px 10px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
 .riego-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
 .riego-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 .rc-top{display:flex;align-items:center;justify-content:space-between;}
-.rc-tiempo{font-family:'Fraunces',serif;font-size:17px;font-weight:700;line-height:1;letter-spacing:-.3px;}
+.rc-tiempo{font-family:'Fraunces',serif;font-size:15px;font-weight:700;line-height:1;letter-spacing:-.3px;}
 .rc-ico{font-size:14px;}
 .rc-mid{display:flex;flex-direction:column;gap:1px;}
 .rc-mm{font-size:12px;font-weight:600;color:var(--ink2);}
@@ -125,11 +125,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .rc-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;align-self:flex-start;}
 
 /* VACÍO */
-.dia-empty{width:100%;height:86px;border-radius:var(--r);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--line);font-size:18px;}
+.dia-empty{width:100%;height:64px;border-radius:var(--r);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--line);font-size:16px;}
 
 /* ═══ FRANJA INFERIOR ═══ */
-.franja{height:96px;background:var(--white);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);flex-shrink:0;box-shadow:0 -1px 3px rgba(0,0,0,.04);}
-.franja-card{padding:14px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;transition:background .15s;}
+.franja{background:var(--white);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);box-shadow:0 -1px 3px rgba(0,0,0,.04);}
+.franja-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:5px;transition:background .15s;}
 .franja-card:last-child{border-right:none;}
 .franja-card:hover{background:#FAFBFC;}
 .franja-top{display:flex;align-items:center;gap:7px;}
@@ -142,9 +142,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .franja-sub{font-size:10px;color:var(--muted);}
 
 /* ═══ PANEL DERECHO ═══ */
-.panel{width:296px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;gap:0;}
+.panel{width:296px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0;gap:0;position:sticky;top:0;max-height:100vh;overflow-y:auto;}
 .p-block{padding:14px;border-bottom:1px solid var(--line);background:var(--white);}
-.p-block.flex-auto{flex:1;overflow-y:auto;}
+.p-block.flex-auto{flex:1;}
 .p-block.no-flex{flex-shrink:0;}
 .p-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:5px;}
 .p-title i{font-size:14px;}
@@ -515,7 +515,7 @@ function rCal(dias,sc){
   G.zonas.forEach((z,zi)=>{
     const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
     const nd=G.ndvi[z.id_zona];
-    tbody+=`<tr style="height:100px;">
+    tbody+=`<tr style="height:72px;">
       <td class="zona-td" style="padding:3px 6px 3px 0">
         <div class="zona-pill">
           <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
