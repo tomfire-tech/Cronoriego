@@ -11,7 +11,7 @@
 <style>
   :root {
     --teal-900:#0f3a52;--teal-700:#1A5276;--teal-500:#2E86AB;--teal-50:#eaf3f8;
-    --green-900:#154a29;--green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;
+    --green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;--green-900:#154a29;
     --amber:#d29922;--amber-bg:#fff8e6;
     --ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;
     --bg:#f7faf9;--white:#ffffff;--danger:#c0392b;--danger-bg:#fdf2f2;
@@ -19,7 +19,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
 
-  /* ── TOPBAR ── */
+  /* TOPBAR */
   .topbar{background:var(--white);border-bottom:1px solid var(--line);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
   .brand{font-size:16px;font-weight:800;}
   .brand span:first-child{color:var(--teal-700);}
@@ -27,11 +27,10 @@
   .topbar-right{display:flex;align-items:center;gap:16px;}
   .topbar-date{font-size:12px;color:var(--muted);}
   .topbar-semana{font-size:11px;font-weight:600;background:var(--teal-50);color:var(--teal-700);padding:3px 10px;border-radius:999px;}
-  .user-btn{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--white);transition:background .2s;}
-  .user-btn:hover{background:var(--bg);}
+  .user-btn{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--white);}
   .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--teal-700);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
 
-  /* ── SELECTORS ── */
+  /* SELECTORS */
   .selectors{background:var(--white);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
   .sel-group{display:flex;align-items:center;gap:6px;}
   .sel-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
@@ -39,125 +38,107 @@
   .sel-group select:focus{outline:none;border-color:var(--teal-700);}
   .ndvi-chip{font-size:11px;font-weight:600;background:var(--green-50);color:var(--green-700);padding:4px 10px;border-radius:999px;border:1px solid rgba(30,132,73,.2);margin-left:auto;}
 
-  /* ── HERO ── */
+  /* HERO */
   .hero{background:linear-gradient(135deg,var(--teal-900),var(--teal-700));border-radius:14px;padding:22px 26px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden;}
   .hero::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);pointer-events:none;}
   .hero-eyebrow{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-bottom:10px;}
-  .hero-main{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;}
-  .hero-verb{font-family:'Fraunces',serif;font-size:clamp(26px,4vw,38px);font-weight:700;line-height:1.1;}
-  .hero-tags{display:flex;gap:8px;flex-wrap:wrap;}
-  .htag{font-size:12px;font-weight:600;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 12px;}
-  .htag.ferti{background:rgba(210,153,34,.85);border-color:transparent;}
+  .hero-verb{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,36px);font-weight:700;line-height:1.1;margin-bottom:10px;}
   .hero-sub{font-size:13px;opacity:.88;max-width:65ch;margin-bottom:16px;line-height:1.55;}
   .hero-meta{display:flex;gap:24px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.15);padding-top:14px;}
   .hm-item{display:flex;flex-direction:column;gap:2px;}
   .hm-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
   .hm-label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;}
 
-  /* ── LAYOUT ── */
+  /* MAIN */
   .main{padding:20px 24px;max-width:1400px;margin:0 auto;}
 
-  /* ── KPIs ── */
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
-  .kpi{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  /* GRID */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
+  @media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:1fr 1fr;}}
+  @media(max-width:720px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+  /* CARD */
+  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+  .card-title i{font-size:15px;color:var(--teal-500);}
+
+  /* MÉTRICA COMPARATIVA */
+  .metrica-comp{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:10px;}
+  .metrica-comp:last-child{margin-bottom:0;}
+  .metrica-titulo{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+  .metrica-fila{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .metrica-fila:last-child{margin-bottom:0;}
+  .metrica-key{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px;}
+  .metrica-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
+  .metrica-val.est{color:var(--green-700);}
+  .metrica-val.pron{color:var(--teal-700);}
+  .metrica-val.cero{color:var(--muted);font-size:14px;}
+  .tag-est{font-size:9px;font-weight:700;background:var(--green-50);color:var(--green-700);border-radius:4px;padding:2px 5px;letter-spacing:.04em;}
+  .tag-pron{font-size:9px;font-weight:700;background:var(--teal-50);color:var(--teal-700);border-radius:4px;padding:2px 5px;letter-spacing:.04em;}
+  .tag-sin{font-size:9px;font-weight:700;background:var(--bg);color:var(--muted);border-radius:4px;padding:2px 5px;border:1px solid var(--line);}
+
+  /* KPI SIMPLE */
+  .kpi{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px;}
   .kpi-label{font-size:11px;color:var(--muted);margin-bottom:6px;}
-  .kpi-val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;line-height:1;}
+  .kpi-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;line-height:1;}
   .kpi-unit{font-size:11px;color:var(--muted);margin-top:3px;}
   .kpi-val.green{color:var(--green-700);}
   .kpi-val.teal{color:var(--teal-700);}
   .kpi-val.amber{color:var(--amber);}
 
-  /* ── GRID ── */
-  .grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:14px;}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-  @media(max-width:1100px){.grid-3{grid-template-columns:1fr 1fr;} .grid-3 > :first-child{grid-column:span 2;}}
-  @media(max-width:720px){.grid-3,.grid-2{grid-template-columns:1fr;} .grid-3 > :first-child{grid-column:span 1;} .kpis{grid-template-columns:repeat(3,1fr);}}
-  @media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr);}}
-
-  /* ── CARD ── */
-  .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:18px;}
-  .card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
-  .card-title i{font-size:16px;color:var(--teal-500);}
-
-  /* ── BALANCE ── */
-  .bal-track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;margin:10px 0 6px;}
-  .bal-fill{height:100%;background:linear-gradient(90deg,var(--teal-700),var(--teal-500));border-radius:6px;transition:width .7s cubic-bezier(.2,.7,.2,1);}
-  .bal-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
-
-  /* ── MÉTRICAS ── */
-  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);}
-  .metric-row:last-child{border-bottom:none;}
-  .metric-key{font-size:12px;color:var(--ink-2);}
-  .metric-val{font-size:13px;font-weight:600;}
-  .metric-val.green{color:var(--green-700);}
-  .metric-val.teal{color:var(--teal-700);}
-  .metric-val.amber{color:var(--amber);}
-
-  /* ── CALENDARIO ── */
+  /* CALENDARIO */
   .cal-grid{display:grid;grid-template-columns:28px repeat(7,1fr);gap:2px;font-size:11px;}
   .cal-dh{text-align:center;color:var(--muted);padding:3px 0;font-weight:600;}
   .cal-wn{color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:10px;}
-  .cal-cell{background:var(--bg);border:0.5px solid var(--line);border-radius:4px;padding:3px 4px;min-height:42px;}
-  .cal-cell.hoy{border-color:var(--teal-700) !important;border-width:2px;}
-  .cal-cell.riego{background:var(--green-50);border-color:rgba(30,132,73,.3);}
-  .cal-cell.ferti{background:var(--teal-50);border-color:rgba(46,134,171,.3);}
-  .cal-cell.otro-mes{opacity:.25;}
-  .cal-clickable{cursor:pointer;transition:transform .15s,box-shadow .15s;}
-  .cal-clickable:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(30,132,73,.2);}
+  .cal-cell{background:var(--bg);border:0.5px solid var(--line);border-radius:4px;padding:3px 4px;min-height:48px;transition:all .15s;}
+  .cal-cell.hoy{border:2px solid var(--teal-700);}
+  .cal-cell.tiene-riego-est{background:#e8f5e9;border-color:rgba(30,132,73,.4);}
+  .cal-cell.tiene-riego-pron{background:var(--teal-50);border-color:rgba(46,134,171,.3);}
+  .cal-cell.tiene-ambos{background:linear-gradient(135deg,#e8f5e9 50%,var(--teal-50) 50%);border-color:rgba(30,132,73,.3);}
+  .cal-cell.otro-mes{opacity:.2;}
+  .cal-clickable{cursor:pointer;}
+  .cal-clickable:hover{transform:scale(1.04);box-shadow:0 4px 12px rgba(14,31,38,.1);}
   .cal-dn{font-size:10px;font-weight:600;color:var(--ink-2);}
   .cal-cell.hoy .cal-dn{color:var(--teal-700);}
-  .cal-ev{font-size:9px;color:var(--green-700);margin-top:2px;font-weight:600;}
-  .cal-fe{font-size:9px;color:var(--teal-700);}
+  .cal-ev-est{font-size:9px;color:var(--green-700);font-weight:700;margin-top:2px;}
+  .cal-ev-pron{font-size:9px;color:var(--teal-700);font-weight:600;}
   .cal-legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
   .cal-leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
   .cal-leg-dot{width:8px;height:8px;border-radius:2px;}
 
-  /* ── NUTRICIÓN ── */
-  .nut-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-  .nut-item{background:var(--bg);border-radius:8px;padding:10px;text-align:center;}
-  .nut-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
-  .nut-val{font-family:'Fraunces',serif;font-size:20px;font-weight:600;}
-  .nut-unit{font-size:10px;color:var(--muted);}
-  .nut-N .nut-val{color:#185FA5;}
-  .nut-P .nut-val{color:#854F0B;}
-  .nut-K .nut-val{color:var(--green-700);}
-
-  /* ── NDVI CHART ── */
-  .ndvi-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px;}
+  /* NDVI BAR */
+  .ndvi-chart{display:flex;align-items:flex-end;gap:4px;height:55px;margin-top:8px;}
   .ndvi-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
   .ndvi-bar-item{width:100%;background:var(--green-500);border-radius:2px 2px 0 0;}
   .ndvi-date{font-size:9px;color:var(--muted);}
 
-  /* ── ALERTAS ── */
-  .alerta{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;}
-  .alerta:last-child{margin-bottom:0;}
-  .alerta.warn{background:var(--amber-bg);color:#633806;border:1px solid rgba(210,153,34,.2);}
-  .alerta.ok{background:var(--green-50);color:var(--green-900);border:1px solid rgba(30,132,73,.2);}
-  .alerta.info{background:var(--teal-50);color:var(--teal-900);border:1px solid rgba(46,134,171,.2);}
-  .alerta i{font-size:16px;flex-shrink:0;margin-top:1px;}
-
-  /* ── DRAWER ── */
+  /* DRAWER */
   .scrim{position:fixed;inset:0;background:rgba(14,31,38,.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
   .scrim.open{opacity:1;pointer-events:auto;}
-  .drawer{position:fixed;right:0;top:0;height:100%;width:min(420px,92vw);background:var(--white);box-shadow:-4px 0 24px rgba(14,31,38,.12);z-index:201;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;}
+  .drawer{position:fixed;right:0;top:0;height:100%;width:min(440px,92vw);background:var(--white);box-shadow:-4px 0 24px rgba(14,31,38,.12);z-index:201;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);display:flex;flex-direction:column;}
   .drawer.open{transform:translateX(0);}
   .drawer-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
   .drawer-head .dt{font-family:'Fraunces',serif;font-size:20px;font-weight:700;text-transform:capitalize;}
   .drawer-head .ds{font-size:12px;color:var(--muted);margin-top:2px;}
-  .dclose{border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);flex:none;display:grid;place-items:center;}
-  .dclose:hover{background:var(--line);}
+  .dclose{border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:grid;place-items:center;}
   .drawer-body{padding:20px 22px;overflow-y:auto;flex:1;}
 
-  /* ── PROG ── */
-  .prog-wrap{margin:8px 0;}
-  .prog-header{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;}
-  .prog-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;}
-  .prog-fill{height:100%;border-radius:3px;}
-  .prog-fill.hf{background:var(--teal-500);}
-  .prog-fill.gd{background:var(--amber);}
+  /* MODAL CLAVE */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(14,31,38,.5);z-index:300;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:var(--white);border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(14,31,38,.2);}
+  .form-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;}
+  .form-input{width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;position:relative;}
+  .form-input:focus{border-color:var(--teal-700);}
+  .inp-wrap{position:relative;margin-bottom:14px;}
+  .eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);font-size:16px;}
+  .req{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+  .req.ok{color:var(--green-700);}
 
-  /* ── LOADING ── */
   .loading{text-align:center;padding:60px;color:var(--muted);font-size:14px;}
+  .sin-rs{text-align:center;padding:60px 20px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -166,14 +147,45 @@
 <div class="scrim" id="scrim" onclick="cerrarDrawer()"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
-    <div>
-      <div class="dt" id="dw-title">—</div>
-      <div class="ds" id="dw-sub">—</div>
-    </div>
+    <div><div class="dt" id="dw-title">—</div><div class="ds" id="dw-sub">—</div></div>
     <button class="dclose" onclick="cerrarDrawer()">✕</button>
   </div>
   <div class="drawer-body" id="dw-body"></div>
 </aside>
+
+<!-- MODAL CAMBIAR CLAVE -->
+<div class="modal-overlay" id="modal-clave" onclick="if(event.target===this)cerrarClave()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700">Cambiar contraseña</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Elige una contraseña segura</div>
+      </div>
+      <button onclick="cerrarClave()" style="border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:grid;place-items:center;">✕</button>
+    </div>
+    <label class="form-label">Nueva contraseña</label>
+    <div class="inp-wrap">
+      <input type="password" id="inp-nueva" class="form-input" placeholder="Mínimo 8 caracteres" oninput="validarClave()">
+      <button class="eye-btn" onclick="toggleVer('inp-nueva','ico-nueva')"><i class="ti ti-eye" id="ico-nueva"></i></button>
+    </div>
+    <label class="form-label">Confirmar contraseña</label>
+    <div class="inp-wrap">
+      <input type="password" id="inp-conf" class="form-input" placeholder="Repite la contraseña" oninput="validarClave()">
+      <button class="eye-btn" onclick="toggleVer('inp-conf','ico-conf')"><i class="ti ti-eye" id="ico-conf"></i></button>
+    </div>
+    <div style="margin:8px 0 14px;">
+      <div class="req" id="req-len"><i class="ti ti-circle" style="font-size:10px"></i> Mínimo 8 caracteres</div>
+      <div class="req" id="req-num"><i class="ti ti-circle" style="font-size:10px"></i> Al menos un número</div>
+      <div class="req" id="req-may"><i class="ti ti-circle" style="font-size:10px"></i> Al menos una mayúscula</div>
+      <div class="req" id="req-match"><i class="ti ti-circle" style="font-size:10px"></i> Las contraseñas coinciden</div>
+    </div>
+    <div id="clave-msg" style="display:none;font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:12px;"></div>
+    <button id="btn-guardar-clave" onclick="guardarClave()" disabled
+      style="width:100%;padding:12px;background:var(--teal-700);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:not-allowed;opacity:.5;transition:all .2s;">
+      Guardar contraseña
+    </button>
+  </div>
+</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -188,11 +200,11 @@
         <i class="ti ti-chevron-down" style="font-size:12px;color:var(--muted)"></i>
       </button>
       <div id="user-menu" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--white);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(14,31,38,.12);min-width:180px;overflow:hidden;z-index:200;">
-        <button onclick="abrirCambiarClave()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">
+        <button onclick="abrirClave()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:10px;">
           <i class="ti ti-lock" style="font-size:15px;color:var(--muted)"></i> Cambiar contraseña
         </button>
         <div style="height:1px;background:var(--line);margin:0 12px"></div>
-        <button onclick="logout()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--danger);cursor:pointer;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='var(--danger-bg)'" onmouseout="this.style.background='none'">
+        <button onclick="logout()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--danger);cursor:pointer;display:flex;align-items:center;gap:10px;">
           <i class="ti ti-logout" style="font-size:15px"></i> Cerrar sesión
         </button>
       </div>
@@ -202,18 +214,9 @@
 
 <!-- SELECTORS -->
 <div class="selectors">
-  <div class="sel-group">
-    <span class="sel-label">Predio</span>
-    <select id="sel-predio" onchange="onPredioChange()"><option>Cargando...</option></select>
-  </div>
-  <div class="sel-group">
-    <span class="sel-label">Equipo</span>
-    <select id="sel-equipo" onchange="onEquipoChange()"><option>Cargando...</option></select>
-  </div>
-  <div class="sel-group">
-    <span class="sel-label">Zona</span>
-    <select id="sel-zona" onchange="onZonaChange()"><option>Cargando...</option></select>
-  </div>
+  <div class="sel-group"><span class="sel-label">Predio</span><select id="sel-predio" onchange="onPredioChange()"><option>Cargando...</option></select></div>
+  <div class="sel-group"><span class="sel-label">Equipo</span><select id="sel-equipo" onchange="onEquipoChange()"><option>Cargando...</option></select></div>
+  <div class="sel-group"><span class="sel-label">Zona</span><select id="sel-zona" onchange="onZonaChange()"><option>Cargando...</option></select></div>
   <div class="ndvi-chip" id="ndvi-chip">NDVI —</div>
 </div>
 
@@ -228,18 +231,20 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let _zona = null, _rec = null, _scDia = null;
+let _zona = null, _scDia = [], _ndvi = [];
 let allData = {};
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-function hm(h) {
-  if (!h || h <= 0) return '—';
-  const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
-  return mm === 60 ? `${hh+1}h 00min` : `${hh}h ${String(mm).padStart(2,'0')}min`;
-}
-function n2(v, dec=1, suf='') {
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function n(v, dec=1, suf='') {
   const f = parseFloat(v);
-  return isNaN(f) ? '—' : f.toFixed(dec) + suf;
+  return isNaN(f) || f === 0 ? null : f.toFixed(dec) + suf;
+}
+function fmt(v, dec=1, suf='') { return n(v,dec,suf) || '—'; }
+function hm(h) {
+  const f = parseFloat(h);
+  if (!f || f <= 0) return null;
+  const hh = Math.floor(f), mm = Math.round((f-hh)*60);
+  return mm===60 ? `${hh+1}h 00min` : `${hh}h ${String(mm).padStart(2,'0')}min`;
 }
 function isoWeek(d) {
   const dc = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
@@ -250,20 +255,79 @@ function isoWeek(d) {
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function checkAuth() {
-  const { data: { session } } = await db.auth.getSession();
-  if (!session) { window.location.href = 'login.html'; return null; }
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { window.location.href='login.html'; return null; }
   return session;
 }
-async function logout() {
-  await db.auth.signOut();
-  window.location.href = 'login.html';
+async function logout() { await db.auth.signOut(); window.location.href='login.html'; }
+
+// ── MENÚ ──────────────────────────────────────────────────────────────────────
+function toggleMenu() {
+  const m = document.getElementById('user-menu');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
+}
+document.addEventListener('click', e => {
+  const btn = document.getElementById('user-menu-btn');
+  const m   = document.getElementById('user-menu');
+  if (btn && !btn.contains(e.target) && m && !m.contains(e.target)) m.style.display='none';
+});
+
+// ── CAMBIAR CLAVE ─────────────────────────────────────────────────────────────
+function abrirClave() {
+  document.getElementById('user-menu').style.display='none';
+  document.getElementById('inp-nueva').value='';
+  document.getElementById('inp-conf').value='';
+  document.getElementById('clave-msg').style.display='none';
+  document.getElementById('btn-guardar-clave').disabled=true;
+  document.getElementById('btn-guardar-clave').style.opacity='.5';
+  validarClave();
+  document.getElementById('modal-clave').classList.add('open');
+}
+function cerrarClave() { document.getElementById('modal-clave').classList.remove('open'); }
+function toggleVer(id,ico) {
+  const i=document.getElementById(id); const ic=document.getElementById(ico);
+  i.type=i.type==='password'?'text':'password';
+  ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';
+}
+function setReq(id,ok) {
+  const el=document.getElementById(id); if(!el)return;
+  el.className='req'+(ok?' ok':'');
+  el.querySelector('i').className=ok?'ti ti-circle-check':'ti ti-circle';
+  el.querySelector('i').style.fontSize='10px';
+}
+function validarClave() {
+  const a=document.getElementById('inp-nueva').value;
+  const b=document.getElementById('inp-conf').value;
+  const l=a.length>=8, num=/[0-9]/.test(a), may=/[A-Z]/.test(a), match=a===b&&a.length>0;
+  setReq('req-len',l); setReq('req-num',num); setReq('req-may',may); setReq('req-match',match);
+  const ok=l&&num&&may&&match;
+  const btn=document.getElementById('btn-guardar-clave');
+  btn.disabled=!ok; btn.style.opacity=ok?'1':'.5'; btn.style.cursor=ok?'pointer':'not-allowed';
+}
+async function guardarClave() {
+  const pw=document.getElementById('inp-nueva').value;
+  const btn=document.getElementById('btn-guardar-clave');
+  const msg=document.getElementById('clave-msg');
+  btn.disabled=true; btn.textContent='Guardando...';
+  const {error}=await db.auth.updateUser({password:pw});
+  msg.style.display='block';
+  if (error) {
+    msg.style.cssText='display:block;background:var(--danger-bg);color:var(--danger);border:1px solid rgba(192,57,43,.2);font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:12px;';
+    msg.textContent='Error: '+error.message;
+    btn.disabled=false; btn.textContent='Guardar contraseña';
+  } else {
+    msg.style.cssText='display:block;background:var(--green-50);color:var(--green-700);border:1px solid rgba(30,132,73,.2);font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:12px;';
+    msg.textContent='✓ Contraseña actualizada';
+    btn.textContent='✓ Listo';
+    setTimeout(()=>cerrarClave(),2000);
+  }
 }
 
-// ── DRAWER ───────────────────────────────────────────────────────────────────
-function abrirDrawer(titulo, sub, html) {
-  document.getElementById('dw-title').textContent = titulo;
-  document.getElementById('dw-sub').textContent = sub;
-  document.getElementById('dw-body').innerHTML = html;
+// ── DRAWER ────────────────────────────────────────────────────────────────────
+function abrirDrawer(titulo,sub,html) {
+  document.getElementById('dw-title').textContent=titulo;
+  document.getElementById('dw-sub').textContent=sub;
+  document.getElementById('dw-body').innerHTML=html;
   document.getElementById('scrim').classList.add('open');
   document.getElementById('drawer').classList.add('open');
 }
@@ -271,584 +335,453 @@ function cerrarDrawer() {
   document.getElementById('scrim').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarDrawer(); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarDrawer();cerrarClave();}});
 
 // ── FECHA ─────────────────────────────────────────────────────────────────────
 function initFecha() {
-  const t = new Date();
-  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('top-fecha').textContent = `${dias[t.getDay()]} ${t.getDate()} de ${meses[t.getMonth()]}`;
-  document.getElementById('top-semana').textContent = `Semana ISO ${isoWeek(t)}`;
+  const t=new Date();
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('top-fecha').textContent=`${dias[t.getDay()]} ${t.getDate()} de ${meses[t.getMonth()]}`;
+  document.getElementById('top-semana').textContent=`Semana ISO ${isoWeek(t)}`;
 }
 
-// ── QUERIES ──────────────────────────────────────────────────────────────────
+// ── QUERIES — SOLO sc_* y ndvi_registros ──────────────────────────────────────
 async function cargarPredios(rsId) {
-  const { data } = await db.from('v_predios').select('*').eq('id_rs', rsId);
-  return data || [];
+  const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);
+  return data||[];
 }
 async function cargarEquipos(prId) {
-  const { data } = await db.from('v_equipos').select('*').eq('id_predio', prId);
-  return data || [];
+  const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);
+  return data||[];
 }
 async function cargarZonas(eqId) {
-  const { data } = await db.from('v_zonas').select('*').eq('id_equipo', eqId).eq('activa','Sí');
-  return data || [];
-}
-async function cargarEto(prId) {
-  const { data } = await db.from('eto_pronostico').select('*')
-    .eq('ID Predio', prId).order('Fecha_Pronostico',{ascending:false}).limit(7);
-  return data || [];
+  const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí');
+  return data||[];
 }
 async function cargarNdvi(zId) {
-  const { data } = await db.from('ndvi_registros').select('*')
-    .eq('ID Zona Relacional (PK)', zId).order('Fecha',{ascending:false}).limit(8);
-  return data || [];
-}
-async function cargarRecomendacion(zId) {
-  const { data } = await db.from('v_recomendaciones').select('*')
-    .eq('id_zona', zId).order('fecha_calculo',{ascending:false}).limit(1);
-  return data?.[0] || null;
+  const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"')
+    .eq('ID Zona Relacional (PK)',zId)
+    .order('Fecha',{ascending:false}).limit(8);
+  return data||[];
 }
 async function cargarScDiaria(zId) {
-  // Últimos 30 días de sc_demanda_hidrica_diaria_zona para la zona actual
-  const { data } = await db.from('sc_demanda_hidrica_diaria_zona').select(
-    'id_zona,fecha,kc,ndvi,eto_pronostico_mm_dia,etc_pronostico_mm_dia,' +
-    'lamina_neta_pronostico_mm_dia,lamina_neta_riego_pronostico_mm,' +
-    'tiempo_de_riego_pronostico_horas,calculo_umbral_riego_mm,' +
-    'lluvia_pronostico_mm_dia,deficit_hidrico_controlado'
-  )
-    .eq('id_zona', zId)
-    .order('fecha',{ascending:false})
-    .limit(60);
-  return data || [];
+  // Últimos 60 días + próximos 30 (la tabla tiene datos históricos y futuros)
+  const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select(
+    'fecha,id_zona,ndvi,kc,'+
+    'eto_estacion_mm_dia,eto_pronostico_mm_dia,'+
+    'etc_estacion_mm_dia,etc_pronostico_mm_dia,'+
+    'lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,'+
+    'tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,'+
+    'lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,'+
+    'deficit_hidrico_controlado'
+  ).eq('id_zona',zId).order('fecha',{ascending:true});
+  return data||[];
+}
+async function cargarScSemanal(eqId) {
+  const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*')
+    .eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(8);
+  return data||[];
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  const session = await checkAuth();
-  if (!session) return;
+  const session=await checkAuth(); if(!session)return;
   initFecha();
+  const email=session.user.email;
+  document.getElementById('user-email').textContent=email.split('@')[0];
+  document.getElementById('user-ini').textContent=email[0].toUpperCase();
 
-  const email = session.user.email;
-  document.getElementById('user-email').textContent = email.split('@')[0];
-  document.getElementById('user-ini').textContent = email[0].toUpperCase();
+  const {data:u}=await db.from('v_usuarios').select('*').eq('email',email).limit(1);
+  const rsId=u?.[0]?.id_rs||null;
 
-  const { data: usuarios } = await db.from('v_usuarios').select('*').eq('email', email).limit(1);
-  let rsId = usuarios?.[0]?.['id_rs'] || null;
-
-  let predios = [];
-  if (rsId) {
-    predios = await cargarPredios(rsId);
-  } else {
-    // Sin RS asignada: mostrar error en vez de todos los predios
-    document.getElementById('main-content').innerHTML = `
-      <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+  if (!rsId) {
+    document.getElementById('main-content').innerHTML=`
+      <div class="sin-rs">
         <i class="ti ti-alert-circle" style="font-size:40px;color:var(--amber);display:block;margin-bottom:12px"></i>
         <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px">Cuenta no configurada</div>
         <div style="font-size:13px">Tu cuenta aún no tiene predios asignados.<br>Contacta al administrador de CronoRiego.</div>
       </div>`;
     return;
   }
-  allData.predios = predios;
 
-  const sel = document.getElementById('sel-predio');
-  sel.innerHTML = predios.map(p => `<option value="${p['id_predio']}">${p['nombre']}</option>`).join('');
-  if (predios.length > 0) await onPredioChange();
+  const predios=await cargarPredios(rsId);
+  allData.predios=predios;
+  const sel=document.getElementById('sel-predio');
+  sel.innerHTML=predios.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
+  if(predios.length>0) await onPredioChange();
 }
 
 async function onPredioChange() {
-  const prId = document.getElementById('sel-predio').value;
-  const equipos = await cargarEquipos(prId);
-  allData.equipos = equipos;
-  const sel = document.getElementById('sel-equipo');
-  sel.innerHTML = equipos.length
-    ? equipos.map(e => `<option value="${e['id_equipo']}">${e['nombre']}</option>`).join('')
+  const prId=document.getElementById('sel-predio').value;
+  const equipos=await cargarEquipos(prId);
+  allData.equipos=equipos;
+  const sel=document.getElementById('sel-equipo');
+  sel.innerHTML=equipos.length
+    ? equipos.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join('')
     : '<option value="">Sin equipos</option>';
-  if (equipos.length > 0) await onEquipoChange();
+  if(equipos.length>0) await onEquipoChange();
 }
 
 async function onEquipoChange() {
-  const eqId = document.getElementById('sel-equipo').value;
-  const zonas = await cargarZonas(eqId);
-  allData.zonas = zonas;
-  const sel = document.getElementById('sel-zona');
-  sel.innerHTML = zonas.length
-    ? zonas.map(z => `<option value="${z['id_zona']}">${z['id_zona']} — ${z['nombre']} (${z['especie']})</option>`).join('')
+  const eqId=document.getElementById('sel-equipo').value;
+  const zonas=await cargarZonas(eqId);
+  allData.zonas=zonas;
+  const sel=document.getElementById('sel-zona');
+  sel.innerHTML=zonas.length
+    ? zonas.map(z=>`<option value="${z.id_zona}">${z.id_zona} — ${z.nombre} (${z.especie})</option>`).join('')
     : '<option value="">Sin zonas</option>';
-  if (zonas.length > 0) await onZonaChange();
+  if(zonas.length>0) await onZonaChange();
 }
 
 async function onZonaChange() {
-  const zId = document.getElementById('sel-zona').value;
-  const prId = document.getElementById('sel-predio').value;
-  const zona = allData.zonas?.find(z => z['id_zona'] === zId);
-  if (!zona) return;
-  _zona = zona;
-  document.getElementById('main-content').innerHTML = '<div class="loading"><i class="ti ti-loader" style="font-size:24px"></i><br><br>Cargando zona...</div>';
+  const zId=document.getElementById('sel-zona').value;
+  const eqId=document.getElementById('sel-equipo').value;
+  const zona=allData.zonas?.find(z=>z.id_zona===zId);
+  if(!zona)return;
+  _zona=zona;
+  document.getElementById('main-content').innerHTML='<div class="loading"><i class="ti ti-loader" style="font-size:24px"></i><br><br>Cargando zona...</div>';
 
-  const [eto, ndvi, rec, scDia] = await Promise.all([
-    cargarEto(prId), cargarNdvi(zId), cargarRecomendacion(zId), cargarScDiaria(zId)
-  ]);
+  const [ndvi,scDia]=await Promise.all([cargarNdvi(zId),cargarScDiaria(zId)]);
+  _ndvi=ndvi; _scDia=scDia;
 
-  _rec = rec; _scDia = scDia;
-
-  const ndviActual = ndvi[0];
-  if (ndviActual) {
-    document.getElementById('ndvi-chip').textContent = `NDVI ${ndviActual['NDVI']} · Kc ${rec?.kc_ajustado ? parseFloat(rec.kc_ajustado).toFixed(2) : '—'}`;
+  // NDVI chip
+  const ndviActual=ndvi[0];
+  if(ndviActual) {
+    document.getElementById('ndvi-chip').textContent=
+      `NDVI ${parseFloat(ndviActual['NDVI']).toFixed(3)} · Kc ${parseFloat(ndviActual['Kc']).toFixed(2)}`;
+  } else {
+    document.getElementById('ndvi-chip').textContent='NDVI —';
   }
 
-  renderDashboard(zona, eto, ndvi, rec, scDia);
+  renderDashboard(zona,ndvi,scDia);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-function renderDashboard(zona, eto, ndvi, rec, scDia) {
-  // Datos ETo acumulados
-  const etoAcum = eto.reduce((s,e) => s + (parseFloat(e['ETo_Proyectada (mm)'])||0), 0);
-  const precipAcum = eto.reduce((s,e) => s + (parseFloat(e['Precipitacion_Probable (mm)'])||0), 0);
-  const tmaxProm = eto.length ? eto.reduce((s,e)=>s+(parseFloat(e['Tmax_Proy (C)'])||0),0)/eto.length : null;
-  const tminProm = eto.length ? eto.reduce((s,e)=>s+(parseFloat(e['Tmin_Proy (C)'])||0),0)/eto.length : null;
+function renderDashboard(zona,ndvi,scDia) {
+  const hoy=new Date();
+  const hoyStr=hoy.toISOString().slice(0,10);
 
-  // Datos de recomendación
-  const kcAj      = parseFloat(rec?.kc_ajustado) || null;
-  const etcNeta   = parseFloat(rec?.etc_neta) || null;
-  const frec      = parseFloat(rec?.frecuencia_dias) || null;
-  const tRiego    = parseFloat(rec?.tiempo_h) || null;
-  const consumoEv = parseFloat(rec?.consumo_evento) || null;
-  const laminaNeta  = parseFloat(rec?.lamina_neta) || null;
-  const laminaUmbral= parseFloat(rec?.lamina_umbral) || null;
-  const nMes = parseFloat(rec?.n_mes) || null;
-  const pMes = parseFloat(rec?.p_mes) || null;
-  const kMes = parseFloat(rec?.k_mes) || null;
+  // Datos de hoy o más reciente con datos
+  const diaHoy=scDia.find(r=>r.fecha===hoyStr);
+  const diaReciente=scDia.slice().reverse().find(r=>
+    parseFloat(r.lamina_neta_riego_estacion_mm)>0||parseFloat(r.lamina_neta_riego_pronostico_mm)>0
+  );
+  const diaRef=diaHoy||diaReciente;
 
-  // Datos sc_demanda_hidrica_diaria — usar fila más reciente con datos
-  const scHoy = scDia?.find(r => parseFloat(r.tiempo_de_riego_pronostico_horas) > 0) || scDia?.[0];
-  const tRiegoSc = parseFloat(scHoy?.tiempo_de_riego_pronostico_horas) || tRiego;
-  const laminaRiegoSc = parseFloat(scHoy?.lamina_neta_riego_pronostico_mm) || null;
-  const umbralSc = parseFloat(scHoy?.calculo_umbral_riego_mm) || laminaUmbral;
-  const deficitCtrl = parseFloat(scHoy?.deficit_hidrico_controlado) || null;
+  // NDVI y Kc desde ndvi_registros
+  const ndviVal=ndvi[0]?parseFloat(ndvi[0]['NDVI']):null;
+  const kcVal  =ndvi[0]?parseFloat(ndvi[0]['Kc']):null;
 
-  // Balance hídrico: % de umbral consumido
-  const etcDiaria = parseFloat(scHoy?.etc_pronostico_mm_dia) || etcNeta || 0;
-  const diasDesdeRiego = frec ? Math.min(frec, (frec * (1 - (laminaRiegoSc || 0) / (laminaNeta || 1)))) : null;
-  const consumoAcum = etcDiaria * (diasDesdeRiego || (frec ? frec * 0.7 : 5));
-  const pctUmbral = umbralSc ? Math.min(100, Math.round(consumoAcum / umbralSc * 100)) : 0;
+  // Valores de referencia para el Hero
+  const lamEst =diaRef?parseFloat(diaRef.lamina_neta_riego_estacion_mm):0;
+  const lamPron=diaRef?parseFloat(diaRef.lamina_neta_riego_pronostico_mm):0;
+  const tEst   =diaRef?parseFloat(diaRef.tiempo_de_riego_estacion_horas):0;
+  const tPron  =diaRef?parseFloat(diaRef.tiempo_de_riego_pronostico_horas):0;
+  const etoPron7=scDia.filter(r=>{const f=new Date(r.fecha);return f>=new Date(hoy-7*86400000)&&f<=hoy;})
+    .reduce((s,r)=>s+(parseFloat(r.eto_pronostico_mm_dia)||0),0);
+  const etoEst7=scDia.filter(r=>{const f=new Date(r.fecha);return f>=new Date(hoy-7*86400000)&&f<=hoy;})
+    .reduce((s,r)=>s+(parseFloat(r.eto_estacion_mm_dia)||0),0);
 
-  // ¿Riega hoy?
-  const riegaHoy = scDia?.some(r => {
-    const f = new Date(r.fecha);
-    const hoy = new Date();
-    return f.toDateString() === hoy.toDateString() && parseFloat(r.tiempo_de_riego_pronostico_horas) > 0;
+  // Próximo riego desde sc_demanda
+  const proxRiego=scDia.find(r=>{
+    const f=new Date(r.fecha+'T00:00:00');
+    return f>hoy&&(parseFloat(r.lamina_neta_riego_pronostico_mm)>0||parseFloat(r.lamina_neta_riego_estacion_mm)>0);
   });
-  const hayFerti = !!(nMes || pMes || kMes);
+  const diasHastaRiego=proxRiego?Math.ceil((new Date(proxRiego.fecha+'T00:00:00')-hoy)/86400000):null;
+  const tieneRiegoHoy=diaHoy&&(parseFloat(diaHoy.lamina_neta_riego_estacion_mm)>0||parseFloat(diaHoy.lamina_neta_riego_pronostico_mm)>0);
 
-  // Fenología (misma lógica que antes)
-  const FENO = {
-    'Nogales':{etapa:'Dormancia / inicio brotación',hf:420,hfReq:'700-1000',gd:180},
-    'Nogal':{etapa:'Dormancia / inicio brotación',hf:420,hfReq:'700-1000',gd:180},
-    'Cerezo':{etapa:'Post-cosecha / inducción floral',hf:510,hfReq:'800-1200',gd:210},
-    'Ciruelos':{etapa:'Dormancia',hf:380,hfReq:'600-900',gd:155},
-    'Ciruelo':{etapa:'Dormancia',hf:380,hfReq:'600-900',gd:155},
-    'Avellano Europeo':{etapa:'Floración / cuaje',hf:890,hfReq:'1000-1400',gd:320},
-    'Avellanos':{etapa:'Dormancia',hf:420,hfReq:'1000-1400',gd:160},
-    'Manzano':{etapa:'Floración / cuaje',hf:750,hfReq:'800-1200',gd:290},
-  };
-  const fen = FENO[zona['especie']] || {etapa:'Desarrollo activo',hf:null,hfReq:null,gd:0};
-  const hfPct = fen.hf && fen.hfReq ? Math.min(100, Math.round(fen.hf/parseFloat(fen.hfReq)*100)) : 0;
-
-  // Alertas
-  const alertas = [];
-  if (precipAcum > 10) alertas.push({t:'info',m:`${precipAcum.toFixed(1)} mm de lluvia probable esta semana — considera reducir el riego.`});
-  if (ndvi.length >= 2) {
-    const n1 = parseFloat(ndvi[0]['NDVI']), n2 = parseFloat(ndvi[1]['NDVI']);
-    if (n2 > 0 && (n1-n2)/n2*100 < -10) alertas.push({t:'warn',m:`NDVI bajó ${(Math.abs((n1-n2)/n2*100)).toFixed(1)}% vs semana anterior — revisa el estado del cultivo.`});
+  // Hero texto
+  let heroVerb, heroSub;
+  if(tieneRiegoHoy) {
+    const t=hm(tEst||tPron);
+    heroVerb=`Riega${t?' '+t:''}`;
+    heroSub=`Hoy es día de riego en ${zona.id_zona}. ${lamEst>0?`Lámina real: <strong>${lamEst.toFixed(1)} mm</strong>.`:''} ${lamPron>0?`Pronóstico: <strong>${lamPron.toFixed(1)} mm</strong>.`:''}`;
+  } else if(diasHastaRiego) {
+    heroVerb=`Próximo riego en ${diasHastaRiego} día${diasHastaRiego!==1?'s':''}`;
+    heroSub=`El suelo tiene reserva suficiente. Monitorea el pronóstico de la próxima semana.`;
+  } else {
+    heroVerb='Sin eventos de riego programados';
+    heroSub='No hay datos de riego disponibles para esta zona en el período actual.';
   }
-  if (!zona['superficie_ha']) alertas.push({t:'warn',m:'Superficie no ingresada — los cálculos de consumo pueden ser inexactos.'});
-  if (alertas.length === 0) alertas.push({t:'ok',m:'Sin alertas activas para esta zona.'});
 
-  const riegos = frec ? Math.max(1, Math.round(7/frec)) : 0;
-
-  document.getElementById('main-content').innerHTML = `
+  document.getElementById('main-content').innerHTML=`
 
     <!-- HERO -->
     <div class="hero">
-      <div class="hero-eyebrow">Hoy en tu zona — ${zona['id_zona']} · ${zona['especie']} ${zona['variedad']||''}</div>
-      <div class="hero-main">
-        <div class="hero-verb">${riegaHoy ? `Riega ${hm(tRiegoSc)}` : (frec ? `Próximo riego en ${Math.round(frec)} días` : 'Sin datos de riego')}</div>
-        <div class="hero-tags">
-          ${laminaRiegoSc ? `<span class="htag">💧 Repone ${laminaRiegoSc.toFixed(1)} mm</span>` : ''}
-          ${hayFerti && riegaHoy ? `<span class="htag ferti">🧪 Aplica fertirriego</span>` : ''}
+      <div class="hero-eyebrow">Hoy en tu zona — ${zona.id_zona} · ${zona.especie||''} ${zona.variedad||''}</div>
+      <div class="hero-verb">${heroVerb}</div>
+      <p class="hero-sub">${heroSub}</p>
+      <div class="hero-meta">
+        <div class="hm-item">
+          <div class="hm-val">${ndviVal?ndviVal.toFixed(3):'—'}</div>
+          <div class="hm-label">NDVI actual</div>
+        </div>
+        <div class="hm-item">
+          <div class="hm-val">${kcVal?kcVal.toFixed(2):'—'}</div>
+          <div class="hm-label">Kc ajustado</div>
+        </div>
+        <div class="hm-item">
+          <div class="hm-val">${etoEst7>0?etoEst7.toFixed(1)+'mm':etoPron7>0?etoPron7.toFixed(1)+'mm':'—'}</div>
+          <div class="hm-label">ETo 7 días</div>
+        </div>
+        <div class="hm-item">
+          <div class="hm-val">${zona.superficie_ha||'—'} ha</div>
+          <div class="hm-label">Superficie</div>
         </div>
       </div>
-      <p class="hero-sub">
-        ${riegaHoy
-          ? `Tu ${(zona['especie']||'cultivo').toLowerCase()} necesita reposición de humedad. Riega <strong>${hm(tRiegoSc)}</strong> para cubrir la demanda de la semana.${hayFerti ? ' Hoy toca fertirriego — carga la dosis al inicio del evento.' : ''}`
-          : `El suelo tiene reserva suficiente. ETc diaria: <strong>${n2(etcDiaria,2)} mm/día</strong>. Monitorea la próxima semana.`
-        }
-      </p>
-      <div class="hero-meta">
-        <div class="hm-item"><div class="hm-val">${consumoEv ? consumoEv.toFixed(1)+' m³' : '—'}</div><div class="hm-label">Agua / evento</div></div>
-        <div class="hm-item"><div class="hm-val">${n2(etcDiaria,2)} mm/d</div><div class="hm-label">ETc neta diaria</div></div>
-        <div class="hm-item"><div class="hm-val">c/ ${frec ? frec.toFixed(0) : '—'} días</div><div class="hm-label">Frecuencia</div></div>
-        <div class="hm-item"><div class="hm-val">${etoAcum.toFixed(1)} mm</div><div class="hm-label">ETo 7 días</div></div>
+    </div>
+
+    <!-- KPIs NDVI -->
+    <div class="grid-4" style="margin-bottom:14px;">
+      <div class="kpi">
+        <div class="kpi-label">NDVI</div>
+        <div class="kpi-val green">${ndviVal?ndviVal.toFixed(3):'—'}</div>
+        <div class="kpi-unit">${ndvi[0]?'Fecha: '+ndvi[0]['Fecha']:'Sin datos'}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Kc ajustado</div>
+        <div class="kpi-val teal">${kcVal?kcVal.toFixed(3):'—'}</div>
+        <div class="kpi-unit">Coeficiente cultivo</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">ETo Estación 7d</div>
+        <div class="kpi-val">${etoEst7>0?etoEst7.toFixed(1):'—'}</div>
+        <div class="kpi-unit">mm acumulados</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">ETo Pronóstico 7d</div>
+        <div class="kpi-val">${etoPron7>0?etoPron7.toFixed(1):'—'}</div>
+        <div class="kpi-unit">mm acumulados</div>
       </div>
     </div>
 
-    <!-- KPIs -->
-    <div class="kpis">
-      <div class="kpi"><div class="kpi-label">Kc ajustado</div><div class="kpi-val green">${n2(kcAj,3)}</div></div>
-      <div class="kpi"><div class="kpi-label">Lámina neta</div><div class="kpi-val teal">${n2(laminaNeta,1)}<span style="font-size:12px;color:var(--muted)"> mm</span></div></div>
-      <div class="kpi"><div class="kpi-label">Lámina umbral</div><div class="kpi-val amber">${n2(umbralSc,1)}<span style="font-size:12px;color:var(--muted)"> mm</span></div></div>
-      <div class="kpi"><div class="kpi-label">ETo 7 días</div><div class="kpi-val">${n2(etoAcum,1)}<span style="font-size:12px;color:var(--muted)"> mm</span></div></div>
-      <div class="kpi"><div class="kpi-label">Tiempo de riego</div><div class="kpi-val green">${hm(tRiegoSc)}</div><div class="kpi-unit">${riegos} riego${riegos!==1?'s':''}/sem</div></div>
-      <div class="kpi"><div class="kpi-label">Lluvia probable</div><div class="kpi-val">${n2(precipAcum,1)}<span style="font-size:12px;color:var(--muted)"> mm</span></div></div>
-    </div>
-
-    <!-- GRID 3 -->
-    <div class="grid-3">
+    <!-- COMPARATIVA RIEGO + CALENDARIO -->
+    <div class="grid-2">
+      <!-- Comparativa Estación vs Pronóstico -->
+      <div class="card">
+        <div class="card-title"><i class="ti ti-droplet-half-2"></i>Riego — Estación vs Pronóstico</div>
+        ${renderComparativa(diaRef)}
+      </div>
 
       <!-- Calendario -->
       <div class="card">
-        <div class="card-title"><i class="ti ti-calendar"></i>Calendario — ${new Date().toLocaleString('es-CL',{month:'long',year:'numeric'})}</div>
-        ${renderCalendario(frec, tRiegoSc, hayFerti, zona, rec, scDia)}
-        <div class="cal-legend">
-          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--green-50);border:1px solid rgba(30,132,73,.3)"></div>Riego</div>
-          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--teal-50);border:1px solid rgba(46,134,171,.3)"></div>Riego + Ferti</div>
+        <div class="card-title"><i class="ti ti-calendar"></i>Calendario — ${hoy.toLocaleString('es-CL',{month:'long',year:'numeric'})}</div>
+        ${renderCalendario(scDia,zona)}
+        <div class="cal-legend" style="margin-top:10px;">
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#e8f5e9;border:1px solid rgba(30,132,73,.4)"></div>Riego real (estación)</div>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--teal-50);border:1px solid rgba(46,134,171,.3)"></div>Riego pronóstico</div>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:linear-gradient(135deg,#e8f5e9 50%,var(--teal-50) 50%);border:1px solid rgba(30,132,73,.3)"></div>Ambos</div>
         </div>
-      </div>
-
-      <!-- Estado de riego -->
-      <div class="card">
-        <div class="card-title"><i class="ti ti-droplet"></i>Estado de riego</div>
-        <div class="metric-row"><span class="metric-key">Kc ajustado</span><span class="metric-val green">${n2(kcAj,3)}</span></div>
-        <div class="metric-row"><span class="metric-key">ETc neta</span><span class="metric-val">${n2(etcNeta,2)} mm/día</span></div>
-        <div class="metric-row"><span class="metric-key">Tmax / Tmin</span><span class="metric-val">${tmaxProm ? tmaxProm.toFixed(1)+'° / '+tminProm.toFixed(1)+'°C' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Lámina neta</span><span class="metric-val">${n2(laminaNeta,1)} mm</span></div>
-        <div class="metric-row"><span class="metric-key">Lámina umbral</span><span class="metric-val amber">${n2(umbralSc,1)} mm</span></div>
-        <div class="metric-row"><span class="metric-key">Frecuencia</span><span class="metric-val">${frec ? frec.toFixed(1)+' días' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Consumo / evento</span><span class="metric-val">${consumoEv ? consumoEv.toFixed(1)+' m³' : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Superficie</span><span class="metric-val">${zona['superficie_ha']||'—'} ha</span></div>
-        <!-- Balance hídrico -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Balance hídrico</div>
-          <div class="bal-track"><div class="bal-fill" id="bal-fill" style="width:0%"></div></div>
-          <div class="bal-scale"><span>0 mm</span><span>Umbral ${n2(umbralSc,1)} mm</span></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">${consumoAcum.toFixed(1)} mm consumidos (${pctUmbral}% del umbral)</div>
-        </div>
-      </div>
-
-      <!-- Fenología + NDVI -->
-      <div class="card">
-        <div class="card-title"><i class="ti ti-plant"></i>Fenología y NDVI</div>
-        <div style="font-size:14px;font-weight:700;color:var(--green-700);margin-bottom:4px">${fen.etapa}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${zona['especie']||'—'} ${zona['variedad']||''}</div>
-        ${fen.hf ? `
-          <div class="prog-wrap">
-            <div class="prog-header"><span>Horas frío</span><span>${fen.hf} hf</span></div>
-            <div class="prog-bar"><div class="prog-fill hf" style="width:${hfPct}%"></div></div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px">Req: ${fen.hfReq} hf</div>
-          </div>` : ''}
-        <div class="metric-row" style="margin-top:10px"><span class="metric-key">NDVI actual</span><span class="metric-val green">${ndvi[0] ? parseFloat(ndvi[0]['NDVI']).toFixed(3) : '—'}</span></div>
-        <div class="metric-row"><span class="metric-key">Fecha NDVI</span><span class="metric-val">${ndvi[0]?.['Fecha'] || '—'}</span></div>
-        ${renderNdviChart(ndvi)}
       </div>
     </div>
 
-    <!-- GRID 2 -->
+    <!-- NDVI HISTÓRICO -->
     <div class="grid-2">
       <div class="card">
-        <div class="card-title"><i class="ti ti-leaf"></i>Nutrición — ${new Date().toLocaleString('es-CL',{month:'long'})}</div>
-        ${nMes || pMes || kMes ? `
-          <div style="font-size:12px;background:var(--green-50);color:var(--green-900);padding:6px 10px;border-radius:6px;margin-bottom:12px;border:1px solid rgba(30,132,73,.2)">✓ Fertirriego activo este mes</div>
-          <div class="nut-grid">
-            <div class="nut-item nut-N"><div class="nut-label">Nitrógeno N</div><div class="nut-val">${n2(nMes,1)}</div><div class="nut-unit">kg/zona</div></div>
-            <div class="nut-item nut-P"><div class="nut-label">P₂O₅</div><div class="nut-val">${n2(pMes,1)}</div><div class="nut-unit">kg/zona</div></div>
-            <div class="nut-item nut-K"><div class="nut-label">K₂O</div><div class="nut-val">${n2(kMes,1)}</div><div class="nut-unit">kg/zona</div></div>
-          </div>` : `<div style="font-size:13px;color:var(--muted)">Sin recomendación de nutrición para esta zona.</div>`}
+        <div class="card-title"><i class="ti ti-plant"></i>NDVI histórico</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">${zona.especie||'—'} ${zona.variedad||''} · ${zona.id_zona}</div>
+        ${renderNdviChart(ndvi)}
+        <div style="margin-top:14px;">
+          ${ndvi.slice(0,4).map(v=>`
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;">
+              <span style="color:var(--muted)">${v['Fecha']?.slice(0,10)||'—'}</span>
+              <span style="font-weight:600;color:var(--green-700)">NDVI ${parseFloat(v['NDVI']).toFixed(3)}</span>
+              <span style="color:var(--teal-700)">Kc ${parseFloat(v['Kc']).toFixed(2)}</span>
+            </div>`).join('')}
+        </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="ti ti-bell"></i>Alertas</div>
-        ${alertas.map(a => `
-          <div class="alerta ${a.t}">
-            <i class="ti ti-${a.t==='ok'?'check':a.t==='info'?'info-circle':'alert-triangle'}"></i>
-            <span>${a.m}</span>
+        <div class="card-title"><i class="ti ti-info-circle"></i>Datos de la zona</div>
+        ${[
+          ['Especie',`${zona.especie||'—'} ${zona.variedad||''}`],
+          ['Superficie',`${zona.superficie_ha||'—'} ha`],
+          ['Tipo de riego',zona.tipo_riego||'—'],
+          ['CC suelo',zona.cc?zona.cc+' %':'—'],
+          ['PMP suelo',zona.pmp?zona.pmp+' %':'—'],
+          ['Da suelo',zona.da?zona.da+' g/cm³':'—'],
+          ['Profundidad',zona.prof?zona.prof+' m':'—'],
+          ['% Sombra',zona.sombra_pct?zona.sombra_pct+' %':'—'],
+        ].map(([k,v])=>`
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;">
+            <span style="color:var(--muted)">${k}</span>
+            <span style="font-weight:600">${v}</span>
           </div>`).join('')}
       </div>
     </div>
   `;
-
-  // Animar barra balance
-  setTimeout(() => {
-    const el = document.getElementById('bal-fill');
-    if (el) el.style.width = pctUmbral + '%';
-  }, 200);
 }
 
-function renderCalendario(frec, tRiego, hayFerti, zona, rec, scDia) {
-  const today = new Date();
-  const mes = today.getMonth(), año = today.getFullYear();
-  const diasMes = new Date(año, mes+1, 0).getDate();
-  const primerDia = new Date(año, mes, 1).getDay();
-  const offset = primerDia === 0 ? 6 : primerDia - 1;
+function renderComparativa(dia) {
+  if(!dia) return `<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">Sin datos de riego disponibles para esta zona.</div>`;
 
-  // Días de riego desde sc_demanda_hidrica_diaria_zona
-  const riegoDias = new Set();
-  if (scDia) {
-    scDia.forEach(r => {
-      if (parseFloat(r.tiempo_de_riego_pronostico_horas) > 0 || parseFloat(r.lamina_neta_riego_pronostico_mm) > 0) {
-        const f = new Date(r.fecha);
-        if (f.getMonth() === mes && f.getFullYear() === año) riegoDias.add(f.getDate());
-      }
-    });
+  const lamEst  = parseFloat(dia.lamina_neta_riego_estacion_mm)||0;
+  const lamPron = parseFloat(dia.lamina_neta_riego_pronostico_mm)||0;
+  const tEst    = parseFloat(dia.tiempo_de_riego_estacion_horas)||0;
+  const tPron   = parseFloat(dia.tiempo_de_riego_pronostico_horas)||0;
+  const etoEst  = parseFloat(dia.eto_estacion_mm_dia)||0;
+  const etoPron = parseFloat(dia.eto_pronostico_mm_dia)||0;
+  const etcEst  = parseFloat(dia.etc_estacion_mm_dia)||0;
+  const etcPron = parseFloat(dia.etc_pronostico_mm_dia)||0;
+  const lluvEst = parseFloat(dia.lluvia_estacion_mm_dia)||0;
+  const lluvPron= parseFloat(dia.lluvia_pronostico_mm_dia)||0;
+
+  function fila(label,est,pron,dec=1,suf='') {
+    const eV=est?est.toFixed(dec)+suf:null;
+    const pV=pron?pron.toFixed(dec)+suf:null;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);">
+      <span style="font-size:12px;color:var(--muted);flex:1">${label}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--green-700);min-width:80px;text-align:right">${eV||'<span style="color:var(--muted);font-weight:400;font-size:12px">sin dato</span>'}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--teal-700);min-width:80px;text-align:right">${pV||'<span style="color:var(--muted);font-weight:400;font-size:12px">sin dato</span>'}</span>
+    </div>`;
   }
-  // Fallback: calcular desde frecuencia si sc_demanda no tiene datos del mes
-  if (riegoDias.size === 0 && frec && frec > 0) {
-    for (let d = today.getDate(); d <= diasMes; d += Math.round(frec)) riegoDias.add(d);
-    for (let d = today.getDate() - Math.round(frec); d >= 1; d -= Math.round(frec)) riegoDias.add(d);
-  }
 
-  const diasSem = ['L','M','X','J','V','S','D'];
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  let html = `<div class="cal-grid"><div></div>${diasSem.map(d=>`<div class="cal-dh">${d}</div>`).join('')}`;
+  return `
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;">
+      <span class="tag-est">🌡 Estación</span>
+      <span class="tag-pron">📡 Pronóstico</span>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Ref: ${dia.fecha}</div>
+    ${fila('ETo (mm/día)',etoEst,etoPron)}
+    ${fila('ETc (mm/día)',etcEst,etcPron)}
+    ${fila('Lluvia (mm)',lluvEst,lluvPron)}
+    ${fila('Lámina de riego (mm)',lamEst,lamPron)}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+      <span style="font-size:12px;color:var(--muted);flex:1">Tiempo de riego</span>
+      <span style="font-size:14px;font-weight:700;color:var(--green-700);min-width:80px;text-align:right">${hm(tEst)||'<span style="color:var(--muted);font-weight:400;font-size:12px">sin dato</span>'}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--teal-700);min-width:80px;text-align:right">${hm(tPron)||'<span style="color:var(--muted);font-weight:400;font-size:12px">sin dato</span>'}</span>
+    </div>
+  `;
+}
 
-  let dia = 1 - offset;
-  for (let s = 0; s < 5; s++) {
-    const fw = new Date(año, mes, Math.max(1, dia+offset));
-    html += `<div class="cal-wn">${isoWeek(fw)}</div>`;
-    for (let d = 0; d < 7; d++, dia++) {
-      const ok = dia >= 1 && dia <= diasMes;
-      const esHoy = dia === today.getDate() && ok;
-      const esR = ok && riegoDias.has(dia);
-      const esF = esR && hayFerti;
-      const esFuturo = ok && dia >= today.getDate();
-      let cls = 'cal-cell'+((!ok)?' otro-mes':'')+(esHoy?' hoy':'')+(esF?' ferti':esR?' riego':'')+(esR?' cal-clickable':'');
-      const fechaStr = ok ? `${dia} de ${meses[mes]}` : '';
-      html += `<div class="${cls}" ${esR && ok ? `onclick="abrirDetalleCalendario(${dia},'${fechaStr}',${esF},${esFuturo})"` : ''}>
+function renderCalendario(scDia,zona) {
+  const hoy=new Date();
+  const mes=hoy.getMonth(), año=hoy.getFullYear();
+  const diasMes=new Date(año,mes+1,0).getDate();
+  const primerDia=new Date(año,mes,1).getDay();
+  const offset=primerDia===0?6:primerDia-1;
+
+  // Mapear datos del mes
+  const dataMap={};
+  scDia.forEach(r=>{
+    const f=new Date(r.fecha+'T00:00:00');
+    if(f.getMonth()===mes&&f.getFullYear()===año) {
+      dataMap[f.getDate()]=r;
+    }
+  });
+
+  const diasSem=['L','M','X','J','V','S','D'];
+  let html=`<div class="cal-grid"><div></div>${diasSem.map(d=>`<div class="cal-dh">${d}</div>`).join('')}`;
+
+  let dia=1-offset;
+  for(let s=0;s<5;s++) {
+    const fw=new Date(año,mes,Math.max(1,dia+offset));
+    html+=`<div class="cal-wn">${isoWeek(fw)}</div>`;
+    for(let d=0;d<7;d++,dia++) {
+      const ok=dia>=1&&dia<=diasMes;
+      const esHoy=dia===hoy.getDate()&&ok;
+      const r=ok?dataMap[dia]:null;
+      const lamEst=r?parseFloat(r.lamina_neta_riego_estacion_mm)||0:0;
+      const lamPron=r?parseFloat(r.lamina_neta_riego_pronostico_mm)||0:0;
+      const tieneEst=lamEst>0;
+      const tienePron=lamPron>0;
+      const tieneAmbos=tieneEst&&tienePron;
+
+      let cls='cal-cell'+(ok?'':' otro-mes')+(esHoy?' hoy':'');
+      if(tieneAmbos) cls+=' tiene-ambos cal-clickable';
+      else if(tieneEst) cls+=' tiene-riego-est cal-clickable';
+      else if(tienePron) cls+=' tiene-riego-pron cal-clickable';
+
+      html+=`<div class="${cls}" ${(tieneEst||tienePron)&&ok?`onclick="abrirDia(${dia})"`:''}> 
         <div class="cal-dn">${ok?dia:''}</div>
-        ${esR?`<div class="cal-ev">${hm(tRiego)}</div>`:''}
-        ${esF?`<div class="cal-fe">Ferti</div>`:''}
+        ${tieneEst?`<div class="cal-ev-est">${lamEst.toFixed(0)}mm</div>`:''}
+        ${tienePron&&!tieneEst?`<div class="cal-ev-pron">${lamPron.toFixed(0)}mm</div>`:''}
+        ${tienePron&&tieneEst?`<div class="cal-ev-pron">${lamPron.toFixed(0)}p</div>`:''}
       </div>`;
     }
   }
-  html += '</div>';
+  html+='</div>';
   return html;
 }
 
-function abrirDetalleCalendario(dia, fechaStr, hayFerti, esFuturo) {
-  const rec = _rec, zona = _zona;
-  const tHmin  = rec?.tiempo_hmin || hm(parseFloat(rec?.tiempo_h));
-  const consumo = rec?.consumo_evento ? parseFloat(rec.consumo_evento).toFixed(1)+' m³' : '—';
-  const freq   = rec?.frecuencia_dias ? parseFloat(rec.frecuencia_dias).toFixed(1) : '—';
-  const ibruta = rec?.i_bruta ? parseFloat(rec.i_bruta).toFixed(2)+' mm/h' : '—';
-  const camino = rec?.camino || '—';
-  const nMes = parseFloat(rec?.n_mes) || null;
-  const pMes = parseFloat(rec?.p_mes) || null;
-  const kMes = parseFloat(rec?.k_mes) || null;
-  const tipo  = esFuturo ? 'Próximo riego' : 'Riego ejecutado';
+function abrirDia(dia) {
+  const hoy=new Date();
+  const mes=hoy.getMonth(), año=hoy.getFullYear();
+  const fecha=`${año}-${String(mes+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+  const r=_scDia.find(d=>d.fecha===fecha);
+  if(!r)return;
 
-  const html = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div style="width:46px;height:46px;border-radius:50%;background:var(--teal-700);color:#fff;display:grid;place-items:center;font-family:'Fraunces',serif;font-size:20px;font-weight:700;flex:none">${dia}</div>
-      <div>
-        <div style="font-weight:700;font-size:15px">${fechaStr}</div>
-        <div style="font-size:12px;color:var(--muted)">${tipo} · ${zona?.especie||''} ${zona?.variedad||''}</div>
+  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const dt=new Date(fecha+'T00:00:00');
+  const titulo=`${dias[dt.getDay()]} ${dia} de ${meses[mes]}`;
+
+  const lamEst  = parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+  const lamPron = parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+  const tEst    = parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+  const tPron   = parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+  const etoEst  = parseFloat(r.eto_estacion_mm_dia)||0;
+  const etoPron = parseFloat(r.eto_pronostico_mm_dia)||0;
+  const etcEst  = parseFloat(r.etc_estacion_mm_dia)||0;
+  const etcPron = parseFloat(r.etc_pronostico_mm_dia)||0;
+
+  function row(label,est,pron,suf='') {
+    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+      <span style="color:var(--muted)">${label}</span>
+      <div style="display:flex;gap:16px;">
+        <span style="color:var(--green-700);font-weight:600;min-width:70px;text-align:right">${est?est+suf:'—'}</span>
+        <span style="color:var(--teal-700);font-weight:600;min-width:70px;text-align:right">${pron?pron+suf:'—'}</span>
+      </div>
+    </div>`;
+  }
+
+  const html=`
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;">
+      <span class="tag-est">🌡 Estación</span>
+      <span class="tag-pron">📡 Pronóstico</span>
+    </div>
+    ${row('ETo (mm/día)',etoEst?etoEst.toFixed(2):null,etoPron?etoPron.toFixed(2):null)}
+    ${row('ETc (mm/día)',etcEst?etcEst.toFixed(2):null,etcPron?etcPron.toFixed(2):null)}
+    ${row('Lámina riego (mm)',lamEst?lamEst.toFixed(1):null,lamPron?lamPron.toFixed(1):null)}
+    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;">
+      <span style="color:var(--muted)">Tiempo de riego</span>
+      <div style="display:flex;gap:16px;">
+        <span style="color:var(--green-700);font-weight:600;min-width:70px;text-align:right">${hm(tEst)||'—'}</span>
+        <span style="color:var(--teal-700);font-weight:600;min-width:70px;text-align:right">${hm(tPron)||'—'}</span>
       </div>
     </div>
-    <div style="background:var(--teal-50);border-radius:10px;padding:14px;margin-bottom:14px;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-700);margin-bottom:10px">Instrucción de riego</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div><div style="font-size:11px;color:var(--muted)">Tiempo</div><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--teal-700)">${tHmin}</div></div>
-        <div><div style="font-size:11px;color:var(--muted)">Consumo</div><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--teal-700)">${consumo}</div></div>
-        <div><div style="font-size:11px;color:var(--muted)">Frecuencia</div><div style="font-size:14px;font-weight:600">Cada ${freq} días</div></div>
-        <div><div style="font-size:11px;color:var(--muted)">I. Bruta</div><div style="font-size:14px;font-weight:600">${ibruta}</div></div>
+    ${lamEst>0&&lamPron>0?`
+    <div style="margin-top:16px;background:var(--bg);border-radius:8px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Comparativa</div>
+      <div style="font-size:12px;color:var(--ink-2)">
+        Diferencia lámina: <strong style="color:${Math.abs(lamEst-lamPron)<5?'var(--green-700)':'var(--amber)'}">
+        ${(lamEst-lamPron>0?'+':'')}${(lamEst-lamPron).toFixed(1)} mm</strong>
       </div>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">Sistema</div>
-    <div style="font-size:13px;font-weight:600;margin-bottom:16px">${camino}</div>
-    ${hayFerti && (nMes||pMes||kMes) ? `
-    <div style="background:var(--green-50);border-radius:10px;padding:14px;border:1px solid rgba(30,132,73,.2);">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-700);margin-bottom:10px">🌿 Carga de fertirriego</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;">
-        <div><div style="font-size:10px;color:var(--muted)">N</div><div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:#185FA5">${n2(nMes,1)}</div><div style="font-size:10px;color:var(--muted)">kg/zona</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">P₂O₅</div><div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:#854F0B">${n2(pMes,1)}</div><div style="font-size:10px;color:var(--muted)">kg/zona</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">K₂O</div><div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--green-700)">${n2(kMes,1)}</div><div style="font-size:10px;color:var(--muted)">kg/zona</div></div>
+      <div style="font-size:12px;color:var(--ink-2);margin-top:4px">
+        Diferencia tiempo: <strong>${hm(Math.abs(tEst-tPron))||'—'}</strong>
       </div>
-    </div>` : ''}
+    </div>`:''} 
   `;
 
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  abrirDrawer(`${['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][new Date(new Date().getFullYear(),new Date().getMonth(),dia).getDay()]} ${dia}`, `${zona?.id_zona||''} · ${zona?.especie||''} ${zona?.variedad||''}`, html);
+  abrirDrawer(titulo,`${_zona?.id_zona||''} · ${_zona?.especie||''}`,html);
 }
 
 function renderNdviChart(ndvi) {
-  if (!ndvi || ndvi.length < 2) return '';
-  const vals = ndvi.slice(0,6).reverse();
-  const max = Math.max(...vals.map(v => parseFloat(v['NDVI'])||0));
-  return `<div style="margin-top:12px;font-size:10px;color:var(--muted);margin-bottom:4px">NDVI histórico</div>
-    <div class="ndvi-chart">
-      ${vals.map(v => {
-        const pct = max > 0 ? (parseFloat(v['NDVI'])/max*100) : 0;
-        return `<div class="ndvi-bar-wrap">
-          <div class="ndvi-bar-item" style="height:${pct}%"></div>
-          <div class="ndvi-date">${v['Fecha']?.toString().slice(5)||''}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  if(!ndvi||ndvi.length<2) return '<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px">Sin historial NDVI disponible</div>';
+  const vals=ndvi.slice(0,6).reverse();
+  const max=Math.max(...vals.map(v=>parseFloat(v['NDVI'])||0));
+  return `<div class="ndvi-chart">
+    ${vals.map(v=>{
+      const pct=max>0?(parseFloat(v['NDVI'])/max*100):0;
+      return `<div class="ndvi-bar-wrap">
+        <div class="ndvi-bar-item" style="height:${pct}%"></div>
+        <div class="ndvi-date">${v['Fecha']?.toString().slice(5)||''}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 init();
-</script>
-
-<!-- MODAL CAMBIAR CONTRASEÑA -->
-<div id="modal-clave" style="display:none;position:fixed;inset:0;background:rgba(14,31,38,.5);z-index:300;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)cerrarCambiarClave()">
-  <div style="background:var(--white);border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(14,31,38,.2);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div>
-        <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700">Cambiar contraseña</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">Elige una contraseña segura</div>
-      </div>
-      <button onclick="cerrarCambiarClave()" style="border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:grid;place-items:center;">✕</button>
-    </div>
-
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Nueva contraseña</label>
-      <div style="position:relative">
-        <input type="password" id="inp-nueva" placeholder="Mínimo 8 caracteres"
-          style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;"
-          oninput="validarClave()" onfocus="this.style.borderColor='var(--teal-700)'" onblur="this.style.borderColor='var(--line)'">
-        <button onclick="toggleVer('inp-nueva')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);font-size:16px;">
-          <i class="ti ti-eye" id="ico-nueva"></i>
-        </button>
-      </div>
-    </div>
-
-    <div style="margin-bottom:6px;">
-      <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Confirmar contraseña</label>
-      <div style="position:relative">
-        <input type="password" id="inp-confirmar" placeholder="Repite la contraseña"
-          style="width:100%;padding:10px 40px 10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;"
-          oninput="validarClave()" onfocus="this.style.borderColor='var(--teal-700)'" onblur="this.style.borderColor='var(--line)'">
-        <button onclick="toggleVer('inp-confirmar')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);font-size:16px;">
-          <i class="ti ti-eye" id="ico-confirmar"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Indicadores de seguridad -->
-    <div id="clave-requisitos" style="margin:10px 0 16px;display:flex;flex-direction:column;gap:4px;">
-      <div id="req-len" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Mínimo 8 caracteres</div>
-      <div id="req-num" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Al menos un número</div>
-      <div id="req-may" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Al menos una mayúscula</div>
-      <div id="req-match" style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-circle" style="font-size:10px"></i> Las contraseñas coinciden</div>
-    </div>
-
-    <div id="clave-msg" style="display:none;font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:14px;"></div>
-
-    <button id="btn-guardar-clave" onclick="guardarClave()" disabled
-      style="width:100%;padding:12px;background:var(--teal-700);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:not-allowed;opacity:.5;transition:opacity .2s,background .2s;">
-      Guardar nueva contraseña
-    </button>
-  </div>
-</div>
-
-<script>
-
-// ── MENÚ USUARIO ─────────────────────────────────────────────────────────────
-function toggleMenu() {
-  const menu = document.getElementById('user-menu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', e => {
-  const btn = document.getElementById('user-menu-btn');
-  const menu = document.getElementById('user-menu');
-  if (btn && !btn.contains(e.target) && menu && !menu.contains(e.target)) {
-    menu.style.display = 'none';
-  }
-});
-
-// ── CAMBIAR CONTRASEÑA ────────────────────────────────────────────────────────
-function abrirCambiarClave() {
-  document.getElementById('user-menu').style.display = 'none';
-  document.getElementById('inp-nueva').value = '';
-  document.getElementById('inp-confirmar').value = '';
-  document.getElementById('clave-msg').style.display = 'none';
-  document.getElementById('btn-guardar-clave').disabled = true;
-  document.getElementById('btn-guardar-clave').style.opacity = '.5';
-  document.getElementById('btn-guardar-clave').style.cursor = 'not-allowed';
-  validarClave();
-  const modal = document.getElementById('modal-clave');
-  modal.style.display = 'flex';
-}
-function cerrarCambiarClave() {
-  document.getElementById('modal-clave').style.display = 'none';
-}
-
-function toggleVer(inputId) {
-  const inp = document.getElementById(inputId);
-  const ico = document.getElementById('ico-' + inputId.replace('inp-',''));
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    ico.className = 'ti ti-eye-off';
-  } else {
-    inp.type = 'password';
-    ico.className = 'ti ti-eye';
-  }
-}
-
-function setReq(id, ok) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.style.color = ok ? 'var(--green-700)' : 'var(--muted)';
-  el.querySelector('i').className = ok ? 'ti ti-circle-check' : 'ti ti-circle';
-}
-
-function validarClave() {
-  const nueva = document.getElementById('inp-nueva').value;
-  const confirmar = document.getElementById('inp-confirmar').value;
-  const lenOk  = nueva.length >= 8;
-  const numOk  = /\d/.test(nueva);
-  const mayOk  = /[A-Z]/.test(nueva);
-  const matchOk = nueva === confirmar && nueva.length > 0;
-  setReq('req-len', lenOk);
-  setReq('req-num', numOk);
-  setReq('req-may', mayOk);
-  setReq('req-match', matchOk);
-  const todo = lenOk && numOk && mayOk && matchOk;
-  const btn = document.getElementById('btn-guardar-clave');
-  btn.disabled = !todo;
-  btn.style.opacity = todo ? '1' : '.5';
-  btn.style.cursor = todo ? 'pointer' : 'not-allowed';
-  btn.style.background = todo ? 'var(--teal-700)' : 'var(--teal-700)';
-}
-
-async function guardarClave() {
-  const nueva = document.getElementById('inp-nueva').value;
-  const btn = document.getElementById('btn-guardar-clave');
-  const msg = document.getElementById('clave-msg');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
-
-  const { error } = await db.auth.updateUser({ password: nueva });
-
-  if (error) {
-    msg.style.display = 'block';
-    msg.style.background = 'var(--danger-bg)';
-    msg.style.color = 'var(--danger)';
-    msg.style.border = '1px solid rgba(192,57,43,.2)';
-    msg.textContent = 'Error: ' + error.message;
-    btn.disabled = false;
-    btn.textContent = 'Guardar nueva contraseña';
-  } else {
-    msg.style.display = 'block';
-    msg.style.background = 'var(--green-50)';
-    msg.style.color = 'var(--green-900)';
-    msg.style.border = '1px solid rgba(30,132,73,.2)';
-    msg.textContent = '✓ Contraseña actualizada correctamente';
-    btn.textContent = '✓ Listo';
-    setTimeout(() => cerrarCambiarClave(), 2000);
-  }
-}
-
 </script>
 </body>
 </html>
