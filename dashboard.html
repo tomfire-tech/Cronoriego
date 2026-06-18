@@ -140,6 +140,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .franja-val.blue{color:var(--blue);}
 .franja-val.amber{color:var(--amber);}
 .franja-sub{font-size:12px;color:var(--muted);}
+/* franja: doble valor estación/pronóstico */
+.franja-dual{display:flex;gap:18px;margin-top:1px;}
+.fd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.fd-lbl.est{color:var(--green);}
+.fd-lbl.pron{color:var(--blue);}
 
 /* ═══ PANEL DERECHO ═══ */
 .panel{width:320px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0;gap:0;overflow-y:auto;}
@@ -180,11 +185,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .res-tbl tr.total-row td{font-weight:700;color:var(--ink);background:var(--line2);border-radius:0;}
 .res-tbl tr.total-row td:first-child{border-radius:4px 0 0 4px;}
 .res-tbl tr.total-row td:last-child{border-radius:0 4px 4px 0;}
+.res-src{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.res-src.est{color:var(--green);}
+.res-src.pron{color:var(--blue);}
 
 /* ═══ DRAWER ═══ */
 .scrim{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);}
 .scrim.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;right:0;top:0;height:100%;width:min(460px,90vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
+.drawer{position:fixed;right:0;top:0;height:100%;width:min(520px,92vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
 .drawer.open{transform:translateX(0);}
 .dh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
 .dh-left .dt{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px;text-transform:capitalize;}
@@ -204,15 +212,32 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .cmp-h{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
 .cmp-h.est{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0;}
 .cmp-h.pron{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;}
-.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line2);font-size:12px;}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px;}
 .cmp-row:last-child{border-bottom:none;}
 .cmp-k{color:var(--muted);}
 .cmp-vs{display:flex;gap:10px;}
-.ce{color:var(--green);font-weight:700;min-width:72px;text-align:right;}
-.cp{color:var(--blue);font-weight:700;min-width:72px;text-align:right;}
+.ce{color:var(--green);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
+.cp{color:var(--blue);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
 .ndvi-bars{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:6px;}
 .nb{flex:1;background:var(--green);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
 .nd{font-size:8px;color:var(--subtle);text-align:center;margin-top:2px;}
+
+/* DRAWER — hero riego del día */
+.hero2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.hero-card{border-radius:12px;padding:14px 16px;border:1px solid transparent;}
+.hero-card.est{background:#F0FDF4;border-color:#BBF7D0;}
+.hero-card.pron{background:#EFF6FF;border-color:#BFDBFE;}
+.hero-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:4px;margin-bottom:6px;}
+.hero-card.est .hero-lbl{color:var(--green);}
+.hero-card.pron .hero-lbl{color:var(--blue);}
+.hero-big{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
+.hero-card.est .hero-big{color:var(--green);}
+.hero-card.pron .hero-big{color:var(--blue);}
+.hero-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+.cbox{border-radius:10px;padding:12px 14px;border:1px solid var(--line);}
+.cbox-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:var(--ink2);}
+.cbox-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.05);}
+.note{font-size:12px;color:var(--muted);background:var(--line2);border-radius:8px;padding:10px 12px;line-height:1.45;}
 
 /* ═══ MODAL CLAVE ═══ */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
@@ -571,7 +596,7 @@ function rFranja(sc,ndvi){
       const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
       const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
       const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-      lamTE+=lE; lamTP+=lP;          // ← estación y pronóstico SEPARADOS
+      lamTE+=lE; lamTP+=lP;
       tTE+=tE;   tTP+=tP;
       volTE+=lE*ha*10; volTP+=lP*ha*10;
       const fd=new Date(r.fecha+'T00:00:00');
@@ -586,13 +611,13 @@ function rFranja(sc,ndvi){
 
   // card con doble valor Estación (verde) / Pronóstico (azul)
   const dual=(est,pron,sz=22)=>`
-    <div style="display:flex;gap:18px;margin-top:1px">
+    <div class="franja-dual">
       <div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--green);margin-bottom:2px">● Estación</div>
+        <div class="fd-lbl est">● Estación</div>
         <div class="franja-val green" style="font-size:${sz}px">${est}</div>
       </div>
       <div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--blue);margin-bottom:2px">● Pronóstico</div>
+        <div class="fd-lbl pron">● Pronóstico</div>
         <div class="franja-val blue" style="font-size:${sz}px">${pron}</div>
       </div>
     </div>`;
@@ -677,16 +702,43 @@ function rPanel(dias,sc,ndvi){
     <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
     ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
 
-  // RESUMEN
-  const res=G.zonas.map((z,zi)=>{let l=0,t=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;t+=parseFloat(r.tiempo_de_riego_estacion_horas)||parseFloat(r.tiempo_de_riego_pronostico_horas)||0;});return{z,zi,l,t,v:l*ha*10};});
-  const tot={l:res.reduce((s,r)=>s+r.l,0),t:res.reduce((s,r)=>s+r.t,0),v:res.reduce((s,r)=>s+r.v,0)};
+  // RESUMEN — Estación (real) y Pronóstico separados
+  const res=G.zonas.map((z,zi)=>{
+    let lE=0,lP=0,tE=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
+    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
+      lE+=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+      lP+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+      tE+=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+      tP+=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+    });
+    return{z,zi,lE,lP,tE,tP,vE:lE*ha*10,vP:lP*ha*10};
+  });
+  const tot={lE:0,lP:0,tE:0,tP:0,vE:0,vP:0};
+  res.forEach(r=>{tot.lE+=r.lE;tot.lP+=r.lP;tot.tE+=r.tE;tot.tP+=r.tP;tot.vE+=r.vE;tot.vP+=r.vP;});
+  const cell=(e,p,fn)=>`<div class="res-src est">${fn(e)}</div><div class="res-src pron">${fn(p)}</div>`;
+  const mm=v=>v>0?v.toFixed(0):'—';
+  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
+  const hh=v=>hm(v)||'—';
   document.getElementById('presum').innerHTML=`
     <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:6px">
+      <span class="res-src est">● Estación</span><span class="res-src pron">● Pronóstico</span>
+    </div>
     <table class="res-tbl">
       <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
       <tbody>
-        ${res.map(r=>`<tr><td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||r.z.id_zona}</td><td>${r.l>0?r.l.toFixed(0):'—'}</td><td>${hm(r.t)||'—'}</td><td>${r.v>0?Math.round(r.v).toLocaleString('es-CL'):'—'}</td></tr>`).join('')}
-        <tr class="total-row"><td>Total equipo</td><td>${tot.l>0?tot.l.toFixed(0):'—'}</td><td>${hm(tot.t)||'—'}</td><td>${tot.v>0?Math.round(tot.v).toLocaleString('es-CL'):'—'}</td></tr>
+        ${res.map(r=>`<tr>
+          <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||r.z.id_zona}</td>
+          <td>${cell(r.lE,r.lP,mm)}</td>
+          <td>${cell(r.tE,r.tP,hh)}</td>
+          <td>${cell(r.vE,r.vP,m3)}</td>
+        </tr>`).join('')}
+        <tr class="total-row">
+          <td>Total equipo</td>
+          <td>${cell(tot.lE,tot.lP,mm)}</td>
+          <td>${cell(tot.tE,tot.tP,hh)}</td>
+          <td>${cell(tot.vE,tot.vP,m3)}</td>
+        </tr>
       </tbody>
     </table>`;
 }
@@ -698,7 +750,8 @@ function openDia(fecha,znId){
   if(!r||!z)return;
   const dt=new Date(fecha+'T00:00:00');
   const tit=`${DS[dt.getDay()]} ${dt.getDate()} de ${MS[dt.getMonth()]}`;
-  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];
+  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
+  const ha=parseFloat(z.superficie_ha)||0;
   const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
   const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
   const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
@@ -706,32 +759,82 @@ function openDia(fecha,znId){
   const eE=parseFloat(r.eto_estacion_mm_dia)||0;const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
   const cE=parseFloat(r.etc_estacion_mm_dia)||0;const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
   const llE=parseFloat(r.lluvia_estacion_mm_dia)||0;const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
+  const volE=lE>0?Math.round(lE*ha*10):0;const volP=lP>0?Math.round(lP*ha*10):0;
   const nd=G.ndvi[znId];
-  function crow(k,e,p,d=2,s=''){return`<div class="cmp-row"><span class="cmp-k">${k}</span><div class="cmp-vs"><span class="ce">${e?e.toFixed(d)+s:'—'}</span><span class="cp">${p?p.toFixed(d)+s:'—'}</span></div></div>`;}
-  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.id_zona} · ${z.especie||''}`;
-  const html=`
-    <div class="cmp-hd"><span class="cmp-h est">🌡 Estación</span><span class="cmp-h pron">📡 Pronóstico</span></div>
-    <div class="d-section">
-      <div class="d-section-t">Meteorología</div>
-      ${crow('ETo (mm/día)',eE,eP)}${crow('ETc (mm/día)',cE,cP)}${crow('Lluvia (mm)',llE,llP)}
+  const hoy=new Date();hoy.setHours(0,0,0,0);const past=dt<hoy;
+
+  const num=(v,d=2,s='')=>v>0?v.toFixed(d)+s:'—';
+  const crow=(k,e,p,d=2,s='')=>`<div class="cmp-row"><span class="cmp-k">${k}</span><div class="cmp-vs"><span class="ce">${num(e,d,s)}</span><span class="cp">${num(p,d,s)}</span></div></div>`;
+
+  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||z.id_zona} · ${z.id_zona} · ${z.especie||''} ${z.variedad||''}`;
+
+  // HERO — riego del día
+  const hero=`<div class="hero2">
+    <div class="hero-card est">
+      <div class="hero-lbl"><i class="ti ti-broadcast"></i> Estación · real</div>
+      <div class="hero-big">${hm(tE)||'—'}</div>
+      <div class="hero-sub">${lE>0?lE.toFixed(1)+' mm':'—'}${volE>0?' · '+volE.toLocaleString('es-CL')+' m³':''}</div>
     </div>
-    <div class="d-section">
-      <div class="d-section-t">Riego</div>
-      ${crow('Lámina neta (mm)',lE,lP,1)}
-      <div class="cmp-row"><span class="cmp-k">Tiempo de riego</span><div class="cmp-vs"><span class="ce">${hm(tE)||'—'}</span><span class="cp">${hm(tP)||'—'}</span></div></div>
+    <div class="hero-card pron">
+      <div class="hero-lbl"><i class="ti ti-satellite"></i> Pronóstico</div>
+      <div class="hero-big">${hm(tP)||'—'}</div>
+      <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
     </div>
-    ${lE>0&&lP>0?`<div class="d-section"><div class="d-section-t">Comparativa</div><div style="background:${cl};border-radius:8px;padding:10px;font-size:12px;"><div>Diferencia lámina: <strong style="color:${Math.abs(lE-lP)<5?'var(--green)':'var(--amber)'}">${(lE-lP>0?'+':'')}${(lE-lP).toFixed(1)} mm</strong></div></div></div>`:''}
-    ${nd?`<div class="d-section">
+  </div>`;
+
+  // COMPARATIVA contextual
+  let comp='';
+  if(lE>0&&lP>0){
+    const dMm=lE-lP,dT=tE-tP,acc=Math.round(lE/lP*100);
+    comp=`<div class="d-section"><div class="d-section-t">Plan vs Real</div>
+      <div class="cbox" style="background:${cl};border-color:${cm}">
+        <div class="cbox-row"><span>Diferencia lámina</span><strong style="color:${Math.abs(dMm)<5?'var(--green)':'var(--amber)'}">${dMm>0?'+':''}${dMm.toFixed(1)} mm</strong></div>
+        <div class="cbox-row"><span>Diferencia tiempo</span><strong style="color:${Math.abs(dT)<0.5?'var(--green)':'var(--amber)'}">${dT>0?'+':''}${Math.trunc(dT*60)} min</strong></div>
+        <div class="cbox-row"><span>Acierto del pronóstico</span><strong>${acc}%</strong></div>
+      </div></div>`;
+  }else if(!past&&lP>0){
+    comp=`<div class="d-section"><div class="note">Día futuro — solo pronóstico. El dato de estación aparecerá cuando pase el día.</div></div>`;
+  }else if(past&&lE>0&&lP===0){
+    comp=`<div class="d-section"><div class="note">Riego real de la estación (sin pronóstico previo para comparar).</div></div>`;
+  }
+
+  // ESTADO DEL CULTIVO
+  const cultivo=nd?`<div class="d-section">
       <div class="d-section-t">Estado del cultivo</div>
       <div class="d-grid2">
         <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${nd.ndvi.toFixed(3)}</div></div>
         <div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${nd.kc.toFixed(2)}</div></div>
-        <div class="d-kpi"><div class="l">Especie</div><div class="v" style="font-size:13px">${z.especie||'—'}</div></div>
-        <div class="d-kpi"><div class="l">Superficie</div><div class="v" style="font-size:13px">${z.superficie_ha||'—'} ha</div></div>
       </div>
-      <div class="d-section-t" style="margin-top:10px">Historial NDVI</div>
+      <div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
-    </div>`:''}`;
+    </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
+
+  // FICHA DE LA ZONA (los extras se encienden solos si v_zonas los expone)
+  const extras=[
+    ['Edad del huerto',z.edad_huerto],
+    ['Densidad (pl/ha)',z.densidad_plantacion],
+    ['N° árboles',z.numero_arboles],
+    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
+    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
+    ['Fecha plantación',z.fecha_plantacion],
+  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
+  const ficha=`<div class="d-section">
+      <div class="d-section-t">Ficha de la zona</div>
+      <div class="d-grid2">
+        <div class="d-kpi"><div class="l">Especie</div><div class="v" style="font-size:14px">${z.especie||'—'}</div></div>
+        <div class="d-kpi"><div class="l">Variedad</div><div class="v" style="font-size:14px">${z.variedad||'—'}</div></div>
+        <div class="d-kpi"><div class="l">Superficie</div><div class="v" style="font-size:14px">${z.superficie_ha||'—'} ha</div></div>
+        <div class="d-kpi"><div class="l">ID Zona</div><div class="v" style="font-size:14px">${z.id_zona}</div></div>
+        ${extras.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
+      </div></div>`;
+
+  const html=`${hero}
+    <div class="d-section">
+      <div class="cmp-hd"><span class="cmp-h est">● Estación</span><span class="cmp-h pron">● Pronóstico</span></div>
+      <div class="d-section-t">Meteorología</div>
+      ${crow('ETo (mm/día)',eE,eP)}${crow('ETc (mm/día)',cE,cP)}${crow('Lluvia (mm)',llE,llP)}
+    </div>
+    ${comp}${cultivo}${ficha}`;
   openD(tit,sub,html);
 }
 
