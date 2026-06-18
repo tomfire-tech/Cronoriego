@@ -563,28 +563,58 @@ function rCal(dias,sc){
 // RENDER FRANJA
 function rFranja(sc,ndvi){
   const hoy=new Date();
-  let lamT=0,tT=0,volT=0;const efs=[];
-  G.zonas.forEach(z=>{const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;const l=lE||lP,t=tE||tP;lamT+=l;tT+=t;volT+=l*ha*10;const fd=new Date(r.fecha+'T00:00:00');if(fd<hoy&&lE>0&&lP>0)efs.push(lE/lP);});});
+  let lamTE=0,lamTP=0,volTE=0,volTP=0,tTE=0,tTP=0;const efs=[];
+  G.zonas.forEach(z=>{
+    const ha=parseFloat(z.superficie_ha)||0;
+    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
+      const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+      const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+      const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+      const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+      lamTE+=lE; lamTP+=lP;          // ← estación y pronóstico SEPARADOS
+      tTE+=tE;   tTP+=tP;
+      volTE+=lE*ha*10; volTP+=lP*ha*10;
+      const fd=new Date(r.fecha+'T00:00:00');
+      if(fd<hoy&&lE>0&&lP>0)efs.push(lE/lP);
+    });
+  });
   const ef=efs.length?Math.round(efs.reduce((a,b)=>a+b,0)/efs.length*100):null;
   const nA=Object.values(ndvi).map(v=>v.ndvi).filter(v=>v>0);
   const nP=nA.length?(nA.reduce((a,b)=>a+b,0)/nA.length).toFixed(2):null;
   const eC=nP?parseFloat(nP)>=0.5?'Bueno':parseFloat(nP)>=0.3?'Regular':'Bajo':'—';
   const eCol=nP?parseFloat(nP)>=0.5?'green':parseFloat(nP)>=0.3?'amber':'':'';
 
+  // card con doble valor Estación (verde) / Pronóstico (azul)
+  const dual=(est,pron,sz=22)=>`
+    <div style="display:flex;gap:18px;margin-top:1px">
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--green);margin-bottom:2px">● Estación</div>
+        <div class="franja-val green" style="font-size:${sz}px">${est}</div>
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--blue);margin-bottom:2px">● Pronóstico</div>
+        <div class="franja-val blue" style="font-size:${sz}px">${pron}</div>
+      </div>
+    </div>`;
+
+  const mm=v=>v>0?v.toFixed(0):'—';
+  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
+  const hh=v=>hm(v)||'—';
+
   document.getElementById('franja').innerHTML=`
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Demanda total</div></div>
-    <div class="franja-val blue">${lamT>0?lamT.toFixed(0):'—'}</div>
+    ${dual(mm(lamTE),mm(lamTP))}
     <div class="franja-sub">mm lámina neta</div>
   </div>
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div><div class="franja-lbl">Volumen a aplicar</div></div>
-    <div class="franja-val blue">${volT>0?Math.round(volT).toLocaleString('es-CL'):'—'}</div>
+    ${dual(m3(volTE),m3(volTP))}
     <div class="franja-sub">m³ en todas las zonas</div>
   </div>
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-clock"></i></div><div class="franja-lbl">Tiempo total</div></div>
-    <div class="franja-val">${hm(tT)||'—'}</div>
+    ${dual(hh(tTE),hh(tTP),19)}
     <div class="franja-sub">horas en el equipo</div>
   </div>
   <div class="franja-card">
