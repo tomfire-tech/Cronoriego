@@ -239,6 +239,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .cbox-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:var(--ink2);}
 .cbox-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.05);}
 .note{font-size:12px;color:var(--muted);background:var(--line2);border-radius:8px;padding:10px 12px;line-height:1.45;}
+/* acordeón Más información */
+.mas-btn{width:100%;margin:4px 0 0;padding:11px 14px;background:var(--line2);border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .15s;}
+.mas-btn:hover{background:#E9EEF4;}
+.mas-btn span{display:flex;align-items:center;gap:7px;}
+.mas-btn i{font-size:15px;}
+.mas-panel{display:none;padding:6px 2px 2px;}
+.mas-panel.open{display:block;}
 
 /* ═══ MODAL CLAVE ═══ */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
@@ -429,6 +436,7 @@ async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id
 async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
 async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
+async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>m[r.id_zona]=r);return m;}
 
 // INIT
 async function init(){
@@ -462,8 +470,8 @@ async function loadRender(){
   const dias=semDias(G.off);
   const fi=fs(dias[0]),ff=fs(dias[6]);
   const znIds=G.zonas.map(z=>z.id_zona);
-  const [sc,ndvi,sem]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId)]);
-  G.scDia=sc;G.ndvi=ndvi;
+  const [sc,ndvi,sem,calc]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qCalc(znIds)]);
+  G.scDia=sc;G.ndvi=ndvi;G.calc=calc;
   rKpi(dias,sc,sem);
   rCal(dias,sc);
   rFranja(sc,ndvi);
@@ -823,15 +831,12 @@ function openDia(fecha,znId){
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
-  // FICHA DE LA ZONA (los extras se encienden solos si v_zonas los expone)
-  const extras=[
-    ['Edad del huerto',z.edad_huerto],
-    ['Densidad (pl/ha)',z.densidad_plantacion],
-    ['N° árboles',z.numero_arboles],
-    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
-    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
-    ['Fecha plantación',z.fecha_plantacion],
-  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
+  // datos calculados de la zona (sc_calculos_estaticos_zona)
+  const cz=G.calc?.[znId]||{};
+  const fn=(v,d=1,s='')=>{const n=parseFloat(v);return isNaN(n)?'—':(d===0?Math.round(n).toLocaleString('es-CL'):n.toFixed(d))+s;};
+  const pct=v=>{const n=parseFloat(v);if(isNaN(n))return '—';return (n<=1?(n*100).toFixed(0):n.toFixed(0))+'%';};
+
+  // FICHA DE LA ZONA
   const ficha=`<div class="d-section">
       <div class="d-section-t">Ficha de la zona</div>
       <div class="d-grid2">
@@ -839,8 +844,48 @@ function openDia(fecha,znId){
         <div class="d-kpi"><div class="l">Variedad</div><div class="v" style="font-size:14px">${z.variedad||'—'}</div></div>
         <div class="d-kpi"><div class="l">Superficie</div><div class="v" style="font-size:14px">${z.superficie_ha||'—'} ha</div></div>
         <div class="d-kpi"><div class="l">ID Zona</div><div class="v" style="font-size:14px">${z.id_zona}</div></div>
-        ${extras.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
       </div></div>`;
+
+  // DISEÑO DE RIEGO — 6 campos clave
+  const riego=`<div class="d-section">
+      <div class="d-section-t">Diseño de riego</div>
+      <div class="d-grid2">
+        <div class="d-kpi"><div class="l">Caudal zona</div><div class="v b" style="font-size:16px">${fn(cz.caudal_zona_m3h,1)} <span style="font-size:11px;color:var(--muted)">m³/h</span></div></div>
+        <div class="d-kpi"><div class="l">Intensidad neta</div><div class="v b" style="font-size:16px">${fn(cz.intensidad_precip_neta_mmh,2)} <span style="font-size:11px;color:var(--muted)">mm/h</span></div></div>
+        <div class="d-kpi"><div class="l">N° de árboles</div><div class="v" style="font-size:16px">${fn(cz.numero_arboles_zona,0)}</div></div>
+        <div class="d-kpi"><div class="l">Densidad</div><div class="v" style="font-size:16px">${fn(cz.densidad_plantacion_pl_ha,0)} <span style="font-size:11px;color:var(--muted)">pl/ha</span></div></div>
+        <div class="d-kpi"><div class="l">Emisores/planta</div><div class="v" style="font-size:16px">${fn(cz.emisores_por_planta,0)}</div></div>
+        <div class="d-kpi"><div class="l">Cap. estanque suelo</div><div class="v" style="font-size:16px">${fn(cz.capacidad_estanque_suelo_mm,0)} <span style="font-size:11px;color:var(--muted)">mm</span></div></div>
+      </div></div>`;
+
+  // MÁS INFORMACIÓN — acordeón con ficha técnica completa
+  const masInfo=`
+    <button class="mas-btn" onclick="toggleMas()">
+      <span><i class="ti ti-list-details"></i> Más información</span>
+      <i class="ti ti-chevron-down" id="masIco"></i>
+    </button>
+    <div class="mas-panel" id="masinfo">
+      <div class="d-section-t" style="margin-top:4px">Riego (detalle)</div>
+      <div class="cmp-row"><span class="cmp-k">Edad del huerto</span><strong>${cz.edad_huerto||'—'}</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Tipo de riego</span><strong>${z.tipo_riego||'—'}</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Intensidad bruta</span><strong>${fn(cz.intensidad_precip_bruta_mmh,2)} mm/h</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Factor de eficiencia</span><strong>${pct(cz.factor_eficiencia_pct)}</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Diámetro bulbo húmedo</span><strong>${fn(cz.diametro_bulbo_humedo_m,2)} m</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Suelo mojado</span><strong>${pct(cz.porcentaje_suelo_mojado)}</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Ancho de banda</span><strong>${fn(cz.ancho_banda_m,2)} m</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Separación máx. laterales</span><strong>${fn(cz.separacion_max_laterales_m,2)} m</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Descuento infiltración</span><strong>${fn(cz.descuento_infiltracion_superf_mm,1)} mm</strong></div>
+
+      <div class="d-section-t" style="margin-top:14px">Suelo (primer perfil)</div>
+      <div class="cmp-row"><span class="cmp-k">Capacidad de campo</span><strong>${fn(z.cc,1)} %</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Punto marchitez</span><strong>${fn(z.pmp,1)} %</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Densidad aparente</span><strong>${fn(z.da,2)} g/cc</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Profundidad perfil</span><strong>${fn(z.prof,2)} m</strong></div>
+
+      <div class="d-section-t" style="margin-top:14px">Cultivo y clima</div>
+      <div class="cmp-row"><span class="cmp-k">% de sombra</span><strong>${fn(z.sombra_pct,0)} %</strong></div>
+      <div class="cmp-row"><span class="cmp-k">Tipo de clima</span><strong>${z.tipo_clima||'—'}</strong></div>
+    </div>`;
 
   const html=`${hero}
     <div class="d-section">
@@ -848,8 +893,16 @@ function openDia(fecha,znId){
       <div class="d-section-t">Meteorología</div>
       ${crow('ETo (mm/día)',eE,eP)}${crow('ETc (mm/día)',cE,cP)}${crow('Lluvia (mm)',llE,llP)}
     </div>
-    ${comp}${cultivo}${ficha}`;
+    ${comp}${cultivo}${ficha}${riego}${masInfo}`;
   openD(tit,sub,html);
+}
+
+// ACORDEÓN MÁS INFORMACIÓN
+function toggleMas(){
+  const p=document.getElementById('masinfo'),ico=document.getElementById('masIco');
+  if(!p)return;
+  const open=p.classList.toggle('open');
+  ico.className=open?'ti ti-chevron-up':'ti ti-chevron-down';
 }
 
 init();
