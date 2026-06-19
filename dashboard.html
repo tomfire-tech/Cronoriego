@@ -472,9 +472,22 @@ async function loadRender(){
 // RENDER KPI BAR
 function rKpi(dias,sc,sem){
   const hoy=new Date();
-  let lluv=0,etoSum=0,etoN=0;
-  sc.forEach(r=>{lluv+=parseFloat(r.lluvia_pronostico_mm_dia)||0;const e=parseFloat(r.eto_estacion_mm_dia)||parseFloat(r.eto_pronostico_mm_dia)||0;if(e>0){etoSum+=e;etoN++;}});
-  const eMed=etoN?etoSum/etoN:0;
+  // ETo y lluvia son variables CLIMÁTICAS: todas las zonas del predio comparten
+  // casi el mismo valor diario. Sumar las 12 zonas las multiplica por ~12.
+  // Correcto: promediar zonas dentro de cada día, luego sumar los días (acumulado semanal).
+  const etoPorDia={},lluvPorDia={};
+  sc.forEach(r=>{
+    const e=parseFloat(r.eto_estacion_mm_dia)||parseFloat(r.eto_pronostico_mm_dia)||0;
+    if(e>0)(etoPorDia[r.fecha]=etoPorDia[r.fecha]||[]).push(e);
+    const ll=parseFloat(r.lluvia_pronostico_mm_dia);
+    if(!isNaN(ll))(lluvPorDia[r.fecha]=lluvPorDia[r.fecha]||[]).push(ll);
+  });
+  const promDia=o=>Object.values(o).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
+  const etoDiario=promDia(etoPorDia);
+  const etoSum=etoDiario.reduce((a,b)=>a+b,0);       // ETo acumulado semanal (mm)
+  const etoN=etoDiario.length;
+  const lluv=promDia(lluvPorDia).reduce((a,b)=>a+b,0); // lluvia acumulada semanal (mm)
+  const eMed=etoN?etoSum/etoN:0;                       // ETo promedio diario (mm/día)
   const temp=eMed>0?Math.round(eMed*5+8):null;
   document.getElementById('ct').textContent=temp||'—';
   document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
@@ -690,7 +703,8 @@ function rPanel(dias,sc,ndvi){
   const als=[];
   const maxE=Math.max(0,...sc.map(r=>parseFloat(r.eto_pronostico_mm_dia)||0));
   if(maxE>6)als.push({cls:'warn',i:'ti-temperature-plus',t:'ETo alta pronosticada',s:`Máximo ${maxE.toFixed(1)} mm/día — aumenta la demanda hídrica`});
-  const totL=sc.reduce((s,r)=>s+(parseFloat(r.lluvia_pronostico_mm_dia)||0),0);
+  const _llDia={};sc.forEach(r=>{const v=parseFloat(r.lluvia_pronostico_mm_dia);if(!isNaN(v))(_llDia[r.fecha]=_llDia[r.fecha]||[]).push(v);});
+  const totL=Object.values(_llDia).map(a=>a.reduce((x,y)=>x+y,0)/a.length).reduce((a,b)=>a+b,0);
   if(totL>15)als.push({cls:'info',i:'ti-cloud-rain',t:'Lluvia importante',s:`${totL.toFixed(1)} mm esta semana — considera suspender o reducir riego`});
   G.zonas.forEach((z,zi)=>{
     const nd=ndvi[z.id_zona];
