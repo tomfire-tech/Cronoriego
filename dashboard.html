@@ -63,13 +63,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 /* ═══ KPI BAR ═══ */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
-.kpi-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
+.kpi-card{padding:14px 18px;border-right:1px solid var(--line);display:flex;align-items:center;gap:14px;transition:background .15s;}
 .kpi-card:last-child{border-right:none;}
 .kpi-card:hover{background:#FAFBFC;}
+.kpi-body{display:flex;flex-direction:column;gap:3px;min-width:0;}
 .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;}
-.kpi-ico{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.kpi-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
-.kpi-val{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
+.kpi-val{font-family:'Fraunces',serif;font-size:28px;font-weight:700;line-height:1;letter-spacing:-.5px;}
 .kpi-val.green{color:var(--green);}
 .kpi-val.blue{color:var(--blue);}
 .kpi-val.amber{color:var(--amber);}
@@ -362,7 +363,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="p-block no-flex" id="pprox">
       <div class="p-title"><i class="ti ti-calendar-event"></i>Próximos riegos</div>
     </div>
-    <div class="p-block flex-auto" id="palertas">
+    <div class="p-block no-flex" id="palertas">
       <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
     </div>
     <div class="p-block no-flex" id="presum">
@@ -495,26 +496,43 @@ function rKpi(dias,sc,sem){
   let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
 
+  // próxima lluvia: primer día de la semana con lluvia >= 1 mm
+  let proxLluvia=null;
+  for(const d of dias){const arr=lluvPorDia[fs(d)];const v=arr?arr.reduce((a,b)=>a+b,0)/arr.length:0;if(v>=1){proxLluvia=d;break;}}
+  const lluviaSub=lluv>0?(proxLluvia?`Próxima: ${DSS[proxLluvia.getDay()]} ${proxLluvia.getDate()} ${MSS[proxLluvia.getMonth()]}`:'En los próximos 7 días'):'Sin lluvia esta semana';
+
   document.getElementById('kpib').innerHTML=`
   <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div>
-    <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
-    <div class="kpi-sub">m³ estimados</div>
+    <div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-lbl">Volumen semana</div>
+      <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
+      <div class="kpi-sub">m³ a aplicar</div>
+    </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
-    <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
-    <div class="kpi-sub">mm evapotranspiración</div>
+    <div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-lbl">ETo semana</div>
+      <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
+      <div class="kpi-sub">${eMed>0?'≈ '+eMed.toFixed(1)+' mm/día':'mm evapotranspiración'}</div>
+    </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Energía estimada</div><div class="kpi-ico" style="background:#F5F3FF;color:var(--purple,#7C3AED)"><i class="ti ti-bolt"></i></div></div>
-    <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
-    <div class="kpi-sub">kWh esta semana</div>
+    <div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-bolt"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-lbl">Energía estimada</div>
+      <div class="kpi-val">${energ>0?Math.round(energ).toLocaleString('es-CL'):'—'}</div>
+      <div class="kpi-sub">kWh esta semana</div>
+    </div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Lluvia probable</div><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-cloud-rain"></i></div></div>
-    <div class="kpi-val ${lluv>15?'blue':''}">${lluv>0?lluv.toFixed(1):'0'}</div>
-    <div class="kpi-sub">mm en 7 días</div>
+    <div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-cloud-rain"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-lbl">Lluvia probable</div>
+      <div class="kpi-val ${lluv>15?'blue':''}">${lluv>0?lluv.toFixed(1):'0'}</div>
+      <div class="kpi-sub">${lluviaSub}</div>
+    </div>
   </div>`;
 }
 
