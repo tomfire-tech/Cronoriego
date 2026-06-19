@@ -62,7 +62,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .dd-sep{height:1px;background:var(--line);margin:2px 0;}
 
 /* ═══ KPI BAR ═══ */
-.kpi-bar{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
+.kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
 .kpi-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
 .kpi-card:last-child{border-right:none;}
 .kpi-card:hover{background:#FAFBFC;}
@@ -263,7 +263,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 /* RESPONSIVE */
 @media(max-width:1200px){.panel{width:260px;}}
-@media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(2,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
 </style>
 </head>
 <body><div class="app">
@@ -324,7 +324,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="hdr-right">
     <div class="clim-badge"><i class="ti ti-temperature" style="color:var(--amber)"></i><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">°C</span></div>
     <div class="clim-badge"><i class="ti ti-cloud-rain" style="color:#0891b2"></i><span id="cl">—</span><span style="color:var(--subtle);font-size:11px">mm</span></div>
-    <div class="sem-badge" id="sbadge">Sem. —</div>
+    <div class="sem-badge" id="sbadge">Semana en curso</div>
     <div class="usr-btn" onclick="tgM(event)" id="ubtn">
       <div class="avatar" id="uini">—</div>
       <span class="usr-name" id="unm">—</span>
@@ -406,7 +406,7 @@ document.addEventListener('click',()=>document.getElementById('udd')?.classList.
 
 // SEMANA
 function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
-function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl').textContent=`Sem. ${nw}  ${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=`Sem. ISO ${nw}`;}
+function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl').textContent=`Sem. ${nw}  ${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent='Semana en curso';}
 
 // CLAVE
 function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
@@ -492,32 +492,14 @@ function rKpi(dias,sc,sem){
   document.getElementById('ct').textContent=temp||'—';
   document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
 
-  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0||(parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
-  const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
   let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
-  const ok=cob>=75;
 
   document.getElementById('kpib').innerHTML=`
-  <div class="kpi-card">
-    <div class="kpi-top">
-      <div class="kpi-lbl">Estado hídrico</div>
-      <div class="kpi-ico" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'var(--green)':'var(--amber)'}"><i class="ti ti-droplet${ok?'':'-off'}"></i></div>
-    </div>
-    <div>
-      <div class="kpi-val ${ok?'green':'amber'}" style="font-size:15px;font-weight:800">${ok?'Agua disponible':'Verificar disponibilidad'}</div>
-      <div class="kpi-sub">${ok?'Sin restricciones hoy':'Revisar zonas con déficit'}</div>
-    </div>
-  </div>
   <div class="kpi-card">
     <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div>
     <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
     <div class="kpi-sub">m³ estimados</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Cobertura de riego</div><div class="kpi-ico" style="background:${cob>=80?'#F0FDF4':'#FFFBEB'};color:${cob>=80?'var(--green)':'var(--amber)'}"><i class="ti ti-percentage"></i></div></div>
-    <div class="kpi-val ${cob>=80?'green':'amber'}">${cob}%</div>
-    <div class="kpi-sub">${znR.size} de ${G.zonas.length} zonas</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
