@@ -630,7 +630,7 @@ function rCal(dias,sc){
         const l=lE||lP;const t=tE||tP;
         const ha=parseFloat(z.superficie_ha)||0;
         const vol=l>0?Math.round(l*ha*10):0;
-        const esEst=lE>0;const fd=new Date(dS+'T00:00:00');const past=fd<hoy;
+        const hayEst=lE>0;const fd=new Date(dS+'T00:00:00');const past=fd<hoy;
 
         if(l>0&&hm(t)){
           return`<td class="dia-td${eh?' hoy-col':''}">
