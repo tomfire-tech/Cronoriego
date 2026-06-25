@@ -645,7 +645,7 @@ function rCal(dias,sc){
                   <div class="rc-mm">${l.toFixed(0)} mm</div>
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
                 </div>
-                ${esEst&&past?`<div class="rc-badge" style="background:${cm};color:${c}"><i class="ti ti-circle-check" style="font-size:9px"></i>Real</div>`:''}
+                ${eh&&hayEst?`<div class="rc-badge" style="background:${cm};color:${c}"><i class="ti ti-circle-check" style="font-size:9px"></i>Real ${lE.toFixed(0)}mm</div>`:''}
               </div>
             </div>
           </td>`;
