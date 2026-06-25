@@ -61,6 +61,19 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .dd-btn.danger{color:var(--red);}
 .dd-sep{height:1px;background:var(--line);margin:2px 0;}
 
+/* ═══ CUSTOM SELECT ═══ */
+.csel{position:relative;}
+.csel-btn{display:flex;align-items:center;gap:6px;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;padding:0;max-width:160px;}
+.csel-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.csel-arr{font-size:13px;color:var(--subtle);transition:transform .18s;flex-shrink:0;}
+.csel.open .csel-arr{transform:rotate(180deg);}
+.csel-menu{position:absolute;top:calc(100%+8px);left:-10px;min-width:200px;max-height:300px;overflow-y:auto;background:var(--white);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:5px;margin:0;list-style:none;z-index:300;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .15s,transform .15s;}
+.csel.open .csel-menu{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+.csel-opt{padding:9px 11px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:background .12s;white-space:nowrap;}
+.csel-opt:hover{background:var(--line2);}
+.csel-opt.sel{background:#EFF6FF;color:var(--blue);font-weight:600;}
+.csel-opt.sel::after{content:'\2713';font-size:12px;color:var(--blue);}
+
 /* ═══ KPI BAR ═══ */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
 .kpi-card{padding:14px 18px;border-right:1px solid var(--line);display:flex;align-items:center;gap:14px;transition:background .15s;}
@@ -315,13 +328,27 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
-    <div class="sel-wrap">
+    <div class="sel-wrap" id="wrap-sp">
       <span class="sel-lbl">Predio</span>
-      <select id="sp" onchange="onPredio()"></select>
+      <div class="csel" data-for="sp">
+        <button type="button" class="csel-btn" onclick="csOpen('sp',event)">
+          <span class="csel-txt" id="sp-txt">—</span>
+          <i class="ti ti-chevron-down csel-arr"></i>
+        </button>
+        <ul class="csel-menu" id="sp-menu"></ul>
+      </div>
+      <select id="sp" onchange="onPredio()" style="display:none"></select>
     </div>
-    <div class="sel-wrap">
+    <div class="sel-wrap" id="wrap-se">
       <span class="sel-lbl">Equipo</span>
-      <select id="se" onchange="onEquipo()"></select>
+      <div class="csel" data-for="se">
+        <button type="button" class="csel-btn" onclick="csOpen('se',event)">
+          <span class="csel-txt" id="se-txt">—</span>
+          <i class="ti ti-chevron-down csel-arr"></i>
+        </button>
+        <ul class="csel-menu" id="se-menu"></ul>
+      </div>
+      <select id="se" onchange="onEquipo()" style="display:none"></select>
     </div>
     <div class="week-nav">
       <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
@@ -429,6 +456,33 @@ function openD(t,s,h){document.getElementById('dt').textContent=t;document.getEl
 function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();}});
 
+// CUSTOM SELECT (capa visual sobre los <select> reales)
+function csSync(id){
+  const sel=document.getElementById(id);
+  const menu=document.getElementById(id+'-menu');
+  const txt=document.getElementById(id+'-txt');
+  if(!sel||!menu)return;
+  menu.innerHTML=[...sel.options].map(o=>
+    `<li class="csel-opt${o.value===sel.value?' sel':''}" data-v="${o.value}" onclick="csPick('${id}','${o.value.replace(/'/g,"\\'")}')">${o.textContent}</li>`
+  ).join('');
+  txt.textContent=sel.selectedOptions[0]?.textContent||'—';
+}
+function csOpen(id,e){
+  e.stopPropagation();
+  const box=document.getElementById(id+'-menu').closest('.csel');
+  const wasOpen=box.classList.contains('open');
+  document.querySelectorAll('.csel.open').forEach(b=>b.classList.remove('open'));
+  if(!wasOpen){csSync(id);box.classList.add('open');}
+}
+function csPick(id,val){
+  const sel=document.getElementById(id);
+  sel.value=val;
+  document.getElementById(id+'-txt').textContent=sel.selectedOptions[0]?.textContent||'—';
+  document.getElementById(id+'-menu').closest('.csel').classList.remove('open');
+  sel.dispatchEvent(new Event('change'));
+}
+document.addEventListener('click',()=>document.querySelectorAll('.csel.open').forEach(b=>b.classList.remove('open')));
+
 // QUERIES
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
@@ -451,6 +505,7 @@ async function init(){
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
   sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
+  csSync('sp');
   if(ps.length)await onPredio();
 }
 async function onPredio(){
@@ -458,6 +513,7 @@ async function onPredio(){
   const es=await qE(prId);
   const se=document.getElementById('se');
   se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  csSync('se');
   if(es.length)await onEquipo();
 }
 async function onEquipo(){
@@ -481,9 +537,6 @@ async function loadRender(){
 // RENDER KPI BAR
 function rKpi(dias,sc,sem){
   const hoy=new Date();
-  // ETo y lluvia son variables CLIMÁTICAS: todas las zonas del predio comparten
-  // casi el mismo valor diario. Sumar las 12 zonas las multiplica por ~12.
-  // Correcto: promediar zonas dentro de cada día, luego sumar los días (acumulado semanal).
   const etoPorDia={},lluvPorDia={};
   sc.forEach(r=>{
     const e=parseFloat(r.eto_estacion_mm_dia)||parseFloat(r.eto_pronostico_mm_dia)||0;
@@ -493,10 +546,10 @@ function rKpi(dias,sc,sem){
   });
   const promDia=o=>Object.values(o).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
   const etoDiario=promDia(etoPorDia);
-  const etoSum=etoDiario.reduce((a,b)=>a+b,0);       // ETo acumulado semanal (mm)
+  const etoSum=etoDiario.reduce((a,b)=>a+b,0);
   const etoN=etoDiario.length;
-  const lluv=promDia(lluvPorDia).reduce((a,b)=>a+b,0); // lluvia acumulada semanal (mm)
-  const eMed=etoN?etoSum/etoN:0;                       // ETo promedio diario (mm/día)
+  const lluv=promDia(lluvPorDia).reduce((a,b)=>a+b,0);
+  const eMed=etoN?etoSum/etoN:0;
   const temp=eMed>0?Math.round(eMed*5+8):null;
   document.getElementById('ct').textContent=temp||'—';
   document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
@@ -504,7 +557,6 @@ function rKpi(dias,sc,sem){
   let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
 
-  // próxima lluvia: primer día de la semana con lluvia >= 1 mm
   let proxLluvia=null;
   for(const d of dias){const arr=lluvPorDia[fs(d)];const v=arr?arr.reduce((a,b)=>a+b,0)/arr.length:0;if(v>=1){proxLluvia=d;break;}}
   const lluviaSub=lluv>0?(proxLluvia?`Próxima: ${DSS[proxLluvia.getDay()]} ${proxLluvia.getDate()} ${MSS[proxLluvia.getMonth()]}`:'En los próximos 7 días'):'Sin lluvia esta semana';
@@ -630,7 +682,6 @@ function rFranja(sc,ndvi){
   const eC=nP?parseFloat(nP)>=0.5?'Bueno':parseFloat(nP)>=0.3?'Regular':'Bajo':'—';
   const eCol=nP?parseFloat(nP)>=0.5?'green':parseFloat(nP)>=0.3?'amber':'':'';
 
-  // card con doble valor Estación (verde) / Pronóstico (azul)
   const dual=(est,pron,sz=22)=>`
     <div class="franja-dual">
       <div>
@@ -680,7 +731,6 @@ function rPanel(dias,sc,ndvi){
   const hoy=new Date();const hS=fs(hoy);
   const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
 
-  // PRÓXIMOS
   const prox=[];
   dias.forEach(d=>{
     const dS=fs(d);if(new Date(dS+'T00:00:00')<=hoy)return;
@@ -707,7 +757,6 @@ function rPanel(dias,sc,ndvi){
     }).join('')}
     ${prox.length===0?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Sin riegos próximos esta semana</div>':''}`;
 
-  // ALERTAS
   const als=[];
   const maxE=Math.max(0,...sc.map(r=>parseFloat(r.eto_pronostico_mm_dia)||0));
   if(maxE>6)als.push({cls:'warn',i:'ti-temperature-plus',t:'ETo alta pronosticada',s:`Máximo ${maxE.toFixed(1)} mm/día — aumenta la demanda hídrica`});
@@ -724,7 +773,6 @@ function rPanel(dias,sc,ndvi){
     <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
     ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
 
-  // RESUMEN — Estación (real) y Pronóstico separados
   const res=G.zonas.map((z,zi)=>{
     let lE=0,lP=0,tE=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
     sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
@@ -790,7 +838,6 @@ function openDia(fecha,znId){
 
   const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||z.id_zona} · ${z.id_zona} · ${z.especie||''} ${z.variedad||''}`;
 
-  // HERO — riego del día
   const hero=`<div class="hero2">
     <div class="hero-card est">
       <div class="hero-lbl"><i class="ti ti-broadcast"></i> Estación · real</div>
@@ -804,7 +851,6 @@ function openDia(fecha,znId){
     </div>
   </div>`;
 
-  // COMPARATIVA contextual
   let comp='';
   if(lE>0&&lP>0){
     const dMm=lE-lP,dT=tE-tP,acc=Math.round(lE/lP*100);
@@ -820,7 +866,6 @@ function openDia(fecha,znId){
     comp=`<div class="d-section"><div class="note">Riego real de la estación (sin pronóstico previo para comparar).</div></div>`;
   }
 
-  // ESTADO DEL CULTIVO
   const cultivo=nd?`<div class="d-section">
       <div class="d-section-t">Estado del cultivo</div>
       <div class="d-grid2">
@@ -831,12 +876,10 @@ function openDia(fecha,znId){
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
-  // datos calculados de la zona (sc_calculos_estaticos_zona)
   const cz=G.calc?.[znId]||{};
   const fn=(v,d=1,s='')=>{const n=parseFloat(v);return isNaN(n)?'—':(d===0?Math.round(n).toLocaleString('es-CL'):n.toFixed(d))+s;};
   const pct=v=>{const n=parseFloat(v);if(isNaN(n))return '—';return (n<=1?(n*100).toFixed(0):n.toFixed(0))+'%';};
 
-  // FICHA DE LA ZONA
   const ficha=`<div class="d-section">
       <div class="d-section-t">Ficha de la zona</div>
       <div class="d-grid2">
@@ -846,7 +889,6 @@ function openDia(fecha,znId){
         <div class="d-kpi"><div class="l">ID Zona</div><div class="v" style="font-size:14px">${z.id_zona}</div></div>
       </div></div>`;
 
-  // DISEÑO DE RIEGO — 6 campos clave
   const riego=`<div class="d-section">
       <div class="d-section-t">Diseño de riego</div>
       <div class="d-grid2">
@@ -858,7 +900,6 @@ function openDia(fecha,znId){
         <div class="d-kpi"><div class="l">Cap. estanque suelo</div><div class="v" style="font-size:16px">${fn(cz.capacidad_estanque_suelo_mm,0)} <span style="font-size:11px;color:var(--muted)">mm</span></div></div>
       </div></div>`;
 
-  // MÁS INFORMACIÓN — acordeón con ficha técnica completa
   const masInfo=`
     <button class="mas-btn" onclick="toggleMas()">
       <span><i class="ti ti-list-details"></i> Más información</span>
