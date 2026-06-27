@@ -363,6 +363,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 <div class="tabs">
   <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego</div>
   <div class="tab" id="tab-ferti" onclick="switchTab('ferti')"><i class="ti ti-flask-2"></i>Fertirriego</div>
+  <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
+  <div class="tab" id="tab-productos" onclick="switchTab('productos')"><i class="ti ti-package"></i>Productos</div>
+  <div class="tab" id="tab-historial" onclick="switchTab('historial')"><i class="ti ti-history"></i>Historial</div>
 </div>
 <div id="view-riego" class="view">
 
@@ -411,6 +414,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="p-block" id="fpalert"></div>
       <div class="p-block" id="fpprox"></div>
     </div>
+  </div>
+</div>
+<div id="view-soon" class="view" style="display:none;align-items:center;justify-content:center">
+  <div style="text-align:center;color:var(--muted);padding:40px">
+    <i class="ti ti-tools" style="font-size:42px;color:var(--subtle)"></i>
+    <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--ink);margin-top:14px" id="soon-t">Próximamente</div>
+    <div style="font-size:13px;margin-top:6px">Esta sección está en construcción.</div>
   </div>
 </div>
 </div><!-- /app -->
@@ -885,10 +895,13 @@ function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2
 
 function switchTab(t){
   if(t===TAB)return;TAB=t;
+  const TABS=['riego','ferti','balance','productos','historial'];
+  const SOON={balance:'Balance Nutricional',productos:'Productos',historial:'Historial'};
+  TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
   document.getElementById('view-ferti').style.display=t==='ferti'?'flex':'none';
-  document.getElementById('tab-riego').classList.toggle('active',t==='riego');
-  document.getElementById('tab-ferti').classList.toggle('active',t==='ferti');
+  document.getElementById('view-soon').style.display=SOON[t]?'flex':'none';
+  if(SOON[t])document.getElementById('soon-t').textContent=SOON[t];
   if(t==='ferti'&&G.zonas.length)loadRenderFerti();
 }
 
