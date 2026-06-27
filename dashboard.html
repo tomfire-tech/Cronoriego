@@ -3,84 +3,239 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CronoRiego · Fertirriego</title>
+<title>CronoRiego</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --z0:#2563EB;--z0l:#EFF6FF;--z1:#16A34A;--z1l:#F0FDF4;--z2:#EA580C;--z2l:#FFF7ED;
-  --z3:#7C3AED;--z3l:#F5F3FF;--z4:#0891B2;--z4l:#ECFEFF;--z5:#DC2626;--z5l:#FEF2F2;
+  --z0:#2563EB;--z0l:#EFF6FF;--z0m:#BFDBFE;
+  --z1:#16A34A;--z1l:#F0FDF4;--z1m:#BBF7D0;
+  --z2:#EA580C;--z2l:#FFF7ED;--z2m:#FED7AA;
+  --z3:#7C3AED;--z3l:#F5F3FF;--z3m:#DDD6FE;
+  --z4:#0891B2;--z4l:#ECFEFF;--z4m:#A5F3FC;
+  --z5:#DC2626;--z5l:#FEF2F2;--z5m:#FECACA;
   --ink:#0F172A;--ink2:#334155;--muted:#64748B;--subtle:#94A3B8;
   --line:#E2E8F0;--line2:#F1F5F9;--bg:#F8FAFC;--white:#FFFFFF;
   --blue:#2563EB;--green:#16A34A;--amber:#D97706;--red:#DC2626;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.05);--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);--shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
   --r-sm:8px;--r:12px;--r-lg:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;}
 .app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-.hdr{height:56px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:50;box-shadow:var(--shadow-sm);}
-.logo{font-weight:800;font-size:16px;letter-spacing:-.3px;white-space:nowrap;}
-.hdr-sep{width:1px;height:24px;background:var(--line);}
+.hdr{height:58px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:50;box-shadow:var(--shadow-sm);}
+.logo{display:flex;align-items:center;gap:0;font-weight:800;font-size:16px;letter-spacing:-.3px;margin-right:4px;white-space:nowrap;}
+.hdr-sep{width:1px;height:24px;background:var(--line);flex-shrink:0;}
 .hdr-filters{display:flex;align-items:center;gap:8px;flex:1;}
-.sel-wrap{display:flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r-sm);}
-.sel-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);}
-.sel-wrap select{border:none;outline:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);background:transparent;cursor:pointer;max-width:150px;}
-.week-nav{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:12px;font-weight:600;white-space:nowrap;}
-.week-nav button{border:none;background:none;cursor:pointer;color:var(--subtle);display:flex;padding:2px;border-radius:4px;}
+.sel-wrap{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--white);cursor:pointer;transition:all .15s;}
+.sel-wrap:hover,.sel-wrap:focus-within{border-color:#94A3B8;box-shadow:var(--shadow-sm);}
+.sel-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);white-space:nowrap;}
+.sel-wrap select{border:none;outline:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);background:transparent;cursor:pointer;max-width:140px;}
+.week-nav{display:flex;align-items:center;gap:2px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--white);font-size:12px;font-weight:600;gap:6px;}
+.week-nav button{border:none;background:none;cursor:pointer;color:var(--subtle);display:flex;align-items:center;padding:2px;border-radius:4px;transition:all .1s;}
 .week-nav button:hover{background:var(--line2);color:var(--ink);}
 .hdr-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.clim-badge{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--line2);border-radius:var(--r-sm);font-size:12px;font-weight:500;}
+.clim-badge i{font-size:14px;}
 .sem-badge{background:#EFF6FF;color:#1d4ed8;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid #BFDBFE;}
-.usr-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;}
+.usr-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;background:var(--white);position:relative;transition:border-color .15s;}
+.usr-btn:hover{border-color:#94A3B8;}
 .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#0891B2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
 .usr-name{font-size:12px;font-weight:500;color:var(--ink2);}
+.usr-dd{position:absolute;right:0;top:calc(100%+6px);background:var(--white);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);min-width:180px;overflow:hidden;display:none;z-index:200;}
+.usr-dd.open{display:block;}
+.dd-btn{width:100%;text-align:left;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--ink2);transition:background .1s;}
+.dd-btn:hover{background:var(--line2);}
+.dd-btn.danger{color:var(--red);}
+.dd-sep{height:1px;background:var(--line);margin:2px 0;}
+.kpi-bar{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
+.kpi-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
+.kpi-card:last-child{border-right:none;}
+.kpi-card:hover{background:#FAFBFC;}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;}
+.kpi-ico{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
+.kpi-val{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
+.kpi-val.green{color:var(--green);}
+.kpi-val.blue{color:var(--blue);}
+.kpi-val.amber{color:var(--amber);}
+.kpi-val.red{color:var(--red);}
+.kpi-sub{font-size:11px;color:var(--muted);}
+.body{display:flex;gap:0;flex:1;overflow:hidden;min-height:0;}
+.cal-zone{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.cal-scroll{flex:1;overflow-y:auto;overflow-x:auto;padding:12px 16px 0;}
+.cal-tbl{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:680px;}
+.cal-tbl thead tr th{padding:0 8px 8px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:2px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
+.cal-tbl thead tr th.th-zona{text-align:left;min-width:150px;width:150px;}
+.cal-tbl thead tr th.th-hoy{color:var(--blue);}
+.cal-tbl thead tr th .th-num{font-family:'Fraunces',serif;font-size:20px;font-weight:700;display:block;line-height:1;}
+.cal-tbl thead tr th.th-hoy .th-num{color:var(--blue);}
+.cal-tbl tbody tr{border-radius:var(--r);}
+.cal-tbl tbody tr td{padding:0;background:transparent;}
+.cal-tbl tbody tr td:first-child{border-radius:var(--r) 0 0 var(--r);}
+.cal-tbl tbody tr td:last-child{border-radius:0 var(--r) var(--r) 0;}
+.zona-td{padding:0;width:165px;min-width:165px;}
+.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;height:88px;display:flex;flex-direction:column;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);}
+.zona-head{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--ink);}
+.zona-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.zona-esp{font-size:13px;color:var(--muted);padding-left:15px;line-height:1.3;}
+.zona-ndvi{font-size:12px;color:var(--subtle);padding-left:15px;margin-top:1px;}
+.dia-td{padding:3px;vertical-align:top;min-width:100px;}
+.dia-td.hoy-col .riego-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
+.dia-inner{height:88px;display:flex;align-items:center;justify-content:center;}
+.riego-card{width:100%;height:88px;border-radius:var(--r);padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
+.riego-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
+.riego-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.rc-top{display:flex;align-items:center;justify-content:space-between;}
+.rc-tiempo{font-family:'Fraunces',serif;font-size:21px;font-weight:700;line-height:1;letter-spacing:-.3px;}
+.rc-ico{font-size:14px;}
+.rc-mid{display:flex;flex-direction:column;gap:1px;}
+.rc-mm{font-size:14px;font-weight:600;color:var(--ink2);}
+.rc-m3{font-size:12px;color:var(--muted);}
+.rc-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;align-self:flex-start;}
+.dia-empty{width:100%;height:88px;border-radius:var(--r);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--line);font-size:16px;}
+.franja{background:var(--white);border-top:2px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);box-shadow:0 -2px 12px rgba(0,0,0,.06);flex-shrink:0;}
+.franja-card{padding:16px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
+.franja-card:last-child{border-right:none;}
+.franja-card:hover{background:#FAFBFC;}
+.franja-top{display:flex;align-items:center;gap:7px;}
+.franja-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.franja-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
+.franja-val{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1;color:var(--ink);letter-spacing:-.5px;}
+.franja-val.green{color:var(--green);}
+.franja-val.blue{color:var(--blue);}
+.franja-val.amber{color:var(--amber);}
+.franja-sub{font-size:12px;color:var(--muted);}
+.franja-dual{display:flex;gap:18px;margin-top:1px;}
+.fd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.fd-lbl.est{color:var(--green);}
+.fd-lbl.pron{color:var(--blue);}
+.panel{width:320px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0;gap:0;overflow-y:auto;}
+.p-block{padding:16px;border-bottom:1px solid var(--line);background:var(--white);}
+.p-block.flex-auto{flex:1;overflow-y:auto;}
+.p-block.no-flex{flex-shrink:0;}
+.p-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:5px;}
+.p-title i{font-size:14px;}
+.prox-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--line2);align-items:flex-start;}
+.prox-item:last-child{border-bottom:none;}
+.prox-stripe{width:3px;border-radius:2px;min-height:44px;flex-shrink:0;margin-top:2px;}
+.prox-body{flex:1;min-width:0;}
+.prox-zona{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prox-esp{font-size:12px;color:var(--muted);}
+.prox-fecha{font-size:12px;color:var(--subtle);margin-top:2px;}
+.prox-t{font-size:14px;font-weight:700;padding:5px 10px;border-radius:6px;white-space:nowrap;align-self:center;flex-shrink:0;}
+.alerta-card{border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px;border:1px solid transparent;display:flex;gap:8px;align-items:flex-start;}
+.alerta-card:last-child{margin-bottom:0;}
+.alerta-card.danger{background:#FEF2F2;border-color:#FECACA;color:#7F1D1D;}
+.alerta-card.warn{background:#FFFBEB;border-color:#FDE68A;color:#78350F;}
+.alerta-card.info{background:#EFF6FF;border-color:#BFDBFE;color:#1E3A5F;}
+.alerta-card.ok{background:#F0FDF4;border-color:#BBF7D0;color:#14532D;}
+.alerta-card.yellow{background:#FEFCE8;border-color:#FEF08A;color:#713F12;}
+.alerta-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
+.alerta-t{font-size:13px;font-weight:700;line-height:1.3;}
+.alerta-s{font-size:12px;opacity:.8;margin-top:2px;}
+.res-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.res-tbl th{color:var(--subtle);font-weight:600;padding:5px 8px;text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1.5px solid var(--line);}
+.res-tbl th:first-child{text-align:left;}
+.res-tbl td{padding:8px 8px;border-bottom:1px solid var(--line2);text-align:right;color:var(--ink2);font-size:13px;}
+.res-tbl td:first-child{text-align:left;display:flex;align-items:center;gap:5px;color:var(--ink);}
+.res-tbl tr.total-row td{font-weight:700;color:var(--ink);background:var(--line2);border-radius:0;}
+.res-tbl tr.total-row td:first-child{border-radius:4px 0 0 4px;}
+.res-tbl tr.total-row td:last-child{border-radius:0 4px 4px 0;}
+.res-src{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.res-src.est{color:var(--green);}
+.res-src.pron{color:var(--blue);}
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);}
+.scrim.open{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;right:0;top:0;height:100%;width:min(520px,92vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
+.drawer.open{transform:translateX(0);}
+.dh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.dh-left .dt{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px;text-transform:capitalize;}
+.dh-left .ds{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px;}
+.dclose{border:none;background:var(--line2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;flex:none;transition:background .15s;}
+.dclose:hover{background:var(--line);}
+.db{padding:18px 22px;overflow-y:auto;flex:1;}
+.d-section{margin-bottom:20px;}
+.d-section-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line2);}
+.d-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.d-kpi{background:var(--line2);border-radius:var(--r-sm);padding:10px 12px;}
+.d-kpi .l{font-size:10px;color:var(--subtle);margin-bottom:3px;}
+.d-kpi .v{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);}
+.d-kpi .v.g{color:var(--green);}
+.d-kpi .v.b{color:var(--blue);}
+.cmp-hd{display:flex;justify-content:flex-end;gap:8px;margin-bottom:6px;}
+.cmp-h{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
+.cmp-h.est{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0;}
+.cmp-h.pron{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;}
+.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px;}
+.cmp-row:last-child{border-bottom:none;}
+.cmp-k{color:var(--muted);}
+.cmp-vs{display:flex;gap:10px;}
+.ce{color:var(--green);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
+.cp{color:var(--blue);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
+.ndvi-bars{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:6px;}
+.nb{flex:1;background:var(--green);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
+.nd{font-size:8px;color:var(--subtle);text-align:center;margin-top:2px;}
+.hero2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.hero-card{border-radius:12px;padding:14px 16px;border:1px solid transparent;}
+.hero-card.est{background:#F0FDF4;border-color:#BBF7D0;}
+.hero-card.pron{background:#EFF6FF;border-color:#BFDBFE;}
+.hero-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:4px;margin-bottom:6px;}
+.hero-card.est .hero-lbl{color:var(--green);}
+.hero-card.pron .hero-lbl{color:var(--blue);}
+.hero-big{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
+.hero-card.est .hero-big{color:var(--green);}
+.hero-card.pron .hero-big{color:var(--blue);}
+.hero-sub{font-size:12px;color:var(--muted);margin-top:6px;}
+.cbox{border-radius:10px;padding:12px 14px;border:1px solid var(--line);}
+.cbox-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:var(--ink2);}
+.cbox-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.05);}
+.note{font-size:12px;color:var(--muted);background:var(--line2);border-radius:8px;padding:10px 12px;line-height:1.45;}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-ov.open{display:flex;}
+.modal-box{background:var(--white);border-radius:var(--r-lg);padding:26px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);}
+.m-t{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+.m-s{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.fl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:5px;margin-top:12px;}
+.fi-w{position:relative;}
+.fi{width:100%;padding:9px 36px 9px 11px;border:1.5px solid var(--line);border-radius:var(--r-sm);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.eye{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--subtle);font-size:15px;}
+.req-i{font-size:11px;color:var(--subtle);display:flex;align-items:center;gap:5px;margin-top:3px;}
+.req-i.ok{color:var(--green);}
+.m-msg{font-size:11px;padding:8px 12px;border-radius:var(--r-sm);margin:10px 0;display:none;border:1px solid transparent;}
+.m-msg.ok{background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
+.m-msg.err{background:#FEF2F2;color:var(--red);border-color:#FECACA;}
+.btn-p{width:100%;margin-top:14px;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-p:not(:disabled):hover{background:#1d4ed8;}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
+@media(max-width:1200px){.panel{width:260px;}}
+@media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
+/* ===== FERTIRRIEGO ===== */
 .tabs{height:42px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 20px;gap:2px;flex-shrink:0;}
 .tab{display:flex;align-items:center;gap:7px;padding:0 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
 .tab i{font-size:16px;}.tab:hover{color:var(--ink2);}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
-.kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
-.kpi-card{padding:14px 18px;border-right:1px solid var(--line);display:flex;align-items:center;gap:13px;}
-.kpi-card:last-child{border-right:none;}
-.kpi-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;}
-.kpi-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
-.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
-.kpi-val{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1.05;letter-spacing:-.5px;}
-.kpi-val.sm{font-size:19px;}
-.kpi-sub{font-size:11px;color:var(--muted);}
-.body{display:flex;flex:1;overflow:hidden;min-height:0;}
-.cal-zone{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
-.cal-scroll{flex:1;overflow:auto;padding:12px 16px 0;}
-.cal-tbl{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:740px;}
-.cal-tbl thead th{padding:0 8px 11px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:2px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
-.cal-tbl thead th.th-zona{text-align:left;min-width:150px;}
-.cal-tbl thead th.th-hoy{color:var(--blue);}
-.cal-tbl thead th .th-num{font-family:'Fraunces',serif;font-size:19px;font-weight:700;display:block;line-height:1;}
-.zona-td{padding:3px 6px 3px 0;width:160px;}
-.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:10px 13px;height:84px;display:flex;flex-direction:column;justify-content:center;gap:3px;box-shadow:var(--shadow-sm);}
-.zona-head{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;}
-.zona-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.zona-esp{font-size:11px;color:var(--muted);padding-left:16px;line-height:1.35;}
-.dia-td{padding:3px;vertical-align:top;min-width:108px;}
-.dia-inner{height:84px;display:flex;align-items:center;justify-content:center;}
-.dia-td.hoy-col .ferti-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
-.ferti-card{width:100%;height:84px;border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
+.view{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+#view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
+#view-ferti .kpi-card{flex-direction:row;align-items:center;gap:13px;padding:14px 18px;}
+#view-ferti .kpi-ico{width:44px;height:44px;border-radius:11px;font-size:21px;}
+#view-ferti .kpi-val{font-size:26px;}
+#view-ferti .kpi-val.sm{font-size:19px;}
+.fc-prod{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ferti-card{width:100%;height:88px;border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
 .ferti-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 .fc-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .fc-dosis{font-family:'Fraunces',serif;font-size:18px;font-weight:700;line-height:1;letter-spacing:-.3px;display:flex;align-items:center;gap:4px;}
 .fc-dosis span{font-size:11px;font-weight:600;color:var(--muted);font-family:'Inter';}
-.fc-prod{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .fc-foot{display:flex;align-items:center;justify-content:space-between;}
 .fc-time{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px;}
-.dia-empty{width:100%;height:84px;}
-.franja{background:var(--white);border-top:2px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);box-shadow:0 -2px 12px rgba(0,0,0,.06);flex-shrink:0;}
-.franja-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px;}
-.franja-card:last-child{border-right:none;}
-.franja-top{display:flex;align-items:center;gap:7px;}
-.franja-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.franja-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);}
 .nut-grid{display:flex;align-items:flex-end;gap:11px;flex-wrap:wrap;}
 .nut-c{display:flex;flex-direction:column;gap:1px;}
 .nut-k{font-size:9px;font-weight:700;text-transform:uppercase;}
@@ -88,11 +243,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .nut-v small{font-size:10px;font-weight:500;color:var(--muted);}
 .nut-more{font-size:10px;color:var(--subtle);align-self:flex-end;padding-bottom:1px;}
 .franja-big{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.4px;}
-.franja-sub{font-size:11px;color:var(--muted);}
-.panel{width:330px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
-.p-block{padding:15px 16px;border-bottom:1px solid var(--line);background:var(--white);}
-.p-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:13px;display:flex;align-items:center;gap:5px;}
-.p-title i{font-size:14px;}
 .bn-row{display:grid;grid-template-columns:34px 1fr 38px 52px;align-items:center;gap:8px;margin-bottom:9px;}
 .bn-row:last-child{margin-bottom:0;}
 .bn-k{font-size:11px;font-weight:700;}
@@ -103,34 +253,19 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .bn-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;}
 .bn-tag.exc{background:#FFF7ED;color:var(--z2);}
 .bn-tag.def{background:#FEFCE8;color:#A16207;}
-.alerta-card{border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px;border:1px solid transparent;display:flex;gap:9px;align-items:flex-start;}
-.alerta-card:last-child{margin-bottom:0;}
-.alerta-card.warn{background:#FFF7ED;border-color:#FED7AA;}
-.alerta-card.def{background:#FEFCE8;border-color:#FEF08A;}
-.alerta-card.ok{background:#F0FDF4;border-color:#BBF7D0;}
-.alerta-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.alerta-t{font-size:12px;font-weight:700;line-height:1.3;color:var(--ink);}
-.alerta-s{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;}
-.prox-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);align-items:center;}
-.prox-item:last-child{border-bottom:none;padding-bottom:0;}
-.prox-body{flex:1;min-width:0;}
-.prox-zona{font-size:13px;font-weight:700;}
+#view-ferti .alerta-card{border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px;border:1px solid transparent;display:flex;gap:9px;align-items:flex-start;color:var(--ink);}
+#view-ferti .alerta-card.warn{background:#FFF7ED;border-color:#FED7AA;}
+#view-ferti .alerta-card.def{background:#FEFCE8;border-color:#FEF08A;}
+#view-ferti .alerta-card.ok{background:#F0FDF4;border-color:#BBF7D0;}
+#view-ferti .alerta-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:0;}
+#view-ferti .alerta-t{font-size:12px;font-weight:700;line-height:1.3;color:var(--ink);}
+#view-ferti .alerta-s{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;opacity:1;}
+#view-ferti .prox-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);align-items:center;}
+#view-ferti .prox-item:last-child{border-bottom:none;}
+#view-ferti .prox-zona{font-size:13px;font-weight:700;}
 .prox-prod{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
 .prox-r{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
 .prox-dosis{font-size:13px;font-weight:700;}
-.prox-fecha{font-size:10px;color:var(--subtle);}
-.scrim{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);}
-.scrim.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;right:0;top:0;height:100%;width:min(560px,94vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
-.drawer.open{transform:translateX(0);}
-.dh{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.dt{font-family:'Fraunces',serif;font-size:19px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:7px;}
-.ds{font-size:12px;color:var(--muted);margin-top:3px;}
-.dh-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.dh-date{font-size:11px;color:var(--subtle);text-align:right;line-height:1.4;}
-.dclose{border:none;background:var(--line2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;}
-.dclose:hover{background:var(--line);}
-.db{padding:16px 22px;overflow-y:auto;flex:1;}
 .dcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .dcard{border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:14px;}
 .dcard-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);margin-bottom:9px;display:flex;align-items:center;gap:5px;}
@@ -155,254 +290,730 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .reco{background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:12px;display:flex;gap:9px;}
 .reco-t{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
 .reco-s{font-size:11px;color:var(--ink2);line-height:1.45;}
-.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
-@media(max-width:1100px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(2,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
 </style>
 </head>
 <body><div class="app">
+
 <div class="scrim" id="scrim" onclick="closeD()"></div>
 <aside class="drawer" id="drawer">
-  <div class="dh"><div><div class="dt" id="dt"></div><div class="ds" id="ds"></div></div>
-    <div class="dh-right"><div class="dh-date" id="ddate"></div><button class="dclose" onclick="closeD()"><i class="ti ti-x"></i></button></div></div>
+  <div class="dh">
+    <div class="dh-left"><div class="dt" id="dt"></div><div class="ds" id="ds"></div></div>
+    <button class="dclose" onclick="closeD()"><i class="ti ti-x"></i></button>
+  </div>
   <div class="db" id="db"></div>
 </aside>
 
+<div class="modal-ov" id="mcl" onclick="if(event.target===this)closeCl()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><div class="m-t">Cambiar contraseña</div><div class="m-s">Elige una contraseña segura de al menos 8 caracteres</div></div>
+      <button onclick="closeCl()" style="border:none;background:var(--line2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;"><i class="ti ti-x"></i></button>
+    </div>
+    <label class="fl">Nueva contraseña</label>
+    <div class="fi-w"><input type="password" id="pwa" class="fi" placeholder="Mínimo 8 caracteres" oninput="vCl()"><button class="eye" onclick="tv('pwa','ia')"><i class="ti ti-eye" id="ia"></i></button></div>
+    <label class="fl">Confirmar contraseña</label>
+    <div class="fi-w"><input type="password" id="pwb" class="fi" placeholder="Repite la contraseña" oninput="vCl()"><button class="eye" onclick="tv('pwb','ib')"><i class="ti ti-eye" id="ib"></i></button></div>
+    <div style="margin-top:10px;">
+      <div class="req-i" id="rlen"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Mínimo 8 caracteres</div>
+      <div class="req-i" id="rnum"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Al menos un número</div>
+      <div class="req-i" id="rmay"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Al menos una mayúscula</div>
+      <div class="req-i" id="rmat"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Las contraseñas coinciden</div>
+    </div>
+    <div class="m-msg" id="cmsg"></div>
+    <button class="btn-p" id="bcl" onclick="saveCl()" disabled>Guardar contraseña</button>
+  </div>
+</div>
+
 <header class="hdr">
-  <div class="logo"><span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span></div>
+  <div class="logo">
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span>
+  </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
-    <div class="sel-wrap"><span class="sel-lbl">Predio</span><select id="sp" onchange="onPredio()"></select></div>
-    <div class="sel-wrap"><span class="sel-lbl">Equipo</span><select id="se" onchange="onEquipo()"></select></div>
-    <div class="week-nav"><button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button><span id="wlbl">Semana —</span><button onclick="chW(1)"><i class="ti ti-chevron-right"></i></button></div>
+    <div class="sel-wrap">
+      <span class="sel-lbl">Predio</span>
+      <select id="sp" onchange="onPredio()"></select>
+    </div>
+    <div class="sel-wrap">
+      <span class="sel-lbl">Equipo</span>
+      <select id="se" onchange="onEquipo()"></select>
+    </div>
+    <div class="week-nav">
+      <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span id="wlbl" style="white-space:nowrap;font-size:12px">Semana —</span>
+      <button onclick="chW(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
   </div>
   <div class="hdr-right">
-    <div class="sem-badge" id="sbadge">—</div>
-    <div class="usr-btn" onclick="logout()"><div class="avatar" id="uini">—</div><span class="usr-name" id="unm">—</span><i class="ti ti-logout" style="font-size:13px;color:var(--subtle)"></i></div>
+    <div class="clim-badge"><i class="ti ti-temperature" style="color:var(--amber)"></i><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">°C</span></div>
+    <div class="clim-badge"><i class="ti ti-cloud-rain" style="color:#0891b2"></i><span id="cl">—</span><span style="color:var(--subtle);font-size:11px">mm</span></div>
+    <div class="sem-badge" id="sbadge">Sem. —</div>
+    <div class="usr-btn" onclick="tgM(event)" id="ubtn">
+      <div class="avatar" id="uini">—</div>
+      <span class="usr-name" id="unm">—</span>
+      <i class="ti ti-chevron-down" style="font-size:11px;color:var(--subtle)"></i>
+      <div class="usr-dd" id="udd">
+        <button class="dd-btn" onclick="openCl()"><i class="ti ti-lock"></i>Cambiar contraseña</button>
+        <div class="dd-sep"></div>
+        <button class="dd-btn danger" onclick="logout()"><i class="ti ti-logout"></i>Cerrar sesión</button>
+      </div>
+    </div>
   </div>
 </header>
-
 <div class="tabs">
-  <div class="tab" onclick="location.href='dashboard.html'"><i class="ti ti-droplet"></i>Riego</div>
-  <div class="tab active"><i class="ti ti-flask-2"></i>Fertirriego</div>
+  <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego</div>
+  <div class="tab" id="tab-ferti" onclick="switchTab('ferti')"><i class="ti ti-flask-2"></i>Fertirriego</div>
+</div>
+<div id="view-riego" class="view">
+
+<div class="kpi-bar" id="kpib">
+  <div class="kpi-card"><div class="loading" style="padding:0;font-size:12px">Cargando...</div></div>
 </div>
 
-<div class="kpi-bar" id="kpib"><div class="kpi-card"><div class="loading" style="padding:0">Cargando…</div></div></div>
 <div class="body">
   <div class="cal-zone">
-    <div class="cal-scroll"><table class="cal-tbl" id="ctbl"><tbody><tr><td class="loading">Cargando fertirriego…</td></tr></tbody></table></div>
-    <div class="franja" id="franja"></div>
+    <div class="cal-scroll">
+      <table class="cal-tbl" id="ctbl"><tbody><tr><td colspan="8" class="loading">Cargando datos de riego...</td></tr></tbody></table>
+    </div>
+    <div class="franja" id="franja">
+      <div class="franja-card"><div class="loading" style="padding:0">—</div></div>
+    </div>
   </div>
   <div class="panel">
-    <div class="p-block" id="pbal"></div>
-    <div class="p-block" id="palert"></div>
-    <div class="p-block" id="pprox"></div>
+    <div class="p-block no-flex" id="pprox">
+      <div class="p-title"><i class="ti ti-calendar-event"></i>Próximos riegos</div>
+    </div>
+    <div class="p-block flex-auto" id="palertas">
+      <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
+    </div>
+    <div class="p-block no-flex" id="presum">
+      <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
+    </div>
   </div>
 </div>
+</div><!-- /view-riego -->
+
+<div id="view-ferti" class="view" style="display:none">
+  <div class="scrim" id="fscrim" onclick="closeDF()"></div>
+  <aside class="drawer" id="fdrawer">
+    <div class="dh"><div class="dh-left"><div class="dt" id="fdt"></div><div class="ds" id="fds"></div></div>
+      <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
+    <div class="db" id="fdb"></div>
+  </aside>
+  <div class="kpi-bar" id="fkpib"></div>
+  <div class="body">
+    <div class="cal-zone">
+      <div class="cal-scroll"><table class="cal-tbl" id="fctbl"></table></div>
+      <div class="franja" id="ffranja"></div>
+    </div>
+    <div class="panel">
+      <div class="p-block" id="fpbal"></div>
+      <div class="p-block" id="fpalert"></div>
+      <div class="p-block" id="fpprox"></div>
+    </div>
+  </div>
 </div>
+</div><!-- /app -->
 
 <script>
 const SU='https://lmexinxdmkgexpthuosn.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
-const {createClient}=supabase;const db=createClient(SU,SK);
+const {createClient}=supabase;
+const db=createClient(SU,SK);
 
 const ZC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626'];
 const ZL=['#EFF6FF','#F0FDF4','#FFF7ED','#F5F3FF','#ECFEFF','#FEF2F2'];
-const DSS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const ZM=['#BFDBFE','#BBF7D0','#FED7AA','#DDD6FE','#A5F3FC','#FECACA'];
+const DS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DSS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const MSS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-// nutrientes: macros (aplicado/demanda) + micros (actual/objetivo ppm)
+
+let G={rsId:null,zonas:[],scDia:[],ndvi:{},off:0};
+
+function hm(h){const f=parseFloat(h);if(!f||f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00min`:`${hh}h ${String(mm).padStart(2,'0')}min`;}
+function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
+function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h);l.setDate(h.getDate()-(dw-1)+(o*7));l.setHours(0,0,0,0);return l;}
+function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
+function fs(d){return d.toISOString().slice(0,10);}
+
+async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='login.html';return null;}return session;}
+async function logout(){await db.auth.signOut();window.location.href='login.html';}
+
+function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
+
+function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
+function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl').textContent=`Sem. ${nw}  ${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=`Sem. ISO ${nw}`;}
+
+function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
+function closeCl(){document.getElementById('mcl').classList.remove('open');}
+function tv(id,ico){const i=document.getElementById(id),ic=document.getElementById(ico);i.type=i.type==='password'?'text':'password';ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';}
+function sR(id,ok){const el=document.getElementById(id);if(!el)return;el.className='req-i'+(ok?' ok':'');const ic=el.querySelector('i');ic.className=ok?'ti ti-circle-check':'ti ti-circle-dashed';ic.style.fontSize='10px';}
+function vCl(){const a=document.getElementById('pwa').value,b=document.getElementById('pwb').value;const l=a.length>=8,n=/[0-9]/.test(a),m=/[A-Z]/.test(a),x=a===b&&a.length>0;sR('rlen',l);sR('rnum',n);sR('rmay',m);sR('rmat',x);document.getElementById('bcl').disabled=!(l&&n&&m&&x);}
+async function saveCl(){const pw=document.getElementById('pwa').value;const btn=document.getElementById('bcl'),msg=document.getElementById('cmsg');btn.disabled=true;btn.textContent='Guardando...';const {error}=await db.auth.updateUser({password:pw});msg.style.display='block';if(error){msg.className='m-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar contraseña';}else{msg.className='m-msg ok';msg.textContent='✓ Contraseña actualizada correctamente';btn.textContent='✓ Listo';setTimeout(()=>closeCl(),1600);}}
+
+function openD(t,s,h){document.getElementById('dt').textContent=t;document.getElementById('ds').innerHTML=s;document.getElementById('db').innerHTML=h;document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');}
+function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();}});
+
+async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
+async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
+async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí');return data||[];}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
+async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
+async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
+
+async function init(){
+  const ses=await chkAuth();if(!ses)return;
+  updW();
+  const em=ses.user.email;
+  document.getElementById('unm').textContent=em.split('@')[0];
+  document.getElementById('uini').textContent=em[0].toUpperCase();
+  const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
+  G.rsId=u?.[0]?.id_rs||null;
+  if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
+  const ps=await qP(G.rsId);
+  const sp=document.getElementById('sp');
+  sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
+  if(ps.length)await onPredio();
+}
+async function onPredio(){
+  const prId=document.getElementById('sp').value;
+  const es=await qE(prId);
+  const se=document.getElementById('se');
+  se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  if(es.length)await onEquipo();
+}
+async function onEquipo(){
+  const eqId=document.getElementById('se').value;
+  G.zonas=await qZ(eqId);
+  if(G.zonas.length)await loadRender();
+}
+async function loadRender(){
+  const eqId=document.getElementById('se').value;
+  const dias=semDias(G.off);
+  const fi=fs(dias[0]),ff=fs(dias[6]);
+  const znIds=G.zonas.map(z=>z.id_zona);
+  const [sc,ndvi,sem]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId)]);
+  G.scDia=sc;G.ndvi=ndvi;
+  rKpi(dias,sc,sem);
+  rCal(dias,sc);
+  rFranja(sc,ndvi);
+  rPanel(dias,sc,ndvi);
+}
+
+function rKpi(dias,sc,sem){
+  const hoy=new Date();
+  const etoPorDia={},lluvPorDia={};
+  sc.forEach(r=>{
+    const e=parseFloat(r.eto_estacion_mm_dia)||parseFloat(r.eto_pronostico_mm_dia)||0;
+    if(e>0)(etoPorDia[r.fecha]=etoPorDia[r.fecha]||[]).push(e);
+    const ll=parseFloat(r.lluvia_pronostico_mm_dia);
+    if(!isNaN(ll))(lluvPorDia[r.fecha]=lluvPorDia[r.fecha]||[]).push(ll);
+  });
+  const promDia=o=>Object.values(o).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
+  const etoDiario=promDia(etoPorDia);
+  const etoSum=etoDiario.reduce((a,b)=>a+b,0);
+  const etoN=etoDiario.length;
+  const lluv=promDia(lluvPorDia).reduce((a,b)=>a+b,0);
+  const eMed=etoN?etoSum/etoN:0;
+  const temp=eMed>0?Math.round(eMed*5+8):null;
+  document.getElementById('ct').textContent=temp||'—';
+  document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
+
+  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0||(parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
+  const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
+  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
+  let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
+  const ok=cob>=75;
+
+  document.getElementById('kpib').innerHTML=`
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Estado hídrico</div>
+      <div class="kpi-ico" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'var(--green)':'var(--amber)'}"><i class="ti ti-droplet${ok?'':'-off'}"></i></div>
+    </div>
+    <div>
+      <div class="kpi-val ${ok?'green':'amber'}" style="font-size:15px;font-weight:800">${ok?'Agua disponible':'Verificar disponibilidad'}</div>
+      <div class="kpi-sub">${ok?'Sin restricciones hoy':'Revisar zonas con déficit'}</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div>
+    <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
+    <div class="kpi-sub">m³ estimados</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">Cobertura de riego</div><div class="kpi-ico" style="background:${cob>=80?'#F0FDF4':'#FFFBEB'};color:${cob>=80?'var(--green)':'var(--amber)'}"><i class="ti ti-percentage"></i></div></div>
+    <div class="kpi-val ${cob>=80?'green':'amber'}">${cob}%</div>
+    <div class="kpi-sub">${znR.size} de ${G.zonas.length} zonas</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
+    <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
+    <div class="kpi-sub">mm evapotranspiración</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">Energía estimada</div><div class="kpi-ico" style="background:#F5F3FF;color:var(--purple,#7C3AED)"><i class="ti ti-bolt"></i></div></div>
+    <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
+    <div class="kpi-sub">kWh esta semana</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">Lluvia probable</div><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-cloud-rain"></i></div></div>
+    <div class="kpi-val ${lluv>15?'blue':''}">${lluv>0?lluv.toFixed(1):'0'}</div>
+    <div class="kpi-sub">mm en 7 días</div>
+  </div>`;
+}
+
+function rCal(dias,sc){
+  const hoy=new Date();const hS=fs(hoy);
+  const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
+
+  let thead=`<thead><tr>
+    <th class="th-zona" style="padding-bottom:12px">Zona</th>
+    ${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px">
+      <div class="th-num">${d.getDate()}</div>
+      <div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div>
+    </th>`;}).join('')}</tr></thead>`;
+
+  let tbody='<tbody>';
+  G.zonas.forEach((z,zi)=>{
+    const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
+    const nd=G.ndvi[z.id_zona];
+    tbody+=`<tr style="height:96px;">
+      <td class="zona-td" style="padding:3px 6px 3px 0">
+        <div class="zona-pill">
+          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
+          <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div>
+          ${nd?`<div class="zona-ndvi">NDVI ${nd.ndvi.toFixed(2)} · Kc ${nd.kc.toFixed(2)}</div>`:`<div class="zona-ndvi">${z.superficie_ha||'—'} ha</div>`}
+        </div>
+      </td>
+      ${dias.map(d=>{
+        const dS=fs(d);const eh=dS===hS;
+        const r=dm[z.id_zona]?.[dS];
+        const lE=r?parseFloat(r.lamina_neta_riego_estacion_mm)||0:0;
+        const lP=r?parseFloat(r.lamina_neta_riego_pronostico_mm)||0:0;
+        const tE=r?parseFloat(r.tiempo_de_riego_estacion_horas)||0:0;
+        const tP=r?parseFloat(r.tiempo_de_riego_pronostico_horas)||0:0;
+        const l=lE||lP;const t=tE||tP;
+        const ha=parseFloat(z.superficie_ha)||0;
+        const vol=l>0?Math.round(l*ha*10):0;
+        const esEst=lE>0;const fd=new Date(dS+'T00:00:00');const past=fd<hoy;
+
+        if(l>0&&hm(t)){
+          return`<td class="dia-td${eh?' hoy-col':''}">
+            <div class="dia-inner">
+              <div class="riego-card" style="background:${cl};border-color:${cm};--zc:${c}" onclick="openDia('${dS}','${z.id_zona}')">
+                <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
+                <div class="rc-top">
+                  <div class="rc-tiempo" style="color:${c}">${hm(t)}</div>
+                  <i class="ti ti-droplet rc-ico" style="color:${c};opacity:.6"></i>
+                </div>
+                <div class="rc-mid">
+                  <div class="rc-mm">${l.toFixed(0)} mm</div>
+                  ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
+                </div>
+                ${esEst&&past?`<div class="rc-badge" style="background:${cm};color:${c}"><i class="ti ti-circle-check" style="font-size:9px"></i>Real</div>`:''}
+              </div>
+            </div>
+          </td>`;
+        }
+        return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
+      }).join('')}
+    </tr>`;
+  });
+  tbody+='</tbody>';
+  document.getElementById('ctbl').innerHTML=thead+tbody;
+}
+
+function rFranja(sc,ndvi){
+  const hoy=new Date();
+  let lamTE=0,lamTP=0,volTE=0,volTP=0,tTE=0,tTP=0;const efs=[];
+  G.zonas.forEach(z=>{
+    const ha=parseFloat(z.superficie_ha)||0;
+    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
+      const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+      const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+      const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+      const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+      lamTE+=lE; lamTP+=lP;
+      tTE+=tE;   tTP+=tP;
+      volTE+=lE*ha*10; volTP+=lP*ha*10;
+      const fd=new Date(r.fecha+'T00:00:00');
+      if(fd<hoy&&lE>0&&lP>0)efs.push(lE/lP);
+    });
+  });
+  const ef=efs.length?Math.round(efs.reduce((a,b)=>a+b,0)/efs.length*100):null;
+  const nA=Object.values(ndvi).map(v=>v.ndvi).filter(v=>v>0);
+  const nP=nA.length?(nA.reduce((a,b)=>a+b,0)/nA.length).toFixed(2):null;
+  const eC=nP?parseFloat(nP)>=0.5?'Bueno':parseFloat(nP)>=0.3?'Regular':'Bajo':'—';
+  const eCol=nP?parseFloat(nP)>=0.5?'green':parseFloat(nP)>=0.3?'amber':'':'';
+
+  const dual=(est,pron,sz=22)=>`
+    <div class="franja-dual">
+      <div>
+        <div class="fd-lbl est">● Estación</div>
+        <div class="franja-val green" style="font-size:${sz}px">${est}</div>
+      </div>
+      <div>
+        <div class="fd-lbl pron">● Pronóstico</div>
+        <div class="franja-val blue" style="font-size:${sz}px">${pron}</div>
+      </div>
+    </div>`;
+
+  const mm=v=>v>0?v.toFixed(0):'—';
+  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
+  const hh=v=>hm(v)||'—';
+
+  document.getElementById('franja').innerHTML=`
+  <div class="franja-card">
+    <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Demanda total</div></div>
+    ${dual(mm(lamTE),mm(lamTP))}
+    <div class="franja-sub">mm lámina neta</div>
+  </div>
+  <div class="franja-card">
+    <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div><div class="franja-lbl">Volumen a aplicar</div></div>
+    ${dual(m3(volTE),m3(volTP))}
+    <div class="franja-sub">m³ en todas las zonas</div>
+  </div>
+  <div class="franja-card">
+    <div class="franja-top"><div class="franja-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-clock"></i></div><div class="franja-lbl">Tiempo total</div></div>
+    ${dual(hh(tTE),hh(tTP),19)}
+    <div class="franja-sub">horas en el equipo</div>
+  </div>
+  <div class="franja-card">
+    <div class="franja-top"><div class="franja-ico" style="background:${ef&&ef>=90?'#F0FDF4':ef?'#FFFBEB':'#F1F5F9'};color:${ef&&ef>=90?'var(--green)':ef?'var(--amber)':'var(--subtle)'}"><i class="ti ti-target"></i></div><div class="franja-lbl">Eficiencia</div></div>
+    <div class="franja-val ${ef&&ef>=90?'green':ef&&ef>=70?'amber':''}">${ef!==null?ef+'%':'—'}</div>
+    <div class="franja-sub">${ef!==null?ef>=90?'Buen desempeño':ef>=70?'Regular':'Revisar':'Sin datos comparativos'}</div>
+  </div>
+  <div class="franja-card">
+    <div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-plant-2"></i></div><div class="franja-lbl">Estado del cultivo</div></div>
+    <div class="franja-val ${eCol}">${eC}</div>
+    <div class="franja-sub">${nP?'NDVI promedio '+nP:'Sin datos NDVI'}</div>
+  </div>`;
+}
+
+function rPanel(dias,sc,ndvi){
+  const hoy=new Date();const hS=fs(hoy);
+  const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
+
+  const prox=[];
+  dias.forEach(d=>{
+    const dS=fs(d);if(new Date(dS+'T00:00:00')<=hoy)return;
+    G.zonas.forEach((z,zi)=>{
+      const r=dm[z.id_zona]?.[dS];if(!r)return;
+      const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+      const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+      if(lP>0||tP>0)prox.push({z,d,r,zi});
+    });
+  });
+  document.getElementById('pprox').innerHTML=`
+    <div class="p-title"><i class="ti ti-calendar-event"></i>Próximos riegos</div>
+    ${prox.slice(0,5).map(p=>{
+      const c=ZC[p.zi%ZC.length];const t=hm(parseFloat(p.r.tiempo_de_riego_pronostico_horas));
+      return`<div class="prox-item">
+        <div class="prox-stripe" style="background:${c}"></div>
+        <div class="prox-body">
+          <div class="prox-zona">${p.z.nombre||p.z.id_zona}</div>
+          <div class="prox-esp">${p.z.especie||'—'} ${p.z.variedad||''}</div>
+          <div class="prox-fecha">${DSS[p.d.getDay()]} ${p.d.getDate()} ${MSS[p.d.getMonth()]}</div>
+        </div>
+        ${t?`<div class="prox-t" style="background:${ZL[p.zi%ZL.length]};color:${c}">${t}</div>`:''}
+      </div>`;
+    }).join('')}
+    ${prox.length===0?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Sin riegos próximos esta semana</div>':''}`;
+
+  const als=[];
+  const maxE=Math.max(0,...sc.map(r=>parseFloat(r.eto_pronostico_mm_dia)||0));
+  if(maxE>6)als.push({cls:'warn',i:'ti-temperature-plus',t:'ETo alta pronosticada',s:`Máximo ${maxE.toFixed(1)} mm/día — aumenta la demanda hídrica`});
+  const _llDia={};sc.forEach(r=>{const v=parseFloat(r.lluvia_pronostico_mm_dia);if(!isNaN(v))(_llDia[r.fecha]=_llDia[r.fecha]||[]).push(v);});
+  const totL=Object.values(_llDia).map(a=>a.reduce((x,y)=>x+y,0)/a.length).reduce((a,b)=>a+b,0);
+  if(totL>15)als.push({cls:'info',i:'ti-cloud-rain',t:'Lluvia importante',s:`${totL.toFixed(1)} mm esta semana — considera suspender o reducir riego`});
+  G.zonas.forEach((z,zi)=>{
+    const nd=ndvi[z.id_zona];
+    if(nd&&nd.ndvi<0.3)als.push({cls:'danger',i:'ti-plant-off',t:`NDVI crítico — ${z.nombre||z.id_zona}`,s:`NDVI ${nd.ndvi.toFixed(3)} — posible estrés hídrico severo`});
+    else if(nd&&nd.hist.length>=2){const diff=(nd.hist[0].ndvi-nd.hist[1].ndvi)/Math.max(nd.hist[1].ndvi,.001)*100;if(diff<-10)als.push({cls:'yellow',i:'ti-trending-down',t:`NDVI disminuyendo — ${z.nombre||z.id_zona}`,s:`Bajó ${Math.abs(diff).toFixed(1)}% vs semana anterior`});}
+  });
+  if(als.length===0)als.push({cls:'ok',i:'ti-circle-check',t:'Sin alertas activas',s:'Todo dentro de parámetros normales'});
+  document.getElementById('palertas').innerHTML=`
+    <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
+    ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
+
+  const res=G.zonas.map((z,zi)=>{
+    let lE=0,lP=0,tE=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
+    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
+      lE+=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+      lP+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+      tE+=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+      tP+=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+    });
+    return{z,zi,lE,lP,tE,tP,vE:lE*ha*10,vP:lP*ha*10};
+  });
+  const tot={lE:0,lP:0,tE:0,tP:0,vE:0,vP:0};
+  res.forEach(r=>{tot.lE+=r.lE;tot.lP+=r.lP;tot.tE+=r.tE;tot.tP+=r.tP;tot.vE+=r.vE;tot.vP+=r.vP;});
+  const cell=(e,p,fn)=>`<div class="res-src est">${fn(e)}</div><div class="res-src pron">${fn(p)}</div>`;
+  const mm=v=>v>0?v.toFixed(0):'—';
+  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
+  const hh=v=>hm(v)||'—';
+  document.getElementById('presum').innerHTML=`
+    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:6px">
+      <span class="res-src est">● Estación</span><span class="res-src pron">● Pronóstico</span>
+    </div>
+    <table class="res-tbl">
+      <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
+      <tbody>
+        ${res.map(r=>`<tr>
+          <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||r.z.id_zona}</td>
+          <td>${cell(r.lE,r.lP,mm)}</td>
+          <td>${cell(r.tE,r.tP,hh)}</td>
+          <td>${cell(r.vE,r.vP,m3)}</td>
+        </tr>`).join('')}
+        <tr class="total-row">
+          <td>Total equipo</td>
+          <td>${cell(tot.lE,tot.lP,mm)}</td>
+          <td>${cell(tot.tE,tot.tP,hh)}</td>
+          <td>${cell(tot.vE,tot.vP,m3)}</td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+function openDia(fecha,znId){
+  const r=G.scDia.find(d=>d.fecha===fecha&&d.id_zona===znId);
+  const z=G.zonas.find(zz=>zz.id_zona===znId);
+  if(!r||!z)return;
+  const dt=new Date(fecha+'T00:00:00');
+  const tit=`${DS[dt.getDay()]} ${dt.getDate()} de ${MS[dt.getMonth()]}`;
+  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
+  const ha=parseFloat(z.superficie_ha)||0;
+  const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
+  const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+  const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+  const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+  const eE=parseFloat(r.eto_estacion_mm_dia)||0;const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
+  const cE=parseFloat(r.etc_estacion_mm_dia)||0;const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
+  const llE=parseFloat(r.lluvia_estacion_mm_dia)||0;const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
+  const volE=lE>0?Math.round(lE*ha*10):0;const volP=lP>0?Math.round(lP*ha*10):0;
+  const nd=G.ndvi[znId];
+  const hoy=new Date();hoy.setHours(0,0,0,0);const past=dt<hoy;
+
+  const num=(v,d=2,s='')=>v>0?v.toFixed(d)+s:'—';
+  const crow=(k,e,p,d=2,s='')=>`<div class="cmp-row"><span class="cmp-k">${k}</span><div class="cmp-vs"><span class="ce">${num(e,d,s)}</span><span class="cp">${num(p,d,s)}</span></div></div>`;
+
+  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||z.id_zona} · ${z.id_zona} · ${z.especie||''} ${z.variedad||''}`;
+
+  const hero=`<div class="hero2">
+    <div class="hero-card est">
+      <div class="hero-lbl"><i class="ti ti-broadcast"></i> Estación · real</div>
+      <div class="hero-big">${hm(tE)||'—'}</div>
+      <div class="hero-sub">${lE>0?lE.toFixed(1)+' mm':'—'}${volE>0?' · '+volE.toLocaleString('es-CL')+' m³':''}</div>
+    </div>
+    <div class="hero-card pron">
+      <div class="hero-lbl"><i class="ti ti-satellite"></i> Pronóstico</div>
+      <div class="hero-big">${hm(tP)||'—'}</div>
+      <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
+    </div>
+  </div>`;
+
+  let comp='';
+  if(lE>0&&lP>0){
+    const dMm=lE-lP,dT=tE-tP,acc=Math.round(lE/lP*100);
+    comp=`<div class="d-section"><div class="d-section-t">Plan vs Real</div>
+      <div class="cbox" style="background:${cl};border-color:${cm}">
+        <div class="cbox-row"><span>Diferencia lámina</span><strong style="color:${Math.abs(dMm)<5?'var(--green)':'var(--amber)'}">${dMm>0?'+':''}${dMm.toFixed(1)} mm</strong></div>
+        <div class="cbox-row"><span>Diferencia tiempo</span><strong style="color:${Math.abs(dT)<0.5?'var(--green)':'var(--amber)'}">${dT>0?'+':''}${Math.trunc(dT*60)} min</strong></div>
+        <div class="cbox-row"><span>Acierto del pronóstico</span><strong>${acc}%</strong></div>
+      </div></div>`;
+  }else if(!past&&lP>0){
+    comp=`<div class="d-section"><div class="note">Día futuro — solo pronóstico. El dato de estación aparecerá cuando pase el día.</div></div>`;
+  }else if(past&&lE>0&&lP===0){
+    comp=`<div class="d-section"><div class="note">Riego real de la estación (sin pronóstico previo para comparar).</div></div>`;
+  }
+
+  const cultivo=nd?`<div class="d-section">
+      <div class="d-section-t">Estado del cultivo</div>
+      <div class="d-grid2">
+        <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${nd.ndvi.toFixed(3)}</div></div>
+        <div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${nd.kc.toFixed(2)}</div></div>
+      </div>
+      <div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
+      <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
+    </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
+
+  const extras=[
+    ['Edad del huerto',z.edad_huerto],
+    ['Densidad (pl/ha)',z.densidad_plantacion],
+    ['N° árboles',z.numero_arboles],
+    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
+    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
+    ['Fecha plantación',z.fecha_plantacion],
+  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
+  const ficha=`<div class="d-section">
+      <div class="d-section-t">Ficha de la zona</div>
+      <div class="d-grid2">
+        <div class="d-kpi"><div class="l">Especie</div><div class="v" style="font-size:14px">${z.especie||'—'}</div></div>
+        <div class="d-kpi"><div class="l">Variedad</div><div class="v" style="font-size:14px">${z.variedad||'—'}</div></div>
+        <div class="d-kpi"><div class="l">Superficie</div><div class="v" style="font-size:14px">${z.superficie_ha||'—'} ha</div></div>
+        <div class="d-kpi"><div class="l">ID Zona</div><div class="v" style="font-size:14px">${z.id_zona}</div></div>
+        ${extras.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
+      </div></div>`;
+
+  const html=`${hero}
+    <div class="d-section">
+      <div class="cmp-hd"><span class="cmp-h est">● Estación</span><span class="cmp-h pron">● Pronóstico</span></div>
+      <div class="d-section-t">Meteorología</div>
+      ${crow('ETo (mm/día)',eE,eP)}${crow('ETc (mm/día)',cE,cP)}${crow('Lluvia (mm)',llE,llP)}
+    </div>
+    ${comp}${cultivo}${ficha}`;
+  openD(tit,sub,html);
+}
+
+/* ===== FERTIRRIEGO ===== */
+let TAB='riego';
+let GF={ferti:[],bal:{},loaded:false};
 const MACRO=[{k:'N',c:'#2563EB',dem:'demanda_neta_n_kg_zona',acc:'acumulado_n_kg',ap:'n_aplicado_kg'},
   {k:'P₂O₅',c:'#EA580C',dem:'demanda_neta_p2o5_kg_zona',acc:'acumulado_p2o5_kg',ap:'p2o5_aplicado_kg'},
   {k:'K₂O',c:'#7C3AED',dem:'demanda_neta_k2o_kg_zona',acc:'acumulado_k2o_kg',ap:'k2o_aplicado_kg'}];
 const MICRO=[{k:'Ca',c:'#0891B2',p:'ca'},{k:'Mg',c:'#16A34A',p:'mg'},{k:'S',c:'#CA8A04',p:'s'},
   {k:'Zn',c:'#DB2777',p:'zn'},{k:'Mn',c:'#92400E',p:'mn'},{k:'Fe',c:'#DC2626',p:'fe'},
   {k:'Cu',c:'#B45309',p:'cu'},{k:'B',c:'#0D9488',p:'b'}];
-
-let G={rsId:null,zonas:[],ferti:[],bal:{},off:0};
-const num=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
-const fs=d=>d.toISOString().slice(0,10);
-function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h);l.setDate(h.getDate()-(dw-1)+o*7);l.setHours(0,0,0,0);return l;}
-function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
-function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
-function hm(h){const f=num(h);if(f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00`:`${hh}h ${String(mm).padStart(2,'0')}`;}
+const numF=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
+function hmF(h){const f=numF(h);if(f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00`:`${hh}h ${String(mm).padStart(2,'0')}`;}
 function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2}/);return m?m[0]:p.split('(')[0].trim().slice(0,16);}
-function prodColor(p){const s=prodShort(p);return s.startsWith('20-13')?'#1d4ed8':s.startsWith('15-5')?'#7C3AED':'#0891B2';}
 
-async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){location.href='login.html';return null;}return session;}
-async function logout(){await db.auth.signOut();location.href='login.html';}
-function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
-function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];document.getElementById('wlbl').textContent=`Sem. ${isoW(l)} · ${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=G.off===0?'Semana en curso':(G.off>0?'+'+G.off+' sem':G.off+' sem');}
+function switchTab(t){
+  if(t===TAB)return;TAB=t;
+  document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
+  document.getElementById('view-ferti').style.display=t==='ferti'?'flex':'none';
+  document.getElementById('tab-riego').classList.toggle('active',t==='riego');
+  document.getElementById('tab-ferti').classList.toggle('active',t==='ferti');
+  if(t==='ferti'&&G.zonas.length)loadRenderFerti();
+}
 
-async function init(){
-  const ses=await chkAuth();if(!ses)return;updW();
-  const em=ses.user.email;document.getElementById('unm').textContent=em.split('@')[0];document.getElementById('uini').textContent=em[0].toUpperCase();
-  const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
-  G.rsId=u?.[0]?.id_rs||null;
-  if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
-  const {data:ps}=await db.from('v_predios').select('*').eq('id_rs',G.rsId);
-  document.getElementById('sp').innerHTML=(ps||[]).map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
-  if(ps&&ps.length)await onPredio();
-}
-async function onPredio(){
-  const pr=document.getElementById('sp').value;
-  const {data:es}=await db.from('v_equipos').select('*').eq('id_predio',pr);
-  document.getElementById('se').innerHTML=(es||[]).map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join('')||'<option>Sin equipos</option>';
-  if(es&&es.length)await onEquipo();
-}
-async function onEquipo(){
-  const eq=document.getElementById('se').value;
-  const {data:zs}=await db.from('v_zonas').select('*').eq('id_equipo',eq).eq('activa','Sí');
-  G.zonas=zs||[];
-  if(G.zonas.length)await loadRender();
-  else document.getElementById('ctbl').innerHTML='<tbody><tr><td class="loading">Equipo sin zonas activas.</td></tr></tbody>';
-}
-async function loadRender(){
-  const znIds=G.zonas.map(z=>z.id_zona);
+async function loadRenderFerti(){
+  const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
   const [{data:fe},{data:ba}]=await Promise.all([
     db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
     db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
   ]);
-  G.ferti=fe||[];G.bal={};(ba||[]).forEach(r=>G.bal[r.id_zona]=r);
-  rKpi();rCal();rFranja();rPanel();
+  GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
+  rKpiF();rCalF();rFranjaF();rPanelF();
 }
+function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
+function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
+function covMicro(znId,mi){const b=GF.bal[znId];if(!b)return null;const obj=numF(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return numF(b[mi.p+'_actual_ppm'])/obj*100;}
 
-// acumulado aplicado por zona (último/máximo de cada acumulado_*)
-function accZona(znId,col){const ev=G.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>num(e[col]))):0;}
-// cobertura por zona de un macro (aplicado acumulado / demanda)
-function covMacro(znId,m){const b=G.bal[znId];if(!b)return null;const dem=num(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
-function covMicro(znId,mi){const b=G.bal[znId];if(!b)return null;const obj=num(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return num(b[mi.p+'_actual_ppm'])/obj*100;}
-
-function rKpi(){
+function rKpiF(){
   const dias=semDias(G.off);const fi=fs(dias[0]),ff=fs(dias[6]);
-  const evSem=G.ferti.filter(e=>e.fecha_evento>=fi&&e.fecha_evento<=ff);
-  const kg=evSem.reduce((a,e)=>a+num(e.dosis_aplicar_kg),0);
-  // cobertura promedio (macros+micros) sobre zonas con dato
+  const evSem=GF.ferti.filter(e=>e.fecha_evento>=fi&&e.fecha_evento<=ff);
+  const kg=evSem.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0);
   let cs=[];G.zonas.forEach(z=>{[...MACRO.map(m=>covMacro(z.id_zona,m)),...MICRO.map(mi=>covMicro(z.id_zona,mi))].forEach(v=>{if(v!=null)cs.push(Math.min(v,100));});});
   const cov=cs.length?Math.round(cs.reduce((a,b)=>a+b,0)/cs.length):null;
-  // próxima aplicación (fecha_evento >= hoy)
-  const hoy=fs(new Date());const fut=G.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1);
-  const px=fut[0];const pxZ=px?G.zonas.find(z=>z.id_zona===px.id_zona):null;
-  const pxd=px?new Date(px.fecha_evento+'T00:00:00'):null;
-  document.getElementById('kpib').innerHTML=`
+  const hoy=fs(new Date());const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1);
+  const px=fut[0];const pxZ=px?G.zonas.find(z=>z.id_zona===px.id_zona):null;const pxd=px?new Date(px.fecha_evento+'T00:00:00'):null;
+  document.getElementById('fkpib').innerHTML=`
   <div class="kpi-card"><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-package"></i></div>
     <div class="kpi-body"><div class="kpi-lbl">Producto semana</div><div class="kpi-val">${kg>0?kg.toFixed(0):'—'} <span style="font-size:14px;color:var(--muted)">kg</span></div><div class="kpi-sub">${evSem.length} aplicaciones</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
     <div class="kpi-body"><div class="kpi-lbl">Cobertura nutricional</div><div class="kpi-val">${cov!=null?cov+'%':'—'}</div><div class="kpi-sub">promedio del equipo</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-letter-n"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Aplicaciones temporada</div><div class="kpi-val">${G.ferti.length}</div><div class="kpi-sub">eventos en ${G.zonas.length} zonas</div></div></div>
+    <div class="kpi-body"><div class="kpi-lbl">Aplicaciones temporada</div><div class="kpi-val">${GF.ferti.length}</div><div class="kpi-sub">eventos en ${G.zonas.length} zonas</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-calendar-due"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Próxima aplicación</div><div class="kpi-val sm">${pxZ?(pxZ.nombre||px.id_zona):'—'}</div><div class="kpi-sub">${pxd?DSS[(pxd.getDay()||7)-1]+' '+pxd.getDate()+' '+MSS[pxd.getMonth()]:'sin programar'}</div></div></div>`;
+    <div class="kpi-body"><div class="kpi-lbl">Próxima aplicación</div><div class="kpi-val sm">${pxZ?(pxZ.nombre||px.id_zona):'—'}</div><div class="kpi-sub">${pxd?DSS[pxd.getDay()]+' '+pxd.getDate()+' '+MSS[pxd.getMonth()]:'sin programar'}</div></div></div>`;
 }
 
-function rCal(){
+function rCalF(){
   const dias=semDias(G.off);const hS=fs(new Date());
-  const map={};G.ferti.forEach(e=>{(map[e.id_zona]=map[e.id_zona]||{})[e.fecha_evento]=map[e.id_zona][e.fecha_evento]||[];map[e.id_zona][e.fecha_evento].push(e);});
-  let th=`<thead><tr><th class="th-zona">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}"><span class="th-num">${d.getDate()}</span><div style="font-size:10px;margin-top:1px">${DSS[(d.getDay()||7)-1]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
+  const map={};GF.ferti.forEach(e=>{(map[e.id_zona]=map[e.id_zona]||{})[e.fecha_evento]=map[e.id_zona][e.fecha_evento]||[];map[e.id_zona][e.fecha_evento].push(e);});
+  let th=`<thead><tr><th class="th-zona" style="padding-bottom:12px">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px"><div class="th-num">${d.getDate()}</div><div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
   let tb='<tbody>';
-  G.zonas.forEach((z,i)=>{const c=ZC[i%6],cl=ZL[i%6];
-    tb+=`<tr><td class="zona-td"><div class="zona-pill"><div class="zona-head"><span class="zona-dot" style="background:${c}"></span>${z.nombre||z.id_zona}</div>
-      <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}<br>${z.superficie_ha||'—'} ha</div></div></td>`;
+  G.zonas.forEach((z,i)=>{const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];
+    tb+=`<tr style="height:96px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
+      <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
     dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
-      if(evs&&evs.length){const e=evs[0];const past=dS<hS;
-        tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner">
-          <div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEv('${z.id_zona}','${dS}',0)">
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c}"></div>
-            <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-flask-2" style="font-size:14px"></i>${num(e.dosis_aplicar_kg).toFixed(1)} <span>kg</span></span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
-            <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
-            <div class="fc-foot"><span class="fc-time"><i class="ti ti-clock" style="font-size:11px"></i>${hm(e.tiempo_fertirriego_hrs)||'—'} fert.</span></div>
-          </div></div></td>`;
-      } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty"></div></div></td>`;
+      if(evs&&evs.length){const e=evs[0];
+        tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
+          <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-flask-2" style="font-size:14px"></i>${numF(e.dosis_aplicar_kg).toFixed(1)} <span>kg</span></span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
+          <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
+          <div class="fc-foot"><span class="fc-time"><i class="ti ti-clock" style="font-size:11px"></i>${hmF(e.tiempo_fertirriego_hrs)||'—'} fert.</span></div>
+        </div></div></td>`;
+      } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
     });
     tb+='</tr>';
   });
-  document.getElementById('ctbl').innerHTML=th+tb+(G.ferti.length===0?'<tr><td colspan="8" class="loading" style="color:var(--amber)">No hay aplicaciones cargadas para estas zonas. Navega a otra semana o revisa que el equipo tenga eventos de fertirriego.</td></tr>':'')+'</tbody>';
+  document.getElementById('fctbl').innerHTML=th+tb+(GF.ferti.length===0?'<tr><td colspan="8" class="loading" style="color:var(--amber)">No hay aplicaciones para estas zonas. Navega a otra semana (mayo–octubre 2026).</td></tr>':'')+'</tbody>';
 }
 
-function rFranja(){
-  const demT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+num(G.bal[z.id_zona]?.[m.dem]),0));
+function rFranjaF(){
+  const demT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+numF(GF.bal[z.id_zona]?.[m.dem]),0));
   const apoT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+accZona(z.id_zona,m.acc),0));
   const restT=demT.map((d,i)=>Math.max(0,d-apoT[i]));
   const ng=(arr)=>`<div class="nut-grid">${MACRO.map((n,i)=>`<div class="nut-c"><div class="nut-k" style="color:${n.c}">${n.k}</div><div class="nut-v">${arr[i].toFixed(1)} <small>kg</small></div></div>`).join('')}<div class="nut-more">+micros</div></div>`;
-  // eficiencia = aportado/demanda global (cap 100)
-  const sd=demT.reduce((a,b)=>a+b,0),sa=apoT.reduce((a,b)=>a+b,0);
-  const ef=sd>0?Math.round(Math.min(sa/sd,1)*100):null;
-  document.getElementById('franja').innerHTML=`
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-flask"></i></div><div class="franja-lbl">Demanda total (NPK)</div></div>${ng(demT)}</div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-circle-check"></i></div><div class="franja-lbl">Aportado (acumulado)</div></div>${ng(apoT)}</div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-progress"></i></div><div class="franja-lbl">Demanda restante</div></div>${ng(restT)}</div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-target-arrow"></i></div><div class="franja-lbl">Eficiencia nutricional</div></div><div class="franja-big" style="color:${ef>=80?'var(--green)':'var(--amber)'}">${ef!=null?ef+'%':'—'}</div><div class="franja-sub">aportado vs demanda</div></div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Producto total temporada</div></div><div class="franja-big">${G.ferti.reduce((a,e)=>a+num(e.dosis_aplicar_kg),0).toFixed(0)}</div><div class="franja-sub">kg aplicados</div></div>`;
+  const sd=demT.reduce((a,b)=>a+b,0),sa=apoT.reduce((a,b)=>a+b,0);const ef=sd>0?Math.round(Math.min(sa/sd,1)*100):null;
+  document.getElementById('ffranja').innerHTML=`
+  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-flask"></i></div><div class="franja-lbl">Demanda total (NPK)</div></div>${ng(demT)}<div class="franja-sub">kg objetivo</div></div>
+  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-circle-check"></i></div><div class="franja-lbl">Aportado (acumulado)</div></div>${ng(apoT)}<div class="franja-sub">kg aplicados</div></div>
+  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-progress"></i></div><div class="franja-lbl">Demanda restante</div></div>${ng(restT)}<div class="franja-sub">kg por reponer</div></div>
+  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-target"></i></div><div class="franja-lbl">Eficiencia nutricional</div></div><div class="franja-val ${ef>=80?'green':'amber'}">${ef!=null?ef+'%':'—'}</div><div class="franja-sub">aportado vs demanda</div></div>
+  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Producto temporada</div></div><div class="franja-val">${GF.ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}</div><div class="franja-sub">kg totales</div></div>`;
 }
 
-function rPanel(){
-  // balance promedio del equipo
+function rPanelF(){
   const avg=(fn)=>{const vs=G.zonas.map(z=>fn(z.id_zona)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;};
   let rows=[...MACRO.map(m=>({k:m.k,c:m.c,pct:avg(z=>covMacro(z,m))})),...MICRO.map(mi=>({k:mi.k,c:mi.c,pct:avg(z=>covMicro(z,mi))}))];
   let bh=`<div class="p-title"><i class="ti ti-chart-donut-3"></i>Balance nutricional promedio</div>`;
   rows.forEach(r=>{if(r.pct==null){bh+=`<div class="bn-row"><span class="bn-k" style="color:${r.c}">${r.k}</span><div class="bn-track"></div><span class="bn-pct" style="color:var(--subtle)">s/d</span><span></span></div>`;return;}
     const pct=Math.round(r.pct);const w=Math.min(pct,100);const exc=pct>=110;const def=pct<60;
-    bh+=`<div class="bn-row"><span class="bn-k" style="color:${r.c}">${r.k}</span>
-      <div class="bn-track"><div class="bn-fill" style="width:${w}%;background:${r.c}"></div>${pct>100?`<div class="bn-over" style="width:${Math.min(pct-100,30)}%"></div>`:''}</div>
-      <span class="bn-pct">${pct}%</span><span>${exc?'<span class="bn-tag exc">Exceso</span>':def?'<span class="bn-tag def">Déficit</span>':''}</span></div>`;
+    bh+=`<div class="bn-row"><span class="bn-k" style="color:${r.c}">${r.k}</span><div class="bn-track"><div class="bn-fill" style="width:${w}%;background:${r.c}"></div>${pct>100?`<div class="bn-over" style="width:${Math.min(pct-100,30)}%"></div>`:''}</div><span class="bn-pct">${pct}%</span><span>${exc?'<span class="bn-tag exc">Exceso</span>':def?'<span class="bn-tag def">Déficit</span>':''}</span></div>`;
   });
-  document.getElementById('pbal').innerHTML=bh;
-
-  // alertas dinámicas
+  document.getElementById('fpbal').innerHTML=bh;
   const al=[];
   G.zonas.forEach(z=>{
     MACRO.forEach(m=>{const c=covMacro(z.id_zona,m);if(c!=null&&c>=130)al.push({cls:'warn',ic:'ti-alert-triangle',col:m.c,t:`Exceso de ${m.k} en ${z.nombre||z.id_zona}`,s:`Cobertura ${Math.round(c)}%. Evaluar fórmula con menos ${m.k}.`});});
     MICRO.forEach(mi=>{const c=covMicro(z.id_zona,mi);if(c!=null&&c<60)al.push({cls:'def',ic:'ti-trending-down',col:mi.c,t:`Déficit de ${mi.k} en ${z.nombre||z.id_zona}`,s:`Suelo en ${Math.round(c)}% del objetivo.`});});
   });
   const als=al.slice(0,4);
-  document.getElementById('palert').innerHTML=`<div class="p-title"><i class="ti ti-bell"></i>Alertas</div>`+
-    (als.length?als.map(a=>`<div class="alerta-card ${a.cls}"><div class="alerta-ico" style="background:${a.col}22;color:${a.col}"><i class="ti ${a.ic}"></i></div><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join(''):`<div class="alerta-card ok"><div class="alerta-ico" style="background:#BBF7D0;color:var(--green)"><i class="ti ti-circle-check"></i></div><div><div class="alerta-t">Sin alertas</div><div class="alerta-s">Nutrientes dentro de rango.</div></div></div>`);
-
+  document.getElementById('fpalert').innerHTML=`<div class="p-title"><i class="ti ti-bell"></i>Alertas</div>`+(als.length?als.map(a=>`<div class="alerta-card ${a.cls}"><div class="alerta-ico" style="background:${a.col}22;color:${a.col}"><i class="ti ${a.ic}"></i></div><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join(''):`<div class="alerta-card ok"><div class="alerta-ico" style="background:#BBF7D0;color:var(--green)"><i class="ti ti-circle-check"></i></div><div><div class="alerta-t">Sin alertas</div><div class="alerta-s">Nutrientes dentro de rango.</div></div></div>`);
   const hoy=fs(new Date());
-  const fut=G.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1).slice(0,5);
-  document.getElementById('pprox').innerHTML=`<div class="p-title"><i class="ti ti-calendar-event"></i>Próximas aplicaciones</div>`+
-    (fut.length?fut.map(e=>{const i=G.zonas.findIndex(z=>z.id_zona===e.id_zona);const z=G.zonas[i];const d=new Date(e.fecha_evento+'T00:00:00');
-      return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[(i<0?0:i)%6]}"></div><div class="prox-body"><div class="prox-zona">${z?.nombre||e.id_zona}</div><div class="prox-prod">${prodShort(e.producto_asignado)}</div></div>
-      <div class="prox-r"><div class="prox-dosis" style="color:${ZC[(i<0?0:i)%6]}">${num(e.dosis_aplicar_kg).toFixed(1)} kg</div><div class="prox-fecha">${DSS[(d.getDay()||7)-1]} ${d.getDate()} ${MSS[d.getMonth()]}</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--muted)">Sin aplicaciones futuras programadas.</div>');
+  const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1).slice(0,5);
+  document.getElementById('fpprox').innerHTML=`<div class="p-title"><i class="ti ti-calendar-event"></i>Próximas aplicaciones</div>`+(fut.length?fut.map(e=>{const i=G.zonas.findIndex(z=>z.id_zona===e.id_zona);const z=G.zonas[i];const d=new Date(e.fecha_evento+'T00:00:00');return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[(i<0?0:i)%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${z?.nombre||e.id_zona}</div><div class="prox-prod">${prodShort(e.producto_asignado)}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[(i<0?0:i)%ZC.length]}">${numF(e.dosis_aplicar_kg).toFixed(1)} kg</div><div class="prox-fecha">${DSS[d.getDay()]} ${d.getDate()} ${MSS[d.getMonth()]}</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--muted)">Sin aplicaciones futuras.</div>');
 }
 
-function openEv(znId,fecha,idx){
-  const evs=G.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento===fecha);const e=evs[idx]||evs[0];if(!e)return;
-  const i=G.zonas.findIndex(z=>z.id_zona===znId);const z=G.zonas[i];const c=ZC[i%6],cl=ZL[i%6];const b=G.bal[znId];
+function openEvF(znId,fecha,idx){
+  const evs=GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento===fecha);const e=evs[idx]||evs[0];if(!e)return;
+  const i=G.zonas.findIndex(z=>z.id_zona===znId);const z=G.zonas[i];const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];const b=GF.bal[znId];
   const d=new Date(fecha+'T00:00:00');const past=fecha<fs(new Date());
-  document.getElementById('dt').innerHTML=`<span class="zona-dot" style="background:${c};width:11px;height:11px"></span>${z?.nombre||znId}`;
-  document.getElementById('ds').textContent=`${z?.especie||''} ${z?.variedad||''} · ${z?.superficie_ha||'—'} ha`;
-  document.getElementById('ddate').innerHTML=`${DSS[(d.getDay()||7)-1]} ${d.getDate()} ${MSS[d.getMonth()]} ${d.getFullYear()}<br>${past?'Aplicado':'Programado'}`;
-  const ap=[{k:'N',c:'#2563EB',v:num(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:num(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:num(e.k2o_aplicado_kg)}];
+  document.getElementById('fdt').innerHTML=`<span class="zona-dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c};margin-right:5px"></span>${z?.nombre||znId}`;
+  document.getElementById('fds').innerHTML=`${z?.especie||''} ${z?.variedad||''} · ${z?.superficie_ha||'—'} ha · ${DSS[d.getDay()]} ${d.getDate()} ${MSS[d.getMonth()]} ${d.getFullYear()} · ${past?'Aplicado':'Programado'}`;
+  const ap=[{k:'N',c:'#2563EB',v:numF(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:numF(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:numF(e.k2o_aplicado_kg)}];
   const otros=evs.length>1?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">+${evs.length-1} producto(s) más este día: ${evs.slice(1).map(x=>prodShort(x.producto_asignado)).join(', ')}</div>`:'';
   const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,pct:covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,pct:covMicro(znId,mi)}))]:[];
-  document.getElementById('db').innerHTML=`${otros}
+  document.getElementById('fdb').innerHTML=`${otros}
     <div class="dcols">
-      <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0">
-        <div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div>
-        <div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div>
-        <div class="dprod-sub">${num(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
-      <div class="dcard" style="margin-bottom:0">
-        <div class="dcard-t"><i class="ti ti-atom-2"></i>Nutrientes aportados</div>
-        <div class="naport">${ap.map(a=>`<div class="naport-c"><div class="naport-k" style="color:${a.c}">${a.k}</div><div class="naport-v">${a.v.toFixed(2)}</div><div class="naport-u">kg</div></div>`).join('')}</div></div>
+      <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0"><div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div><div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div><div class="dprod-sub">${numF(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
+      <div class="dcard" style="margin-bottom:0"><div class="dcard-t"><i class="ti ti-atom-2"></i>Nutrientes aportados</div><div class="naport">${ap.map(a=>`<div class="naport-c"><div class="naport-k" style="color:${a.c}">${a.k}</div><div class="naport-v">${a.v.toFixed(2)}</div><div class="naport-u">kg</div></div>`).join('')}</div></div>
     </div>
     <div class="dcard" style="margin-top:14px"><div class="dcard-t"><i class="ti ti-adjustments"></i>Parámetros de inyección</div>
       <div class="dcols" style="gap:0 24px">
-        <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hm(e.tiempo_fertirriego_hrs)||'—'}</span></div>
-        <div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hm(e.tiempo_riego_hrs)||'—'}</span></div>
-        <div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${num(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
-        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${num(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div>
-        <div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${num(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div>
-        <div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion??'—'} L/h</span></div></div>
+        <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
+        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion??'—'} L/h</span></div></div>
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
-    ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div>
-      <table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>
-      ${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}
-      </tbody></table></div>`:''}
+    ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
     ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}`;
-  document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');
+  document.getElementById('fscrim').classList.add('open');document.getElementById('fdrawer').classList.add('open');
 }
-function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeD();});
+function closeDF(){document.getElementById('fscrim').classList.remove('open');document.getElementById('fdrawer').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDF();});
+
+/* recargar fertirriego cuando cambie equipo o semana, sin tocar tu código de riego */
+const _onEquipoFerti=onEquipo;
+onEquipo=async function(){await _onEquipoFerti.apply(this,arguments);GF.loaded=false;if(TAB==='ferti'&&G.zonas.length)await loadRenderFerti();};
+const _chWFerti=chW;
+chW=function(){_chWFerti.apply(this,arguments);if(TAB==='ferti'&&G.zonas.length)loadRenderFerti();};
 
 init();
 </script>
