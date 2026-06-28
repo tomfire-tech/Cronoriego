@@ -300,11 +300,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 #view-estanque .kpi-card{flex-direction:row;align-items:center;gap:12px;padding:14px 16px;}
 #view-estanque .kpi-ico{width:42px;height:42px;border-radius:10px;font-size:20px;}
 #view-estanque .kpi-val{font-size:23px;}
-.est-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+.est-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:stretch;}
 .est-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);}
+.est-card.chart{display:flex;flex-direction:column;}
 .est-card-t{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
 .est-card-s{font-size:11px;color:var(--muted);margin-bottom:12px;}
-.est-chart-box{position:relative;height:300px;width:100%;}
+.est-chart-box{position:relative;flex:1;min-height:340px;width:100%;}
 .est-side{display:flex;flex-direction:column;gap:16px;}
 .est-rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px;}
 .est-rrow:last-child{border-bottom:none;}
@@ -466,7 +467,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
     <div class="est-grid">
-      <div class="est-card">
+      <div class="est-card chart">
         <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
         <div class="est-card-s" id="estChartSub">Oferta base, aporte de lluvia y demanda promedio por semana</div>
         <div class="est-chart-box"><canvas id="estChart"></canvas></div>
