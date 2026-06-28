@@ -817,16 +817,21 @@ function openZona(znId){
   const tit=z.nombre||'Zona';
   const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.especie||''} ${z.variedad||''} · ${z.superficie_ha||'—'} ha`;
 
+  const fmtF=v=>{if(!v)return null;const s=String(v).slice(0,10);const p=s.split('-');return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:s;};
+  const u=(v,suf='')=>(v!==undefined&&v!==null&&v!=='')?v+suf:null;
   const ficha=[
-    ['Especie',z.especie],['Variedad',z.variedad],
-    ['Superficie',z.superficie_ha?z.superficie_ha+' ha':null],
-    ['Edad del huerto',z.edad_huerto],
-    ['Densidad (pl/ha)',z.densidad_plantacion],
-    ['N° árboles',z.numero_arboles],
-    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
-    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
-    ['Fecha plantación',z.fecha_plantacion],
-    ['Textura de suelo',z.textura_suelo||z.textura],
+    ['Especie',z.especie],
+    ['Variedad',z.variedad],
+    ['Superficie',u(z.superficie_ha,' ha')],
+    ['Tipo de riego',z.tipo_riego],
+    ['Fecha de plantación',fmtF(z.fecha_plantacion)],
+    ['Textura',z.textura],
+    ['Tipo de clima',z.tipo_clima],
+    ['Sombra',u(z.sombra_pct,' %')],
+    ['Cap. de campo',u(z.cc,' %')],
+    ['Punto marchitez',u(z.pmp,' %')],
+    ['Densidad aparente',u(z.da,' g/cc')],
+    ['Profundidad suelo',u(z.prof,' m')],
   ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
 
   const fichaHtml=`<div class="d-section">
