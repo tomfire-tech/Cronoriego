@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --z0:#2563EB;--z0l:#EFF6FF;--z0m:#BFDBFE;
@@ -80,7 +81,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .cal-tbl tbody tr td:first-child{border-radius:var(--r) 0 0 var(--r);}
 .cal-tbl tbody tr td:last-child{border-radius:0 var(--r) var(--r) 0;}
 .zona-td{padding:0;width:165px;min-width:165px;}
-.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;height:88px;display:flex;flex-direction:column;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);}
+.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;height:88px;display:flex;flex-direction:column;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.zona-pill:hover{border-color:var(--blue);box-shadow:var(--shadow-md);}
 .zona-head{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--ink);}
 .zona-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 .zona-esp{font-size:13px;color:var(--muted);padding-left:15px;line-height:1.3;}
@@ -345,6 +347,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
   <div class="hdr-right">
+    <button class="dlbtn" id="dlEst" onclick="downloadEstacion()" title="Descargar datos de la estación (toda la temporada) en Excel"><i class="ti ti-download"></i>Estación</button>
     <div class="clim-badge"><i class="ti ti-temperature" style="color:var(--amber)"></i><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">°C</span></div>
     <div class="clim-badge"><i class="ti ti-cloud-rain" style="color:#0891b2"></i><span id="cl">—</span><span style="color:var(--subtle);font-size:11px">mm</span></div>
     <div class="sem-badge" id="sbadge">Sem. —</div>
@@ -485,14 +488,14 @@ async function init(){
   if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
-  sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
+  sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre} (${p.id_predio})</option>`).join('');
   if(ps.length)await onPredio();
 }
 async function onPredio(){
   const prId=document.getElementById('sp').value;
   const es=await qE(prId);
   const se=document.getElementById('se');
-  se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre} (${e.id_equipo})</option>`).join(''):'<option>Sin equipos</option>';
   if(es.length)await onEquipo();
 }
 async function onEquipo(){
@@ -517,7 +520,7 @@ function rKpi(dias,sc,sem){
   const hoy=new Date();
   const etoPorDia={},lluvPorDia={};
   sc.forEach(r=>{
-    const e=parseFloat(r.eto_estacion_mm_dia)||parseFloat(r.eto_pronostico_mm_dia)||0;
+    const e=parseFloat(r.eto_pronostico_mm_dia)||0;
     if(e>0)(etoPorDia[r.fecha]=etoPorDia[r.fecha]||[]).push(e);
     const ll=parseFloat(r.lluvia_pronostico_mm_dia);
     if(!isNaN(ll))(lluvPorDia[r.fecha]=lluvPorDia[r.fecha]||[]).push(ll);
@@ -532,9 +535,9 @@ function rKpi(dias,sc,sem){
   document.getElementById('ct').textContent=temp||'—';
   document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
 
-  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0||(parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
+  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
   const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
-  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_estacion_mm)||parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
+  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
   const ok=cob>=75;
 
@@ -593,23 +596,19 @@ function rCal(dias,sc){
     const nd=G.ndvi[z.id_zona];
     tbody+=`<tr style="height:96px;">
       <td class="zona-td" style="padding:3px 6px 3px 0">
-        <div class="zona-pill">
-          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
+        <div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona">
+          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||'Zona'}</div>
           <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div>
-          ${nd?`<div class="zona-ndvi">NDVI ${nd.ndvi.toFixed(2)} · Kc ${nd.kc.toFixed(2)}</div>`:`<div class="zona-ndvi">${z.superficie_ha||'—'} ha</div>`}
+          <div class="zona-ndvi">${z.superficie_ha||'—'} ha${nd?` · NDVI ${nd.ndvi.toFixed(2)}`:''}</div>
         </div>
       </td>
       ${dias.map(d=>{
         const dS=fs(d);const eh=dS===hS;
         const r=dm[z.id_zona]?.[dS];
-        const lE=r?parseFloat(r.lamina_neta_riego_estacion_mm)||0:0;
-        const lP=r?parseFloat(r.lamina_neta_riego_pronostico_mm)||0:0;
-        const tE=r?parseFloat(r.tiempo_de_riego_estacion_horas)||0:0;
-        const tP=r?parseFloat(r.tiempo_de_riego_pronostico_horas)||0:0;
-        const l=lE||lP;const t=tE||tP;
+        const l=r?parseFloat(r.lamina_neta_riego_pronostico_mm)||0:0;
+        const t=r?parseFloat(r.tiempo_de_riego_pronostico_horas)||0:0;
         const ha=parseFloat(z.superficie_ha)||0;
         const vol=l>0?Math.round(l*ha*10):0;
-        const esEst=lE>0;const fd=new Date(dS+'T00:00:00');const past=fd<hoy;
 
         if(l>0&&hm(t)){
           return`<td class="dia-td${eh?' hoy-col':''}">
@@ -624,7 +623,6 @@ function rCal(dias,sc){
                   <div class="rc-mm">${l.toFixed(0)} mm</div>
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
                 </div>
-                ${esEst&&past?`<div class="rc-badge" style="background:${cm};color:${c}"><i class="ti ti-circle-check" style="font-size:9px"></i>Real</div>`:''}
               </div>
             </div>
           </td>`;
@@ -638,40 +636,20 @@ function rCal(dias,sc){
 }
 
 function rFranja(sc,ndvi){
-  const hoy=new Date();
-  let lamTE=0,lamTP=0,volTE=0,volTP=0,tTE=0,tTP=0;const efs=[];
+  let lamTP=0,volTP=0,tTP=0;let diasRiego=new Set();
   G.zonas.forEach(z=>{
     const ha=parseFloat(z.superficie_ha)||0;
     sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
-      const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
       const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
       const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-      lamTE+=lE; lamTP+=lP;
-      tTE+=tE;   tTP+=tP;
-      volTE+=lE*ha*10; volTP+=lP*ha*10;
-      const fd=new Date(r.fecha+'T00:00:00');
-      if(fd<hoy&&lE>0&&lP>0)efs.push(lE/lP);
+      lamTP+=lP; tTP+=tP; volTP+=lP*ha*10;
+      if(lP>0)diasRiego.add(r.fecha);
     });
   });
-  const ef=efs.length?Math.round(efs.reduce((a,b)=>a+b,0)/efs.length*100):null;
   const nA=Object.values(ndvi).map(v=>v.ndvi).filter(v=>v>0);
   const nP=nA.length?(nA.reduce((a,b)=>a+b,0)/nA.length).toFixed(2):null;
   const eC=nP?parseFloat(nP)>=0.5?'Bueno':parseFloat(nP)>=0.3?'Regular':'Bajo':'—';
   const eCol=nP?parseFloat(nP)>=0.5?'green':parseFloat(nP)>=0.3?'amber':'':'';
-
-  const dual=(est,pron,sz=22)=>`
-    <div class="franja-dual">
-      <div>
-        <div class="fd-lbl est">● Estación</div>
-        <div class="franja-val green" style="font-size:${sz}px">${est}</div>
-      </div>
-      <div>
-        <div class="fd-lbl pron">● Pronóstico</div>
-        <div class="franja-val blue" style="font-size:${sz}px">${pron}</div>
-      </div>
-    </div>`;
-
   const mm=v=>v>0?v.toFixed(0):'—';
   const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
   const hh=v=>hm(v)||'—';
@@ -679,23 +657,23 @@ function rFranja(sc,ndvi){
   document.getElementById('franja').innerHTML=`
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Demanda total</div></div>
-    ${dual(mm(lamTE),mm(lamTP))}
-    <div class="franja-sub">mm lámina neta</div>
+    <div class="franja-val blue">${mm(lamTP)}</div>
+    <div class="franja-sub">mm lámina neta pronóstico</div>
   </div>
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div><div class="franja-lbl">Volumen a aplicar</div></div>
-    ${dual(m3(volTE),m3(volTP))}
+    <div class="franja-val blue">${m3(volTP)}</div>
     <div class="franja-sub">m³ en todas las zonas</div>
   </div>
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-clock"></i></div><div class="franja-lbl">Tiempo total</div></div>
-    ${dual(hh(tTE),hh(tTP),19)}
+    <div class="franja-val" style="font-size:22px">${hh(tTP)}</div>
     <div class="franja-sub">horas en el equipo</div>
   </div>
   <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:${ef&&ef>=90?'#F0FDF4':ef?'#FFFBEB':'#F1F5F9'};color:${ef&&ef>=90?'var(--green)':ef?'var(--amber)':'var(--subtle)'}"><i class="ti ti-target"></i></div><div class="franja-lbl">Eficiencia</div></div>
-    <div class="franja-val ${ef&&ef>=90?'green':ef&&ef>=70?'amber':''}">${ef!==null?ef+'%':'—'}</div>
-    <div class="franja-sub">${ef!==null?ef>=90?'Buen desempeño':ef>=70?'Regular':'Revisar':'Sin datos comparativos'}</div>
+    <div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-calendar-check"></i></div><div class="franja-lbl">Días con riego</div></div>
+    <div class="franja-val">${diasRiego.size||'—'}</div>
+    <div class="franja-sub">días esta semana</div>
   </div>
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-plant-2"></i></div><div class="franja-lbl">Estado del cultivo</div></div>
@@ -725,7 +703,7 @@ function rPanel(dias,sc,ndvi){
       return`<div class="prox-item">
         <div class="prox-stripe" style="background:${c}"></div>
         <div class="prox-body">
-          <div class="prox-zona">${p.z.nombre||p.z.id_zona}</div>
+          <div class="prox-zona">${p.z.nombre||'Zona'}</div>
           <div class="prox-esp">${p.z.especie||'—'} ${p.z.variedad||''}</div>
           <div class="prox-fecha">${DSS[p.d.getDay()]} ${p.d.getDate()} ${MSS[p.d.getMonth()]}</div>
         </div>
@@ -742,8 +720,8 @@ function rPanel(dias,sc,ndvi){
   if(totL>15)als.push({cls:'info',i:'ti-cloud-rain',t:'Lluvia importante',s:`${totL.toFixed(1)} mm esta semana — considera suspender o reducir riego`});
   G.zonas.forEach((z,zi)=>{
     const nd=ndvi[z.id_zona];
-    if(nd&&nd.ndvi<0.3)als.push({cls:'danger',i:'ti-plant-off',t:`NDVI crítico — ${z.nombre||z.id_zona}`,s:`NDVI ${nd.ndvi.toFixed(3)} — posible estrés hídrico severo`});
-    else if(nd&&nd.hist.length>=2){const diff=(nd.hist[0].ndvi-nd.hist[1].ndvi)/Math.max(nd.hist[1].ndvi,.001)*100;if(diff<-10)als.push({cls:'yellow',i:'ti-trending-down',t:`NDVI disminuyendo — ${z.nombre||z.id_zona}`,s:`Bajó ${Math.abs(diff).toFixed(1)}% vs semana anterior`});}
+    if(nd&&nd.ndvi<0.3)als.push({cls:'danger',i:'ti-plant-off',t:`NDVI crítico — ${z.nombre||'Zona'}`,s:`NDVI ${nd.ndvi.toFixed(3)} — posible estrés hídrico severo`});
+    else if(nd&&nd.hist.length>=2){const diff=(nd.hist[0].ndvi-nd.hist[1].ndvi)/Math.max(nd.hist[1].ndvi,.001)*100;if(diff<-10)als.push({cls:'yellow',i:'ti-trending-down',t:`NDVI disminuyendo — ${z.nombre||'Zona'}`,s:`Bajó ${Math.abs(diff).toFixed(1)}% vs semana anterior`});}
   });
   if(als.length===0)als.push({cls:'ok',i:'ti-circle-check',t:'Sin alertas activas',s:'Todo dentro de parámetros normales'});
   document.getElementById('palertas').innerHTML=`
@@ -751,40 +729,34 @@ function rPanel(dias,sc,ndvi){
     ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
 
   const res=G.zonas.map((z,zi)=>{
-    let lE=0,lP=0,tE=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
+    let lP=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
     sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
-      lE+=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
       lP+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      tE+=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
       tP+=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
     });
-    return{z,zi,lE,lP,tE,tP,vE:lE*ha*10,vP:lP*ha*10};
+    return{z,zi,lP,tP,vP:lP*ha*10};
   });
-  const tot={lE:0,lP:0,tE:0,tP:0,vE:0,vP:0};
-  res.forEach(r=>{tot.lE+=r.lE;tot.lP+=r.lP;tot.tE+=r.tE;tot.tP+=r.tP;tot.vE+=r.vE;tot.vP+=r.vP;});
-  const cell=(e,p,fn)=>`<div class="res-src est">${fn(e)}</div><div class="res-src pron">${fn(p)}</div>`;
+  const tot={lP:0,tP:0,vP:0};
+  res.forEach(r=>{tot.lP+=r.lP;tot.tP+=r.tP;tot.vP+=r.vP;});
   const mm=v=>v>0?v.toFixed(0):'—';
   const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
   const hh=v=>hm(v)||'—';
   document.getElementById('presum').innerHTML=`
-    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:6px">
-      <span class="res-src est">● Estación</span><span class="res-src pron">● Pronóstico</span>
-    </div>
+    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal · pronóstico</div>
     <table class="res-tbl">
       <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
       <tbody>
         ${res.map(r=>`<tr>
-          <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||r.z.id_zona}</td>
-          <td>${cell(r.lE,r.lP,mm)}</td>
-          <td>${cell(r.tE,r.tP,hh)}</td>
-          <td>${cell(r.vE,r.vP,m3)}</td>
+          <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||'Zona'}</td>
+          <td>${mm(r.lP)}</td>
+          <td>${hh(r.tP)}</td>
+          <td>${m3(r.vP)}</td>
         </tr>`).join('')}
         <tr class="total-row">
           <td>Total equipo</td>
-          <td>${cell(tot.lE,tot.lP,mm)}</td>
-          <td>${cell(tot.tE,tot.tP,hh)}</td>
-          <td>${cell(tot.vE,tot.vP,m3)}</td>
+          <td>${mm(tot.lP)}</td>
+          <td>${hh(tot.tP)}</td>
+          <td>${m3(tot.vP)}</td>
         </tr>
       </tbody>
     </table>`;
@@ -798,49 +770,70 @@ function openDia(fecha,znId){
   const tit=`${DS[dt.getDay()]} ${dt.getDate()} de ${MS[dt.getMonth()]}`;
   const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
   const ha=parseFloat(z.superficie_ha)||0;
-  const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
   const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-  const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
   const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-  const eE=parseFloat(r.eto_estacion_mm_dia)||0;const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
-  const cE=parseFloat(r.etc_estacion_mm_dia)||0;const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
-  const llE=parseFloat(r.lluvia_estacion_mm_dia)||0;const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
-  const volE=lE>0?Math.round(lE*ha*10):0;const volP=lP>0?Math.round(lP*ha*10):0;
-  const nd=G.ndvi[znId];
-  const hoy=new Date();hoy.setHours(0,0,0,0);const past=dt<hoy;
+  const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
+  const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
+  const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
+  const volP=lP>0?Math.round(lP*ha*10):0;
 
-  const num=(v,d=2,s='')=>v>0?v.toFixed(d)+s:'—';
-  const crow=(k,e,p,d=2,s='')=>`<div class="cmp-row"><span class="cmp-k">${k}</span><div class="cmp-vs"><span class="ce">${num(e,d,s)}</span><span class="cp">${num(p,d,s)}</span></div></div>`;
+  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · Pronóstico`;
 
-  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||z.id_zona} · ${z.id_zona} · ${z.especie||''} ${z.variedad||''}`;
+  const num=(v,dec=2,s='')=>v>0?v.toFixed(dec)+s:'—';
 
-  const hero=`<div class="hero2">
-    <div class="hero-card est">
-      <div class="hero-lbl"><i class="ti ti-broadcast"></i> Estación · real</div>
-      <div class="hero-big">${hm(tE)||'—'}</div>
-      <div class="hero-sub">${lE>0?lE.toFixed(1)+' mm':'—'}${volE>0?' · '+volE.toLocaleString('es-CL')+' m³':''}</div>
-    </div>
+  const hero=`<div class="hero2" style="grid-template-columns:1fr">
     <div class="hero-card pron">
-      <div class="hero-lbl"><i class="ti ti-satellite"></i> Pronóstico</div>
+      <div class="hero-lbl"><i class="ti ti-satellite"></i> Riego pronosticado</div>
       <div class="hero-big">${hm(tP)||'—'}</div>
       <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
     </div>
   </div>`;
 
-  let comp='';
-  if(lE>0&&lP>0){
-    const dMm=lE-lP,dT=tE-tP,acc=Math.round(lE/lP*100);
-    comp=`<div class="d-section"><div class="d-section-t">Plan vs Real</div>
-      <div class="cbox" style="background:${cl};border-color:${cm}">
-        <div class="cbox-row"><span>Diferencia lámina</span><strong style="color:${Math.abs(dMm)<5?'var(--green)':'var(--amber)'}">${dMm>0?'+':''}${dMm.toFixed(1)} mm</strong></div>
-        <div class="cbox-row"><span>Diferencia tiempo</span><strong style="color:${Math.abs(dT)<0.5?'var(--green)':'var(--amber)'}">${dT>0?'+':''}${Math.trunc(dT*60)} min</strong></div>
-        <div class="cbox-row"><span>Acierto del pronóstico</span><strong>${acc}%</strong></div>
+  const detalle=`<div class="d-section">
+      <div class="d-section-t">Detalle del riego</div>
+      <div class="d-grid2">
+        <div class="d-kpi"><div class="l">Tiempo de riego</div><div class="v b">${hm(tP)||'—'}</div></div>
+        <div class="d-kpi"><div class="l">Lámina neta</div><div class="v b">${num(lP,1,' mm')}</div></div>
+        <div class="d-kpi"><div class="l">Volumen</div><div class="v b">${volP>0?volP.toLocaleString('es-CL')+' m³':'—'}</div></div>
+        <div class="d-kpi"><div class="l">Superficie</div><div class="v">${z.superficie_ha||'—'} ha</div></div>
       </div></div>`;
-  }else if(!past&&lP>0){
-    comp=`<div class="d-section"><div class="note">Día futuro — solo pronóstico. El dato de estación aparecerá cuando pase el día.</div></div>`;
-  }else if(past&&lE>0&&lP===0){
-    comp=`<div class="d-section"><div class="note">Riego real de la estación (sin pronóstico previo para comparar).</div></div>`;
-  }
+
+  const meteo=`<div class="d-section">
+      <div class="d-section-t">Meteorología pronosticada</div>
+      <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="cp">${num(eP)}</span></div></div>
+      <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="cp">${num(cP)}</span></div></div>
+      <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="cp">${num(llP)}</span></div></div>
+    </div>`;
+
+  const html=`${hero}${detalle}${meteo}`;
+  openD(tit,sub,html);
+}
+
+function openZona(znId){
+  const z=G.zonas.find(zz=>zz.id_zona===znId);
+  if(!z)return;
+  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
+  const nd=G.ndvi[znId];
+  const tit=z.nombre||'Zona';
+  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.especie||''} ${z.variedad||''} · ${z.superficie_ha||'—'} ha`;
+
+  const ficha=[
+    ['Especie',z.especie],['Variedad',z.variedad],
+    ['Superficie',z.superficie_ha?z.superficie_ha+' ha':null],
+    ['Edad del huerto',z.edad_huerto],
+    ['Densidad (pl/ha)',z.densidad_plantacion],
+    ['N° árboles',z.numero_arboles],
+    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
+    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
+    ['Fecha plantación',z.fecha_plantacion],
+    ['Textura de suelo',z.textura_suelo||z.textura],
+  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
+
+  const fichaHtml=`<div class="d-section">
+      <div class="d-section-t">Ficha de la zona</div>
+      <div class="d-grid2">
+        ${ficha.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
+      </div></div>`;
 
   const cultivo=nd?`<div class="d-section">
       <div class="d-section-t">Estado del cultivo</div>
@@ -852,32 +845,45 @@ function openDia(fecha,znId){
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
-  const extras=[
-    ['Edad del huerto',z.edad_huerto],
-    ['Densidad (pl/ha)',z.densidad_plantacion],
-    ['N° árboles',z.numero_arboles],
-    ['Caudal zona (m³/h)',z.caudal_zona_m3h],
-    ['Cap. estanque suelo (mm)',z.capacidad_estanque_suelo_mm],
-    ['Fecha plantación',z.fecha_plantacion],
-  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
-  const ficha=`<div class="d-section">
-      <div class="d-section-t">Ficha de la zona</div>
-      <div class="d-grid2">
-        <div class="d-kpi"><div class="l">Especie</div><div class="v" style="font-size:14px">${z.especie||'—'}</div></div>
-        <div class="d-kpi"><div class="l">Variedad</div><div class="v" style="font-size:14px">${z.variedad||'—'}</div></div>
-        <div class="d-kpi"><div class="l">Superficie</div><div class="v" style="font-size:14px">${z.superficie_ha||'—'} ha</div></div>
-        <div class="d-kpi"><div class="l">ID Zona</div><div class="v" style="font-size:14px">${z.id_zona}</div></div>
-        ${extras.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
-      </div></div>`;
+  openD(tit,sub,fichaHtml+cultivo);
+}
 
-  const html=`${hero}
-    <div class="d-section">
-      <div class="cmp-hd"><span class="cmp-h est">● Estación</span><span class="cmp-h pron">● Pronóstico</span></div>
-      <div class="d-section-t">Meteorología</div>
-      ${crow('ETo (mm/día)',eE,eP)}${crow('ETc (mm/día)',cE,cP)}${crow('Lluvia (mm)',llE,llP)}
-    </div>
-    ${comp}${cultivo}${ficha}`;
-  openD(tit,sub,html);
+
+async function downloadEstacion(){
+  const btn=document.getElementById('dlEst');
+  if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
+  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Generando...';
+  try{
+    const znIds=G.zonas.map(z=>z.id_zona);
+    const znName={};G.zonas.forEach(z=>znName[z.id_zona]=z.nombre||z.id_zona);
+    const {data,error}=await db.from('sc_demanda_hidrica_diaria_zona')
+      .select('fecha,id_zona,eto_estacion_mm_dia,etc_estacion_mm_dia,lamina_neta_riego_estacion_mm,tiempo_de_riego_estacion_horas,lluvia_estacion_mm_dia')
+      .in('id_zona',znIds).order('id_zona',{ascending:true}).order('fecha',{ascending:true});
+    if(error)throw error;
+    const rows=(data||[]).filter(r=>
+      (parseFloat(r.eto_estacion_mm_dia)||0)>0 || (parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0 ||
+      (parseFloat(r.tiempo_de_riego_estacion_horas)||0)>0 || (parseFloat(r.lluvia_estacion_mm_dia)||0)>0
+    ).map(r=>({
+      'Fecha':r.fecha,
+      'Zona':znName[r.id_zona]||r.id_zona,
+      'ETo estación (mm/día)':parseFloat(r.eto_estacion_mm_dia)||0,
+      'ETc estación (mm/día)':parseFloat(r.etc_estacion_mm_dia)||0,
+      'Lámina neta estación (mm)':parseFloat(r.lamina_neta_riego_estacion_mm)||0,
+      'Tiempo riego estación (h)':parseFloat(r.tiempo_de_riego_estacion_horas)||0,
+      'Lluvia estación (mm)':parseFloat(r.lluvia_estacion_mm_dia)||0
+    }));
+    if(!rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Estación');
+    const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
+    XLSX.writeFile(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }catch(err){
+    console.error(err);alert('Error al descargar: '+(err.message||err));
+  }finally{
+    btn.disabled=false;btn.innerHTML=orig;
+  }
 }
 
 /* ===== FERTIRRIEGO ===== */
