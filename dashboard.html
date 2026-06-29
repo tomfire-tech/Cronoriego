@@ -312,12 +312,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .reco-t{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
 .reco-s{font-size:11px;color:var(--ink2);line-height:1.45;}
 /* ===== DINAMICA ESTANQUE ===== */
-#view-estanque{overflow-y:auto;background:var(--bg);}
+#view-estanque,#view-balance{overflow-y:auto;background:var(--bg);}
 .est-wrap{padding:14px 20px;display:flex;flex-direction:column;gap:14px;}
 #view-estanque .kpi-bar{grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
-#view-estanque .kpi-card{flex-direction:row;align-items:center;gap:12px;padding:14px 16px;}
-#view-estanque .kpi-ico{width:42px;height:42px;border-radius:10px;font-size:20px;}
+#view-balance .kpi-bar{grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+#view-estanque .kpi-card,#view-balance .kpi-card{flex-direction:row;align-items:center;gap:12px;padding:14px 16px;}
+#view-estanque .kpi-ico,#view-balance .kpi-ico{width:42px;height:42px;border-radius:10px;font-size:20px;}
 #view-estanque .kpi-val{font-size:23px;}
+#view-balance .kpi-val{font-size:23px;}
 .est-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
 .est-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);}
 .est-card.chart{display:flex;flex-direction:column;}
