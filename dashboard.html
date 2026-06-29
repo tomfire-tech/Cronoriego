@@ -327,8 +327,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-side{display:flex;flex-direction:column;gap:14px;}
 .est-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
 .est-grid-bn{align-items:stretch;}
-.bn-side{height:100%;display:flex;flex-direction:column;}
-.bn-grow{flex:1 1 auto;display:flex;flex-direction:column;}
+.bn-side{height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:14px;}
 .bn-side .alerta-card:last-child{margin-bottom:0;}
 .est-rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px;}
 .est-rrow:last-child{border-bottom:none;}
@@ -356,12 +355,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-badge.ade{background:#F0FDF4;color:var(--green);}
 .est-badge.aju{background:#FFF7ED;color:var(--z2);}
 .est-badge.cri{background:#FEF2F2;color:var(--red);}
-.est-tbl-scroll{max-height:300px;overflow-y:auto;border-radius:8px;}
+.est-tbl-scroll{max-height:440px;overflow-y:auto;border-radius:8px;}
 .bn-scroll{overflow-x:auto;}
-.bn-scroll .est-tbl{min-width:1180px;}
-.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:10px 16px;white-space:nowrap;text-align:center;}
-.bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:6px;min-width:120px;}
-.bn-scroll .est-tbl th:nth-child(2),.bn-scroll .est-tbl td:nth-child(2){text-align:center;}
+.bn-scroll .est-tbl{min-width:1100px;}
+.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:12px 18px;white-space:nowrap;text-align:center;font-size:12.5px;}
+.bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:8px;min-width:115px;}
+.bn-scroll .est-tbl tbody tr:nth-child(even){background:#FAFBFC;}
+.bn-scroll .est-tbl tbody tr:hover{background:#EFF6FF;}
 
 </style>
 </head>
@@ -553,7 +553,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
           <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
           <div id="bnResumen"></div>
         </div>
-        <div class="est-card bn-grow">
+        <div class="est-card">
           <div class="est-card-t"><i class="ti ti-bell" style="color:var(--z2)"></i>Alertas nutricionales</div>
           <div id="bnAlertas"></div>
         </div>
