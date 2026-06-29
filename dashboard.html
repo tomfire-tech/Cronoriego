@@ -497,7 +497,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
-          <div class="est-card-s" id="estChartSub">Oferta base, aporte de lluvia y demanda promedio por semana</div>
+          <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta base y aporte de lluvia por semana</div>
           <div class="est-chart-box"><canvas id="estChart"></canvas></div>
         </div>
         <div class="est-card">
@@ -1256,10 +1256,10 @@ function estChart(rows){
   const ctx=document.getElementById('estChart').getContext('2d');
   GE.chart=new Chart(ctx,{
     data:{labels,datasets:[
-      {type:'bar',label:'Aporte lluvia (m³)',data:aporte,backgroundColor:'#86EFAC',borderRadius:3,order:3},
-      {type:'line',label:'Volumen actual (m³)',data:volActual,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2,order:1},
+      {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
+      {type:'line',label:'Volumen actual (m³)',data:volActual,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
       {type:'line',label:'Oferta base (m³)',data:ofertaBase,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
-      {type:'line',label:'Demanda promedio (m³)',data:demanda,borderColor:'#EA580C',backgroundColor:'#EA580C',tension:.3,pointRadius:2,borderWidth:2,order:1},
+      {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
