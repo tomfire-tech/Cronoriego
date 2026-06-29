@@ -326,9 +326,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-chart-box{position:relative;height:340px;width:100%;}
 .est-side{display:flex;flex-direction:column;gap:14px;}
 .est-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
-.est-grid:has(.bn-side){align-items:stretch;}
-.bn-side{height:100%;}
-.bn-grow{flex:1;}
+.est-grid-bn{align-items:stretch;}
+.bn-side{height:100%;display:flex;flex-direction:column;}
+.bn-grow{flex:1 1 auto;display:flex;flex-direction:column;}
 .bn-side .alerta-card:last-child{margin-bottom:0;}
 .est-rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px;}
 .est-rrow:last-child{border-bottom:none;}
@@ -358,9 +358,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-badge.cri{background:#FEF2F2;color:var(--red);}
 .est-tbl-scroll{max-height:300px;overflow-y:auto;border-radius:8px;}
 .bn-scroll{overflow-x:auto;}
-.bn-scroll .est-tbl{min-width:920px;}
-.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:9px 14px;white-space:nowrap;}
-.bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{padding-left:4px;}
+.bn-scroll .est-tbl{min-width:1180px;}
+.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:10px 16px;white-space:nowrap;text-align:center;}
+.bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:6px;min-width:120px;}
+.bn-scroll .est-tbl th:nth-child(2),.bn-scroll .est-tbl td:nth-child(2){text-align:center;}
 
 </style>
 </head>
@@ -535,7 +536,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 <div id="view-balance" class="view" style="display:none">
   <div class="est-wrap">
     <div class="kpi-bar" id="bnkpi"></div>
-    <div class="est-grid">
+    <div class="est-grid est-grid-bn">
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#7C3AED"></i>Cobertura por nutriente (promedio del predio)</div>
