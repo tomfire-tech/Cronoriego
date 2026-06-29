@@ -47,6 +47,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .dlbtn:disabled{opacity:.6;cursor:wait;transform:none;}
 .sel-wrap select option{background:var(--white);color:var(--ink);font-weight:500;padding:10px;}
 .sel-wrap select option:checked{background:#EFF6FF;color:var(--blue);font-weight:600;}
+.cd-val{font-size:12.5px;font-weight:600;color:var(--ink);max-width:175px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cd-menu{position:absolute;top:calc(100% + 7px);left:0;min-width:calc(100% + 20px);background:var(--white);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow-lg);padding:5px;z-index:300;display:none;max-height:300px;overflow-y:auto;}
+.cd-menu.open{display:block;animation:cdfade .12s ease;}
+@keyframes cdfade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.cd-item{padding:8px 11px;font-size:12.5px;font-weight:500;color:var(--ink2);border-radius:7px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.cd-item:hover{background:var(--line2);}
+.cd-item.sel{background:#EFF6FF;color:var(--blue);font-weight:600;}
+.cd-item.sel::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.cd-item:not(.sel)::before{content:'';width:6px;height:6px;flex-shrink:0;}
 .week-nav{display:flex;align-items:center;gap:2px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--white);font-size:12px;font-weight:600;gap:6px;}
 .week-nav button{border:none;background:none;cursor:pointer;color:var(--subtle);display:flex;align-items:center;padding:2px;border-radius:4px;transition:all .1s;}
 .week-nav button:hover{background:var(--line2);color:var(--ink);}
@@ -344,6 +353,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-badge.aju{background:#FFF7ED;color:var(--z2);}
 .est-badge.cri{background:#FEF2F2;color:var(--red);}
 .est-tbl-scroll{max-height:300px;overflow-y:auto;border-radius:8px;}
+.bn-scroll{overflow-x:auto;}
+.bn-scroll .est-tbl{min-width:760px;}
+.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:7px 8px;white-space:nowrap;}
 
 </style>
 </head>
@@ -467,9 +479,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="franja" id="ffranja"></div>
     </div>
     <div class="panel">
-      <div class="p-block" id="fpbal"></div>
-      <div class="p-block" id="fpalert"></div>
       <div class="p-block" id="fpprox"></div>
+      <div class="p-block" id="fpprod"></div>
     </div>
   </div>
 </div>
@@ -511,6 +522,38 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-info-circle" style="color:var(--muted)"></i>Información del estanque</div>
           <div id="estInfo"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="view-balance" class="view" style="display:none">
+  <div class="est-wrap">
+    <div class="kpi-bar" id="bnkpi"></div>
+    <div class="est-grid">
+      <div class="est-col">
+        <div class="est-card chart">
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#7C3AED"></i>Cobertura por nutriente (promedio del predio)</div>
+          <div class="est-card-s">Objetivo 100% · Rango adecuado 80–120%</div>
+          <div class="est-chart-box"><canvas id="bnChart"></canvas></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance nutricional por zona</div>
+          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTabla"></table></div>
+        </div>
+      </div>
+      <div class="est-side">
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
+          <div id="bnResumen"></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-bell" style="color:var(--z2)"></i>Alertas nutricionales</div>
+          <div id="bnAlertas"></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-trending-down" style="color:var(--red)"></i>Zonas con menor cobertura</div>
+          <div id="bnZonas"></div>
         </div>
       </div>
     </div>
@@ -1004,15 +1047,17 @@ function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2
 function switchTab(t){
   if(t===TAB)return;TAB=t;
   const TABS=['riego','ferti','estanque','balance','productos','historial'];
-  const SOON={balance:'Balance Nutricional',productos:'Productos',historial:'Historial'};
+  const SOON={productos:'Productos',historial:'Historial'};
   TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
   document.getElementById('view-ferti').style.display=t==='ferti'?'flex':'none';
   document.getElementById('view-estanque').style.display=t==='estanque'?'flex':'none';
+  document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
   document.getElementById('view-soon').style.display=SOON[t]?'flex':'none';
   if(SOON[t])document.getElementById('soon-t').textContent=SOON[t];
   if(t==='ferti'&&G.zonas.length)loadRenderFerti();
   if(t==='estanque')loadRenderEstanque();
+  if(t==='balance'&&G.zonas.length)loadRenderBalance();
 }
 
 async function loadRenderFerti(){
@@ -1085,24 +1130,39 @@ function rFranjaF(){
 }
 
 function rPanelF(){
-  const avg=(fn)=>{const vs=G.zonas.map(z=>fn(z.id_zona)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;};
-  let rows=[...MACRO.map(m=>({k:m.k,c:m.c,pct:avg(z=>covMacro(z,m))})),...MICRO.map(mi=>({k:mi.k,c:mi.c,pct:avg(z=>covMicro(z,mi))}))];
-  let bh=`<div class="p-title"><i class="ti ti-chart-donut-3"></i>Balance nutricional promedio</div>`;
-  rows.forEach(r=>{if(r.pct==null){bh+=`<div class="bn-row"><span class="bn-k" style="color:${r.c}">${r.k}</span><div class="bn-track"></div><span class="bn-pct" style="color:var(--subtle)">s/d</span><span></span></div>`;return;}
-    const pct=Math.round(r.pct);const w=Math.min(pct,100);const exc=pct>=110;const def=pct<60;
-    bh+=`<div class="bn-row"><span class="bn-k" style="color:${r.c}">${r.k}</span><div class="bn-track"><div class="bn-fill" style="width:${w}%;background:${r.c}"></div>${pct>100?`<div class="bn-over" style="width:${Math.min(pct-100,30)}%"></div>`:''}</div><span class="bn-pct">${pct}%</span><span>${exc?'<span class="bn-tag exc">Exceso</span>':def?'<span class="bn-tag def">Déficit</span>':''}</span></div>`;
-  });
-  document.getElementById('fpbal').innerHTML=bh;
-  const al=[];
-  G.zonas.forEach(z=>{
-    MACRO.forEach(m=>{const c=covMacro(z.id_zona,m);if(c!=null&&c>=130)al.push({cls:'warn',ic:'ti-alert-triangle',col:m.c,t:`Exceso de ${m.k} en ${z.nombre||z.id_zona}`,s:`Cobertura ${Math.round(c)}%. Evaluar fórmula con menos ${m.k}.`});});
-    MICRO.forEach(mi=>{const c=covMicro(z.id_zona,mi);if(c!=null&&c<60)al.push({cls:'def',ic:'ti-trending-down',col:mi.c,t:`Déficit de ${mi.k} en ${z.nombre||z.id_zona}`,s:`Suelo en ${Math.round(c)}% del objetivo.`});});
-  });
-  const als=al.slice(0,4);
-  document.getElementById('fpalert').innerHTML=`<div class="p-title"><i class="ti ti-bell"></i>Alertas</div>`+(als.length?als.map(a=>`<div class="alerta-card ${a.cls}"><div class="alerta-ico" style="background:${a.col}22;color:${a.col}"><i class="ti ${a.ic}"></i></div><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join(''):`<div class="alerta-card ok"><div class="alerta-ico" style="background:#BBF7D0;color:var(--green)"><i class="ti ti-circle-check"></i></div><div><div class="alerta-t">Sin alertas</div><div class="alerta-s">Nutrientes dentro de rango.</div></div></div>`);
+  // Próximas aplicaciones
   const hoy=fs(new Date());
-  const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1).slice(0,5);
-  document.getElementById('fpprox').innerHTML=`<div class="p-title"><i class="ti ti-calendar-event"></i>Próximas aplicaciones</div>`+(fut.length?fut.map(e=>{const i=G.zonas.findIndex(z=>z.id_zona===e.id_zona);const z=G.zonas[i];const d=new Date(e.fecha_evento+'T00:00:00');return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[(i<0?0:i)%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${z?.nombre||e.id_zona}</div><div class="prox-prod">${prodShort(e.producto_asignado)}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[(i<0?0:i)%ZC.length]}">${numF(e.dosis_aplicar_kg).toFixed(1)} kg</div><div class="prox-fecha">${DSS[d.getDay()]} ${d.getDate()} ${MSS[d.getMonth()]}</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--muted)">Sin aplicaciones futuras.</div>');
+  const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1).slice(0,6);
+  document.getElementById('fpprox').innerHTML=`<div class="p-title"><i class="ti ti-calendar-event"></i>Próximas aplicaciones</div>`+(fut.length?fut.map(e=>{const i=G.zonas.findIndex(z=>z.id_zona===e.id_zona);const z=G.zonas[i];const d2=new Date(e.fecha_evento+'T00:00:00');return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[(i<0?0:i)%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${z?.nombre||'Zona'}</div><div class="prox-prod">${prodShort(e.producto_asignado)}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[(i<0?0:i)%ZC.length]}">${numF(e.dosis_aplicar_kg).toFixed(1)} kg</div><div class="prox-fecha">${DSS[d2.getDay()]} ${d2.getDate()} ${MSS[d2.getMonth()]}</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--muted)">Sin aplicaciones futuras.</div>');
+
+  // Resumen de productos (agrupado por producto)
+  const prod={};
+  GF.ferti.forEach(e=>{
+    const p=e.producto_asignado||'Sin nombre';
+    if(!prod[p])prod[p]={kg:0,apps:0};
+    prod[p].kg+=numF(e.dosis_aplicar_kg);prod[p].apps++;
+  });
+  const lista=Object.entries(prod).sort((a,b)=>b[1].kg-a[1].kg);
+  const totKg=lista.reduce((a,[_,v])=>a+v.kg,0);
+  const PC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04','#DB2777'];
+  let ph=`<div class="p-title"><i class="ti ti-package"></i>Resumen de productos</div>`;
+  if(lista.length){
+    ph+=lista.map(([p,v],i)=>{
+      const pct=totKg>0?v.kg/totKg*100:0;const c=PC[i%PC.length];
+      return `<div style="margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${prodShort(p)}</span>
+          <span style="font-size:12px;font-weight:700;color:${c}">${v.kg.toFixed(0)} kg</span>
+        </div>
+        <div style="height:6px;border-radius:4px;background:var(--line2);overflow:hidden"><div style="height:100%;width:${pct}%;background:${c};border-radius:4px"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${v.apps} aplicaciones · ${pct.toFixed(0)}% del total</div>
+      </div>`;
+    }).join('');
+    ph+=`<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700;color:var(--ink)">Total temporada</span><span style="font-size:13px;font-weight:700;color:var(--green)">${totKg.toFixed(0)} kg</span></div>`;
+  }else{
+    ph+='<div style="font-size:11px;color:var(--muted)">Sin productos registrados.</div>';
+  }
+  document.getElementById('fpprod').innerHTML=ph;
 }
 
 function openEvF(znId,fecha,idx){
@@ -1273,6 +1333,176 @@ function estTabla(rows){
 /* recargar estanque al cambiar de predio, sin tocar el resto */
 const _onPredioEst=onPredio;
 onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=false;if(TAB==='estanque')await loadRenderEstanque();};
+
+
+/* ===== BALANCE NUTRICIONAL (pestaña) ===== */
+let GB={chart:null,loaded:false};
+const NUT_ALL=[
+  {k:'N',c:'#2563EB',macro:true,m:MACRO[0]},
+  {k:'P₂O₅',c:'#EA580C',macro:true,m:MACRO[1]},
+  {k:'K₂O',c:'#7C3AED',macro:true,m:MACRO[2]},
+  {k:'Ca',c:'#0891B2',macro:false,p:'ca'},
+  {k:'Mg',c:'#16A34A',macro:false,p:'mg'},
+  {k:'S',c:'#CA8A04',macro:false,p:'s'},
+  {k:'Zn',c:'#DB2777',macro:false,p:'zn'},
+  {k:'Mn',c:'#92400E',macro:false,p:'mn'},
+  {k:'Fe',c:'#DC2626',macro:false,p:'fe'},
+  {k:'Cu',c:'#B45309',macro:false,p:'cu'},
+  {k:'B',c:'#0D9488',macro:false,p:'b'},
+];
+function bnCov(znId,n){return n.macro?covMacro(znId,n.m):covMicro(znId,{p:n.p});}
+function bnAvg(n){const vs=G.zonas.map(z=>bnCov(z.id_zona,n)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;}
+function bnState(p){if(p==null)return{t:'s/d',cls:'',c:'#94A3B8'};if(p>120)return{t:'Exceso',cls:'aju',c:'#EA580C'};if(p<80)return{t:'Déficit',cls:'cri',c:'#DC2626'};return{t:'Óptimo',cls:'ade',c:'#16A34A'};}
+
+async function loadRenderBalance(){
+  const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
+  const cont=document.getElementById('bnkpi');
+  cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando balance...</div></div>';
+  // asegurar datos (comparte GF con fertirriego)
+  const [{data:fe},{data:ba}]=await Promise.all([
+    db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds),
+    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
+  ]);
+  GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);
+  GB.loaded=true;
+  bnKpis();bnChart();bnTabla();bnResumen();bnAlertas();bnZonas();
+}
+
+function bnKpis(){
+  const covs=NUT_ALL.map(n=>bnAvg(n)).filter(v=>v!=null);
+  const covProm=covs.length?Math.round(covs.reduce((a,b)=>a+b,0)/covs.length):null;
+  const deficit=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a<80;});
+  const exceso=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a>120;});
+  const zCrit=G.zonas.filter(z=>{const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return pr!=null&&pr<80;});
+  document.getElementById('bnkpi').innerHTML=`
+  <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
+    <div><div class="kpi-lbl">Cobertura promedio</div><div class="kpi-val" style="color:#7C3AED">${covProm!=null?covProm+'%':'—'}</div><div class="kpi-sub">promedio general</div></div></div>
+  <div class="kpi-card"><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-arrow-down-circle"></i></div>
+    <div><div class="kpi-lbl">Nutrientes en déficit</div><div class="kpi-val" style="color:${deficit.length?'var(--red)':'var(--green)'}">${deficit.length}</div><div class="kpi-sub">${deficit.length?deficit.map(n=>n.k).join(', '):'ninguno'}</div></div></div>
+  <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-arrow-up-circle"></i></div>
+    <div><div class="kpi-lbl">Nutrientes en exceso</div><div class="kpi-val" style="color:${exceso.length?'var(--z2)':'var(--green)'}">${exceso.length}</div><div class="kpi-sub">${exceso.length?exceso.map(n=>n.k).join(', '):'ninguno'}</div></div></div>
+  <div class="kpi-card"><div class="kpi-ico" style="background:${zCrit.length?'#FEF2F2':'#F0FDF4'};color:${zCrit.length?'var(--red)':'var(--green)'}"><i class="ti ti-alert-triangle"></i></div>
+    <div><div class="kpi-lbl">Zonas críticas</div><div class="kpi-val" style="color:${zCrit.length?'var(--red)':'var(--green)'}">${zCrit.length}</div><div class="kpi-sub">&lt; 80% de cobertura</div></div></div>`;
+}
+
+const bnRefLines={id:'bnRefLines',afterDatasetsDraw(chart){
+  const{ctx,chartArea:{left,right},scales:{y}}=chart;
+  const lines=[{v:80,c:'#DC2626',t:'Déficit (<80%)'},{v:100,c:'#16A34A',t:'Objetivo (100%)'},{v:120,c:'#EA580C',t:'Exceso (>120%)'}];
+  ctx.save();
+  lines.forEach(l=>{const yp=y.getPixelForValue(l.v);ctx.beginPath();ctx.setLineDash([5,4]);ctx.strokeStyle=l.c;ctx.lineWidth=1;ctx.globalAlpha=.55;ctx.moveTo(left,yp);ctx.lineTo(right,yp);ctx.stroke();});
+  ctx.restore();
+}};
+function bnChart(){
+  const labels=NUT_ALL.map(n=>n.k);
+  const data=NUT_ALL.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
+  const colors=NUT_ALL.map(n=>{const a=bnAvg(n);if(a==null)return '#CBD5E1';if(a>120)return '#EA580C';if(a<80)return '#DC2626';return '#16A34A';});
+  if(GB.chart)GB.chart.destroy();
+  const ctx=document.getElementById('bnChart').getContext('2d');
+  GB.chart=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{label:'Cobertura (%)',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Cobertura: '+c.parsed.y+'%'}}},
+      scales:{y:{beginAtZero:true,suggestedMax:170,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v+'%'}},
+        x:{grid:{display:false},ticks:{font:{size:12,weight:'600'}}}}},
+    plugins:[bnRefLines]
+  });
+}
+
+function bnTabla(){
+  const micros=NUT_ALL.filter(n=>!n.macro);
+  let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+NUT_ALL.map(n=>`<th>${n.k}</th>`).join('')+`<th>Estado</th></tr></thead><tbody>`;
+  G.zonas.forEach((z,zi)=>{
+    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
+    const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
+    const st=bnState(pr);
+    h+=`<tr><td><div class="zona-dot" style="background:${ZC[zi%ZC.length]};display:inline-block;margin-right:5px"></div>${z.nombre||'Zona'}</td><td>${z.superficie_ha||'—'}</td>`;
+    h+=NUT_ALL.map(n=>{const c=bnCov(z.id_zona,n);if(c==null)return '<td style="color:var(--subtle)">—</td>';const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;}).join('');
+    h+=`<td><span class="est-badge ${st.cls}">${st.t}</span></td></tr>`;
+  });
+  document.getElementById('bnTabla').innerHTML=h+'</tbody>';
+}
+
+function bnResumen(){
+  const demT=MACRO.reduce((a,m)=>a+G.zonas.reduce((s,z)=>s+numF(GF.bal[z.id_zona]?.[m.dem]),0),0);
+  const covs=NUT_ALL.map(n=>bnAvg(n)).filter(v=>v!=null);
+  const covProm=covs.length?Math.round(covs.reduce((a,b)=>a+b,0)/covs.length):null;
+  const deficit=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a<80;}).length;
+  const exceso=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a>120;}).length;
+  document.getElementById('bnResumen').innerHTML=`
+    <div class="est-rrow"><span class="est-rk">Demanda total (NPK)</span><span class="est-rv">${Math.round(demT).toLocaleString('es-CL')} kg</span></div>
+    <div class="est-rrow"><span class="est-rk">Cobertura promedio</span><span class="est-rv" style="color:#7C3AED">${covProm!=null?covProm+'%':'—'}</span></div>
+    <div class="est-rrow"><span class="est-rk">Nutrientes en déficit</span><span class="est-rv" style="color:${deficit?'var(--red)':'var(--green)'}">${deficit}</span></div>
+    <div class="est-rrow"><span class="est-rk">Nutrientes en exceso</span><span class="est-rv" style="color:${exceso?'var(--z2)':'var(--green)'}">${exceso}</span></div>
+    <div class="est-rrow"><span class="est-rk">Zonas evaluadas</span><span class="est-rv">${G.zonas.length}</span></div>`;
+}
+
+function bnAlertas(){
+  const al=[];
+  NUT_ALL.forEach(n=>{const a=bnAvg(n);if(a==null)return;
+    if(a>130)al.push({cls:'aju',ic:'ti-arrow-up-circle',c:'#EA580C',t:`Exceso de ${n.k}`,s:`Cobertura promedio ${Math.round(a)}%. Revisar próximas aplicaciones.`});
+    else if(a<70)al.push({cls:'cri',ic:'ti-arrow-down-circle',c:'#DC2626',t:`Déficit de ${n.k}`,s:`Cobertura promedio ${Math.round(a)}%. Considerar aporte en próximas aplicaciones.`});
+  });
+  const als=al.slice(0,5);
+  document.getElementById('bnAlertas').innerHTML=als.length?als.map(a=>`<div class="alerta-card ${a.cls==='cri'?'danger':'warn'}" style="margin-bottom:8px"><div class="alerta-ico" style="font-size:16px;color:${a.c}"><i class="ti ${a.ic}"></i></div><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join(''):'<div class="alerta-card ok"><i class="ti ti-circle-check alerta-ico" style="color:var(--green)"></i><div><div class="alerta-t">Sin alertas</div><div class="alerta-s">Nutrientes dentro de rango.</div></div></div>';
+}
+
+function bnZonas(){
+  const ranked=G.zonas.map((z,zi)=>{
+    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
+    const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
+    return {z,zi,pr};
+  }).filter(x=>x.pr!=null).sort((a,b)=>a.pr-b.pr).slice(0,5);
+  document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>{
+    const st=bnState(x.pr);
+    return `<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv" style="color:${st.c}">${Math.round(x.pr)}%</span></div>`;
+  }).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
+}
+
+/* recargar balance al cambiar equipo */
+const _onEquipoBal=onEquipo;
+onEquipo=async function(){await _onEquipoBal.apply(this,arguments);GB.loaded=false;if(TAB==='balance'&&G.zonas.length)await loadRenderBalance();};
+
+
+/* ===== Dropdowns custom (mantiene el <select> oculto como fuente de verdad) ===== */
+function initCustomDropdowns(){
+  document.querySelectorAll('.sel-wrap').forEach(wrap=>{
+    const sel=wrap.querySelector('select');
+    if(!sel||wrap.dataset.cd)return;
+    wrap.dataset.cd='1';
+    sel.style.position='absolute';sel.style.opacity='0';sel.style.pointerEvents='none';sel.style.left='0';sel.style.width='1px';sel.style.height='1px';
+    const val=document.createElement('span');val.className='cd-val';
+    sel.parentNode.insertBefore(val,sel);
+    const menu=document.createElement('div');menu.className='cd-menu';
+    wrap.appendChild(menu);
+    const rebuild=()=>{
+      val.textContent=sel.options[sel.selectedIndex]?.textContent||'—';
+      menu.innerHTML='';
+      Array.from(sel.options).forEach((o,i)=>{
+        const item=document.createElement('div');
+        item.className='cd-item'+(i===sel.selectedIndex?' sel':'');
+        item.textContent=o.textContent;
+        item.addEventListener('click',ev=>{
+          ev.stopPropagation();
+          if(sel.value!==o.value){sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}));}
+          val.textContent=o.textContent;menu.classList.remove('open');
+          Array.from(menu.children).forEach(c=>c.classList.remove('sel'));item.classList.add('sel');
+        });
+        menu.appendChild(item);
+      });
+    };
+    rebuild();
+    wrap.addEventListener('click',ev=>{
+      if(ev.target.closest('.cd-menu'))return;
+      const wasOpen=menu.classList.contains('open');
+      document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open'));
+      if(!wasOpen)menu.classList.add('open');
+    });
+    new MutationObserver(rebuild).observe(sel,{childList:true});
+    sel.addEventListener('change',()=>{val.textContent=sel.options[sel.selectedIndex]?.textContent||'—';});
+  });
+}
+document.addEventListener('click',()=>document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open')));
+initCustomDropdowns();
 
 init();
 </script>
