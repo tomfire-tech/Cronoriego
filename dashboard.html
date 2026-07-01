@@ -245,6 +245,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
 .view{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
 #view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
+#view-ferti .franja{grid-template-columns:repeat(3,1fr);}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
 #view-ferti .kpi-card{flex-direction:row;align-items:center;gap:13px;padding:14px 18px;}
 #view-ferti .kpi-ico{width:44px;height:44px;border-radius:11px;font-size:21px;}
@@ -315,7 +316,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 /* ===== DINAMICA ESTANQUE ===== */
 #view-estanque,#view-balance{overflow-y:auto;background:var(--bg);}
 .est-wrap{padding:14px 20px;display:flex;flex-direction:column;gap:14px;}
-#view-estanque .kpi-bar{grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+#view-estanque .kpi-bar{grid-template-columns:repeat(2,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;max-width:640px;}
 #view-balance .kpi-bar{grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
 #view-estanque .kpi-card,#view-balance .kpi-card{flex-direction:row;align-items:center;gap:12px;padding:14px 16px;}
 #view-estanque .kpi-ico,#view-balance .kpi-ico{width:42px;height:42px;border-radius:10px;font-size:20px;}
@@ -360,7 +361,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-badge.cri{background:#FEF2F2;color:var(--red);}
 .est-tbl-scroll{max-height:440px;overflow-y:auto;border-radius:8px;}
 .bn-scroll{overflow-x:auto;}
-.bn-scroll .est-tbl{min-width:1100px;}
+.bn-scroll .est-tbl{min-width:680px;}
 .bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:12px 18px;white-space:nowrap;text-align:center;font-size:12.5px;}
 .bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:8px;min-width:115px;}
 .bn-scroll .est-tbl tbody tr:nth-child(even){background:#FAFBFC;}
@@ -476,7 +477,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
     <div class="db" id="fdb"></div>
   </aside>
-  <div class="kpi-bar" id="fkpib"></div>
   <div class="body">
     <div class="cal-zone">
       <div class="cal-scroll"><table class="cal-tbl" id="fctbl"></table></div>
@@ -492,42 +492,21 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
     <div class="est-grid">
-      <div class="est-col">
-        <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
-          <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta base y aporte de lluvia por semana</div>
-          <div class="est-chart-box"><canvas id="estChart"></canvas></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Detalle semanal del estanque</div>
-          <div class="est-tbl-scroll"><table class="est-tbl" id="estTabla"></table></div>
-        </div>
+      <div class="est-card chart">
+        <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
+        <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta planificada y aporte de lluvia por semana</div>
+        <div class="est-chart-box"><canvas id="estChart"></canvas></div>
       </div>
       <div class="est-side">
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
           <div id="estResumen"></div>
         </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-gauge" style="color:var(--z2)"></i>Estado de cobertura</div>
-          <div class="gauge-wrap">
-            <div class="gauge-box"><canvas id="estGauge"></canvas></div>
-            <div class="gauge-val" id="gaugeVal">—</div>
-            <div class="gauge-lbl" id="gaugeLbl">Cobertura actual</div>
-          </div>
-          <div class="est-leg">
-            <div class="est-leg-row"><div class="est-leg-l"><div class="est-leg-dot" style="background:#7C3AED"></div>&gt; 200%</div><span style="color:#7C3AED;font-weight:700">Excedente</span></div>
-            <div class="est-leg-row"><div class="est-leg-l"><div class="est-leg-dot" style="background:#2563EB"></div>130% – 200%</div><span style="color:var(--blue);font-weight:700">Holgado</span></div>
-            <div class="est-leg-row"><div class="est-leg-l"><div class="est-leg-dot" style="background:#16A34A"></div>100% – 130%</div><span style="color:var(--green);font-weight:700">Adecuado</span></div>
-            <div class="est-leg-row"><div class="est-leg-l"><div class="est-leg-dot" style="background:#EA580C"></div>80% – 100%</div><span style="color:var(--z2);font-weight:700">Ajustado</span></div>
-            <div class="est-leg-row"><div class="est-leg-l"><div class="est-leg-dot" style="background:#DC2626"></div>&lt; 80%</div><span style="color:var(--red);font-weight:700">Crítico</span></div>
-          </div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-info-circle" style="color:var(--muted)"></i>Información del estanque</div>
-          <div id="estInfo"></div>
-        </div>
       </div>
+    </div>
+    <div class="est-card">
+      <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Detalle semanal del estanque</div>
+      <div class="est-tbl-scroll"><table class="est-tbl" id="estTabla"></table></div>
     </div>
   </div>
 </div>
@@ -537,13 +516,22 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="est-grid est-grid-bn">
       <div class="est-col">
         <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#7C3AED"></i>Cobertura por nutriente (promedio del predio)</div>
-          <div class="est-card-s">Objetivo 100% · Rango adecuado 80–120%</div>
-          <div class="est-chart-box"><canvas id="bnChart"></canvas></div>
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Macronutrientes — cobertura promedio del predio</div>
+          <div class="est-card-s">Primarios (N, P₂O₅, K₂O) y secundarios (Ca, Mg, S) · Objetivo 100% · Rango adecuado 80–120%</div>
+          <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
         </div>
         <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance nutricional por zona</div>
-          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTabla"></table></div>
+          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance de macronutrientes por zona</div>
+          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMacro"></table></div>
+        </div>
+        <div class="est-card chart">
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes — cobertura promedio del predio</div>
+          <div class="est-card-s">Oligoelementos (Zn, Mn, Fe, Cu, B) · Objetivo 100% · Rango adecuado 80–120%</div>
+          <div class="est-chart-box"><canvas id="bnChartMicro"></canvas></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance de micronutrientes por zona</div>
+          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMicro"></table></div>
         </div>
       </div>
       <div class="est-side bn-side">
@@ -1053,7 +1041,7 @@ async function loadRenderFerti(){
     db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
   ]);
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
-  rKpiF();rCalF();rFranjaF();rPanelF();
+  rCalF();rFranjaF();rPanelF();
 }
 function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
 function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
@@ -1111,8 +1099,7 @@ function rFranjaF(){
   <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-flask"></i></div><div class="franja-lbl">Demanda total (NPK)</div></div>${ng(demT)}<div class="franja-sub">kg objetivo</div></div>
   <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-circle-check"></i></div><div class="franja-lbl">Aportado (acumulado)</div></div>${ng(apoT)}<div class="franja-sub">kg aplicados</div></div>
   <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-progress"></i></div><div class="franja-lbl">Demanda restante</div></div>${ng(restT)}<div class="franja-sub">kg por reponer</div></div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-target"></i></div><div class="franja-lbl">Eficiencia nutricional</div></div><div class="franja-val ${ef>=80?'green':'amber'}">${ef!=null?ef+'%':'—'}</div><div class="franja-sub">aportado vs demanda</div></div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Producto temporada</div></div><div class="franja-val">${GF.ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}</div><div class="franja-sub">kg totales</div></div>`;
+`;
 }
 
 function rPanelF(){
@@ -1203,43 +1190,35 @@ async function loadRenderEstanque(){
   GE.rows=rows;GE.loaded=true;
   if(!rows.length){
     cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--amber)">Este predio no tiene estanque registrado.</div></div>';
-    document.getElementById('estResumen').innerHTML='';document.getElementById('estInfo').innerHTML='';
-    document.getElementById('estTabla').innerHTML='';document.getElementById('gaugeVal').textContent='—';
-    if(GE.chart){GE.chart.destroy();GE.chart=null;}if(GE.gauge){GE.gauge.destroy();GE.gauge=null;}
+    document.getElementById('estResumen').innerHTML='';
+    document.getElementById('estTabla').innerHTML='';
+    if(GE.chart){GE.chart.destroy();GE.chart=null;}
     return;
   }
-  estKpis(rows);estChart(rows);estGauge(rows);estResumen(rows);estInfo(rows);estTabla(rows);
+  estKpis(rows);estChart(rows);estResumen(rows);estTabla(rows);
 }
 
+function estFilaActual(rows){
+  const wActual='W'+isoW(new Date());
+  return rows.find(r=>String(r.numero_semana).toUpperCase()===wActual)||rows[rows.length-1];
+}
 function estKpis(rows){
-  const last=rows[rows.length-1];
-  const volActual=numE(last.oferta_extraible_base_m3)+numE(last.aporte_lluvia_semanal_m3);
-  const ofertaBase=numE(last.oferta_extraible_base_m3);
-  const aporte=rows.reduce((a,r)=>a+numE(r.aporte_lluvia_semanal_m3),0);
-  const demProm=rows.reduce((a,r)=>a+numE(r.demanda_promedio_3a_m3),0)/rows.length;
-  const balance=numE(last.balance_m3);
-  const cobPct=numE(last.cobertura_pct)*100;
-  const cat=covCat(cobPct);
+  const act=estFilaActual(rows);
+  const volActual=numE(act.oferta_extraible_base_m3)+numE(act.aporte_lluvia_semanal_m3);
+  const ofertaBase=numE(act.oferta_extraible_base_m3);
+  const cobPct=numE(act.cobertura_pct)*100;
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
   document.getElementById('estkpi').innerHTML=`
   <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div>
     <div><div class="kpi-lbl">Volumen actual</div><div class="kpi-val blue">${fmt(volActual)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">${cobPct.toFixed(2)}% de cobertura</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-businessplan"></i></div>
-    <div><div class="kpi-lbl">Oferta extraíble base</div><div class="kpi-val">${fmt(ofertaBase)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Capacidad operativa</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-cloud-rain"></i></div>
-    <div><div class="kpi-lbl">Aporte temporada</div><div class="kpi-val">${fmt(aporte)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Aporte lluvia total</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-bar"></i></div>
-    <div><div class="kpi-lbl">Demanda promedio</div><div class="kpi-val">${fmt(demProm)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Promedio 3 últimos años</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:${balance>=0?'#F0FDF4':'#FEF2F2'};color:${balance>=0?'var(--green)':'var(--red)'}"><i class="ti ti-scale"></i></div>
-    <div><div class="kpi-lbl">Balance</div><div class="kpi-val" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Última semana</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:${cat.c}22;color:${cat.c}"><i class="ti ti-shield-check"></i></div>
-    <div><div class="kpi-lbl">Estado general</div><div class="kpi-val" style="color:${cat.c};font-size:18px;font-weight:800">${cat.t}</div><div class="kpi-sub">Cobertura ${cobPct.toFixed(0)}%</div></div></div>`;
+    <div><div class="kpi-lbl">Oferta base</div><div class="kpi-val">${fmt(ofertaBase)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Semana ${act.numero_semana}</div></div></div>`;
 }
 
 function estChart(rows){
   const labels=rows.map(r=>r.numero_semana);
   const volActual=rows.map(r=>numE(r.oferta_extraible_base_m3)+numE(r.aporte_lluvia_semanal_m3));
-  const ofertaBase=rows.map(r=>numE(r.oferta_extraible_base_m3));
+  const ofertaPlanif=rows.map(r=>numE(r.oferta_planificada_m3));
   const aporte=rows.map(r=>numE(r.aporte_lluvia_semanal_m3));
   const demanda=rows.map(r=>numE(r.demanda_promedio_3a_m3));
   if(GE.chart)GE.chart.destroy();
@@ -1248,7 +1227,7 @@ function estChart(rows){
     data:{labels,datasets:[
       {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
       {type:'line',label:'Volumen actual (m³)',data:volActual,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
-      {type:'line',label:'Oferta base (m³)',data:ofertaBase,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
+      {type:'line',label:'Oferta planificada (m³)',data:ofertaPlanif,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
       {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
     ]},
     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
@@ -1259,50 +1238,24 @@ function estChart(rows){
   });
 }
 
-function estGauge(rows){
-  const cobPct=numE(rows[rows.length-1].cobertura_pct)*100;
-  const cat=covCat(cobPct);
-  const shown=Math.min(cobPct,200);
-  if(GE.gauge)GE.gauge.destroy();
-  const ctx=document.getElementById('estGauge').getContext('2d');
-  GE.gauge=new Chart(ctx,{type:'doughnut',
-    data:{datasets:[{data:[shown,Math.max(0,200-shown)],backgroundColor:[cat.c,'#E2E8F0'],borderWidth:0,circumference:180,rotation:270}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
-  document.getElementById('gaugeVal').textContent=cobPct.toFixed(2)+'%';
-  document.getElementById('gaugeVal').style.color=cat.c;
-  document.getElementById('gaugeLbl').innerHTML='Cobertura actual<br><b style="color:'+cat.c+'">'+cat.t+'</b>';
-}
-
 function estResumen(rows){
-  const last=rows[rows.length-1];
-  const aporte=numE(last.aporte_lluvia_semanal_m3);
-  const demanda=numE(last.demanda_promedio_3a_m3);
-  const balance=numE(last.balance_m3);
-  const cobProm=rows.reduce((a,r)=>a+numE(r.cobertura_pct),0)/rows.length*100;
-  const cobPct=numE(last.cobertura_pct)*100;
+  const act=estFilaActual(rows);
+  const aporte=numE(act.aporte_lluvia_semanal_m3);
+  const demanda=numE(act.demanda_promedio_3a_m3);
+  const balance=numE(act.balance_m3);
+  const ofertaPlanif=numE(act.oferta_planificada_m3);
+  const ofertaBase=numE(act.oferta_extraible_base_m3);
+  const cobPct=numE(act.cobertura_pct)*100;
   const cat=covCat(cobPct);
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
   document.getElementById('estResumen').innerHTML=`
-    <div class="est-rrow"><span class="est-rk">Semana</span><span class="est-rv">${last.numero_semana}</span></div>
+    <div class="est-rrow"><span class="est-rk">Semana actual</span><span class="est-rv">${act.numero_semana}</span></div>
+    <div class="est-rrow"><span class="est-rk">Oferta planificada</span><span class="est-rv">${fmt(ofertaPlanif)} m³</span></div>
+    <div class="est-rrow"><span class="est-rk">Oferta base</span><span class="est-rv">${fmt(ofertaBase)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Aporte lluvia</span><span class="est-rv">${fmt(aporte)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Demanda (3 años)</span><span class="est-rv">${fmt(demanda)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Balance</span><span class="est-rv" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Cobertura promedio</span><span class="est-rv">${cobProm.toFixed(2)}%</span></div>
-    <div class="est-rrow"><span class="est-rk">Estado general</span><span class="est-badge ${cat.cls}">${cat.t}</span></div>`;
-}
-
-function estInfo(rows){
-  const last=rows[rows.length-1];
-  const capOper=numE(last.oferta_extraible_base_m3);
-  const volActual=capOper+numE(last.aporte_lluvia_semanal_m3);
-  const capMax=Math.max(...rows.map(r=>numE(r.oferta_planificada_m3)));
-  const fmt=v=>Math.round(v).toLocaleString('es-CL');
-  document.getElementById('estInfo').innerHTML=`
-    <div class="est-rrow"><span class="est-rk">Estanque</span><span class="est-rv">${last.nombre_estanque||last.id_estanque}</span></div>
-    <div class="est-rrow"><span class="est-rk">Capacidad operativa</span><span class="est-rv">${fmt(capOper)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Volumen actual</span><span class="est-rv">${fmt(volActual)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Cap. máx. planificada</span><span class="est-rv">${fmt(capMax)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Semanas registradas</span><span class="est-rv">${rows.length}</span></div>`;
+    <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>`;
 }
 
 function estTabla(rows){
@@ -1324,19 +1277,21 @@ onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=fal
 /* ===== BALANCE NUTRICIONAL (pestaña) ===== */
 let GB={chart:null,loaded:false};
 const NUT_ALL=[
-  {k:'N',c:'#2563EB',macro:true,m:MACRO[0]},
-  {k:'P₂O₅',c:'#EA580C',macro:true,m:MACRO[1]},
-  {k:'K₂O',c:'#7C3AED',macro:true,m:MACRO[2]},
-  {k:'Ca',c:'#0891B2',macro:false,p:'ca'},
-  {k:'Mg',c:'#16A34A',macro:false,p:'mg'},
-  {k:'S',c:'#CA8A04',macro:false,p:'s'},
-  {k:'Zn',c:'#DB2777',macro:false,p:'zn'},
-  {k:'Mn',c:'#92400E',macro:false,p:'mn'},
-  {k:'Fe',c:'#DC2626',macro:false,p:'fe'},
-  {k:'Cu',c:'#B45309',macro:false,p:'cu'},
-  {k:'B',c:'#0D9488',macro:false,p:'b'},
+  {k:'N',c:'#2563EB',grupo:'macro',calc:'npk',m:MACRO[0]},
+  {k:'P₂O₅',c:'#EA580C',grupo:'macro',calc:'npk',m:MACRO[1]},
+  {k:'K₂O',c:'#7C3AED',grupo:'macro',calc:'npk',m:MACRO[2]},
+  {k:'Ca',c:'#0891B2',grupo:'macro',calc:'ppm',p:'ca'},
+  {k:'Mg',c:'#16A34A',grupo:'macro',calc:'ppm',p:'mg'},
+  {k:'S',c:'#CA8A04',grupo:'macro',calc:'ppm',p:'s'},
+  {k:'Zn',c:'#DB2777',grupo:'micro',calc:'ppm',p:'zn'},
+  {k:'Mn',c:'#92400E',grupo:'micro',calc:'ppm',p:'mn'},
+  {k:'Fe',c:'#DC2626',grupo:'micro',calc:'ppm',p:'fe'},
+  {k:'Cu',c:'#B45309',grupo:'micro',calc:'ppm',p:'cu'},
+  {k:'B',c:'#0D9488',grupo:'micro',calc:'ppm',p:'b'},
 ];
-function bnCov(znId,n){return n.macro?covMacro(znId,n.m):covMicro(znId,{p:n.p});}
+const NUT_MACRO=NUT_ALL.filter(n=>n.grupo==='macro');
+const NUT_MICRO=NUT_ALL.filter(n=>n.grupo==='micro');
+function bnCov(znId,n){return n.calc==='npk'?covMacro(znId,n.m):covMicro(znId,{p:n.p});}
 function bnAvg(n){const vs=G.zonas.map(z=>bnCov(z.id_zona,n)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;}
 function bnState(p){if(p==null)return{t:'s/d',cls:'',c:'#94A3B8'};if(p>120)return{t:'Exceso',cls:'aju',c:'#EA580C'};if(p<80)return{t:'Déficit',cls:'cri',c:'#DC2626'};return{t:'Óptimo',cls:'ade',c:'#16A34A'};}
 
@@ -1378,14 +1333,14 @@ const bnRefLines={id:'bnRefLines',afterDatasetsDraw(chart){
   lines.forEach(l=>{const yp=y.getPixelForValue(l.v);ctx.beginPath();ctx.setLineDash([5,4]);ctx.strokeStyle=l.c;ctx.lineWidth=1;ctx.globalAlpha=.55;ctx.moveTo(left,yp);ctx.lineTo(right,yp);ctx.stroke();});
   ctx.restore();
 }};
-function bnChart(){
-  const labels=NUT_ALL.map(n=>n.k);
-  const data=NUT_ALL.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
-  const colors=NUT_ALL.map(n=>{const a=bnAvg(n);if(a==null)return '#CBD5E1';if(a>120)return '#EA580C';if(a<80)return '#DC2626';return '#16A34A';});
-  if(GB.chart)GB.chart.destroy();
-  const ctx=document.getElementById('bnChart').getContext('2d');
-  GB.chart=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'Cobertura (%)',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
+function bnChartGrupo(nutrientes,canvasId,chartKey){
+  const labels=nutrientes.map(n=>n.k);
+  const data=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
+  const colors=nutrientes.map(n=>{const a=bnAvg(n);if(a==null)return '#CBD5E1';if(a>120)return '#EA580C';if(a<80)return '#DC2626';return '#16A34A';});
+  if(GB[chartKey])GB[chartKey].destroy();
+  const ctx=document.getElementById(canvasId).getContext('2d');
+  GB[chartKey]=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{label:'Cobertura (%)',data,backgroundColor:colors,borderRadius:5,maxBarThickness:52}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Cobertura: '+c.parsed.y+'%'}}},
       scales:{y:{beginAtZero:true,suggestedMax:170,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v+'%'}},
@@ -1393,19 +1348,26 @@ function bnChart(){
     plugins:[bnRefLines]
   });
 }
+function bnChart(){
+  bnChartGrupo(NUT_MACRO,'bnChartMacro','chartMacro');
+  bnChartGrupo(NUT_MICRO,'bnChartMicro','chartMicro');
+}
 
-function bnTabla(){
-  const micros=NUT_ALL.filter(n=>!n.macro);
-  let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+NUT_ALL.map(n=>`<th>${n.k}</th>`).join('')+`<th>Estado</th></tr></thead><tbody>`;
+function bnTablaGrupo(nutrientes,tablaId){
+  let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+nutrientes.map(n=>`<th>${n.k}</th>`).join('')+`<th>Estado</th></tr></thead><tbody>`;
   G.zonas.forEach((z,zi)=>{
-    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
+    const vs=nutrientes.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
     const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
     const st=bnState(pr);
     h+=`<tr><td><div class="zona-dot" style="background:${ZC[zi%ZC.length]};display:inline-block;margin-right:5px"></div>${z.nombre||'Zona'}</td><td>${z.superficie_ha||'—'}</td>`;
-    h+=NUT_ALL.map(n=>{const c=bnCov(z.id_zona,n);if(c==null)return '<td style="color:var(--subtle)">—</td>';const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;}).join('');
+    h+=nutrientes.map(n=>{const c=bnCov(z.id_zona,n);if(c==null)return '<td style="color:var(--subtle)">—</td>';const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;}).join('');
     h+=`<td><span class="est-badge ${st.cls}">${st.t}</span></td></tr>`;
   });
-  document.getElementById('bnTabla').innerHTML=h+'</tbody>';
+  document.getElementById(tablaId).innerHTML=h+'</tbody>';
+}
+function bnTabla(){
+  bnTablaGrupo(NUT_MACRO,'bnTablaMacro');
+  bnTablaGrupo(NUT_MICRO,'bnTablaMicro');
 }
 
 function bnResumen(){
