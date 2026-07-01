@@ -244,6 +244,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .tab i{font-size:16px;}.tab:hover{color:var(--ink2);}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
 .view{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+#view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
 #view-ferti .kpi-card{flex-direction:row;align-items:center;gap:13px;padding:14px 18px;}
 #view-ferti .kpi-ico{width:44px;height:44px;border-radius:11px;font-size:21px;}
@@ -415,7 +416,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
     <div class="week-nav">
       <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
-      <span id="wlbl" style="white-space:nowrap;font-size:12px">Semana —</span>
+      <span id="wlbl" style="white-space:nowrap;display:flex;flex-direction:column;line-height:1.15;align-items:center"><span id="wlbl-sem" style="font-size:13px;font-weight:700;color:var(--ink)">Sem. —</span><span id="wlbl-fec" style="font-size:10px;color:var(--muted);font-weight:500">—</span></span>
       <button onclick="chW(1)"><i class="ti ti-chevron-right"></i></button>
     </div>
   </div>
@@ -452,9 +453,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="cal-zone">
     <div class="cal-scroll">
       <table class="cal-tbl" id="ctbl"><tbody><tr><td colspan="8" class="loading">Cargando datos de riego...</td></tr></tbody></table>
-    </div>
-    <div class="franja" id="franja">
-      <div class="franja-card"><div class="loading" style="padding:0">—</div></div>
     </div>
   </div>
   <div class="panel">
@@ -596,7 +594,7 @@ function tgM(e){e.stopPropagation();document.getElementById('udd').classList.tog
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
 
 function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
-function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl').textContent=`Sem. ${nw}  ${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=`Sem. ISO ${nw}`;}
+function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl-sem').textContent=`Sem. ${nw}`;document.getElementById('wlbl-fec').textContent=`${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=`Sem. ISO ${nw}`;}
 
 function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
 function closeCl(){document.getElementById('mcl').classList.remove('open');}
@@ -612,7 +610,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí');return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
 async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 
@@ -651,7 +649,6 @@ async function loadRender(){
   G.scDia=sc;G.ndvi=ndvi;
   rKpi(dias,sc,sem);
   rCal(dias,sc);
-  rFranja(sc,ndvi);
   rPanel(dias,sc,ndvi);
 }
 
@@ -688,18 +685,13 @@ function rKpi(dias,sc,sem){
     </div>
     <div>
       <div class="kpi-val ${ok?'green':'amber'}" style="font-size:15px;font-weight:800">${ok?'Agua disponible':'Verificar disponibilidad'}</div>
-      <div class="kpi-sub">${ok?'Sin restricciones hoy':'Revisar zonas con déficit'}</div>
+      <div class="kpi-sub">${ok?'Sin restricciones esta semana':'Revisar zonas con déficit'}</div>
     </div>
   </div>
   <div class="kpi-card">
     <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div>
     <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
     <div class="kpi-sub">m³ estimados</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Cobertura de riego</div><div class="kpi-ico" style="background:${cob>=80?'#F0FDF4':'#FFFBEB'};color:${cob>=80?'var(--green)':'var(--amber)'}"><i class="ti ti-percentage"></i></div></div>
-    <div class="kpi-val ${cob>=80?'green':'amber'}">${cob}%</div>
-    <div class="kpi-sub">${znR.size} de ${G.zonas.length} zonas</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
@@ -711,11 +703,7 @@ function rKpi(dias,sc,sem){
     <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
     <div class="kpi-sub">kWh esta semana</div>
   </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Lluvia probable</div><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-cloud-rain"></i></div></div>
-    <div class="kpi-val ${lluv>15?'blue':''}">${lluv>0?lluv.toFixed(1):'0'}</div>
-    <div class="kpi-sub">mm en 7 días</div>
-  </div>`;
+`;
 }
 
 function rCal(dias,sc){
@@ -914,6 +902,7 @@ function openDia(fecha,znId){
   const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
   const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
   const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
+  const llR=parseFloat(r.lluvia_retenida_pronostico_mm_dia)||0;
   const volP=lP>0?Math.round(lP*ha*10):0;
 
   const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · Pronóstico`;
@@ -942,6 +931,7 @@ function openDia(fecha,znId){
       <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="cp">${num(eP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="cp">${num(cP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="cp">${num(llP)}</span></div></div>
+      <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
     </div>`;
 
   const html=`${hero}${detalle}${meteo}`;
