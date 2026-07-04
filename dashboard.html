@@ -979,21 +979,6 @@ function openZona(znId){
   const mp=G.mapas[znId];
   const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
 
-  // --- PANEL DE DIAGNÓSTICO TEMPORAL (para ver qué pasa sin usar la consola) ---
-  const diag=`<div class="d-section" style="background:#fff8e1;border:1px solid #ffe082">
-      <div class="d-section-t" style="color:#8a6d00">🔎 Diagnóstico NDVI (temporal)</div>
-      <div style="font-size:12px;line-height:1.7;color:#5d4e00;font-family:monospace">
-        Zona abierta: <b>${znId}</b><br>
-        Leaflet cargado: <b>${typeof L!=='undefined'?'SÍ ✓':'NO ✗ (no cargó el mapa)'}</b><br>
-        ¿Zona en tabla ndvi_imagenes?: <b>${mp?'SÍ ✓':'NO ✗ (G.mapas no la tiene)'}</b><br>
-        ${mp?`lat: <b>${mp.lat}</b> · lon: <b>${mp.lon}</b> · delta: <b>${mp.delta}</b><br>
-        url_ndvi: <b>${mp.url_ndvi?'presente ✓':'vacía ✗'}</b><br>
-        url_rgb: <b>${mp.url_rgb?'presente ✓':'vacía ✗'}</b><br>`:''}
-        ¿Se dibuja el mapa?: <b>${hayMapa?'SÍ ✓':'NO ✗'}</b><br>
-        Zonas con imagen cargadas: <b>${Object.keys(G.mapas||{}).join(', ')||'(ninguna)'}</b>
-      </div>
-    </div>`;
-
   const mapaHtml=hayMapa?`<div class="d-section">
       <div class="d-section-t">Imagen satelital NDVI${mp.fecha?` · ${fmtF(mp.fecha)}`:''}</div>
       <div id="ndvi-map"></div>
@@ -1004,7 +989,7 @@ function openZona(znId){
       </div>
     </div>`:'';
 
-  openD(tit,sub,diag+fichaHtml+cultivo+mapaHtml);
+  openD(tit,sub,fichaHtml+cultivo+mapaHtml);
   if(hayMapa)initNdviMap(mp);
 }
 
