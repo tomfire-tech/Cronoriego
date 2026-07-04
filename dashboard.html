@@ -10,6 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{
   --z0:#2563EB;--z0l:#EFF6FF;--z0m:#BFDBFE;
@@ -106,6 +108,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .zona-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 .zona-esp{font-size:13px;color:var(--muted);padding-left:15px;line-height:1.3;}
 .zona-ndvi{font-size:12px;color:var(--subtle);padding-left:15px;margin-top:1px;}
+#ndvi-map{height:260px;width:100%;border-radius:12px;overflow:hidden;margin-top:6px;background:#eef1ef;z-index:1;}
+.ndvi-map-ctrl{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:10px;font-size:13px;color:var(--subtle);}
+.ndvi-map-ctrl label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+.ndvi-map-ctrl input[type=checkbox]{accent-color:#1f7a3d;}
+.ndvi-map-ctrl input[type=range]{accent-color:#1f7a3d;width:90px;}
+.leaflet-container{font-family:inherit;}
 .dia-td{padding:3px;vertical-align:top;min-width:100px;}
 .dia-td.hoy-col .riego-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
 .dia-inner{height:88px;display:flex;align-items:center;justify-content:center;}
@@ -567,7 +575,7 @@ const DSS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const MS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const MSS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
-let G={rsId:null,zonas:[],scDia:[],ndvi:{},off:0};
+let G={rsId:null,zonas:[],scDia:[],ndvi:{},mapas:{},off:0};
 
 function hm(h){const f=parseFloat(h);if(!f||f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00min`:`${hh}h ${String(mm).padStart(2,'0')}min`;}
 function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
@@ -601,6 +609,7 @@ async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id
 async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
 async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
+async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 
 async function init(){
   const ses=await chkAuth();if(!ses)return;
@@ -633,8 +642,8 @@ async function loadRender(){
   const dias=semDias(G.off);
   const fi=fs(dias[0]),ff=fs(dias[6]);
   const znIds=G.zonas.map(z=>z.id_zona);
-  const [sc,ndvi,sem]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId)]);
-  G.scDia=sc;G.ndvi=ndvi;
+  const [sc,ndvi,sem,mapas]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds)]);
+  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;
   rKpi(dias,sc,sem);
   rCal(dias,sc);
   rPanel(dias,sc,ndvi);
@@ -967,7 +976,43 @@ function openZona(znId){
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
-  openD(tit,sub,fichaHtml+cultivo);
+  const mp=G.mapas[znId];
+  const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
+  const mapaHtml=hayMapa?`<div class="d-section">
+      <div class="d-section-t">Imagen satelital NDVI${mp.fecha?` · ${fmtF(mp.fecha)}`:''}</div>
+      <div id="ndvi-map"></div>
+      <div class="ndvi-map-ctrl">
+        <label><input id="ndvi-cn" type="checkbox" checked> NDVI</label>
+        <label><input id="ndvi-cr" type="checkbox"> Foto real</label>
+        <label>Opacidad <input id="ndvi-op" type="range" min="0" max="100" value="80"></label>
+      </div>
+    </div>`:'';
+
+  openD(tit,sub,fichaHtml+cultivo+mapaHtml);
+  if(hayMapa)initNdviMap(mp);
+}
+
+let _ndviMap=null;
+function initNdviMap(mp){
+  if(_ndviMap){try{_ndviMap.remove();}catch(e){}_ndviMap=null;}
+  // esperar la transición del drawer (0.28s) antes de crear el mapa
+  setTimeout(()=>{
+    const el=document.getElementById('ndvi-map');
+    if(!el||typeof L==='undefined')return;
+    const d=mp.delta||0.005;
+    const map=L.map('ndvi-map',{scrollWheelZoom:true,attributionControl:false}).setView([mp.lat,mp.lon],16);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
+    const bounds=[[mp.lat-d,mp.lon-d],[mp.lat+d,mp.lon+d]];
+    const capaNdvi=mp.url_ndvi?L.imageOverlay(mp.url_ndvi,bounds,{opacity:0.8}).addTo(map):null;
+    const capaRgb=mp.url_rgb?L.imageOverlay(mp.url_rgb,bounds,{opacity:0.8}):null;
+    L.marker([mp.lat,mp.lon]).addTo(map);
+    _ndviMap=map;
+    const cN=document.getElementById('ndvi-cn'),cR=document.getElementById('ndvi-cr'),op=document.getElementById('ndvi-op');
+    if(cN)cN.onchange=e=>{if(!capaNdvi)return;e.target.checked?capaNdvi.addTo(map):capaNdvi.remove();};
+    if(cR)cR.onchange=e=>{if(!capaRgb)return;e.target.checked?capaRgb.addTo(map):capaRgb.remove();};
+    if(op)op.oninput=e=>{const o=e.target.value/100;if(capaNdvi)capaNdvi.setOpacity(o);if(capaRgb)capaRgb.setOpacity(o);};
+    setTimeout(()=>map.invalidateSize(),120);
+  },350);
 }
 
 
