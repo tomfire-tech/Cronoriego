@@ -995,24 +995,30 @@ function openZona(znId){
 let _ndviMap=null;
 function initNdviMap(mp){
   if(_ndviMap){try{_ndviMap.remove();}catch(e){}_ndviMap=null;}
-  // esperar la transición del drawer (0.28s) antes de crear el mapa
-  setTimeout(()=>{
+  if(typeof L==='undefined'){console.warn('[NDVI] Leaflet no cargó');return;}
+  const d=mp.delta||0.005;
+  const bounds=[[mp.lat-d,mp.lon-d],[mp.lat+d,mp.lon+d]];
+  let intentos=0;
+  const arranca=()=>{
     const el=document.getElementById('ndvi-map');
-    if(!el||typeof L==='undefined')return;
-    const d=mp.delta||0.005;
-    const map=L.map('ndvi-map',{scrollWheelZoom:true,attributionControl:false}).setView([mp.lat,mp.lon],16);
+    if(!el){if(++intentos<20)setTimeout(arranca,120);return;}
+    // esperar a que el contenedor tenga tamaño real (el drawer se abre con animación)
+    if((el.clientWidth===0||el.clientHeight===0)&&++intentos<20){setTimeout(arranca,120);return;}
+    const map=L.map(el,{scrollWheelZoom:true,attributionControl:false});
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
-    const bounds=[[mp.lat-d,mp.lon-d],[mp.lat+d,mp.lon+d]];
-    const capaNdvi=mp.url_ndvi?L.imageOverlay(mp.url_ndvi,bounds,{opacity:0.8}).addTo(map):null;
-    const capaRgb=mp.url_rgb?L.imageOverlay(mp.url_rgb,bounds,{opacity:0.8}):null;
+    const capaNdvi=mp.url_ndvi?L.imageOverlay(mp.url_ndvi,bounds,{opacity:0.85}).addTo(map):null;
+    const capaRgb=mp.url_rgb?L.imageOverlay(mp.url_rgb,bounds,{opacity:0.85}):null;
     L.marker([mp.lat,mp.lon]).addTo(map);
+    map.fitBounds(bounds,{padding:[30,30]});
     _ndviMap=map;
     const cN=document.getElementById('ndvi-cn'),cR=document.getElementById('ndvi-cr'),op=document.getElementById('ndvi-op');
     if(cN)cN.onchange=e=>{if(!capaNdvi)return;e.target.checked?capaNdvi.addTo(map):capaNdvi.remove();};
     if(cR)cR.onchange=e=>{if(!capaRgb)return;e.target.checked?capaRgb.addTo(map):capaRgb.remove();};
     if(op)op.oninput=e=>{const o=e.target.value/100;if(capaNdvi)capaNdvi.setOpacity(o);if(capaRgb)capaRgb.setOpacity(o);};
-    setTimeout(()=>map.invalidateSize(),120);
-  },350);
+    // re-render tras la animación del drawer (varias pasadas para asegurar)
+    [150,400,700].forEach(t=>setTimeout(()=>{try{map.invalidateSize();map.fitBounds(bounds,{padding:[30,30]});}catch(e){}},t));
+  };
+  setTimeout(arranca,250);
 }
 
 
