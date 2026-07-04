@@ -966,17 +966,21 @@ function openZona(znId){
         ${ficha.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
       </div></div>`;
 
-  const cultivo=nd?`<div class="d-section">
+  const mp=G.mapas[znId];
+  // NDVI/Kc: preferir ndvi_registros (trae historial); si no hay, usar el de la imagen (ndvi_imagenes)
+  const ndviVal=nd?nd.ndvi:(mp&&mp.ndvi!=null?Number(mp.ndvi):null);
+  const kcVal=nd?nd.kc:(mp&&mp.kc!=null?Number(mp.kc):null);
+  const tieneHist=nd&&nd.hist&&nd.hist.length>0;
+  const cultivo=(ndviVal!=null)?`<div class="d-section">
       <div class="d-section-t">Estado del cultivo</div>
       <div class="d-grid2">
-        <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${nd.ndvi.toFixed(3)}</div></div>
-        <div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${nd.kc.toFixed(2)}</div></div>
+        <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${ndviVal.toFixed(3)}</div></div>
+        ${kcVal!=null?`<div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${kcVal.toFixed(2)}</div></div>`:''}
       </div>
-      <div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
-      <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>
+      ${tieneHist?`<div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
+      <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>`:''}
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
-  const mp=G.mapas[znId];
   const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
 
   const mapaHtml=hayMapa?`<div class="d-section">
