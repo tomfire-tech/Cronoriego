@@ -373,6 +373,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-badge.aju{background:#FFF7ED;color:var(--z2);}
 .est-badge.cri{background:#FEF2F2;color:var(--red);}
 .est-tbl-scroll{max-height:440px;overflow-y:auto;border-radius:8px;}
+.est-tbl-scroll-x{overflow-x:auto;}
+.est-tbl-wide{min-width:720px;}
 .bn-scroll{overflow-x:auto;}
 .bn-scroll .est-tbl{min-width:680px;}
 .bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:12px 18px;white-space:nowrap;text-align:center;font-size:12.5px;}
@@ -416,7 +418,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v12</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v13</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -504,10 +506,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
     <div class="est-grid">
-      <div class="est-card chart">
-        <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
-        <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta planificada y aporte de lluvia por semana</div>
-        <div class="est-chart-box"><canvas id="estChart"></canvas></div>
+      <div class="est-col">
+        <div class="est-card chart">
+          <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
+          <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta planificada y aporte de lluvia por semana</div>
+          <div class="est-chart-box"><canvas id="estChart"></canvas></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Detalle semanal del estanque</div>
+          <div class="est-tbl-scroll est-tbl-scroll-x"><table class="est-tbl est-tbl-wide" id="estTabla"></table></div>
+        </div>
       </div>
       <div class="est-side">
         <div class="est-card">
@@ -519,10 +527,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
           <div id="estStats"></div>
         </div>
       </div>
-    </div>
-    <div class="est-card">
-      <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Detalle semanal del estanque</div>
-      <div class="est-tbl-scroll"><table class="est-tbl" id="estTabla"></table></div>
     </div>
   </div>
 </div>
@@ -1156,7 +1160,7 @@ function rCalF(){
   let th=`<thead><tr><th class="th-zona" style="padding-bottom:12px">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px"><div class="th-num">${d.getDate()}</div><div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
   let tb='<tbody>';
   G.zonas.forEach((z,i)=>{const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];
-    tb+=`<tr style="height:96px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
+    tb+=`<tr style="height:96px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona" style="cursor:pointer"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
       <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
     dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
       if(evs&&evs.length){const e=evs[0];
