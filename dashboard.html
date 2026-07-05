@@ -1425,35 +1425,30 @@ const bnRefLines={id:'bnRefLines',beforeDatasetsDraw(chart){
   ctx.restore();
 }};
 function bnChartGrupo(nutrientes,canvasId,chartKey){
+  const VMAX=150; // tope visual del radar (los valores reales van en tooltip/etiqueta)
   const labels=nutrientes.map(n=>n.k);
-  const data=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
-  // paleta sobria: barra gris azulada; acento solo si está fuera de rango
-  const base='#64748B';
-  const colors=nutrientes.map(n=>{const a=bnAvg(n);if(a==null)return '#E2E8F0';if(a>120)return '#D97706';if(a<80)return '#B91C1C';return base;});
-  const hovers=nutrientes.map(n=>{const a=bnAvg(n);if(a==null)return '#CBD5E1';if(a>120)return '#B45309';if(a<80)return '#991B1B';return '#475569';});
+  const raw=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
+  const vis=raw.map(v=>Math.min(v,VMAX));
   if(GB[chartKey])GB[chartKey].destroy();
   const ctx=document.getElementById(canvasId).getContext('2d');
-  GB[chartKey]=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'Cobertura (%)',data,
-      backgroundColor:colors,hoverBackgroundColor:hovers,
-      borderRadius:{topLeft:4,topRight:4},borderSkipped:'bottom',
-      maxBarThickness:34,categoryPercentage:.68,barPercentage:.9}]},
+  GB[chartKey]=new Chart(ctx,{type:'radar',
+    data:{labels,datasets:[
+      {label:'Rango adecuado',data:labels.map(()=>120),borderColor:'rgba(22,163,74,.22)',backgroundColor:'rgba(22,163,74,.05)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:true,order:2},
+      {label:'Cobertura',data:vis,borderColor:'#16A34A',backgroundColor:'rgba(22,163,74,.12)',borderWidth:2,pointBackgroundColor:'#fff',pointBorderColor:'#16A34A',pointBorderWidth:2,pointRadius:3.2,pointHoverRadius:5.5,fill:true,order:1}
+    ]},
     options:{responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:8}},
       plugins:{legend:{display:false},
-        tooltip:{backgroundColor:'#0F172A',titleFont:{size:12,weight:'600'},bodyFont:{size:12},
-          padding:10,cornerRadius:8,displayColors:false,
+        tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,displayColors:false,titleFont:{size:12,weight:'700'},bodyFont:{size:12},
+          filter:i=>i.datasetIndex===1,
           callbacks:{
-            label:c=>`Cobertura: ${c.parsed.y}%`,
-            afterLabel:c=>{const v=c.parsed.y;return v>120?'Estado: excedente':v<80?'Estado: déficit':'Estado: en rango';}
+            title:items=>{const n=nutrientes[items[0].dataIndex];return n?n.k:'';},
+            label:c=>{const rv=raw[c.dataIndex];const st=rv>120?'Exceso':rv<80?'Déficit':'Óptimo';return [`Cobertura: ${rv}%`,`Estado: ${st}`];}
           }}},
-      scales:{
-        y:{beginAtZero:true,suggestedMax:170,border:{display:false},
-          grid:{color:'#EEF2F6',drawTicks:false},
-          ticks:{font:{size:10},color:'#94A3B8',padding:6,callback:v=>v+'%',maxTicksLimit:6}},
-        x:{border:{display:false},grid:{display:false},
-          ticks:{font:{size:12,weight:'600'},color:'#334155'}}}},
-    plugins:[bnRefLines]
+      scales:{r:{min:0,max:VMAX,beginAtZero:true,
+        ticks:{stepSize:50,showLabelBackdrop:false,color:'#A3AEC0',font:{size:9},callback:v=>v+'%'},
+        angleLines:{color:'#E2E8F0'},grid:{color:'#E8EDF3'},
+        pointLabels:{color:'#3F506A',font:{size:12,weight:'700'},
+          callback:(label,index)=>[label, (raw[index]!=null?raw[index]+'%':'—')]}}}}
   });
 }
 function bnChart(){
