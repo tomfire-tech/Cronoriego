@@ -1,1514 +1,416 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CronoRiego</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<style>
-:root{
-  --z0:#2563EB;--z0l:#EFF6FF;--z0m:#BFDBFE;
-  --z1:#16A34A;--z1l:#F0FDF4;--z1m:#BBF7D0;
-  --z2:#EA580C;--z2l:#FFF7ED;--z2m:#FED7AA;
-  --z3:#7C3AED;--z3l:#F5F3FF;--z3m:#DDD6FE;
-  --z4:#0891B2;--z4l:#ECFEFF;--z4m:#A5F3FC;
-  --z5:#DC2626;--z5l:#FEF2F2;--z5m:#FECACA;
-  --ink:#0F172A;--ink2:#334155;--muted:#64748B;--subtle:#94A3B8;
-  --line:#E2E8F0;--line2:#F1F5F9;--bg:#F8FAFC;--white:#FFFFFF;
-  --blue:#2563EB;--green:#16A34A;--amber:#D97706;--red:#DC2626;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.05);
-  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
-  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
-  --r-sm:8px;--r:12px;--r-lg:16px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;}
-.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-.hdr{height:58px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:50;box-shadow:var(--shadow-sm);}
-.logo{display:flex;align-items:center;gap:0;font-weight:800;font-size:16px;letter-spacing:-.3px;margin-right:4px;white-space:nowrap;}
-.hdr-sep{width:1px;height:24px;background:var(--line);flex-shrink:0;}
-.hdr-filters{display:flex;align-items:center;gap:8px;flex:1;}
-.sel-wrap{display:flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--line);border-radius:9px;background:var(--white);cursor:pointer;transition:all .15s;position:relative;}
-.sel-wrap:hover{border-color:#CBD5E1;box-shadow:var(--shadow-sm);}
-.sel-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
-.sel-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);white-space:nowrap;}
-.sel-wrap select{-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;outline:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);background:transparent;cursor:pointer;max-width:170px;padding-right:18px;}
-.sel-wrap::after{content:'';position:absolute;right:10px;top:50%;width:7px;height:7px;border-right:2px solid var(--subtle);border-bottom:2px solid var(--subtle);transform:translateY(-65%) rotate(45deg);pointer-events:none;}
-.dlbtn{display:flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid #BBF7D0;border-radius:9px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);color:#15803D;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .15s;box-shadow:var(--shadow-sm);white-space:nowrap;}
-.dlbtn i{font-size:15px;}
-.dlbtn:hover{background:linear-gradient(135deg,#DCFCE7,#BBF7D0);border-color:#86EFAC;box-shadow:var(--shadow);transform:translateY(-1px);}
-.dlbtn:active{transform:translateY(0);}
-.dlbtn:disabled{opacity:.6;cursor:wait;transform:none;}
-.sel-wrap select option{background:var(--white);color:var(--ink);font-weight:500;padding:10px;}
-.sel-wrap select option:checked{background:#EFF6FF;color:var(--blue);font-weight:600;}
-.cd-val{font-size:12.5px;font-weight:600;color:var(--ink);max-width:175px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cd-menu{position:absolute;top:calc(100% + 7px);left:0;min-width:calc(100% + 20px);background:var(--white);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow-lg);padding:5px;z-index:300;display:none;max-height:300px;overflow-y:auto;}
-.cd-menu.open{display:block;animation:cdfade .12s ease;}
-@keyframes cdfade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.cd-item{padding:8px 11px;font-size:12.5px;font-weight:500;color:var(--ink2);border-radius:7px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;}
-.cd-item:hover{background:var(--line2);}
-.cd-item.sel{background:#EFF6FF;color:var(--blue);font-weight:600;}
-.cd-item.sel::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;}
-.cd-item:not(.sel)::before{content:'';width:6px;height:6px;flex-shrink:0;}
-.week-nav{display:flex;align-items:center;gap:2px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--white);font-size:12px;font-weight:600;gap:6px;}
-.week-nav button{border:none;background:none;cursor:pointer;color:var(--subtle);display:flex;align-items:center;padding:2px;border-radius:4px;transition:all .1s;}
-.week-nav button:hover{background:var(--line2);color:var(--ink);}
-.hdr-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
-.clim-badge{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--line2);border-radius:var(--r-sm);font-size:12px;font-weight:500;}
-.clim-badge i{font-size:14px;}
-.sem-badge{background:#EFF6FF;color:#1d4ed8;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid #BFDBFE;}
-.usr-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;background:var(--white);position:relative;transition:border-color .15s;}
-.usr-btn:hover{border-color:#94A3B8;}
-.avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#0891B2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-.usr-name{font-size:12px;font-weight:500;color:var(--ink2);}
-.usr-dd{position:absolute;right:0;top:calc(100%+6px);background:var(--white);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);min-width:180px;overflow:hidden;display:none;z-index:200;}
-.usr-dd.open{display:block;}
-.dd-btn{width:100%;text-align:left;padding:10px 14px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--ink2);transition:background .1s;}
-.dd-btn:hover{background:var(--line2);}
-.dd-btn.danger{color:var(--red);}
-.dd-sep{height:1px;background:var(--line);margin:2px 0;}
-.kpi-bar{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:0;background:var(--white);border-bottom:1px solid var(--line);flex-shrink:0;}
-.kpi-card{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
-.kpi-card:last-child{border-right:none;}
-.kpi-card:hover{background:#FAFBFC;}
-.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;}
-.kpi-ico{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
-.kpi-val{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
-.kpi-val.green{color:var(--green);}
-.kpi-val.blue{color:var(--blue);}
-.kpi-val.amber{color:var(--amber);}
-.kpi-val.red{color:var(--red);}
-.kpi-sub{font-size:11px;color:var(--muted);}
-.body{display:flex;gap:0;flex:1;overflow:hidden;min-height:0;}
-.cal-zone{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
-.cal-scroll{flex:1;overflow-y:auto;overflow-x:auto;padding:12px 16px 0;}
-.cal-tbl{width:100%;border-collapse:separate;border-spacing:0 5px;min-width:680px;}
-.cal-tbl thead tr th{padding:0 8px 8px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:2px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:10;}
-.cal-tbl thead tr th.th-zona{text-align:left;min-width:150px;width:150px;}
-.cal-tbl thead tr th.th-hoy{color:var(--blue);}
-.cal-tbl thead tr th .th-num{font-family:'Fraunces',serif;font-size:20px;font-weight:700;display:block;line-height:1;}
-.cal-tbl thead tr th.th-hoy .th-num{color:var(--blue);}
-.cal-tbl tbody tr{border-radius:var(--r);}
-.cal-tbl tbody tr td{padding:0;background:transparent;}
-.cal-tbl tbody tr td:first-child{border-radius:var(--r) 0 0 var(--r);}
-.cal-tbl tbody tr td:last-child{border-radius:0 var(--r) var(--r) 0;}
-.zona-td{padding:0;width:165px;min-width:165px;}
-.zona-pill{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;height:88px;display:flex;flex-direction:column;justify-content:center;gap:4px;box-shadow:var(--shadow-sm);cursor:pointer;transition:border-color .15s,box-shadow .15s;}
-.zona-pill:hover{border-color:var(--blue);box-shadow:var(--shadow-md);}
-.zona-head{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;color:var(--ink);}
-.zona-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
-.zona-esp{font-size:13px;color:var(--muted);padding-left:15px;line-height:1.3;}
-.zona-ndvi{font-size:12px;color:var(--subtle);padding-left:15px;margin-top:1px;}
-#ndvi-map{height:260px;width:100%;border-radius:12px;overflow:hidden;margin-top:6px;background:#eef1ef;z-index:1;}
-.ndvi-map-ctrl{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:10px;font-size:13px;color:var(--subtle);}
-.ndvi-map-ctrl label{display:flex;align-items:center;gap:6px;cursor:pointer;}
-.ndvi-map-ctrl input[type=checkbox]{accent-color:#1f7a3d;}
-.ndvi-map-ctrl input[type=range]{accent-color:#1f7a3d;width:90px;}
-.leaflet-container{font-family:inherit;}
-.dia-td{padding:3px;vertical-align:top;min-width:100px;}
-.dia-td.hoy-col .riego-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
-.dia-inner{height:88px;display:flex;align-items:center;justify-content:center;}
-.riego-card{width:100%;height:88px;border-radius:var(--r);padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
-.riego-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
-.riego-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-.rc-top{display:flex;align-items:center;justify-content:space-between;}
-.rc-tiempo{font-family:'Fraunces',serif;font-size:21px;font-weight:700;line-height:1;letter-spacing:-.3px;}
-.rc-ico{font-size:14px;}
-.rc-mid{display:flex;flex-direction:column;gap:1px;}
-.rc-mm{font-size:14px;font-weight:600;color:var(--ink2);}
-.rc-m3{font-size:12px;color:var(--muted);}
-.rc-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;align-self:flex-start;}
-.dia-empty{width:100%;height:88px;border-radius:var(--r);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--line);font-size:16px;}
-.franja{background:var(--white);border-top:2px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);box-shadow:0 -2px 12px rgba(0,0,0,.06);flex-shrink:0;}
-.franja-card{padding:16px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;transition:background .15s;}
-.franja-card:last-child{border-right:none;}
-.franja-card:hover{background:#FAFBFC;}
-.franja-top{display:flex;align-items:center;gap:7px;}
-.franja-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-.franja-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);}
-.franja-val{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1;color:var(--ink);letter-spacing:-.5px;}
-.franja-val.green{color:var(--green);}
-.franja-val.blue{color:var(--blue);}
-.franja-val.amber{color:var(--amber);}
-.franja-sub{font-size:12px;color:var(--muted);}
-.franja-dual{display:flex;gap:18px;margin-top:1px;}
-.fd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
-.fd-lbl.est{color:var(--green);}
-.fd-lbl.pron{color:var(--blue);}
-.panel{width:320px;border-left:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;flex-shrink:0;gap:0;overflow-y:auto;}
-.p-block{padding:16px;border-bottom:1px solid var(--line);background:var(--white);}
-.p-block.flex-auto{flex:1;overflow-y:auto;}
-.p-block.no-flex{flex-shrink:0;}
-.p-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:5px;}
-.p-title i{font-size:14px;}
-.prox-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--line2);align-items:flex-start;}
-.prox-item:last-child{border-bottom:none;}
-.prox-stripe{width:3px;border-radius:2px;min-height:44px;flex-shrink:0;margin-top:2px;}
-.prox-body{flex:1;min-width:0;}
-.prox-zona{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.prox-esp{font-size:12px;color:var(--muted);}
-.prox-fecha{font-size:12px;color:var(--subtle);margin-top:2px;}
-.prox-t{font-size:14px;font-weight:700;padding:5px 10px;border-radius:6px;white-space:nowrap;align-self:center;flex-shrink:0;}
-.alerta-card{border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px;border:1px solid transparent;display:flex;gap:8px;align-items:flex-start;}
-.alerta-card:last-child{margin-bottom:0;}
-.alerta-card.danger{background:#FEF2F2;border-color:#FECACA;color:#7F1D1D;}
-.alerta-card.warn{background:#FFFBEB;border-color:#FDE68A;color:#78350F;}
-.alerta-card.info{background:#EFF6FF;border-color:#BFDBFE;color:#1E3A5F;}
-.alerta-card.ok{background:#F0FDF4;border-color:#BBF7D0;color:#14532D;}
-.alerta-card.yellow{background:#FEFCE8;border-color:#FEF08A;color:#713F12;}
-.alerta-ico{font-size:16px;flex-shrink:0;margin-top:1px;}
-.alerta-t{font-size:13px;font-weight:700;line-height:1.3;}
-.alerta-s{font-size:12px;opacity:.8;margin-top:2px;}
-.res-tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.res-tbl th{color:var(--subtle);font-weight:600;padding:5px 8px;text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1.5px solid var(--line);}
-.res-tbl th:first-child{text-align:left;}
-.res-tbl td{padding:8px 8px;border-bottom:1px solid var(--line2);text-align:right;color:var(--ink2);font-size:13px;}
-.res-tbl td:first-child{text-align:left;display:flex;align-items:center;gap:5px;color:var(--ink);}
-.res-tbl tr.total-row td{font-weight:700;color:var(--ink);background:var(--line2);border-radius:0;}
-.res-tbl tr.total-row td:first-child{border-radius:4px 0 0 4px;}
-.res-tbl tr.total-row td:last-child{border-radius:0 4px 4px 0;}
-.res-src{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-.res-src.est{color:var(--green);}
-.res-src.pron{color:var(--blue);}
-.scrim{position:fixed;inset:0;background:rgba(15,23,42,.35);z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);}
-.scrim.open{opacity:1;pointer-events:auto;}
-.drawer{position:fixed;right:0;top:0;height:100%;width:min(520px,92vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
-.drawer.open{transform:translateX(0);}
-.dh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.dh-left .dt{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px;text-transform:capitalize;}
-.dh-left .ds{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px;}
-.dclose{border:none;background:var(--line2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;flex:none;transition:background .15s;}
-.dclose:hover{background:var(--line);}
-.db{padding:18px 22px;overflow-y:auto;flex:1;}
-.d-section{margin-bottom:20px;}
-.d-section-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line2);}
-.d-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.d-kpi{background:var(--line2);border-radius:var(--r-sm);padding:10px 12px;}
-.d-kpi .l{font-size:10px;color:var(--subtle);margin-bottom:3px;}
-.d-kpi .v{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--ink);}
-.d-kpi .v.g{color:var(--green);}
-.d-kpi .v.b{color:var(--blue);}
-.cmp-hd{display:flex;justify-content:flex-end;gap:8px;margin-bottom:6px;}
-.cmp-h{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
-.cmp-h.est{background:#F0FDF4;color:var(--green);border:1px solid #BBF7D0;}
-.cmp-h.pron{background:#EFF6FF;color:var(--blue);border:1px solid #BFDBFE;}
-.cmp-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px;}
-.cmp-row:last-child{border-bottom:none;}
-.cmp-k{color:var(--muted);}
-.cmp-vs{display:flex;gap:10px;}
-.ce{color:var(--green);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
-.cp{color:var(--blue);font-weight:700;min-width:80px;text-align:right;font-size:14px;}
-.ndvi-bars{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:6px;}
-.nb{flex:1;background:var(--green);border-radius:2px 2px 0 0;min-height:2px;transition:height .3s;}
-.nd{font-size:8px;color:var(--subtle);text-align:center;margin-top:2px;}
-.hero2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
-.hero-card{border-radius:12px;padding:14px 16px;border:1px solid transparent;}
-.hero-card.est{background:#F0FDF4;border-color:#BBF7D0;}
-.hero-card.pron{background:#EFF6FF;border-color:#BFDBFE;}
-.hero-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:4px;margin-bottom:6px;}
-.hero-card.est .hero-lbl{color:var(--green);}
-.hero-card.pron .hero-lbl{color:var(--blue);}
-.hero-big{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.5px;}
-.hero-card.est .hero-big{color:var(--green);}
-.hero-card.pron .hero-big{color:var(--blue);}
-.hero-sub{font-size:12px;color:var(--muted);margin-top:6px;}
-.cbox{border-radius:10px;padding:12px 14px;border:1px solid var(--line);}
-.cbox-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;color:var(--ink2);}
-.cbox-row:not(:last-child){border-bottom:1px solid rgba(0,0,0,.05);}
-.note{font-size:12px;color:var(--muted);background:var(--line2);border-radius:8px;padding:10px 12px;line-height:1.45;}
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
-.modal-ov.open{display:flex;}
-.modal-box{background:var(--white);border-radius:var(--r-lg);padding:26px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);}
-.m-t{font-family:'Fraunces',serif;font-size:18px;font-weight:700;margin-bottom:4px;}
-.m-s{font-size:12px;color:var(--muted);margin-bottom:18px;}
-.fl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:5px;margin-top:12px;}
-.fi-w{position:relative;}
-.fi{width:100%;padding:9px 36px 9px 11px;border:1.5px solid var(--line);border-radius:var(--r-sm);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s;}
-.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
-.eye{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--subtle);font-size:15px;}
-.req-i{font-size:11px;color:var(--subtle);display:flex;align-items:center;gap:5px;margin-top:3px;}
-.req-i.ok{color:var(--green);}
-.m-msg{font-size:11px;padding:8px 12px;border-radius:var(--r-sm);margin:10px 0;display:none;border:1px solid transparent;}
-.m-msg.ok{background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
-.m-msg.err{background:#FEF2F2;color:var(--red);border-color:#FECACA;}
-.btn-p{width:100%;margin-top:14px;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
-.btn-p:not(:disabled):hover{background:#1d4ed8;}
-.btn-p:disabled{opacity:.5;cursor:not-allowed;}
-.loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
-@media(max-width:1200px){.panel{width:260px;}}
-@media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
-/* ===== FERTIRRIEGO ===== */
-.tabs{height:42px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 20px;gap:2px;flex-shrink:0;}
-.tab{display:flex;align-items:center;gap:7px;padding:0 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
-.tab i{font-size:16px;}.tab:hover{color:var(--ink2);}
-.tab.active{color:var(--green);border-bottom-color:var(--green);}
-.view{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
-#view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
-#view-ferti .franja{grid-template-columns:repeat(3,1fr);}
-#view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
-#view-ferti .kpi-card{flex-direction:row;align-items:center;gap:13px;padding:14px 18px;}
-#view-ferti .kpi-ico{width:44px;height:44px;border-radius:11px;font-size:21px;}
-#view-ferti .kpi-val{font-size:26px;}
-#view-ferti .kpi-val.sm{font-size:19px;}
-.fc-prod{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ferti-card{width:100%;height:88px;border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
-.ferti-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-.fc-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-.fc-dosis{font-family:'Fraunces',serif;font-size:18px;font-weight:700;line-height:1;letter-spacing:-.3px;display:flex;align-items:center;gap:4px;}
-.fc-dosis span{font-size:11px;font-weight:600;color:var(--muted);font-family:'Inter';}
-.fc-foot{display:flex;align-items:center;justify-content:space-between;}
-.fc-time{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px;}
-.nut-grid{display:flex;align-items:flex-end;gap:11px;flex-wrap:wrap;}
-.nut-c{display:flex;flex-direction:column;gap:1px;}
-.nut-k{font-size:9px;font-weight:700;text-transform:uppercase;}
-.nut-v{font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap;}
-.nut-v small{font-size:10px;font-weight:500;color:var(--muted);}
-.nut-more{font-size:10px;color:var(--subtle);align-self:flex-end;padding-bottom:1px;}
-.franja-big{font-family:'Fraunces',serif;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.4px;}
-.bn-row{display:grid;grid-template-columns:34px 1fr 38px 52px;align-items:center;gap:8px;margin-bottom:9px;}
-.bn-row:last-child{margin-bottom:0;}
-.bn-k{font-size:11px;font-weight:700;}
-.bn-track{height:6px;border-radius:4px;background:var(--line2);position:relative;overflow:hidden;}
-.bn-fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;}
-.bn-over{position:absolute;top:0;bottom:0;right:0;border-radius:0 4px 4px 0;background:repeating-linear-gradient(45deg,var(--red),var(--red) 2px,#fff5 2px,#fff5 4px);}
-.bn-pct{font-size:11px;font-weight:700;color:var(--ink2);text-align:right;font-variant-numeric:tabular-nums;}
-.bn-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-align:center;}
-.bn-tag.exc{background:#FFF7ED;color:var(--z2);}
-.bn-tag.def{background:#FEFCE8;color:#A16207;}
-#view-ferti .alerta-card{border-radius:var(--r-sm);padding:9px 11px;margin-bottom:8px;border:1px solid transparent;display:flex;gap:9px;align-items:flex-start;color:var(--ink);}
-#view-ferti .alerta-card.warn{background:#FFF7ED;border-color:#FED7AA;}
-#view-ferti .alerta-card.def{background:#FEFCE8;border-color:#FEF08A;}
-#view-ferti .alerta-card.ok{background:#F0FDF4;border-color:#BBF7D0;}
-#view-ferti .alerta-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:0;}
-#view-ferti .alerta-t{font-size:12px;font-weight:700;line-height:1.3;color:var(--ink);}
-#view-ferti .alerta-s{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;opacity:1;}
-#view-ferti .prox-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);align-items:center;}
-#view-ferti .prox-item:last-child{border-bottom:none;}
-#view-ferti .prox-zona{font-size:13px;font-weight:700;}
-.prox-prod{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
-.prox-r{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
-.prox-dosis{font-size:13px;font-weight:700;}
-.dcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.dcard{border:1px solid var(--line);border-radius:var(--r);padding:13px;margin-bottom:14px;}
-.dcard-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);margin-bottom:9px;display:flex;align-items:center;gap:5px;}
-.dprod{font-family:'Fraunces',serif;font-size:20px;font-weight:700;line-height:1.1;}
-.dprod-sub{font-size:11px;color:var(--muted);margin-top:4px;}
-.naport{display:flex;gap:6px;flex-wrap:wrap;}
-.naport-c{flex:1;min-width:48px;text-align:center;padding:7px 4px;border-radius:7px;background:var(--line2);}
-.naport-k{font-size:10px;font-weight:700;}
-.naport-v{font-family:'Fraunces',serif;font-size:15px;font-weight:700;line-height:1.1;}
-.naport-u{font-size:9px;color:var(--muted);}
-.iny-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--line2);}
-.iny-row:last-child{border-bottom:none;}
-.iny-k{color:var(--muted);}.iny-v{font-weight:600;color:var(--ink2);}
-.btbl{width:100%;font-size:12px;border-collapse:collapse;}
-.btbl th{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--subtle);font-weight:600;text-align:left;padding:0 0 6px;}
-.btbl th:last-child{width:64px;}
-.btbl td{padding:5px 0;border-top:1px solid var(--line2);}
-.btbl td.r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
-.mini-track{height:5px;border-radius:3px;background:var(--line2);position:relative;overflow:hidden;}
-.mini-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;}
-.mini-over{position:absolute;top:0;bottom:0;right:0;background:repeating-linear-gradient(45deg,var(--red),var(--red) 2px,#fff5 2px,#fff5 4px);border-radius:0 3px 3px 0;}
-.reco{background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:12px;display:flex;gap:9px;}
-.reco-t{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
-.reco-s{font-size:11px;color:var(--ink2);line-height:1.45;}
-/* ===== DINAMICA ESTANQUE ===== */
-#view-estanque,#view-balance{overflow-y:auto;background:var(--bg);}
-.est-wrap{padding:14px 20px;display:flex;flex-direction:column;gap:14px;}
-#view-estanque .kpi-bar{grid-template-columns:repeat(2,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;max-width:640px;}
-#view-balance .kpi-bar{grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
-#view-estanque .kpi-card,#view-balance .kpi-card{flex-direction:row;align-items:center;gap:12px;padding:14px 16px;}
-#view-estanque .kpi-ico,#view-balance .kpi-ico{width:42px;height:42px;border-radius:10px;font-size:20px;}
-#view-estanque .kpi-val{font-size:23px;}
-#view-balance .kpi-val{font-size:23px;}
-.est-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
-.est-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);}
-.est-card.chart{display:flex;flex-direction:column;}
-.est-card-t{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
-.est-card-s{font-size:11px;color:var(--muted);margin-bottom:12px;}
-.est-chart-box{position:relative;height:340px;width:100%;}
-.est-side{display:flex;flex-direction:column;gap:14px;}
-.est-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
-.est-grid-bn{align-items:stretch;}
-.bn-side{height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:14px;}
-.bn-side .alerta-card:last-child{margin-bottom:0;}
-.est-rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px;}
-.est-rrow:last-child{border-bottom:none;}
-.est-rk{color:var(--muted);}
-.est-rv{font-weight:700;color:var(--ink2);}
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.gauge-box{position:relative;width:200px;height:120px;}
-.gauge-val{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1;}
-.gauge-lbl{font-size:11px;color:var(--muted);text-align:center;}
-.est-leg{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
-.est-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;}
-.est-leg-l{display:flex;align-items:center;gap:6px;color:var(--ink2);}
-.est-leg-dot{width:9px;height:9px;border-radius:50%;}
-.est-tbl{width:100%;border-collapse:collapse;font-size:12px;}
-.est-tbl thead th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;text-align:right;padding:9px 12px;background:var(--line2);position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line);}
-.est-tbl thead th:first-child{text-align:left;border-radius:6px 0 0 0;}
-.est-tbl thead th:last-child{border-radius:0 6px 0 0;}
-.est-tbl td{padding:8px 12px;border-bottom:1px solid var(--line2);text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums;}
-.est-tbl td:first-child{text-align:left;font-weight:700;color:var(--ink);}
-.est-tbl tbody tr:hover{background:#FAFBFC;}
-.est-tbl tbody tr:last-child td{border-bottom:none;}
-.est-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-block;}
-.est-badge.exc{background:#F5F3FF;color:#7C3AED;}
-.est-badge.hol{background:#EFF6FF;color:var(--blue);}
-.est-badge.ade{background:#F0FDF4;color:var(--green);}
-.est-badge.aju{background:#FFF7ED;color:var(--z2);}
-.est-badge.cri{background:#FEF2F2;color:var(--red);}
-.est-tbl-scroll{max-height:440px;overflow-y:auto;border-radius:8px;}
-.bn-scroll{overflow-x:auto;}
-.bn-scroll .est-tbl{min-width:680px;}
-.bn-scroll .est-tbl th,.bn-scroll .est-tbl td{padding:12px 18px;white-space:nowrap;text-align:center;font-size:12.5px;}
-.bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:8px;min-width:115px;}
-.bn-scroll .est-tbl tbody tr:nth-child(even){background:#FAFBFC;}
-.bn-scroll .est-tbl tbody tr:hover{background:#EFF6FF;}
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+CronoRiego · sync.py
+Lee pestañas del Google Sheet DASHBOARD (ya con los cálculos hechos) y
+SINCRONIZA a Supabase. Este script NO calcula nada: solo lee valores y los sube.
 
-</style>
-</head>
-<body><div class="app">
+Fuente de verdad del cálculo: el Sheet en Drive.
+Todas las tablas que carga este script vienen del DASHBOARD → prefijo sc_*.
 
-<div class="scrim" id="scrim" onclick="closeD()"></div>
-<aside class="drawer" id="drawer">
-  <div class="dh">
-    <div class="dh-left"><div class="dt" id="dt"></div><div class="ds" id="ds"></div></div>
-    <button class="dclose" onclick="closeD()"><i class="ti ti-x"></i></button>
-  </div>
-  <div class="db" id="db"></div>
-</aside>
+── Modo de sincronización ──────────────────────────────────────────────
+Cada job usa "delete-and-insert" acotado por un ámbito (scope):
+  1. Lee la pestaña del Sheet.
+  2. Detecta qué valores de 'scope' trae (p.ej. las zonas ZN-53..ZN-64).
+  3. BORRA en Supabase todas las filas de ESOS valores de scope.
+  4. INSERTA lo que trae el Sheet.
+Resultado: Supabase queda idéntico al Sheet para ese ámbito, sin filas
+huérfanas ("zombis") de fechas/productos viejos. No toca otros clientes,
+porque solo borra los valores de scope que vienen en el Sheet.
 
-<div class="modal-ov" id="mcl" onclick="if(event.target===this)closeCl()">
-  <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-      <div><div class="m-t">Cambiar contraseña</div><div class="m-s">Elige una contraseña segura de al menos 8 caracteres</div></div>
-      <button onclick="closeCl()" style="border:none;background:var(--line2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;"><i class="ti ti-x"></i></button>
-    </div>
-    <label class="fl">Nueva contraseña</label>
-    <div class="fi-w"><input type="password" id="pwa" class="fi" placeholder="Mínimo 8 caracteres" oninput="vCl()"><button class="eye" onclick="tv('pwa','ia')"><i class="ti ti-eye" id="ia"></i></button></div>
-    <label class="fl">Confirmar contraseña</label>
-    <div class="fi-w"><input type="password" id="pwb" class="fi" placeholder="Repite la contraseña" oninput="vCl()"><button class="eye" onclick="tv('pwb','ib')"><i class="ti ti-eye" id="ib"></i></button></div>
-    <div style="margin-top:10px;">
-      <div class="req-i" id="rlen"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Mínimo 8 caracteres</div>
-      <div class="req-i" id="rnum"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Al menos un número</div>
-      <div class="req-i" id="rmay"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Al menos una mayúscula</div>
-      <div class="req-i" id="rmat"><i class="ti ti-circle-dashed" style="font-size:10px"></i>Las contraseñas coinciden</div>
-    </div>
-    <div class="m-msg" id="cmsg"></div>
-    <button class="btn-p" id="bcl" onclick="saveCl()" disabled>Guardar contraseña</button>
-  </div>
-</div>
+Esto reemplaza el UPSERT anterior, que solo insertaba/actualizaba y dejaba
+huérfanas las filas cuya clave cambiaba (p.ej. al mover una fecha_evento).
 
-<header class="hdr">
-  <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span>
-  </div>
-  <div class="hdr-sep"></div>
-  <div class="hdr-filters">
-    <div class="sel-wrap">
-      <span class="sel-lbl">Predio</span>
-      <select id="sp" onchange="onPredio()"></select>
-    </div>
-    <div class="sel-wrap">
-      <span class="sel-lbl">Equipo</span>
-      <select id="se" onchange="onEquipo()"></select>
-    </div>
-    <div class="week-nav">
-      <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
-      <span id="wlbl" style="white-space:nowrap;display:flex;flex-direction:column;line-height:1.15;align-items:center"><span id="wlbl-sem" style="font-size:13px;font-weight:700;color:var(--ink)">Sem. —</span><span id="wlbl-fec" style="font-size:10px;color:var(--muted);font-weight:500">—</span></span>
-      <button onclick="chW(1)"><i class="ti ti-chevron-right"></i></button>
-    </div>
-  </div>
-  <div class="hdr-right">
-    <button class="dlbtn" id="dlEst" onclick="downloadEstacion()" title="Descargar datos de la estación (toda la temporada) en Excel"><i class="ti ti-download"></i>Estación</button>
-    <div class="clim-badge"><i class="ti ti-temperature" style="color:var(--amber)"></i><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">°C</span></div>
-    <div class="clim-badge"><i class="ti ti-cloud-rain" style="color:#0891b2"></i><span id="cl">—</span><span style="color:var(--subtle);font-size:11px">mm</span></div>
-    <div class="sem-badge" id="sbadge">Sem. —</div>
-    <div class="usr-btn" onclick="tgM(event)" id="ubtn">
-      <div class="avatar" id="uini">—</div>
-      <span class="usr-name" id="unm">—</span>
-      <i class="ti ti-chevron-down" style="font-size:11px;color:var(--subtle)"></i>
-      <div class="usr-dd" id="udd">
-        <button class="dd-btn" onclick="openCl()"><i class="ti ti-lock"></i>Cambiar contraseña</button>
-        <div class="dd-sep"></div>
-        <button class="dd-btn danger" onclick="logout()"><i class="ti ti-logout"></i>Cerrar sesión</button>
-      </div>
-    </div>
-  </div>
-</header>
-<div class="tabs">
-  <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego</div>
-  <div class="tab" id="tab-ferti" onclick="switchTab('ferti')"><i class="ti ti-flask-2"></i>Fertirriego</div>
-  <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet-filled"></i>Dinámica de Estanque</div>
-  <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
-</div>
-<div id="view-riego" class="view">
+Uso:
+    python sync.py --dry-run     # lee y muestra qué haría, sin escribir
+    python sync.py               # sincroniza todas las tablas
+    python sync.py --only ferti  # sincroniza solo un job
+    python sync.py --legacy-upsert   # (fallback) modo viejo: solo upsert, sin borrar
 
-<div class="kpi-bar" id="kpib">
-  <div class="kpi-card"><div class="loading" style="padding:0;font-size:12px">Cargando...</div></div>
-</div>
+Requisitos:
+    pip install gspread supabase python-dotenv
 
-<div class="body">
-  <div class="cal-zone">
-    <div class="cal-scroll">
-      <table class="cal-tbl" id="ctbl"><tbody><tr><td colspan="8" class="loading">Cargando datos de riego...</td></tr></tbody></table>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="p-block no-flex" id="pprox">
-      <div class="p-title"><i class="ti ti-calendar-event"></i>Próximos riegos</div>
-    </div>
-    <div class="p-block flex-auto" id="palertas">
-      <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
-    </div>
-    <div class="p-block no-flex" id="presum">
-      <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
-    </div>
-  </div>
-</div>
-</div><!-- /view-riego -->
+Variables de entorno (archivo .env junto a este script):
+    SUPABASE_URL          -> https://lmexinxdmkgexpthuosn.supabase.co
+    SUPABASE_SERVICE_KEY  -> service_role key (NO la anon)
+    GOOGLE_SA_JSON        -> ruta al .json del service account
+"""
 
-<div id="view-ferti" class="view" style="display:none">
-  <div class="scrim" id="fscrim" onclick="closeDF()"></div>
-  <aside class="drawer" id="fdrawer">
-    <div class="dh"><div class="dh-left"><div class="dt" id="fdt"></div><div class="ds" id="fds"></div></div>
-      <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
-    <div class="db" id="fdb"></div>
-  </aside>
-  <div class="body">
-    <div class="cal-zone">
-      <div class="cal-scroll"><table class="cal-tbl" id="fctbl"></table></div>
-      <div class="franja" id="ffranja"></div>
-    </div>
-    <div class="panel">
-      <div class="p-block" id="fpprox"></div>
-      <div class="p-block" id="fpprod"></div>
-    </div>
-  </div>
-</div>
-<div id="view-estanque" class="view" style="display:none">
-  <div class="est-wrap">
-    <div class="kpi-bar" id="estkpi"></div>
-    <div class="est-grid">
-      <div class="est-card chart">
-        <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
-        <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta planificada y aporte de lluvia por semana</div>
-        <div class="est-chart-box"><canvas id="estChart"></canvas></div>
-      </div>
-      <div class="est-side">
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
-          <div id="estResumen"></div>
-        </div>
-      </div>
-    </div>
-    <div class="est-card">
-      <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Detalle semanal del estanque</div>
-      <div class="est-tbl-scroll"><table class="est-tbl" id="estTabla"></table></div>
-    </div>
-  </div>
-</div>
-<div id="view-balance" class="view" style="display:none">
-  <div class="est-wrap">
-    <div class="kpi-bar" id="bnkpi"></div>
-    <div class="est-grid est-grid-bn">
-      <div class="est-col">
-        <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Macronutrientes — cobertura promedio del predio</div>
-          <div class="est-card-s">Primarios (N, P₂O₅, K₂O) y secundarios (Ca, Mg, S) · Objetivo 100% · Rango adecuado 80–120%</div>
-          <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance de macronutrientes por zona</div>
-          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMacro"></table></div>
-        </div>
-        <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes — cobertura promedio del predio</div>
-          <div class="est-card-s">Oligoelementos (Zn, Mn, Fe, Cu, B) · Objetivo 100% · Rango adecuado 80–120%</div>
-          <div class="est-chart-box"><canvas id="bnChartMicro"></canvas></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Balance de micronutrientes por zona</div>
-          <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMicro"></table></div>
-        </div>
-      </div>
-      <div class="est-side bn-side">
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
-          <div id="bnResumen"></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-bell" style="color:var(--z2)"></i>Alertas nutricionales</div>
-          <div id="bnAlertas"></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-trending-down" style="color:var(--red)"></i>Zonas con menor cobertura</div>
-          <div id="bnZonas"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div><!-- /app -->
+import os
+import sys
+import argparse
+import datetime as dt
+from pathlib import Path
 
-<script>
-const SU='https://lmexinxdmkgexpthuosn.supabase.co';
-const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
-const {createClient}=supabase;
-const db=createClient(SU,SK);
+import gspread
+from supabase import create_client
 
-const ZC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626'];
-const ZL=['#EFF6FF','#F0FDF4','#FFF7ED','#F5F3FF','#ECFEFF','#FEF2F2'];
-const ZM=['#BFDBFE','#BBF7D0','#FED7AA','#DDD6FE','#A5F3FC','#FECACA'];
-const DS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const DSS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-const MS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const MSS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).with_name('.env'))
+except ImportError:
+    pass
 
-let G={rsId:null,zonas:[],scDia:[],ndvi:{},mapas:{},off:0};
+# ─────────────────────────────────────────────────────────────
+# CONFIG
+# ─────────────────────────────────────────────────────────────
+SHEET_ID = "1T7NJ52-dAZvcwpAVtwA6Irnrk4K3_Tw3SyAzqtL2nHw"
+BATCH = 500          # tamaño de lote para insert
+DELETE_IN_CHUNK = 200  # cuántos valores de scope por sentencia DELETE (.in_)
 
-function hm(h){const f=parseFloat(h);if(!f||f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00min`:`${hh}h ${String(mm).padStart(2,'0')}min`;}
-function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
-function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h);l.setDate(h.getDate()-(dw-1)+(o*7));l.setHours(0,0,0,0);return l;}
-function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
-function fs(d){return d.toISOString().slice(0,10);}
+# ── Mapeos por pestaña: encabezado del Sheet -> columna de Supabase ──
 
-async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='login.html';return null;}return session;}
-async function logout(){await db.auth.signOut();window.location.href='login.html';}
-
-function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
-document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
-
-function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
-function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl-sem').textContent=`Sem. ${nw}`;document.getElementById('wlbl-fec').textContent=`${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;document.getElementById('sbadge').textContent=`Sem. ISO ${nw}`;}
-
-function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
-function closeCl(){document.getElementById('mcl').classList.remove('open');}
-function tv(id,ico){const i=document.getElementById(id),ic=document.getElementById(ico);i.type=i.type==='password'?'text':'password';ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';}
-function sR(id,ok){const el=document.getElementById(id);if(!el)return;el.className='req-i'+(ok?' ok':'');const ic=el.querySelector('i');ic.className=ok?'ti ti-circle-check':'ti ti-circle-dashed';ic.style.fontSize='10px';}
-function vCl(){const a=document.getElementById('pwa').value,b=document.getElementById('pwb').value;const l=a.length>=8,n=/[0-9]/.test(a),m=/[A-Z]/.test(a),x=a===b&&a.length>0;sR('rlen',l);sR('rnum',n);sR('rmay',m);sR('rmat',x);document.getElementById('bcl').disabled=!(l&&n&&m&&x);}
-async function saveCl(){const pw=document.getElementById('pwa').value;const btn=document.getElementById('bcl'),msg=document.getElementById('cmsg');btn.disabled=true;btn.textContent='Guardando...';const {error}=await db.auth.updateUser({password:pw});msg.style.display='block';if(error){msg.className='m-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar contraseña';}else{msg.className='m-msg ok';msg.textContent='✓ Contraseña actualizada correctamente';btn.textContent='✓ Listo';setTimeout(()=>closeCl(),1600);}}
-
-function openD(t,s,h){document.getElementById('dt').textContent=t;document.getElementById('ds').innerHTML=s;document.getElementById('db').innerHTML=h;document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');}
-function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();}});
-
-async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
-async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
-async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí');return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
-async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
-async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
-async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
-
-async function init(){
-  const ses=await chkAuth();if(!ses)return;
-  updW();
-  const em=ses.user.email;
-  document.getElementById('unm').textContent=em.split('@')[0];
-  document.getElementById('uini').textContent=em[0].toUpperCase();
-  const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
-  G.rsId=u?.[0]?.id_rs||null;
-  if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
-  const ps=await qP(G.rsId);
-  const sp=document.getElementById('sp');
-  sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre} (${p.id_predio})</option>`).join('');
-  if(ps.length)await onPredio();
-}
-async function onPredio(){
-  const prId=document.getElementById('sp').value;
-  const es=await qE(prId);
-  const se=document.getElementById('se');
-  se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre} (${e.id_equipo})</option>`).join(''):'<option>Sin equipos</option>';
-  if(es.length)await onEquipo();
-}
-async function onEquipo(){
-  const eqId=document.getElementById('se').value;
-  G.zonas=await qZ(eqId);
-  if(G.zonas.length)await loadRender();
-}
-async function loadRender(){
-  const eqId=document.getElementById('se').value;
-  const dias=semDias(G.off);
-  const fi=fs(dias[0]),ff=fs(dias[6]);
-  const znIds=G.zonas.map(z=>z.id_zona);
-  const [sc,ndvi,sem,mapas]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds)]);
-  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;
-  rKpi(dias,sc,sem);
-  rCal(dias,sc);
-  rPanel(dias,sc,ndvi);
+MAP_DIARIA = {
+    'ID Zona': 'id_zona', 'ID Predio': 'id_predio', 'ID Estacion': 'id_estacion',
+    'ID Equipo': 'id_equipo', 'Fecha': 'fecha', 'Número Semana': 'numero_semana',
+    'ETo Estación Promedio 3 ultimos años (mm/día)': 'eto_estacion_promedio_3_ultimos_anos_mm_dia',
+    'ETo Estación (mm/día)': 'eto_estacion_mm_dia', 'ETo Pronóstico (mm/día)': 'eto_pronostico_mm_dia',
+    'NDVI': 'ndvi', 'Formula Kc': 'formula_kc', 'Coef a': 'coef_a', 'Coef b': 'coef_b', 'Kc': 'kc',
+    'Origen Kc': 'origen_kc', 'Kr': 'kr',
+    'ETc Estación Promedio 3 ultimos años (mm/día)': 'etc_estacion_promedio_3_ultimos_anos_mm_dia',
+    'ETc Estación (mm/día)': 'etc_estacion_mm_dia', 'ETc Pronóstico (mm/día)': 'etc_pronostico_mm_dia',
+    'Lluvia Estación (mm/día)': 'lluvia_estacion_mm_dia', 'Lluvia Pronóstico (mm/día)': 'lluvia_pronostico_mm_dia',
+    'Lluvia Efectiva Estacion (mm/día)': 'lluvia_efectiva_estacion_mm_dia',
+    'Lluvia Retenida Estación (mm/día)': 'lluvia_retenida_estacion_mm_dia',
+    'Lluvia Efectiva Pronostico (mm/día)': 'lluvia_efectiva_pronostico_mm_dia',
+    'Lluvia Retenida Pronóstico (mm/día)': 'lluvia_retenida_pronostico_mm_dia',
+    'Fracción de Lavado - LR (Decimal)': 'fraccion_de_lavado_lr_decimal',
+    'Lamina Neta Estación Promedio 3 ultimos años (mm/día)': 'lamina_neta_estacion_promedio_3_ultimos_anos_mm_dia',
+    '% Deficit Hidrico Controlado': 'deficit_hidrico_controlado',
+    'Lámina Neta Estación (mm/día)': 'lamina_neta_estacion_mm_dia',
+    'Lámina Neta Pronóstico (mm/día)': 'lamina_neta_pronostico_mm_dia',
+    'Cálculo Umbral Riego (mm)': 'calculo_umbral_riego_mm',
+    'Lamina Neta Riego Estación (mm)': 'lamina_neta_riego_estacion_mm',
+    'Lamina Neta Riego Pronostico (mm)': 'lamina_neta_riego_pronostico_mm',
+    'Tiempo de riego Estación (Horas)': 'tiempo_de_riego_estacion_horas',
+    'Tiempo de riego Pronostico (Horas) ': 'tiempo_de_riego_pronostico_horas',
+    'Tiempo de riego Estación Promedio 3 ultimos años (Horas) ': 'tiempo_de_riego_estacion_promedio_3_ultimos_anos_horas',
+    'Lamina Neta Riego  Estación Promedio 3 ultimos años (mm)': 'lamina_neta_riego_estacion_promedio_3_ultimos_anos_mm',
+    'Volumen  Riego Estación (m3)': 'volumen_riego_estacion_m3',
+    'Volumen Riego Pronostico (m3)': 'volumen_riego_pronostico_m3',
+    'ID Razón Social': 'id_razon_social',
+    'Nombre de la Zona': 'nombre_zona',
 }
 
-function rKpi(dias,sc,sem){
-  const hoy=new Date();
-  const etoPorDia={},lluvPorDia={};
-  sc.forEach(r=>{
-    const e=parseFloat(r.eto_pronostico_mm_dia)||0;
-    if(e>0)(etoPorDia[r.fecha]=etoPorDia[r.fecha]||[]).push(e);
-    const ll=parseFloat(r.lluvia_pronostico_mm_dia);
-    if(!isNaN(ll))(lluvPorDia[r.fecha]=lluvPorDia[r.fecha]||[]).push(ll);
-  });
-  const promDia=o=>Object.values(o).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
-  const etoDiario=promDia(etoPorDia);
-  const etoSum=etoDiario.reduce((a,b)=>a+b,0);
-  const etoN=etoDiario.length;
-  const lluv=promDia(lluvPorDia).reduce((a,b)=>a+b,0);
-  const eMed=etoN?etoSum/etoN:0;
-  const temp=eMed>0?Math.round(eMed*5+8):null;
-  document.getElementById('ct').textContent=temp||'—';
-  document.getElementById('cl').textContent=lluv>0?lluv.toFixed(1):'0';
-
-  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
-  const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
-  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
-  let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
-  const ok=cob>=75;
-
-  document.getElementById('kpib').innerHTML=`
-  <div class="kpi-card">
-    <div class="kpi-top">
-      <div class="kpi-lbl">Estado hídrico</div>
-      <div class="kpi-ico" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'var(--green)':'var(--amber)'}"><i class="ti ti-droplet${ok?'':'-off'}"></i></div>
-    </div>
-    <div>
-      <div class="kpi-val ${ok?'green':'amber'}" style="font-size:15px;font-weight:800">${ok?'Agua disponible':'Verificar disponibilidad'}</div>
-      <div class="kpi-sub">${ok?'Sin restricciones esta semana':'Revisar zonas con déficit'}</div>
-    </div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div>
-    <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
-    <div class="kpi-sub">m³ estimados</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
-    <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
-    <div class="kpi-sub">mm evapotranspiración</div>
-  </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Energía estimada</div><div class="kpi-ico" style="background:#F5F3FF;color:var(--purple,#7C3AED)"><i class="ti ti-bolt"></i></div></div>
-    <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
-    <div class="kpi-sub">kWh esta semana</div>
-  </div>
-`;
+MAP_SEMANAL = {
+    'ID Equipo': 'id_equipo', 'ID Predio': 'id_predio', 'ID Estacion': 'id_estacion',
+    'Número Semana': 'numero_semana',
+    'Proyección Volumen agua semanal Estación Promedio 3 ultimos años (m3)': 'volumen_agua_semanal_estacion_m3',
+    'Proyección Costo KWH Promedio 3 ultimos años ($)': 'costo_kwh_estacion',
+    'Proyección Volumen agua semanal Estación (m3)': 'volumen_agua_semanal_pronostico_m3',
+    'Proyección Costo KWH Pronóstico ($)': 'costo_kwh_pronostico',
+    'Volumen Agua Real (m3)': 'volumen_agua_real_m3',
+    'Costo KWH Real ($)': 'costo_kwh_real',
 }
 
-function rCal(dias,sc){
-  const hoy=new Date();const hS=fs(hoy);
-  const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
-
-  let thead=`<thead><tr>
-    <th class="th-zona" style="padding-bottom:12px">Zona</th>
-    ${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px">
-      <div class="th-num">${d.getDate()}</div>
-      <div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div>
-    </th>`;}).join('')}</tr></thead>`;
-
-  let tbody='<tbody>';
-  G.zonas.forEach((z,zi)=>{
-    const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
-    const nd=G.ndvi[z.id_zona];
-    tbody+=`<tr style="height:96px;">
-      <td class="zona-td" style="padding:3px 6px 3px 0">
-        <div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona">
-          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||'Zona'}</div>
-          <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div>
-          <div class="zona-ndvi">${z.superficie_ha||'—'} ha${nd?` · NDVI ${nd.ndvi.toFixed(2)}`:''}</div>
-        </div>
-      </td>
-      ${dias.map(d=>{
-        const dS=fs(d);const eh=dS===hS;
-        const r=dm[z.id_zona]?.[dS];
-        const l=r?parseFloat(r.lamina_neta_riego_pronostico_mm)||0:0;
-        const t=r?parseFloat(r.tiempo_de_riego_pronostico_horas)||0:0;
-        const ha=parseFloat(z.superficie_ha)||0;
-        const vol=l>0?Math.round(l*ha*10):0;
-
-        if(l>0&&hm(t)){
-          return`<td class="dia-td${eh?' hoy-col':''}">
-            <div class="dia-inner">
-              <div class="riego-card" style="background:${cl};border-color:${cm};--zc:${c}" onclick="openDia('${dS}','${z.id_zona}')">
-                <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
-                <div class="rc-top">
-                  <div class="rc-tiempo" style="color:${c}">${hm(t)}</div>
-                  <i class="ti ti-droplet rc-ico" style="color:${c};opacity:.6"></i>
-                </div>
-                <div class="rc-mid">
-                  <div class="rc-mm">${l.toFixed(0)} mm</div>
-                  ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
-                </div>
-              </div>
-            </div>
-          </td>`;
-        }
-        return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
-      }).join('')}
-    </tr>`;
-  });
-  tbody+='</tbody>';
-  document.getElementById('ctbl').innerHTML=thead+tbody;
+MAP_CALCULOS = {
+    'ID Zona': 'id_zona',
+    'Edad del Huerto (Años y Meses)': 'edad_huerto',
+    'Densidad de Plantación (Plantas/Ha)': 'densidad_plantacion_pl_ha',
+    'Número total de Árboles en la Zona': 'numero_arboles_zona',
+    'Cantidad de Emisores por Plantas': 'emisores_por_planta',
+    'Caudal Zona (m3/H)': 'caudal_zona_m3h',
+    'Intensidad de precipitacion Bruta (mm/h)': 'intensidad_precip_bruta_mmh',
+    'Intensidad de Precipitacion Neta (mm/h)': 'intensidad_precip_neta_mmh',
+    'Diámetro del Bulbo Húmedo - Dw (metros)': 'diametro_bulbo_humedo_m',
+    'Separación Máxima entre laterales (m)': 'separacion_max_laterales_m',
+    ' Ancho de la Banda (m)': 'ancho_banda_m',
+    'Porcentaje de Suelo Mojado (%)': 'porcentaje_suelo_mojado',
+    'Capacidad de Estanque de Suelo (mm)': 'capacidad_estanque_suelo_mm',
+    'ID Equipo': 'id_equipo',
+    'ID Predio': 'id_predio',
+    'ID Estacion': 'id_estacion',
+    'Descuento por infiltración superficial (mm)': 'descuento_infiltracion_superf_mm',
+    'Factor de eficiencia (%)': 'factor_eficiencia_pct',
+    'ID Razón Social': 'id_razon_social',
+    'Nombre de la Zona': 'nombre_zona',
+}
+MAP_RECOMENDACION = {
+    'ID Predio':'id_predio','ID Equipo':'id_equipo','ID Zona':'id_zona','Nombre Zona':'nombre_zona',
+    'Fecha Evento':'fecha_evento','Semana':'semana','Mes':'mes',
+    'Producto Asignado':'producto_asignado',
+    'Tiempo Riego (Hrs)':'tiempo_riego_hrs','Tiempo Fertirriego (Hrs)':'tiempo_fertirriego_hrs',
+    'Caudal Zona (m3/H)':'caudal_zona_m3h','Volumen Riego (m3)':'volumen_riego_m3',
+    'Concentración Ideal (gr/L)':'concentracion_ideal_grl',
+    'L/H Inyección':'lh_inyeccion','% Inyección':'pct_inyeccion','Ratio Inyección':'ratio_inyeccion',
+    'Dosis a Aplicar (Kg)':'dosis_aplicar_kg',
+    'Volumen de solucion madre a preparar':'volumen_sol_madre_l',
+    'Dosis del Producto en Estanque (Kg)':'dosis_producto_estanque_kg',
+    'N Aplicado (Kg)':'n_aplicado_kg','P2O5 Aplicado (Kg)':'p2o5_aplicado_kg','K2O Aplicado (Kg)':'k2o_aplicado_kg',
+    'Acumulado Producto (Kg)':'acumulado_producto_kg',
+    'Acumulado N (Kg)':'acumulado_n_kg','Acumulado P2O5 (Kg)':'acumulado_p2o5_kg','Acumulado K2O (Kg)':'acumulado_k2o_kg',
+    'Acumulado Total Zona (Kg)':'acumulado_total_productos_zona_kg',
+    'ID Razon Social': 'id_razon_social',
 }
 
-function rFranja(sc,ndvi){
-  let lamTP=0,volTP=0,tTP=0;let diasRiego=new Set();
-  G.zonas.forEach(z=>{
-    const ha=parseFloat(z.superficie_ha)||0;
-    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
-      const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-      lamTP+=lP; tTP+=tP; volTP+=lP*ha*10;
-      if(lP>0)diasRiego.add(r.fecha);
-    });
-  });
-  const nA=Object.values(ndvi).map(v=>v.ndvi).filter(v=>v>0);
-  const nP=nA.length?(nA.reduce((a,b)=>a+b,0)/nA.length).toFixed(2):null;
-  const eC=nP?parseFloat(nP)>=0.5?'Bueno':parseFloat(nP)>=0.3?'Regular':'Bajo':'—';
-  const eCol=nP?parseFloat(nP)>=0.5?'green':parseFloat(nP)>=0.3?'amber':'':'';
-  const mm=v=>v>0?v.toFixed(0):'—';
-  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
-  const hh=v=>hm(v)||'—';
-
-  document.getElementById('franja').innerHTML=`
-  <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Demanda total</div></div>
-    <div class="franja-val blue">${mm(lamTP)}</div>
-    <div class="franja-sub">mm lámina neta pronóstico</div>
-  </div>
-  <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div><div class="franja-lbl">Volumen a aplicar</div></div>
-    <div class="franja-val blue">${m3(volTP)}</div>
-    <div class="franja-sub">m³ en todas las zonas</div>
-  </div>
-  <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-clock"></i></div><div class="franja-lbl">Tiempo total</div></div>
-    <div class="franja-val" style="font-size:22px">${hh(tTP)}</div>
-    <div class="franja-sub">horas en el equipo</div>
-  </div>
-  <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-calendar-check"></i></div><div class="franja-lbl">Días con riego</div></div>
-    <div class="franja-val">${diasRiego.size||'—'}</div>
-    <div class="franja-sub">días esta semana</div>
-  </div>
-  <div class="franja-card">
-    <div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-plant-2"></i></div><div class="franja-lbl">Estado del cultivo</div></div>
-    <div class="franja-val ${eCol}">${eC}</div>
-    <div class="franja-sub">${nP?'NDVI promedio '+nP:'Sin datos NDVI'}</div>
-  </div>`;
+MAP_BALANCE = {
+    'ID Razon Social':'id_razon_social','ID Predio':'id_predio','ID Zona':'id_zona','Nombre Zona':'nombre_zona',
+    'Superficie Total (Ha)':'superficie_total_ha','Textura':'textura','Rendimiento Esperado (Ton/Ha)':'rendimiento_esperado_ton_ha',
+    'Demanda Neta N (Kg/Zona)':'demanda_neta_n_kg_zona','Demanda Neta P2O5 (Kg/Zona)':'demanda_neta_p2o5_kg_zona','Demanda Neta K2O (Kg/Zona)':'demanda_neta_k2o_kg_zona',
+    'Mg Objetivo (ppm)':'mg_objetivo_ppm','Mg Actual (ppm)':'mg_actual_ppm','Demanda Neta Mg (Kg/Zona)':'demanda_neta_mg_kg_zona',
+    'Ca Objetivo (ppm)':'ca_objetivo_ppm','Ca Actual (ppm)':'ca_actual_ppm','Demanda Neta Ca (Kg/Zona)':'demanda_neta_ca_kg_zona',
+    'S Objetivo (ppm)':'s_objetivo_ppm','S Actual (ppm)':'s_actual_ppm','Demanda Neta S (Kg/Zona)':'demanda_neta_s_kg_zona',
+    'Zn Objetivo (ppm)':'zn_objetivo_ppm','Zn Actual (ppm)':'zn_actual_ppm','Demanda Neta Zn (Kg/Zona)':'demanda_neta_zn_kg_zona',
+    'Mn Objetivo (ppm)':'mn_objetivo_ppm','Mn Actual (ppm)':'mn_actual_ppm','Demanda Neta Mn (Kg/Zona)':'demanda_neta_mn_kg_zona',
+    'Fe Objetivo (ppm)':'fe_objetivo_ppm','Fe Actual (ppm)':'fe_actual_ppm','Demanda Neta Fe (Kg/Zona)':'demanda_neta_fe_kg_zona',
+    'Cu Objetivo (ppm)':'cu_objetivo_ppm','Cu Actual (ppm)':'cu_actual_ppm','Demanda Neta Cu (Kg/Zona)':'demanda_neta_cu_kg_zona',
+    'B Objetivo (ppm)':'b_objetivo_ppm','B Actual (ppm)':'b_actual_ppm','Demanda Neta B (Kg/Zona)':'demanda_neta_b_kg_zona',
+    'Demanda Cal Ajustada (Kg/Zona)':'demanda_cal_ajustada_kg_zona',
 }
 
-function rPanel(dias,sc,ndvi){
-  const hoy=new Date();const hS=fs(hoy);
-  const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
-
-  const prox=[];
-  dias.forEach(d=>{
-    const dS=fs(d);if(new Date(dS+'T00:00:00')<=hoy)return;
-    G.zonas.forEach((z,zi)=>{
-      const r=dm[z.id_zona]?.[dS];if(!r)return;
-      const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-      if(lP>0||tP>0)prox.push({z,d,r,zi});
-    });
-  });
-  document.getElementById('pprox').innerHTML=`
-    <div class="p-title"><i class="ti ti-calendar-event"></i>Próximos riegos</div>
-    ${prox.slice(0,5).map(p=>{
-      const c=ZC[p.zi%ZC.length];const t=hm(parseFloat(p.r.tiempo_de_riego_pronostico_horas));
-      return`<div class="prox-item">
-        <div class="prox-stripe" style="background:${c}"></div>
-        <div class="prox-body">
-          <div class="prox-zona">${p.z.nombre||'Zona'}</div>
-          <div class="prox-esp">${p.z.especie||'—'} ${p.z.variedad||''}</div>
-          <div class="prox-fecha">${DSS[p.d.getDay()]} ${p.d.getDate()} ${MSS[p.d.getMonth()]}</div>
-        </div>
-        ${t?`<div class="prox-t" style="background:${ZL[p.zi%ZL.length]};color:${c}">${t}</div>`:''}
-      </div>`;
-    }).join('')}
-    ${prox.length===0?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Sin riegos próximos esta semana</div>':''}`;
-
-  const als=[];
-  const maxE=Math.max(0,...sc.map(r=>parseFloat(r.eto_pronostico_mm_dia)||0));
-  if(maxE>6)als.push({cls:'warn',i:'ti-temperature-plus',t:'ETo alta pronosticada',s:`Máximo ${maxE.toFixed(1)} mm/día — aumenta la demanda hídrica`});
-  const _llDia={};sc.forEach(r=>{const v=parseFloat(r.lluvia_pronostico_mm_dia);if(!isNaN(v))(_llDia[r.fecha]=_llDia[r.fecha]||[]).push(v);});
-  const totL=Object.values(_llDia).map(a=>a.reduce((x,y)=>x+y,0)/a.length).reduce((a,b)=>a+b,0);
-  if(totL>15)als.push({cls:'info',i:'ti-cloud-rain',t:'Lluvia importante',s:`${totL.toFixed(1)} mm esta semana — considera suspender o reducir riego`});
-  G.zonas.forEach((z,zi)=>{
-    const nd=ndvi[z.id_zona];
-    if(nd&&nd.ndvi<0.3)als.push({cls:'danger',i:'ti-plant-off',t:`NDVI crítico — ${z.nombre||'Zona'}`,s:`NDVI ${nd.ndvi.toFixed(3)} — posible estrés hídrico severo`});
-    else if(nd&&nd.hist.length>=2){const diff=(nd.hist[0].ndvi-nd.hist[1].ndvi)/Math.max(nd.hist[1].ndvi,.001)*100;if(diff<-10)als.push({cls:'yellow',i:'ti-trending-down',t:`NDVI disminuyendo — ${z.nombre||'Zona'}`,s:`Bajó ${Math.abs(diff).toFixed(1)}% vs semana anterior`});}
-  });
-  if(als.length===0)als.push({cls:'ok',i:'ti-circle-check',t:'Sin alertas activas',s:'Todo dentro de parámetros normales'});
-  document.getElementById('palertas').innerHTML=`
-    <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
-    ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
-
-  const res=G.zonas.map((z,zi)=>{
-    let lP=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
-    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
-      lP+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      tP+=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-    });
-    return{z,zi,lP,tP,vP:lP*ha*10};
-  });
-  const tot={lP:0,tP:0,vP:0};
-  res.forEach(r=>{tot.lP+=r.lP;tot.tP+=r.tP;tot.vP+=r.vP;});
-  const mm=v=>v>0?v.toFixed(0):'—';
-  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
-  const hh=v=>hm(v)||'—';
-  document.getElementById('presum').innerHTML=`
-    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal · pronóstico</div>
-    <table class="res-tbl">
-      <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
-      <tbody>
-        ${res.map(r=>`<tr>
-          <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||'Zona'}</td>
-          <td>${mm(r.lP)}</td>
-          <td>${hh(r.tP)}</td>
-          <td>${m3(r.vP)}</td>
-        </tr>`).join('')}
-        <tr class="total-row">
-          <td>Total equipo</td>
-          <td>${mm(tot.lP)}</td>
-          <td>${hh(tot.tP)}</td>
-          <td>${m3(tot.vP)}</td>
-        </tr>
-      </tbody>
-    </table>`;
+MAP_DINAMICA_ESTANQUE = {
+    'ID Razon Social':'id_razon_social',
+    'ID Predio':'id_predio',
+    'ID Estanque':'id_estanque',
+    'Nombre Estanque':'nombre_estanque',
+    'Numero Semana':'numero_semana',
+    'Oferta Planificada':'oferta_planificada_m3',
+    'Oferta Extraíble Base (m3)':'oferta_extraible_base_m3',
+    'Aporte Lluvia Semanal (m3)':'aporte_lluvia_semanal_m3',
+    'Demanda promedio 3 ultimos años':'demanda_promedio_3a_m3',
+    'Balance (m3)':'balance_m3',
+    'Cobertura (%)':'cobertura_pct',
 }
 
-function openDia(fecha,znId){
-  const r=G.scDia.find(d=>d.fecha===fecha&&d.id_zona===znId);
-  const z=G.zonas.find(zz=>zz.id_zona===znId);
-  if(!r||!z)return;
-  const dt=new Date(fecha+'T00:00:00');
-  const tit=`${DS[dt.getDay()]} ${dt.getDate()} de ${MS[dt.getMonth()]}`;
-  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
-  const ha=parseFloat(z.superficie_ha)||0;
-  const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-  const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
-  const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
-  const cP=parseFloat(r.etc_pronostico_mm_dia)||0;
-  const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
-  const llR=parseFloat(r.lluvia_retenida_pronostico_mm_dia)||0;
-  const volP=lP>0?Math.round(lP*ha*10):0;
+# columnas que en Supabase son texto/ID (limpiar 7.0 -> "7"); el resto va como número.
+TEXT_COLS = {
+    'id_zona', 'id_predio', 'id_estacion', 'id_equipo', 'id_razon_social',
+    'numero_semana', 'formula_kc', 'origen_kc', 'edad_huerto', 'nombre_zona',
+    'producto_asignado', 'semana', 'mes', 'textura', 'ratio_inyeccion',
+    'id_estanque', 'nombre_estanque',
+}
+DATE_COLS = {'fecha', 'fecha_evento'}
 
-  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · Pronóstico`;
-
-  const num=(v,dec=2,s='')=>v>0?v.toFixed(dec)+s:'—';
-
-  const hero=`<div class="hero2" style="grid-template-columns:1fr">
-    <div class="hero-card pron">
-      <div class="hero-lbl"><i class="ti ti-satellite"></i> Riego pronosticado</div>
-      <div class="hero-big">${hm(tP)||'—'}</div>
-      <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
-    </div>
-  </div>`;
-
-  const detalle=`<div class="d-section">
-      <div class="d-section-t">Detalle del riego</div>
-      <div class="d-grid2">
-        <div class="d-kpi"><div class="l">Tiempo de riego</div><div class="v b">${hm(tP)||'—'}</div></div>
-        <div class="d-kpi"><div class="l">Lámina neta</div><div class="v b">${num(lP,1,' mm')}</div></div>
-        <div class="d-kpi"><div class="l">Volumen</div><div class="v b">${volP>0?volP.toLocaleString('es-CL')+' m³':'—'}</div></div>
-        <div class="d-kpi"><div class="l">Superficie</div><div class="v">${z.superficie_ha||'—'} ha</div></div>
-      </div></div>`;
-
-  const meteo=`<div class="d-section">
-      <div class="d-section-t">Meteorología pronosticada</div>
-      <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="cp">${num(eP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="cp">${num(cP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="cp">${num(llP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
-    </div>`;
-
-  const html=`${hero}${detalle}${meteo}`;
-  openD(tit,sub,html);
+# ── Definición de jobs: cada pestaña del DASHBOARD -> su tabla Supabase ──
+#
+# 'keys'   : clave lógica de fila (se usa para de-duplicar lo que trae el Sheet).
+# 'scope'  : columna por la que se BORRA antes de insertar. Debe ser una columna
+#            SIEMPRE poblada y estable (típicamente un id_*). Se borran en Supabase
+#            todos los valores de scope presentes en el Sheet, y luego se inserta.
+#            Elegimos id_zona / id_estanque / id_equipo porque nunca cambian al
+#            editar fechas o productos (a diferencia de la clave, que sí cambia).
+JOBS = {
+    'diaria': {
+        'tab': 'DEMANDA HIDRICA DIARIA ZONA',
+        'table': 'sc_demanda_hidrica_diaria_zona',
+        'conflict': 'id_zona,fecha',
+        'keys': ('id_zona', 'fecha'),
+        'scope': 'id_zona',
+        'map': MAP_DIARIA,
+    },
+    'semanal': {
+        'tab': 'DEMANDA HIDRICA SEMANAL EQUIPO',   # ojo: espacio final en el nombre real
+        'table': 'sc_demanda_hidrica_semanal_equipo',
+        'conflict': 'id_equipo,numero_semana',
+        'keys': ('id_equipo', 'numero_semana'),
+        'scope': 'id_equipo',
+        'map': MAP_SEMANAL,
+    },
+    'calculos': {
+        'tab': 'CALCULOS ESTATICOS',
+        'table': 'sc_calculos_estaticos_zona',
+        'conflict': 'id_zona',
+        'keys': ('id_zona',),
+        'scope': 'id_zona',
+        'map': MAP_CALCULOS,
+    },
+    'ferti': {
+        'tab': 'DASHBOARD - RECOMENDACION FERTIRRIEGO',
+        'table': 'sc_recomendacion_ferti',
+        'conflict': 'id_zona,fecha_evento,producto_asignado',
+        'keys': ('id_zona', 'fecha_evento', 'producto_asignado'),
+        'scope': 'id_zona',
+        'map': MAP_RECOMENDACION,
+    },
+    'balance': {
+        'tab': 'DASHBOARD - BALANCE NUTRICIONAL',
+        'table': 'sc_balance_nutricional',
+        'conflict': 'id_zona',
+        'keys': ('id_zona',),
+        'scope': 'id_zona',
+        'map': MAP_BALANCE,
+    },
+    'dinamica_estanque': {
+        'tab': 'DINAMICA ESTANQUE',
+        'table': 'sc_dinamica_estanque',
+        'conflict': 'id_estanque,numero_semana',
+        'keys': ('id_estanque', 'numero_semana'),
+        'scope': 'id_estanque',
+        'map': MAP_DINAMICA_ESTANQUE,
+    },
 }
 
-function openZona(znId){
-  const z=G.zonas.find(zz=>zz.id_zona===znId);
-  if(!z)return;
-  const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
-  const nd=G.ndvi[znId];
-  const tit=z.nombre||'Zona';
-  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.especie||''} ${z.variedad||''} · ${z.superficie_ha||'—'} ha`;
-
-  const fmtF=v=>{if(!v)return null;const s=String(v).slice(0,10);const p=s.split('-');return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:s;};
-  const u=(v,suf='')=>(v!==undefined&&v!==null&&v!=='')?v+suf:null;
-  const ficha=[
-    ['Especie',z.especie],
-    ['Variedad',z.variedad],
-    ['Superficie',u(z.superficie_ha,' ha')],
-    ['Tipo de riego',z.tipo_riego],
-    ['Fecha de plantación',fmtF(z.fecha_plantacion)],
-    ['Textura',z.textura],
-    ['Tipo de clima',z.tipo_clima],
-    ['Sombra',u(z.sombra_pct,' %')],
-    ['Cap. de campo',u(z.cc,' %')],
-    ['Punto marchitez',u(z.pmp,' %')],
-    ['Densidad aparente',u(z.da,' g/cc')],
-    ['Profundidad suelo',u(z.prof,' m')],
-  ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
-
-  const fichaHtml=`<div class="d-section">
-      <div class="d-section-t">Ficha de la zona</div>
-      <div class="d-grid2">
-        ${ficha.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
-      </div></div>`;
-
-  const mp=G.mapas[znId];
-  // NDVI/Kc: preferir ndvi_registros (trae historial); si no hay, usar el de la imagen (ndvi_imagenes)
-  const ndviVal=nd?nd.ndvi:(mp&&mp.ndvi!=null?Number(mp.ndvi):null);
-  const kcVal=nd?nd.kc:(mp&&mp.kc!=null?Number(mp.kc):null);
-  const tieneHist=nd&&nd.hist&&nd.hist.length>0;
-  const cultivo=(ndviVal!=null)?`<div class="d-section">
-      <div class="d-section-t">Estado del cultivo</div>
-      <div class="d-grid2">
-        <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${ndviVal.toFixed(3)}</div></div>
-        ${kcVal!=null?`<div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${kcVal.toFixed(2)}</div></div>`:''}
-      </div>
-      ${tieneHist?`<div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
-      <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>`:''}
-    </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
-
-  const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
-
-  const mapaHtml=hayMapa?`<div class="d-section">
-      <div class="d-section-t">Imagen satelital NDVI${mp.fecha?` · ${fmtF(mp.fecha)}`:''}</div>
-      <div id="ndvi-map"></div>
-      <div class="ndvi-map-ctrl">
-        <label><input id="ndvi-cn" type="checkbox" checked> NDVI</label>
-        <label><input id="ndvi-cr" type="checkbox"> Foto real</label>
-        <label>Opacidad <input id="ndvi-op" type="range" min="0" max="100" value="80"></label>
-      </div>
-    </div>`:'';
-
-  openD(tit,sub,fichaHtml+cultivo+mapaHtml);
-  if(hayMapa)initNdviMap(mp);
-}
-
-let _ndviMap=null;
-function initNdviMap(mp){
-  if(_ndviMap){try{_ndviMap.remove();}catch(e){}_ndviMap=null;}
-  if(typeof L==='undefined'){console.warn('[NDVI] Leaflet no cargó');return;}
-  const d=mp.delta||0.005;
-  const bounds=[[mp.lat-d,mp.lon-d],[mp.lat+d,mp.lon+d]];
-  let intentos=0;
-  const arranca=()=>{
-    const el=document.getElementById('ndvi-map');
-    if(!el){if(++intentos<20)setTimeout(arranca,120);return;}
-    // esperar a que el contenedor tenga tamaño real (el drawer se abre con animación)
-    if((el.clientWidth===0||el.clientHeight===0)&&++intentos<20){setTimeout(arranca,120);return;}
-    const map=L.map(el,{scrollWheelZoom:true,attributionControl:false});
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
-    const capaNdvi=mp.url_ndvi?L.imageOverlay(mp.url_ndvi,bounds,{opacity:0.85}).addTo(map):null;
-    const capaRgb=mp.url_rgb?L.imageOverlay(mp.url_rgb,bounds,{opacity:0.85}):null;
-    L.marker([mp.lat,mp.lon]).addTo(map);
-    map.fitBounds(bounds,{padding:[30,30]});
-    _ndviMap=map;
-    const cN=document.getElementById('ndvi-cn'),cR=document.getElementById('ndvi-cr'),op=document.getElementById('ndvi-op');
-    if(cN)cN.onchange=e=>{if(!capaNdvi)return;e.target.checked?capaNdvi.addTo(map):capaNdvi.remove();};
-    if(cR)cR.onchange=e=>{if(!capaRgb)return;e.target.checked?capaRgb.addTo(map):capaRgb.remove();};
-    if(op)op.oninput=e=>{const o=e.target.value/100;if(capaNdvi)capaNdvi.setOpacity(o);if(capaRgb)capaRgb.setOpacity(o);};
-    // re-render tras la animación del drawer (varias pasadas para asegurar)
-    [150,400,700].forEach(t=>setTimeout(()=>{try{map.invalidateSize();map.fitBounds(bounds,{padding:[30,30]});}catch(e){}},t));
-  };
-  setTimeout(arranca,250);
-}
+# ─────────────────────────────────────────────────────────────
+# LIMPIEZA DE VALORES
+# ─────────────────────────────────────────────────────────────
+def clean_text(v):
+    if v is None or v == '':
+        return None
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))
+    return str(v).strip()
 
 
-async function downloadEstacion(){
-  const btn=document.getElementById('dlEst');
-  if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
-  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Generando...';
-  try{
-    const znIds=G.zonas.map(z=>z.id_zona);
-    const znName={};G.zonas.forEach(z=>znName[z.id_zona]=z.nombre||z.id_zona);
-    const {data,error}=await db.from('sc_demanda_hidrica_diaria_zona')
-      .select('fecha,id_zona,eto_estacion_mm_dia,etc_estacion_mm_dia,lamina_neta_riego_estacion_mm,tiempo_de_riego_estacion_horas,lluvia_estacion_mm_dia')
-      .in('id_zona',znIds).order('id_zona',{ascending:true}).order('fecha',{ascending:true});
-    if(error)throw error;
-    const rows=(data||[]).filter(r=>
-      (parseFloat(r.eto_estacion_mm_dia)||0)>0 || (parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0 ||
-      (parseFloat(r.tiempo_de_riego_estacion_horas)||0)>0 || (parseFloat(r.lluvia_estacion_mm_dia)||0)>0
-    ).map(r=>({
-      'Fecha':r.fecha,
-      'Zona':znName[r.id_zona]||r.id_zona,
-      'ETo estación (mm/día)':parseFloat(r.eto_estacion_mm_dia)||0,
-      'ETc estación (mm/día)':parseFloat(r.etc_estacion_mm_dia)||0,
-      'Lámina neta estación (mm)':parseFloat(r.lamina_neta_riego_estacion_mm)||0,
-      'Tiempo riego estación (h)':parseFloat(r.tiempo_de_riego_estacion_horas)||0,
-      'Lluvia estación (mm)':parseFloat(r.lluvia_estacion_mm_dia)||0
-    }));
-    if(!rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
-    const ws=XLSX.utils.json_to_sheet(rows);
-    ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Estación');
-    const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
-    XLSX.writeFile(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  }catch(err){
-    console.error(err);alert('Error al descargar: '+(err.message||err));
-  }finally{
-    btn.disabled=false;btn.innerHTML=orig;
-  }
-}
-
-/* ===== FERTIRRIEGO ===== */
-let TAB='riego';
-let GF={ferti:[],bal:{},loaded:false};
-const MACRO=[{k:'N',c:'#2563EB',dem:'demanda_neta_n_kg_zona',acc:'acumulado_n_kg',ap:'n_aplicado_kg'},
-  {k:'P₂O₅',c:'#EA580C',dem:'demanda_neta_p2o5_kg_zona',acc:'acumulado_p2o5_kg',ap:'p2o5_aplicado_kg'},
-  {k:'K₂O',c:'#7C3AED',dem:'demanda_neta_k2o_kg_zona',acc:'acumulado_k2o_kg',ap:'k2o_aplicado_kg'}];
-const MICRO=[{k:'Ca',c:'#0891B2',p:'ca'},{k:'Mg',c:'#16A34A',p:'mg'},{k:'S',c:'#CA8A04',p:'s'},
-  {k:'Zn',c:'#DB2777',p:'zn'},{k:'Mn',c:'#92400E',p:'mn'},{k:'Fe',c:'#DC2626',p:'fe'},
-  {k:'Cu',c:'#B45309',p:'cu'},{k:'B',c:'#0D9488',p:'b'}];
-const numF=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
-function hmF(h){const f=numF(h);if(f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00`:`${hh}h ${String(mm).padStart(2,'0')}`;}
-function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2}/);return m?m[0]:p.split('(')[0].trim().slice(0,16);}
-
-function switchTab(t){
-  if(t===TAB)return;TAB=t;
-  const TABS=['riego','ferti','estanque','balance'];
-  TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
-  document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
-  document.getElementById('view-ferti').style.display=t==='ferti'?'flex':'none';
-  document.getElementById('view-estanque').style.display=t==='estanque'?'flex':'none';
-  document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
-  if(t==='ferti'&&G.zonas.length)loadRenderFerti();
-  if(t==='estanque')loadRenderEstanque();
-  if(t==='balance'&&G.zonas.length)loadRenderBalance();
-}
-
-async function loadRenderFerti(){
-  const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
-  const [{data:fe},{data:ba}]=await Promise.all([
-    db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
-    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
-  ]);
-  GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
-  rCalF();rFranjaF();rPanelF();
-}
-function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
-function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
-function covMicro(znId,mi){const b=GF.bal[znId];if(!b)return null;const obj=numF(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return numF(b[mi.p+'_actual_ppm'])/obj*100;}
-
-function rKpiF(){
-  const dias=semDias(G.off);const fi=fs(dias[0]),ff=fs(dias[6]);
-  const evSem=GF.ferti.filter(e=>e.fecha_evento>=fi&&e.fecha_evento<=ff);
-  const kg=evSem.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0);
-  let cs=[];G.zonas.forEach(z=>{[...MACRO.map(m=>covMacro(z.id_zona,m)),...MICRO.map(mi=>covMicro(z.id_zona,mi))].forEach(v=>{if(v!=null)cs.push(Math.min(v,100));});});
-  const cov=cs.length?Math.round(cs.reduce((a,b)=>a+b,0)/cs.length):null;
-  const hoy=fs(new Date());const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1);
-  const px=fut[0];const pxZ=px?G.zonas.find(z=>z.id_zona===px.id_zona):null;const pxd=px?new Date(px.fecha_evento+'T00:00:00'):null;
-  document.getElementById('fkpib').innerHTML=`
-  <div class="kpi-card"><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-package"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Producto semana</div><div class="kpi-val">${kg>0?kg.toFixed(0):'—'} <span style="font-size:14px;color:var(--muted)">kg</span></div><div class="kpi-sub">${evSem.length} aplicaciones</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Cobertura nutricional</div><div class="kpi-val">${cov!=null?cov+'%':'—'}</div><div class="kpi-sub">promedio del equipo</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-letter-n"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Aplicaciones temporada</div><div class="kpi-val">${GF.ferti.length}</div><div class="kpi-sub">eventos en ${G.zonas.length} zonas</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-calendar-due"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Próxima aplicación</div><div class="kpi-val sm">${pxZ?(pxZ.nombre||px.id_zona):'—'}</div><div class="kpi-sub">${pxd?DSS[pxd.getDay()]+' '+pxd.getDate()+' '+MSS[pxd.getMonth()]:'sin programar'}</div></div></div>`;
-}
-
-function rCalF(){
-  const dias=semDias(G.off);const hS=fs(new Date());
-  const map={};GF.ferti.forEach(e=>{(map[e.id_zona]=map[e.id_zona]||{})[e.fecha_evento]=map[e.id_zona][e.fecha_evento]||[];map[e.id_zona][e.fecha_evento].push(e);});
-  let th=`<thead><tr><th class="th-zona" style="padding-bottom:12px">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px"><div class="th-num">${d.getDate()}</div><div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
-  let tb='<tbody>';
-  G.zonas.forEach((z,i)=>{const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];
-    tb+=`<tr style="height:96px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
-      <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
-    dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
-      if(evs&&evs.length){const e=evs[0];
-        tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
-          <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-flask-2" style="font-size:14px"></i>${numF(e.dosis_aplicar_kg).toFixed(1)} <span>kg</span></span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
-          <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
-          <div class="fc-foot"><span class="fc-time"><i class="ti ti-clock" style="font-size:11px"></i>${hmF(e.tiempo_fertirriego_hrs)||'—'} fert.</span></div>
-        </div></div></td>`;
-      } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
-    });
-    tb+='</tr>';
-  });
-  document.getElementById('fctbl').innerHTML=th+tb+(GF.ferti.length===0?'<tr><td colspan="8" class="loading" style="color:var(--amber)">No hay aplicaciones para estas zonas. Navega a otra semana (mayo–octubre 2026).</td></tr>':'')+'</tbody>';
-}
-
-function rFranjaF(){
-  const demT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+numF(GF.bal[z.id_zona]?.[m.dem]),0));
-  const apoT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+accZona(z.id_zona,m.acc),0));
-  const restT=demT.map((d,i)=>Math.max(0,d-apoT[i]));
-  const ng=(arr)=>`<div class="nut-grid">${MACRO.map((n,i)=>`<div class="nut-c"><div class="nut-k" style="color:${n.c}">${n.k}</div><div class="nut-v">${arr[i].toFixed(1)} <small>kg</small></div></div>`).join('')}<div class="nut-more">+micros</div></div>`;
-  const sd=demT.reduce((a,b)=>a+b,0),sa=apoT.reduce((a,b)=>a+b,0);const ef=sd>0?Math.round(Math.min(sa/sd,1)*100):null;
-  document.getElementById('ffranja').innerHTML=`
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-flask"></i></div><div class="franja-lbl">Demanda total (NPK)</div></div>${ng(demT)}<div class="franja-sub">kg objetivo</div></div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-circle-check"></i></div><div class="franja-lbl">Aportado (acumulado)</div></div>${ng(apoT)}<div class="franja-sub">kg aplicados</div></div>
-  <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-progress"></i></div><div class="franja-lbl">Demanda restante</div></div>${ng(restT)}<div class="franja-sub">kg por reponer</div></div>
-`;
-}
-
-function rPanelF(){
-  // Próximas aplicaciones
-  const hoy=fs(new Date());
-  const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1).slice(0,6);
-  document.getElementById('fpprox').innerHTML=`<div class="p-title"><i class="ti ti-calendar-event"></i>Próximas aplicaciones</div>`+(fut.length?fut.map(e=>{const i=G.zonas.findIndex(z=>z.id_zona===e.id_zona);const z=G.zonas[i];const d2=new Date(e.fecha_evento+'T00:00:00');return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[(i<0?0:i)%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${z?.nombre||'Zona'}</div><div class="prox-prod">${prodShort(e.producto_asignado)}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[(i<0?0:i)%ZC.length]}">${numF(e.dosis_aplicar_kg).toFixed(1)} kg</div><div class="prox-fecha">${DSS[d2.getDay()]} ${d2.getDate()} ${MSS[d2.getMonth()]}</div></div></div>`;}).join(''):'<div style="font-size:11px;color:var(--muted)">Sin aplicaciones futuras.</div>');
-
-  // Resumen de productos (agrupado por producto)
-  const prod={};
-  GF.ferti.forEach(e=>{
-    const p=e.producto_asignado||'Sin nombre';
-    if(!prod[p])prod[p]={kg:0,apps:0};
-    prod[p].kg+=numF(e.dosis_aplicar_kg);prod[p].apps++;
-  });
-  const lista=Object.entries(prod).sort((a,b)=>b[1].kg-a[1].kg);
-  const totKg=lista.reduce((a,[_,v])=>a+v.kg,0);
-  const PC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04','#DB2777'];
-  let ph=`<div class="p-title"><i class="ti ti-package"></i>Resumen de productos</div>`;
-  if(lista.length){
-    ph+=lista.map(([p,v],i)=>{
-      const pct=totKg>0?v.kg/totKg*100:0;const c=PC[i%PC.length];
-      return `<div style="margin-bottom:11px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${prodShort(p)}</span>
-          <span style="font-size:12px;font-weight:700;color:${c}">${v.kg.toFixed(0)} kg</span>
-        </div>
-        <div style="height:6px;border-radius:4px;background:var(--line2);overflow:hidden"><div style="height:100%;width:${pct}%;background:${c};border-radius:4px"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${v.apps} aplicaciones · ${pct.toFixed(0)}% del total</div>
-      </div>`;
-    }).join('');
-    ph+=`<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700;color:var(--ink)">Total temporada</span><span style="font-size:13px;font-weight:700;color:var(--green)">${totKg.toFixed(0)} kg</span></div>`;
-  }else{
-    ph+='<div style="font-size:11px;color:var(--muted)">Sin productos registrados.</div>';
-  }
-  document.getElementById('fpprod').innerHTML=ph;
-}
-
-function openEvF(znId,fecha,idx){
-  const evs=GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento===fecha);const e=evs[idx]||evs[0];if(!e)return;
-  const i=G.zonas.findIndex(z=>z.id_zona===znId);const z=G.zonas[i];const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];const b=GF.bal[znId];
-  const d=new Date(fecha+'T00:00:00');const past=fecha<fs(new Date());
-  document.getElementById('fdt').innerHTML=`<span class="zona-dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:${c};margin-right:5px"></span>${z?.nombre||znId}`;
-  document.getElementById('fds').innerHTML=`${z?.especie||''} ${z?.variedad||''} · ${z?.superficie_ha||'—'} ha · ${DSS[d.getDay()]} ${d.getDate()} ${MSS[d.getMonth()]} ${d.getFullYear()} · ${past?'Aplicado':'Programado'}`;
-  const ap=[{k:'N',c:'#2563EB',v:numF(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:numF(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:numF(e.k2o_aplicado_kg)}];
-  const otros=evs.length>1?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">+${evs.length-1} producto(s) más este día: ${evs.slice(1).map(x=>prodShort(x.producto_asignado)).join(', ')}</div>`:'';
-  const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,pct:covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,pct:covMicro(znId,mi)}))]:[];
-  document.getElementById('fdb').innerHTML=`${otros}
-    <div class="dcols">
-      <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0"><div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div><div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div><div class="dprod-sub">${numF(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
-      <div class="dcard" style="margin-bottom:0"><div class="dcard-t"><i class="ti ti-atom-2"></i>Nutrientes aportados</div><div class="naport">${ap.map(a=>`<div class="naport-c"><div class="naport-k" style="color:${a.c}">${a.k}</div><div class="naport-v">${a.v.toFixed(2)}</div><div class="naport-u">kg</div></div>`).join('')}</div></div>
-    </div>
-    <div class="dcard" style="margin-top:14px"><div class="dcard-t"><i class="ti ti-adjustments"></i>Parámetros de inyección</div>
-      <div class="dcols" style="gap:0 24px">
-        <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
-        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion??'—'} L/h</span></div></div>
-      </div>
-      <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
-    ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
-    ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}`;
-  document.getElementById('fscrim').classList.add('open');document.getElementById('fdrawer').classList.add('open');
-}
-function closeDF(){document.getElementById('fscrim').classList.remove('open');document.getElementById('fdrawer').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDF();});
-
-/* recargar fertirriego cuando cambie equipo o semana, sin tocar tu código de riego */
-const _onEquipoFerti=onEquipo;
-onEquipo=async function(){await _onEquipoFerti.apply(this,arguments);GF.loaded=false;if(TAB==='ferti'&&G.zonas.length)await loadRenderFerti();};
-const _chWFerti=chW;
-chW=function(){_chWFerti.apply(this,arguments);if(TAB==='ferti'&&G.zonas.length)loadRenderFerti();};
+def clean_num(v):
+    if v is None or v == '':
+        return None
+    if isinstance(v, (int, float)):
+        return v
+    s = str(v).strip()
+    if s == '':
+        return None
+    has_comma, has_dot = ',' in s, '.' in s
+    if has_comma and has_dot:
+        s = s.replace('.', '').replace(',', '.')
+    elif has_comma:
+        s = s.replace(',', '.')
+    try:
+        return float(s)
+    except ValueError:
+        return None
 
 
-/* ===== DINAMICA ESTANQUE ===== */
-let GE={rows:[],loaded:false,prId:null,chart:null,gauge:null};
-const numE=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
-function covCat(p){if(p>200)return{c:'#7C3AED',t:'Excedente',cls:'exc'};if(p>=130)return{c:'#2563EB',t:'Holgado',cls:'hol'};if(p>=100)return{c:'#16A34A',t:'Adecuado',cls:'ade'};if(p>=80)return{c:'#EA580C',t:'Ajustado',cls:'aju'};return{c:'#DC2626',t:'Crítico',cls:'cri'};}
-function wkNum(w){const m=String(w).match(/\d+/);return m?parseInt(m[0]):0;}
-
-async function loadRenderEstanque(){
-  const prId=document.getElementById('sp').value;
-  if(GE.loaded && GE.prId===prId){return;}
-  GE.prId=prId;
-  const cont=document.getElementById('estkpi');
-  cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando estanque...</div></div>';
-  const {data,error}=await db.from('sc_dinamica_estanque').select('*').eq('id_predio',prId);
-  if(error){cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--red)">Error: '+error.message+'</div></div>';return;}
-  let rows=(data||[]).slice().sort((a,b)=>wkNum(a.numero_semana)-wkNum(b.numero_semana));
-  GE.rows=rows;GE.loaded=true;
-  if(!rows.length){
-    cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--amber)">Este predio no tiene estanque registrado.</div></div>';
-    document.getElementById('estResumen').innerHTML='';
-    document.getElementById('estTabla').innerHTML='';
-    if(GE.chart){GE.chart.destroy();GE.chart=null;}
-    return;
-  }
-  estKpis(rows);estChart(rows);estResumen(rows);estTabla(rows);
-}
-
-function estFilaActual(rows){
-  const wActual='W'+isoW(new Date());
-  return rows.find(r=>String(r.numero_semana).toUpperCase()===wActual)||rows[rows.length-1];
-}
-function estKpis(rows){
-  const act=estFilaActual(rows);
-  const volActual=numE(act.oferta_extraible_base_m3)+numE(act.aporte_lluvia_semanal_m3);
-  const ofertaBase=numE(act.oferta_extraible_base_m3);
-  const cobPct=numE(act.cobertura_pct)*100;
-  const fmt=v=>Math.round(v).toLocaleString('es-CL');
-  document.getElementById('estkpi').innerHTML=`
-  <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div>
-    <div><div class="kpi-lbl">Volumen actual</div><div class="kpi-val blue">${fmt(volActual)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">${cobPct.toFixed(2)}% de cobertura</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-businessplan"></i></div>
-    <div><div class="kpi-lbl">Oferta base</div><div class="kpi-val">${fmt(ofertaBase)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Semana ${act.numero_semana}</div></div></div>`;
-}
-
-function estChart(rows){
-  const labels=rows.map(r=>r.numero_semana);
-  const volActual=rows.map(r=>numE(r.oferta_extraible_base_m3)+numE(r.aporte_lluvia_semanal_m3));
-  const ofertaPlanif=rows.map(r=>numE(r.oferta_planificada_m3));
-  const aporte=rows.map(r=>numE(r.aporte_lluvia_semanal_m3));
-  const demanda=rows.map(r=>numE(r.demanda_promedio_3a_m3));
-  if(GE.chart)GE.chart.destroy();
-  const ctx=document.getElementById('estChart').getContext('2d');
-  GE.chart=new Chart(ctx,{
-    data:{labels,datasets:[
-      {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
-      {type:'line',label:'Volumen actual (m³)',data:volActual,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
-      {type:'line',label:'Oferta planificada (m³)',data:ofertaPlanif,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
-      {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},
-      scales:{y:{beginAtZero:true,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v.toLocaleString('es-CL')}},
-        x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16}}}}
-  });
-}
-
-function estResumen(rows){
-  const act=estFilaActual(rows);
-  const aporte=numE(act.aporte_lluvia_semanal_m3);
-  const demanda=numE(act.demanda_promedio_3a_m3);
-  const balance=numE(act.balance_m3);
-  const ofertaPlanif=numE(act.oferta_planificada_m3);
-  const ofertaBase=numE(act.oferta_extraible_base_m3);
-  const cobPct=numE(act.cobertura_pct)*100;
-  const cat=covCat(cobPct);
-  const fmt=v=>Math.round(v).toLocaleString('es-CL');
-  document.getElementById('estResumen').innerHTML=`
-    <div class="est-rrow"><span class="est-rk">Semana actual</span><span class="est-rv">${act.numero_semana}</span></div>
-    <div class="est-rrow"><span class="est-rk">Oferta planificada</span><span class="est-rv">${fmt(ofertaPlanif)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Oferta base</span><span class="est-rv">${fmt(ofertaBase)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Aporte lluvia</span><span class="est-rv">${fmt(aporte)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Demanda (3 años)</span><span class="est-rv">${fmt(demanda)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Balance</span><span class="est-rv" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>`;
-}
-
-function estTabla(rows){
-  const fmt=v=>Math.round(v).toLocaleString('es-CL');
-  let h=`<thead><tr><th>Semana</th><th>Oferta planif. (m³)</th><th>Oferta base (m³)</th><th>Aporte lluvia (m³)</th><th>Demanda 3 años (m³)</th><th>Balance (m³)</th><th>Cobertura</th><th>Estado</th></tr></thead><tbody>`;
-  rows.slice().reverse().forEach(r=>{
-    const cob=numE(r.cobertura_pct)*100;const cat=covCat(cob);const bal=numE(r.balance_m3);
-    const aporte=numE(r.aporte_lluvia_semanal_m3);
-    h+=`<tr><td>${r.numero_semana}</td><td>${fmt(numE(r.oferta_planificada_m3))}</td><td>${fmt(numE(r.oferta_extraible_base_m3))}</td><td style="${aporte>0?'color:var(--green);font-weight:600':''}">${fmt(aporte)}</td><td>${fmt(numE(r.demanda_promedio_3a_m3))}</td><td style="color:${bal>=0?'var(--green)':'var(--red)'};font-weight:700">${bal>=0?'+':''}${fmt(bal)}</td><td style="color:${cat.c};font-weight:700">${cob.toFixed(2)}%</td><td><span class="est-badge ${cat.cls}">${cat.t}</span></td></tr>`;
-  });
-  document.getElementById('estTabla').innerHTML=h+'</tbody>';
-}
-
-/* recargar estanque al cambiar de predio, sin tocar el resto */
-const _onPredioEst=onPredio;
-onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=false;if(TAB==='estanque')await loadRenderEstanque();};
+def clean_fecha(v):
+    if v is None or v == '':
+        return None
+    if isinstance(v, (int, float)):
+        base = dt.datetime(1899, 12, 30)
+        return (base + dt.timedelta(days=float(v))).date().isoformat()
+    if isinstance(v, dt.datetime):
+        return v.date().isoformat()
+    if isinstance(v, dt.date):
+        return v.isoformat()
+    s = str(v).strip()
+    for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%m/%d/%Y'):
+        try:
+            return dt.datetime.strptime(s[:10], fmt).date().isoformat()
+        except ValueError:
+            continue
+    return s
 
 
-/* ===== BALANCE NUTRICIONAL (pestaña) ===== */
-let GB={chart:null,loaded:false};
-const NUT_ALL=[
-  {k:'N',c:'#2563EB',grupo:'macro',calc:'npk',m:MACRO[0]},
-  {k:'P₂O₅',c:'#EA580C',grupo:'macro',calc:'npk',m:MACRO[1]},
-  {k:'K₂O',c:'#7C3AED',grupo:'macro',calc:'npk',m:MACRO[2]},
-  {k:'Ca',c:'#0891B2',grupo:'macro',calc:'ppm',p:'ca'},
-  {k:'Mg',c:'#16A34A',grupo:'macro',calc:'ppm',p:'mg'},
-  {k:'S',c:'#CA8A04',grupo:'macro',calc:'ppm',p:'s'},
-  {k:'Zn',c:'#DB2777',grupo:'micro',calc:'ppm',p:'zn'},
-  {k:'Mn',c:'#92400E',grupo:'micro',calc:'ppm',p:'mn'},
-  {k:'Fe',c:'#DC2626',grupo:'micro',calc:'ppm',p:'fe'},
-  {k:'Cu',c:'#B45309',grupo:'micro',calc:'ppm',p:'cu'},
-  {k:'B',c:'#0D9488',grupo:'micro',calc:'ppm',p:'b'},
-];
-const NUT_MACRO=NUT_ALL.filter(n=>n.grupo==='macro');
-const NUT_MICRO=NUT_ALL.filter(n=>n.grupo==='micro');
-function bnCov(znId,n){return n.calc==='npk'?covMacro(znId,n.m):covMicro(znId,{p:n.p});}
-function bnAvg(n){const vs=G.zonas.map(z=>bnCov(z.id_zona,n)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;}
-function bnState(p){if(p==null)return{t:'s/d',cls:'',c:'#94A3B8'};if(p>120)return{t:'Exceso',cls:'aju',c:'#EA580C'};if(p<80)return{t:'Déficit',cls:'cri',c:'#DC2626'};return{t:'Óptimo',cls:'ade',c:'#16A34A'};}
-
-async function loadRenderBalance(){
-  const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
-  const cont=document.getElementById('bnkpi');
-  cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando balance...</div></div>';
-  // asegurar datos (comparte GF con fertirriego)
-  const [{data:fe},{data:ba}]=await Promise.all([
-    db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds),
-    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
-  ]);
-  GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);
-  GB.loaded=true;
-  bnKpis();bnChart();bnTabla();bnResumen();bnAlertas();bnZonas();
-}
-
-function bnKpis(){
-  const covs=NUT_ALL.map(n=>bnAvg(n)).filter(v=>v!=null);
-  const covProm=covs.length?Math.round(covs.reduce((a,b)=>a+b,0)/covs.length):null;
-  const deficit=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a<80;});
-  const exceso=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a>120;});
-  const zCrit=G.zonas.filter(z=>{const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return pr!=null&&pr<80;});
-  document.getElementById('bnkpi').innerHTML=`
-  <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
-    <div><div class="kpi-lbl">Cobertura promedio</div><div class="kpi-val" style="color:#7C3AED">${covProm!=null?covProm+'%':'—'}</div><div class="kpi-sub">promedio general</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-arrow-down-circle"></i></div>
-    <div><div class="kpi-lbl">Nutrientes en déficit</div><div class="kpi-val" style="color:${deficit.length?'var(--red)':'var(--green)'}">${deficit.length}</div><div class="kpi-sub">${deficit.length?deficit.map(n=>n.k).join(', '):'ninguno'}</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-arrow-up-circle"></i></div>
-    <div><div class="kpi-lbl">Nutrientes en exceso</div><div class="kpi-val" style="color:${exceso.length?'var(--z2)':'var(--green)'}">${exceso.length}</div><div class="kpi-sub">${exceso.length?exceso.map(n=>n.k).join(', '):'ninguno'}</div></div></div>
-  <div class="kpi-card"><div class="kpi-ico" style="background:${zCrit.length?'#FEF2F2':'#F0FDF4'};color:${zCrit.length?'var(--red)':'var(--green)'}"><i class="ti ti-alert-triangle"></i></div>
-    <div><div class="kpi-lbl">Zonas críticas</div><div class="kpi-val" style="color:${zCrit.length?'var(--red)':'var(--green)'}">${zCrit.length}</div><div class="kpi-sub">&lt; 80% de cobertura</div></div></div>`;
-}
-
-const bnRefLines={id:'bnRefLines',afterDatasetsDraw(chart){
-  const{ctx,chartArea:{left,right},scales:{y}}=chart;
-  const lines=[{v:80,c:'#DC2626',t:'Déficit (<80%)'},{v:100,c:'#16A34A',t:'Objetivo (100%)'},{v:120,c:'#EA580C',t:'Exceso (>120%)'}];
-  ctx.save();
-  lines.forEach(l=>{const yp=y.getPixelForValue(l.v);ctx.beginPath();ctx.setLineDash([5,4]);ctx.strokeStyle=l.c;ctx.lineWidth=1;ctx.globalAlpha=.55;ctx.moveTo(left,yp);ctx.lineTo(right,yp);ctx.stroke();});
-  ctx.restore();
-}};
-function bnChartGrupo(nutrientes,canvasId,chartKey){
-  const labels=nutrientes.map(n=>n.k);
-  const data=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
-  const colors=nutrientes.map(n=>{const a=bnAvg(n);if(a==null)return '#CBD5E1';if(a>120)return '#EA580C';if(a<80)return '#DC2626';return '#16A34A';});
-  if(GB[chartKey])GB[chartKey].destroy();
-  const ctx=document.getElementById(canvasId).getContext('2d');
-  GB[chartKey]=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'Cobertura (%)',data,backgroundColor:colors,borderRadius:5,maxBarThickness:52}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Cobertura: '+c.parsed.y+'%'}}},
-      scales:{y:{beginAtZero:true,suggestedMax:170,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v+'%'}},
-        x:{grid:{display:false},ticks:{font:{size:12,weight:'600'}}}}},
-    plugins:[bnRefLines]
-  });
-}
-function bnChart(){
-  bnChartGrupo(NUT_MACRO,'bnChartMacro','chartMacro');
-  bnChartGrupo(NUT_MICRO,'bnChartMicro','chartMicro');
-}
-
-function bnTablaGrupo(nutrientes,tablaId){
-  let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+nutrientes.map(n=>`<th>${n.k}</th>`).join('')+`<th>Estado</th></tr></thead><tbody>`;
-  G.zonas.forEach((z,zi)=>{
-    const vs=nutrientes.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
-    const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
-    const st=bnState(pr);
-    h+=`<tr><td><div class="zona-dot" style="background:${ZC[zi%ZC.length]};display:inline-block;margin-right:5px"></div>${z.nombre||'Zona'}</td><td>${z.superficie_ha||'—'}</td>`;
-    h+=nutrientes.map(n=>{const c=bnCov(z.id_zona,n);if(c==null)return '<td style="color:var(--subtle)">—</td>';const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;}).join('');
-    h+=`<td><span class="est-badge ${st.cls}">${st.t}</span></td></tr>`;
-  });
-  document.getElementById(tablaId).innerHTML=h+'</tbody>';
-}
-function bnTabla(){
-  bnTablaGrupo(NUT_MACRO,'bnTablaMacro');
-  bnTablaGrupo(NUT_MICRO,'bnTablaMicro');
-}
-
-function bnResumen(){
-  const demT=MACRO.reduce((a,m)=>a+G.zonas.reduce((s,z)=>s+numF(GF.bal[z.id_zona]?.[m.dem]),0),0);
-  const covs=NUT_ALL.map(n=>bnAvg(n)).filter(v=>v!=null);
-  const covProm=covs.length?Math.round(covs.reduce((a,b)=>a+b,0)/covs.length):null;
-  const deficit=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a<80;}).length;
-  const exceso=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a>120;}).length;
-  document.getElementById('bnResumen').innerHTML=`
-    <div class="est-rrow"><span class="est-rk">Demanda total (NPK)</span><span class="est-rv">${Math.round(demT).toLocaleString('es-CL')} kg</span></div>
-    <div class="est-rrow"><span class="est-rk">Cobertura promedio</span><span class="est-rv" style="color:#7C3AED">${covProm!=null?covProm+'%':'—'}</span></div>
-    <div class="est-rrow"><span class="est-rk">Nutrientes en déficit</span><span class="est-rv" style="color:${deficit?'var(--red)':'var(--green)'}">${deficit}</span></div>
-    <div class="est-rrow"><span class="est-rk">Nutrientes en exceso</span><span class="est-rv" style="color:${exceso?'var(--z2)':'var(--green)'}">${exceso}</span></div>
-    <div class="est-rrow"><span class="est-rk">Zonas evaluadas</span><span class="est-rv">${G.zonas.length}</span></div>`;
-}
-
-function bnAlertas(){
-  const al=[];
-  NUT_ALL.forEach(n=>{const a=bnAvg(n);if(a==null)return;
-    if(a>130)al.push({cls:'aju',ic:'ti-arrow-up-circle',c:'#EA580C',t:`Exceso de ${n.k}`,s:`Cobertura promedio ${Math.round(a)}%. Revisar próximas aplicaciones.`});
-    else if(a<70)al.push({cls:'cri',ic:'ti-arrow-down-circle',c:'#DC2626',t:`Déficit de ${n.k}`,s:`Cobertura promedio ${Math.round(a)}%. Considerar aporte en próximas aplicaciones.`});
-  });
-  const als=al.slice(0,5);
-  document.getElementById('bnAlertas').innerHTML=als.length?als.map(a=>`<div class="alerta-card ${a.cls==='cri'?'danger':'warn'}" style="margin-bottom:8px"><div class="alerta-ico" style="font-size:16px;color:${a.c}"><i class="ti ${a.ic}"></i></div><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join(''):'<div class="alerta-card ok"><i class="ti ti-circle-check alerta-ico" style="color:var(--green)"></i><div><div class="alerta-t">Sin alertas</div><div class="alerta-s">Nutrientes dentro de rango.</div></div></div>';
-}
-
-function bnZonas(){
-  const ranked=G.zonas.map((z,zi)=>{
-    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
-    const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
-    return {z,zi,pr};
-  }).filter(x=>x.pr!=null).sort((a,b)=>a.pr-b.pr).slice(0,5);
-  document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>{
-    const st=bnState(x.pr);
-    return `<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv" style="color:${st.c}">${Math.round(x.pr)}%</span></div>`;
-  }).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
-}
-
-/* recargar balance al cambiar equipo */
-const _onEquipoBal=onEquipo;
-onEquipo=async function(){await _onEquipoBal.apply(this,arguments);GB.loaded=false;if(TAB==='balance'&&G.zonas.length)await loadRenderBalance();};
+def build_record(row, colmap):
+    rec = {}
+    for header, col in colmap.items():
+        raw = row.get(header)
+        if col in DATE_COLS:
+            rec[col] = clean_fecha(raw)
+        elif col in TEXT_COLS:
+            rec[col] = clean_text(raw)
+        else:
+            rec[col] = clean_num(raw)
+    return rec
 
 
-/* ===== Dropdowns custom (mantiene el <select> oculto como fuente de verdad) ===== */
-function initCustomDropdowns(){
-  document.querySelectorAll('.sel-wrap').forEach(wrap=>{
-    const sel=wrap.querySelector('select');
-    if(!sel||wrap.dataset.cd)return;
-    wrap.dataset.cd='1';
-    sel.style.position='absolute';sel.style.opacity='0';sel.style.pointerEvents='none';sel.style.left='0';sel.style.width='1px';sel.style.height='1px';
-    const val=document.createElement('span');val.className='cd-val';
-    sel.parentNode.insertBefore(val,sel);
-    const menu=document.createElement('div');menu.className='cd-menu';
-    wrap.appendChild(menu);
-    const rebuild=()=>{
-      val.textContent=sel.options[sel.selectedIndex]?.textContent||'—';
-      menu.innerHTML='';
-      Array.from(sel.options).forEach((o,i)=>{
-        const item=document.createElement('div');
-        item.className='cd-item'+(i===sel.selectedIndex?' sel':'');
-        item.textContent=o.textContent;
-        item.addEventListener('click',ev=>{
-          ev.stopPropagation();
-          if(sel.value!==o.value){sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}));}
-          val.textContent=o.textContent;menu.classList.remove('open');
-          Array.from(menu.children).forEach(c=>c.classList.remove('sel'));item.classList.add('sel');
-        });
-        menu.appendChild(item);
-      });
-    };
-    rebuild();
-    wrap.addEventListener('click',ev=>{
-      if(ev.target.closest('.cd-menu'))return;
-      const wasOpen=menu.classList.contains('open');
-      document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open'));
-      if(!wasOpen)menu.classList.add('open');
-    });
-    new MutationObserver(rebuild).observe(sel,{childList:true});
-    sel.addEventListener('change',()=>{val.textContent=sel.options[sel.selectedIndex]?.textContent||'—';});
-  });
-}
-document.addEventListener('click',()=>document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open')));
-initCustomDropdowns();
+def chunked(seq, n):
+    for i in range(0, len(seq), n):
+        yield seq[i:i + n]
 
-init();
-</script>
-</body>
-</html>
+
+# ─────────────────────────────────────────────────────────────
+# CARGA DE UN JOB
+# ─────────────────────────────────────────────────────────────
+def run_job(name, spec, sh, sb, dry, legacy_upsert=False):
+    print(f"\n=== {name.upper()}  ({spec['tab']} -> {spec['table']}) ===")
+    ws = sh.worksheet(spec['tab'])
+    registros = ws.get_all_records(value_render_option='UNFORMATTED_VALUE')
+    print(f"  filas crudas: {len(registros)}")
+
+    keys = spec['keys']
+    recs = []
+    for row in registros:
+        rec = build_record(row, spec['map'])
+        if all(rec.get(k) not in (None, '') for k in keys):
+            recs.append(rec)
+
+    # de-dup por clave lógica (por si el Sheet trae una fila repetida)
+    dedup = {}
+    for rec in recs:
+        dedup[tuple(rec[k] for k in keys)] = rec
+    out = list(dedup.values())
+    print(f"  con datos: {len(recs)}  |  tras dedup {keys}: {len(out)}  "
+          f"|  duplicados: {len(recs) - len(out)}")
+
+    # valores de scope presentes en el Sheet (lo que vamos a "reemplazar")
+    scope = spec['scope']
+    scope_vals = sorted({rec.get(scope) for rec in out if rec.get(scope) not in (None, '')})
+    print(f"  scope '{scope}': {len(scope_vals)} valores "
+          f"({', '.join(map(str, scope_vals[:8]))}{'…' if len(scope_vals) > 8 else ''})")
+
+    if out:
+        import json
+        print("  ejemplo:", json.dumps(out[len(out) // 2], ensure_ascii=False)[:300])
+
+    if dry:
+        if legacy_upsert:
+            print("  [DRY-RUN] modo legacy-upsert: haría upsert de "
+                  f"{len(out)} filas (sin borrar).")
+        else:
+            print(f"  [DRY-RUN] BORRARÍA en {spec['table']} las filas con "
+                  f"{scope} en esos {len(scope_vals)} valores, y luego "
+                  f"INSERTARÍA {len(out)} filas.")
+        return
+
+    # ── MODO LEGACY (fallback): solo upsert, comportamiento antiguo ──
+    if legacy_upsert:
+        total = 0
+        for chunk in chunked(out, BATCH):
+            sb.table(spec['table']).upsert(chunk, on_conflict=spec['conflict']).execute()
+            total += len(chunk)
+            print(f"  upsert {total}/{len(out)}")
+        print(f"  OK (legacy upsert): {total} filas en {spec['table']}")
+        return
+
+    # ── MODO SINCRONIZACIÓN (delete-and-insert por scope) ──
+    # 1) Borrar en Supabase todo lo de los valores de scope que trae el Sheet.
+    #    Se hace por lotes con .in_() para no exceder límites de URL/consulta.
+    if scope_vals:
+        borrados = 0
+        for grp in chunked(scope_vals, DELETE_IN_CHUNK):
+            sb.table(spec['table']).delete().in_(scope, grp).execute()
+            borrados += len(grp)
+            print(f"  delete scope {borrados}/{len(scope_vals)}")
+    else:
+        print("  (sin valores de scope; no se borra nada)")
+
+    # 2) Insertar limpio lo que trae el Sheet.
+    total = 0
+    for chunk in chunked(out, BATCH):
+        sb.table(spec['table']).insert(chunk).execute()
+        total += len(chunk)
+        print(f"  insert {total}/{len(out)}")
+    print(f"  OK (sync): {spec['table']} quedó con {total} filas para este scope")
+
+
+# ─────────────────────────────────────────────────────────────
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--dry-run', action='store_true', help='Lee y muestra, no escribe')
+    ap.add_argument('--only', choices=list(JOBS.keys()), help='Carga solo un job')
+    ap.add_argument('--legacy-upsert', action='store_true',
+                    help='Fallback: modo viejo (solo upsert, sin borrar). No recomendado.')
+    args = ap.parse_args()
+
+    sa_path = os.environ.get('GOOGLE_SA_JSON')
+    if not sa_path or not os.path.exists(sa_path):
+        sys.exit("ERROR: define GOOGLE_SA_JSON con la ruta al .json del service account.")
+    gc = gspread.service_account(filename=sa_path)
+    sh = gc.open_by_key(SHEET_ID)
+
+    sb = None
+    if not args.dry_run:
+        url = os.environ.get('SUPABASE_URL')
+        key = os.environ.get('SUPABASE_SERVICE_KEY')
+        if not url or not key:
+            sys.exit("ERROR: define SUPABASE_URL y SUPABASE_SERVICE_KEY (service_role).")
+        sb = create_client(url, key)
+
+    jobs = {args.only: JOBS[args.only]} if args.only else JOBS
+    for name, spec in jobs.items():
+        run_job(name, spec, sh, sb, args.dry_run, legacy_upsert=args.legacy_upsert)
+
+    print("\nListo." + (" (dry-run, sin escribir)" if args.dry_run else ""))
+
+
+if __name__ == '__main__':
+    main()
