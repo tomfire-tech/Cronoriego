@@ -339,8 +339,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-side{display:flex;flex-direction:column;gap:14px;}
 .est-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
 .est-grid-bn{align-items:stretch;}
-.bn-side{height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:14px;}
+.bn-side{display:flex;flex-direction:column;justify-content:flex-start;gap:14px;}
 .bn-side .alerta-card:last-child{margin-bottom:0;}
+/* Balance: panel derecho fijo (viñetas juntas); solo gráficos+tablas scrollean */
+#view-balance .est-wrap{flex:1;min-height:0;overflow:hidden;}
+#view-balance .est-grid-bn{flex:1;min-height:0;align-items:stretch;}
+#view-balance .est-col{overflow-y:auto;min-height:0;padding-right:6px;}
+#view-balance .bn-side{min-height:0;overflow-y:auto;}
 .est-rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px;}
 .est-rrow:last-child{border-bottom:none;}
 .est-rk{color:var(--muted);}
@@ -490,6 +495,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
     <div class="panel">
       <div class="p-block" id="fpprox"></div>
+      <div class="p-block" id="fpsummadre"></div>
       <div class="p-block" id="fpprod"></div>
     </div>
   </div>
@@ -507,6 +513,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
           <div id="estResumen"></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-chart-histogram" style="color:var(--blue)"></i>Estadísticas de la temporada</div>
+          <div id="estStats"></div>
         </div>
       </div>
     </div>
@@ -1194,6 +1204,14 @@ function rPanelF(){
     return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[i%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${DSS[d2.getDay()]} ${d2.getDate()} ${MSS[d2.getMonth()]}</div><div class="prox-prod">${p.vol>0?`Vol. solución madre: ${Math.round(p.vol).toLocaleString('es-CL')} L`:'Sin datos de solución madre'}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[i%ZC.length]}">${p.dosis>0?p.dosis.toFixed(1)+' kg':'—'}</div><div class="prox-fecha">producto estanque</div></div></div>`;
   }).join(''):'<div style="font-size:11px;color:var(--muted)">Sin preparaciones futuras.</div>');
 
+  // Resumen de solución madre (toda la temporada cargada)
+  let totVol=0,totDosis=0,nPrep=0;
+  GF.ferti.forEach(e=>{const v=numF(e.volumen_sol_madre_l),d=numF(e.dosis_producto_estanque_kg);if(v>0||d>0){totVol+=v;totDosis+=d;nPrep++;}});
+  document.getElementById('fpsummadre').innerHTML=`<div class="p-title"><i class="ti ti-flask-2"></i>Solución madre · temporada</div>`+(nPrep?`
+    <div class="est-rrow"><span class="est-rk">Preparaciones</span><span class="est-rv">${nPrep}</span></div>
+    <div class="est-rrow"><span class="est-rk">Vol. solución madre</span><span class="est-rv">${Math.round(totVol).toLocaleString('es-CL')} L</span></div>
+    <div class="est-rrow"><span class="est-rk">Producto en estanque</span><span class="est-rv">${totDosis.toFixed(1)} kg</span></div>`:'<div style="font-size:11px;color:var(--muted)">Sin datos de solución madre. Corre el sync con las columnas nuevas.</div>');
+
   // Resumen de productos (agrupado por producto)
   const prod={};
   GF.ferti.forEach(e=>{
@@ -1281,7 +1299,7 @@ async function loadRenderEstanque(){
     if(GE.chart){GE.chart.destroy();GE.chart=null;}
     return;
   }
-  estKpis(rows);estChart(rows);estResumen(rows);estTabla(rows);
+  estKpis(rows);estChart(rows);estResumen(rows);estStats(rows);estTabla(rows);
 }
 
 function estFilaActual(rows){
@@ -1342,6 +1360,29 @@ function estResumen(rows){
     <div class="est-rrow"><span class="est-rk">Demanda (3 años)</span><span class="est-rv">${fmt(demanda)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Balance</span><span class="est-rv" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>`;
+}
+
+function estStats(rows){
+  const fmt=v=>Math.round(v).toLocaleString('es-CL');
+  const n=rows.length;
+  const cobs=rows.map(r=>numE(r.cobertura_pct)*100);
+  const deficit=cobs.filter(c=>c<80).length;
+  const adecuadas=cobs.filter(c=>c>=80&&c<=130).length;
+  const holgadas=cobs.filter(c=>c>130).length;
+  const demProm=n?rows.reduce((a,r)=>a+numE(r.demanda_promedio_3a_m3),0)/n:0;
+  const ofProm=n?rows.reduce((a,r)=>a+numE(r.oferta_extraible_base_m3),0)/n:0;
+  const balAcum=rows.reduce((a,r)=>a+numE(r.balance_m3),0);
+  let critica=null,minCob=Infinity;
+  rows.forEach(r=>{const c=numE(r.cobertura_pct)*100;if(c<minCob){minCob=c;critica=r;}});
+  document.getElementById('estStats').innerHTML=`
+    <div class="est-rrow"><span class="est-rk">Semanas registradas</span><span class="est-rv">${n}</span></div>
+    <div class="est-rrow"><span class="est-rk">Semanas en déficit</span><span class="est-rv" style="color:${deficit>0?'var(--red)':'var(--green)'}">${deficit}</span></div>
+    <div class="est-rrow"><span class="est-rk">Semanas adecuadas</span><span class="est-rv">${adecuadas}</span></div>
+    <div class="est-rrow"><span class="est-rk">Semanas holgadas</span><span class="est-rv">${holgadas}</span></div>
+    <div class="est-rrow"><span class="est-rk">Oferta base media</span><span class="est-rv">${fmt(ofProm)} m³</span></div>
+    <div class="est-rrow"><span class="est-rk">Demanda media</span><span class="est-rv">${fmt(demProm)} m³</span></div>
+    <div class="est-rrow"><span class="est-rk">Balance acumulado</span><span class="est-rv" style="color:${balAcum>=0?'var(--green)':'var(--red)'}">${balAcum>=0?'+':''}${fmt(balAcum)} m³</span></div>
+    ${critica?`<div class="est-rrow"><span class="est-rk">Semana más crítica</span><span class="est-rv">${critica.numero_semana} · ${minCob.toFixed(0)}%</span></div>`:''}`;
 }
 
 function estTabla(rows){
