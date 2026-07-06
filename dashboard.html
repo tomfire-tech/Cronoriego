@@ -418,7 +418,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v13</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v14</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -1423,7 +1423,11 @@ const NUT_ALL=[
 const NUT_MACRO=NUT_ALL.filter(n=>n.grupo==='macro');
 const NUT_MICRO=NUT_ALL.filter(n=>n.grupo==='micro');
 function bnCov(znId,n){return n.calc==='npk'?covMacro(znId,n.m):covMicro(znId,{p:n.p});}
-function bnAvg(n){const vs=G.zonas.map(z=>bnCov(z.id_zona,n)).filter(v=>v!=null);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;}
+function kgMacro(znId,m){const b=GF.bal[znId];if(!b)return null;return{dem:numF(b[m.dem]),ap:accZona(znId,m.acc)};}
+// un % por encima de 1000 casi siempre es un dato corrupto (escalas mezcladas): se ignora en promedios/gráfico
+const COV_MAX_VALIDA=1000;
+function covValida(v){return v!=null&&v<COV_MAX_VALIDA;}
+function bnAvg(n){const vs=G.zonas.map(z=>bnCov(z.id_zona,n)).filter(covValida);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;}
 function bnState(p){if(p==null)return{t:'s/d',cls:'',c:'#94A3B8'};if(p>120)return{t:'Exceso',cls:'aju',c:'#EA580C'};if(p<80)return{t:'Déficit',cls:'cri',c:'#DC2626'};return{t:'Óptimo',cls:'ade',c:'#16A34A'};}
 
 async function loadRenderBalance(){
@@ -1445,7 +1449,7 @@ function bnKpis(){
   const covProm=covs.length?Math.round(covs.reduce((a,b)=>a+b,0)/covs.length):null;
   const deficit=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a<80;});
   const exceso=NUT_ALL.filter(n=>{const a=bnAvg(n);return a!=null&&a>120;});
-  const zCrit=G.zonas.filter(z=>{const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return pr!=null&&pr<80;});
+  const zCrit=G.zonas.filter(z=>{const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(covValida);const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return pr!=null&&pr<80;});
   document.getElementById('bnkpi').innerHTML=`
   <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
     <div><div class="kpi-lbl">Cobertura promedio</div><div class="kpi-val" style="color:#7C3AED">${covProm!=null?covProm+'%':'—'}</div><div class="kpi-sub">promedio general</div></div></div>
@@ -1472,8 +1476,17 @@ const bnRefLines={id:'bnRefLines',beforeDatasetsDraw(chart){
 function bnChartGrupo(nutrientes,canvasId,chartKey){
   const VMAX=150; // tope visual del radar (los valores reales van en tooltip/etiqueta)
   const labels=nutrientes.map(n=>n.k);
-  const raw=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):0;});
-  const vis=raw.map(v=>Math.min(v,VMAX));
+  // cobertura promedio por nutriente, ignorando datos corruptos (>1000%)
+  const raw=nutrientes.map(n=>{const a=bnAvg(n);return a!=null?Math.round(a):null;});
+  const vis=raw.map(v=>v==null?0:Math.min(v,VMAX));
+  // etiqueta: NPK muestra kg aportado/demanda; ppm muestra %
+  const etiquetas=nutrientes.map((n,i)=>{
+    if(n.calc==='npk'){
+      let dem=0,ap=0;G.zonas.forEach(z=>{const kg=kgMacro(z.id_zona,n.m);if(kg){dem+=kg.dem;ap+=kg.ap;}});
+      return `${ap.toFixed(0)}/${dem.toFixed(0)}kg`;
+    }
+    return raw[i]!=null?raw[i]+'%':'s/d';
+  });
   if(GB[chartKey])GB[chartKey].destroy();
   const ctx=document.getElementById(canvasId).getContext('2d');
   GB[chartKey]=new Chart(ctx,{type:'radar',
@@ -1487,13 +1500,16 @@ function bnChartGrupo(nutrientes,canvasId,chartKey){
           filter:i=>i.datasetIndex===1,
           callbacks:{
             title:items=>{const n=nutrientes[items[0].dataIndex];return n?n.k:'';},
-            label:c=>{const rv=raw[c.dataIndex];const st=rv>120?'Exceso':rv<80?'Déficit':'Óptimo';return [`Cobertura: ${rv}%`,`Estado: ${st}`];}
+            label:c=>{const n=nutrientes[c.dataIndex];const rv=raw[c.dataIndex];
+              if(n.calc==='npk'){let dem=0,ap=0;G.zonas.forEach(z=>{const kg=kgMacro(z.id_zona,n.m);if(kg){dem+=kg.dem;ap+=kg.ap;}});return [`Aportado: ${ap.toFixed(1)} kg`,`Demanda: ${dem.toFixed(1)} kg`];}
+              if(rv==null)return 'Sin dato válido';
+              const st=rv>120?'Exceso':rv<80?'Déficit':'Óptimo';return [`Cobertura: ${rv}%`,`Estado: ${st}`];}
           }}},
       scales:{r:{min:0,max:VMAX,beginAtZero:true,
         ticks:{stepSize:50,showLabelBackdrop:false,color:'#A3AEC0',font:{size:9},callback:v=>v+'%'},
         angleLines:{color:'#E2E8F0'},grid:{color:'#E8EDF3'},
         pointLabels:{color:'#3F506A',font:{size:12,weight:'700'},
-          callback:(label,index)=>[label, (raw[index]!=null?raw[index]+'%':'—')]}}}}
+          callback:(label,index)=>[label, etiquetas[index]]}}}}
   });
 }
 function bnChart(){
@@ -1504,11 +1520,24 @@ function bnChart(){
 function bnTablaGrupo(nutrientes,tablaId){
   let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+nutrientes.map(n=>`<th>${n.k}</th>`).join('')+`<th>Estado</th></tr></thead><tbody>`;
   G.zonas.forEach((z,zi)=>{
-    const vs=nutrientes.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
+    // estado de la fila: promedio de coberturas válidas (ignora datos corruptos >1000%)
+    const vs=nutrientes.map(n=>bnCov(z.id_zona,n)).filter(covValida);
     const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
     const st=bnState(pr);
     h+=`<tr><td><div class="zona-dot" style="background:${ZC[zi%ZC.length]};display:inline-block;margin-right:5px"></div>${z.nombre||'Zona'}</td><td>${z.superficie_ha||'—'}</td>`;
-    h+=nutrientes.map(n=>{const c=bnCov(z.id_zona,n);if(c==null)return '<td style="color:var(--subtle)">—</td>';const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;}).join('');
+    h+=nutrientes.map(n=>{
+      if(n.calc==='npk'){
+        const kg=kgMacro(z.id_zona,n.m);
+        if(!kg||kg.dem<=0)return '<td style="color:var(--subtle)">—</td>';
+        const ratio=kg.ap/kg.dem*100;
+        const col=ratio>120?'#EA580C':ratio<80?'#DC2626':'#16A34A';
+        return `<td style="color:${col};font-weight:600" title="Aportado ${kg.ap.toFixed(1)} kg · Demanda ${kg.dem.toFixed(1)} kg">${kg.ap.toFixed(1)}<span style="color:var(--subtle);font-weight:400"> / ${kg.dem.toFixed(1)}</span></td>`;
+      }
+      const c=bnCov(z.id_zona,n);
+      if(c==null)return '<td style="color:var(--subtle)">—</td>';
+      if(c>=COV_MAX_VALIDA)return '<td style="color:#DC2626;font-weight:600" title="Valor fuera de rango — revisar este dato en el Excel (escalas mezcladas)">⚠</td>';
+      const s=bnState(c);return `<td style="color:${s.c};font-weight:600">${Math.round(c)}%</td>`;
+    }).join('');
     h+=`<td><span class="est-badge ${st.cls}">${st.t}</span></td></tr>`;
   });
   document.getElementById(tablaId).innerHTML=h+'</tbody>';
@@ -1544,7 +1573,7 @@ function bnAlertas(){
 
 function bnZonas(){
   const ranked=G.zonas.map((z,zi)=>{
-    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(v=>v!=null);
+    const vs=NUT_ALL.map(n=>bnCov(z.id_zona,n)).filter(covValida);
     const pr=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
     return {z,zi,pr};
   }).filter(x=>x.pr!=null).sort((a,b)=>a.pr-b.pr).slice(0,5);
