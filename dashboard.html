@@ -260,7 +260,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 #view-ferti .kpi-val{font-size:26px;}
 #view-ferti .kpi-val.sm{font-size:19px;}
 .fc-prod{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ferti-card{width:100%;height:88px;border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
+.ferti-card{width:100%;height:104px;border-radius:var(--r);padding:9px 11px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
 .ferti-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 .fc-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .fc-dosis{font-family:'Fraunces',serif;font-size:18px;font-weight:700;line-height:1;letter-spacing:-.3px;display:flex;align-items:center;gap:4px;}
@@ -418,7 +418,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v16</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v17</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -1160,16 +1160,20 @@ function rCalF(){
   let th=`<thead><tr><th class="th-zona" style="padding-bottom:12px">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px"><div class="th-num">${d.getDate()}</div><div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
   let tb='<tbody>';
   G.zonas.forEach((z,i)=>{const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];
-    tb+=`<tr style="height:96px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona" style="cursor:pointer"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
+    tb+=`<tr style="height:116px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona" style="cursor:pointer"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
       <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
     dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
       if(evs&&evs.length){const e=evs[0];
-        const vsm=numF(e.volumen_sol_madre_l);
+        const vsm=numF(e.volumen_sol_madre_l);const dpe=numF(e.dosis_producto_estanque_kg);
+        const fmtN=v=>v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(1);
         tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
           <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-clock-hour-4" style="font-size:14px"></i>${hmF(e.tiempo_fertirriego_hrs)||'—'}</span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
           <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
-          <div class="fc-foot"><span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${vsm>0?`${vsm>=100?Math.round(vsm).toLocaleString('es-CL'):vsm.toFixed(1)} L sol. madre`:'sol. madre s/d'}</span></div>
+          <div class="fc-foot" style="flex-direction:column;align-items:flex-start;gap:2px">
+            <span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${vsm>0?`${fmtN(vsm)} L madre`:'madre s/d'}</span>
+            <span class="fc-time"><i class="ti ti-box" style="font-size:11px"></i>${dpe>0?`${fmtN(dpe)} kg estanque`:'estanque s/d'}</span>
+          </div>
         </div></div></td>`;
       } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
     });
