@@ -432,7 +432,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v20</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v21</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -588,7 +588,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </div>
 <div class="plan-lock" id="planLock">
   <div class="lock-card">
-    <div class="lock-badge"><i class="ti ti-crown"></i> PLAN PRO</div>
+    <div class="lock-badge" id="lockBadge"><i class="ti ti-crown"></i> PLAN PRO</div>
     <div class="lock-ico" id="lockIco"><i class="ti ti-lock"></i></div>
     <div class="lock-title" id="lockTitle">Módulo no incluido</div>
     <div class="lock-desc" id="lockDesc">Este módulo no está incluido en tu plan actual. Actívalo para ver toda la información.</div>
@@ -1152,12 +1152,14 @@ const MOD_INFO={
   estanque:{nombre:'Dinámica de Estanque',ico:'ti-droplet-filled'},
   balance:{nombre:'Balance Nutricional',ico:'ti-chart-donut-3'},
 };
+// Plan mínimo que incluye cada módulo (Estándar: riego · Pro: +ferti +estanque · Premium: +balance)
+const MOD_PLAN={riego:'Estándar',ferti:'Pro',estanque:'Pro',balance:'Premium'};
 function tieneModulo(m){return MODULOS.includes(m);}
 function marcarTabsPlan(){
   ['riego','ferti','estanque','balance'].forEach(m=>{
     const tab=document.getElementById('tab-'+m);if(!tab)return;
     const pro=tab.querySelector('.tab-pro');
-    if(!tieneModulo(m)&&!pro)tab.insertAdjacentHTML('beforeend','<span class="tab-pro">PRO</span>');
+    if(!tieneModulo(m)&&!pro)tab.insertAdjacentHTML('beforeend','<span class="tab-pro">'+MOD_PLAN[m].toUpperCase()+'</span>');
     else if(tieneModulo(m)&&pro)pro.remove();
   });
 }
@@ -1166,9 +1168,10 @@ function aplicarBloqueo(tab){
   const lock=document.getElementById('planLock');
   if(!tieneModulo(tab)){
     document.getElementById('view-'+tab)?.classList.add('blurred');
-    const info=MOD_INFO[tab];
+    const info=MOD_INFO[tab];const plan=MOD_PLAN[tab];
+    document.getElementById('lockBadge').innerHTML='<i class="ti ti-crown"></i> PLAN '+plan.toUpperCase();
     document.getElementById('lockTitle').textContent='Módulo '+info.nombre;
-    document.getElementById('lockDesc').textContent='El módulo de '+info.nombre+' no está incluido en tu plan actual. Actívalo para acceder a toda la información.';
+    document.getElementById('lockDesc').textContent='El módulo de '+info.nombre+' está disponible en el plan '+plan+'. Actívalo para acceder a toda la información.';
     document.getElementById('lockIco').innerHTML='<i class="ti '+info.ico+'"></i>';
     lock.classList.add('show');
   } else lock.classList.remove('show');
