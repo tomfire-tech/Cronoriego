@@ -392,17 +392,32 @@ function planChipsHTML(rsId, modulos){
 async function togglePlan(rsId, modulo, el){
   const cont=el.parentElement;
   const chips=[...cont.querySelectorAll('.plan-chip')];
-  // estado nuevo
   el.classList.toggle('on');
   const activos=chips.filter(c=>c.classList.contains('on')).map(c=>c.dataset.mod);
-  const nuevoStr=MODULOS_DEF.filter(m=>activos.includes(m)).join(','); // orden fijo
+  const nuevoStr=MODULOS_DEF.filter(m=>activos.includes(m)).join(',');
   cont.classList.add('saving');chips.forEach(c=>c.classList.add('saving'));
-  const { error } = await db.from('razones_sociales').update({ modulos: nuevoStr }).eq('"ID Razón Social (PK)"', rsId);
+  const { data, error } = await db.from('razones_sociales')
+    .update({ modulos: nuevoStr })
+    .eq('"ID Razón Social (PK)"', rsId)
+    .select('"ID Razón Social (PK)",modulos');
   cont.classList.remove('saving');chips.forEach(c=>c.classList.remove('saving'));
   if(error){
-    el.classList.toggle('on'); // revertir
-    alert('No se pudo guardar el plan: '+error.message);
+    el.classList.toggle('on');
+    alert('Error al guardar el plan:\n'+error.message+'\n\nCódigo: '+(error.code||'—')+'\nDetalle: '+(error.details||'—'));
+    return;
   }
+  if(!data||!data.length){
+    el.classList.toggle('on');
+    alert('El guardado no afectó ninguna fila.\n\nCausa probable: las políticas RLS de Supabase no permiten UPDATE en "razones_sociales" con esta cuenta, o el nombre de la PK no coincide.');
+    return;
+  }
+  flashGuardado(cont);
+}
+function flashGuardado(cont){
+  let tag=cont.querySelector('.plan-saved');
+  if(!tag){tag=document.createElement('span');tag.className='plan-saved';tag.style.cssText='font-size:11px;color:var(--green-700);font-weight:700;margin-left:4px;';cont.appendChild(tag);}
+  tag.textContent='✓';
+  clearTimeout(tag._t);tag._t=setTimeout(()=>{tag.textContent='';},1500);
 }
 
 async function cargarDatos() {
