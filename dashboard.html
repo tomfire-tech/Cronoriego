@@ -432,7 +432,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v18</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v20</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -658,6 +658,12 @@ async function init(){
   const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
   G.rsId=u?.[0]?.id_rs||null;
   if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
+  // Plan del agricultor: leer 'modulos' de razones_sociales (lo gestiona el panel admin). Si falla o no viene, queda el default.
+  try{
+    const {data:rsRow}=await db.from('razones_sociales').select('modulos').eq('"ID Razón Social (PK)"',G.rsId).limit(1);
+    const planStr=rsRow?.[0]?.modulos;
+    if(planStr&&typeof planStr==='string')MODULOS=planStr.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+  }catch(e){}
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
   sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
@@ -1137,9 +1143,9 @@ function hmF(h){const f=numF(h);if(f<=0)return null;const hh=Math.floor(f),mm=Ma
 function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2}/);return m?m[0]:p.split('(')[0].trim().slice(0,16);}
 
 // ===== PLAN / MÓDULOS =====
-// Módulos que el agricultor tiene contratados. LUEGO vendrá de Supabase (campo 'plan' en la razón social).
-// Para probar distintos planes mientras desarrollas, cambia este array: 'riego','ferti','estanque','balance'
-let MODULOS=['riego','ferti'];
+// Módulos que el agricultor tiene contratados. Se sobrescribe al cargar con el campo 'modulos' de Supabase.
+// Default = todo visible, para no bloquear a nadie mientras configuras los planes en la base.
+let MODULOS=['riego','ferti','estanque','balance'];
 const MOD_INFO={
   riego:{nombre:'Riego',ico:'ti-droplet'},
   ferti:{nombre:'Fertirriego',ico:'ti-flask-2'},
