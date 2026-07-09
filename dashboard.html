@@ -252,6 +252,20 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .tab i{font-size:16px;}.tab:hover{color:var(--ink2);}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
 .view{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+/* ===== Bloqueo por plan ===== */
+.views{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;}
+.view.blurred{filter:blur(3px) saturate(.85);pointer-events:none;user-select:none;transition:filter .25s;}
+.plan-lock{position:absolute;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(248,250,252,.30),rgba(248,250,252,.55));}
+.plan-lock.show{display:flex;}
+.lock-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:32px 36px;box-shadow:0 24px 64px rgba(15,23,42,.20);text-align:center;max-width:400px;animation:lockIn .3s ease;}
+@keyframes lockIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.lock-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;font-weight:800;font-size:12px;padding:6px 14px;border-radius:99px;letter-spacing:.8px;margin-bottom:16px;box-shadow:0 6px 16px rgba(217,119,6,.30);}
+.lock-ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;margin:0 auto 14px;background:#FFF7ED;color:#EA580C;font-size:26px;}
+.lock-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.lock-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+.lock-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E8449,#166534);color:#fff;border:none;font-weight:700;font-size:14px;padding:11px 22px;border-radius:11px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 20px rgba(30,132,73,.28);}
+.lock-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(30,132,73,.36);}
+.tab .tab-pro{font-size:8px;font-weight:800;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;padding:1px 5px;border-radius:6px;margin-left:5px;letter-spacing:.5px;vertical-align:middle;}
 #view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
 #view-ferti .franja{grid-template-columns:repeat(3,1fr);}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
@@ -418,7 +432,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v17</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v18</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -457,6 +471,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet-filled"></i>Dinámica de Estanque</div>
   <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
 </div>
+<div class="views" id="viewsWrap">
 <div id="view-riego" class="view">
 
 <div class="kpi-bar" id="kpib">
@@ -571,6 +586,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
 </div>
+<div class="plan-lock" id="planLock">
+  <div class="lock-card">
+    <div class="lock-badge"><i class="ti ti-crown"></i> PLAN PRO</div>
+    <div class="lock-ico" id="lockIco"><i class="ti ti-lock"></i></div>
+    <div class="lock-title" id="lockTitle">Módulo no incluido</div>
+    <div class="lock-desc" id="lockDesc">Este módulo no está incluido en tu plan actual. Actívalo para ver toda la información.</div>
+    <button class="lock-btn" onclick="cambiarPlan()"><i class="ti ti-arrow-up-circle"></i> Cambiar de plan</button>
+  </div>
+</div>
+</div><!-- /views -->
 </div><!-- /app -->
 
 <script>
@@ -649,6 +674,8 @@ async function onEquipo(){
   const eqId=document.getElementById('se').value;
   G.zonas=await qZ(eqId);
   if(G.zonas.length)await loadRender();
+  marcarTabsPlan();
+  aplicarBloqueo(TAB);
 }
 async function loadRender(){
   const eqId=document.getElementById('se').value;
@@ -1109,6 +1136,42 @@ const numF=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
 function hmF(h){const f=numF(h);if(f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00`:`${hh}h ${String(mm).padStart(2,'0')}`;}
 function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2}/);return m?m[0]:p.split('(')[0].trim().slice(0,16);}
 
+// ===== PLAN / MÓDULOS =====
+// Módulos que el agricultor tiene contratados. LUEGO vendrá de Supabase (campo 'plan' en la razón social).
+// Para probar distintos planes mientras desarrollas, cambia este array: 'riego','ferti','estanque','balance'
+let MODULOS=['riego','ferti'];
+const MOD_INFO={
+  riego:{nombre:'Riego',ico:'ti-droplet'},
+  ferti:{nombre:'Fertirriego',ico:'ti-flask-2'},
+  estanque:{nombre:'Dinámica de Estanque',ico:'ti-droplet-filled'},
+  balance:{nombre:'Balance Nutricional',ico:'ti-chart-donut-3'},
+};
+function tieneModulo(m){return MODULOS.includes(m);}
+function marcarTabsPlan(){
+  ['riego','ferti','estanque','balance'].forEach(m=>{
+    const tab=document.getElementById('tab-'+m);if(!tab)return;
+    const pro=tab.querySelector('.tab-pro');
+    if(!tieneModulo(m)&&!pro)tab.insertAdjacentHTML('beforeend','<span class="tab-pro">PRO</span>');
+    else if(tieneModulo(m)&&pro)pro.remove();
+  });
+}
+function aplicarBloqueo(tab){
+  ['riego','ferti','estanque','balance'].forEach(m=>document.getElementById('view-'+m)?.classList.remove('blurred'));
+  const lock=document.getElementById('planLock');
+  if(!tieneModulo(tab)){
+    document.getElementById('view-'+tab)?.classList.add('blurred');
+    const info=MOD_INFO[tab];
+    document.getElementById('lockTitle').textContent='Módulo '+info.nombre;
+    document.getElementById('lockDesc').textContent='El módulo de '+info.nombre+' no está incluido en tu plan actual. Actívalo para acceder a toda la información.';
+    document.getElementById('lockIco').innerHTML='<i class="ti '+info.ico+'"></i>';
+    lock.classList.add('show');
+  } else lock.classList.remove('show');
+}
+function cambiarPlan(){
+  // Placeholder — aquí irá el flujo real de cambio de plan / contacto comercial.
+  alert('Aquí irá el flujo para cambiar de plan.\n\nMódulos activos: '+MODULOS.join(', '));
+}
+
 function switchTab(t){
   if(t===TAB)return;TAB=t;
   const TABS=['riego','ferti','estanque','balance'];
@@ -1120,6 +1183,7 @@ function switchTab(t){
   if(t==='ferti'&&G.zonas.length)loadRenderFerti();
   if(t==='estanque')loadRenderEstanque();
   if(t==='balance'&&G.zonas.length)loadRenderBalance();
+  aplicarBloqueo(t);
 }
 
 async function loadRenderFerti(){
