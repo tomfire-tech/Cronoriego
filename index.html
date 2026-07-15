@@ -27,6 +27,7 @@
     --bg:      #ffffff;
     --bg-soft: #f7faf9;
     --danger:  #c0392b;
+    --amber:   #c68c1e;
     --radius-lg: 20px;
     --radius-md: 14px;
     --shadow-sm: 0 1px 2px rgba(15, 58, 82, 0.05), 0 2px 8px rgba(15, 58, 82, 0.04);
@@ -274,126 +275,175 @@
   @media (max-width: 1000px) { .steps { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 540px) { .steps { grid-template-columns: 1fr; } }
 
-  /* WhatsApp */
-  .whatsapp-section {
+  /* ===== PLATAFORMA · DEMO INTERACTIVO ===== */
+  .platform {
     background:
-      radial-gradient(700px 400px at 15% 10%, rgba(30, 132, 73, 0.08), transparent 60%),
-      radial-gradient(700px 400px at 85% 90%, rgba(37, 211, 102, 0.08), transparent 60%),
+      radial-gradient(700px 400px at 15% 10%, rgba(46, 134, 171, 0.08), transparent 60%),
+      radial-gradient(700px 400px at 85% 90%, rgba(30, 132, 73, 0.08), transparent 60%),
       var(--bg);
     overflow: hidden;
   }
-  .wa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  .wa-copy .eyebrow { background: #e6f7ed; color: #128c3a; }
-  .wa-features { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
-  .wa-feat { display: flex; gap: 14px; align-items: flex-start; }
-  .wa-feat-icon {
-    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-    background: #e6f7ed; color: #128c3a;
-    display: inline-flex; align-items: center; justify-content: center;
+  .platform .section-head { margin-bottom: 36px; }
+  .demo-hint {
+    display: inline-flex; align-items: center; gap: 9px;
+    margin-top: 18px; padding: 8px 14px; border-radius: 999px;
+    background: var(--green-50); color: var(--green-700);
+    border: 1px solid rgba(30,132,73,.2);
+    font-size: 13.5px; font-weight: 600;
   }
-  .wa-feat h4 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; color: var(--teal-900); margin-bottom: 2px; }
-  .wa-feat p { font-size: 14.5px; color: var(--ink-2); }
+  .demo-hint svg { animation: tap 2.4s ease-in-out infinite; }
+  @keyframes tap { 0%,70%,100% { transform: none; } 80% { transform: translateY(-3px); } 90% { transform: translateY(0); } }
 
-  .phone {
-    width: 360px; max-width: 100%;
-    margin: 0 auto;
-    background: #0b141a;
-    border-radius: 44px;
-    padding: 14px;
-    box-shadow: 0 40px 80px rgba(15, 58, 82, 0.22), 0 10px 30px rgba(15, 58, 82, 0.10);
-    position: relative;
+  .demo-frame {
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--line); background: #fff;
+    box-shadow: var(--shadow-lg);
   }
-  .phone::before {
-    content: "";
-    position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-    width: 110px; height: 28px; background: #0b141a;
-    border-radius: 20px; z-index: 3;
-  }
-  .phone-screen {
-    background: #e5ddd5;
-    border-radius: 32px;
-    overflow: hidden;
-    position: relative;
-    height: 620px;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1px),
-      radial-gradient(circle at 60% 70%, rgba(0,0,0,0.02) 1px, transparent 1px),
-      linear-gradient(135deg, #efeae2 0%, #e7ddd2 100%);
-    background-size: 30px 30px, 40px 40px, 100% 100%;
-    display: flex; flex-direction: column;
-  }
-  .wa-header {
-    background: #128c3a;
-    color: #fff;
-    padding: 44px 16px 12px;
+  .demo-chrome {
+    background: var(--teal-900);
+    padding: 11px 16px;
     display: flex; align-items: center; gap: 12px;
-    flex-shrink: 0;
   }
-  .wa-back { width: 18px; height: 18px; color: #fff; opacity: .9; }
-  .wa-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: #fff; flex-shrink: 0;
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 2px; overflow: hidden;
+  .demo-dots { display: flex; gap: 6px; }
+  .demo-dots i { width: 10px; height: 10px; border-radius: 50%; display: block; opacity: .75; }
+  .demo-url {
+    flex: 1; max-width: 300px; margin: 0 auto; text-align: center;
+    background: rgba(255,255,255,.10); color: rgba(255,255,255,.7);
+    font-size: 12px; padding: 5px 12px; border-radius: 999px;
   }
-  .wa-avatar img { width: 100%; height: 100%; object-fit: contain; }
-  .wa-contact { flex: 1; line-height: 1.1; }
-  .wa-contact .name { font-weight: 600; font-size: 15px; }
-  .wa-contact .status { font-size: 11.5px; opacity: .85; margin-top: 2px; }
-  .wa-icons { display: flex; gap: 16px; color: #fff; opacity: .9; }
+  .demo-live {
+    font-size: 10px; font-weight: 800; letter-spacing: .1em;
+    color: #7EC8A0; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .demo-live i { width: 6px; height: 6px; border-radius: 50%; background: #7EC8A0; display: block; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
 
-  .wa-chat {
-    flex: 1; overflow: hidden;
-    padding: 14px 12px 12px;
-    display: flex; flex-direction: column; gap: 8px;
+  .demo-head {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 14px 20px; border-bottom: 1px solid var(--line);
   }
-  .wa-date {
-    align-self: center; background: #ddecc9; color: #3b4a3c;
-    font-size: 11px; padding: 4px 10px; border-radius: 8px;
-    box-shadow: 0 1px 0 rgba(0,0,0,.04);
-    margin: 2px 0 6px;
+  .demo-logo { font-weight: 800; font-size: 14px; letter-spacing: .02em; }
+  .demo-logo .a { color: var(--teal-700); }
+  .demo-logo .b { color: var(--green-700); }
+  .demo-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 6px 12px; font-size: 13px; color: var(--ink);
   }
-  .bubble {
-    max-width: 78%;
-    padding: 8px 11px 6px;
-    border-radius: 10px;
-    font-size: 13px; line-height: 1.4;
-    color: #111b21;
-    position: relative;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,.08);
-    word-wrap: break-word;
+  .demo-chip span { font-size: 9px; font-weight: 800; letter-spacing: .1em; color: var(--muted); }
+  .demo-chip b { font-weight: 700; }
+  .demo-wk { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+  .demo-wk button {
+    width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: #fff; color: var(--teal-700);
+    font-size: 16px; line-height: 1; display: grid; place-items: center;
+    transition: background .2s ease, border-color .2s ease;
   }
-  .bubble .time { display: inline-block; font-size: 10px; color: #667781; margin-left: 8px; vertical-align: baseline; }
-  .bubble.received { background: #fff; align-self: flex-start; border-top-left-radius: 2px; }
-  .bubble.sent { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 2px; }
-  .bubble .tick { color: #53bdeb; font-weight: bold; margin-left: 2px; font-size: 11px; }
-  .bubble strong { font-weight: 700; }
-  .bubble .zone-line { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; border-bottom: 1px dashed rgba(0,0,0,.08); font-variant-numeric: tabular-nums; }
-  .bubble .zone-line:last-of-type { border-bottom: 0; }
-  .bubble .zone-line b { color: #128c3a; font-weight: 700; }
-  .bubble .title { font-weight: 700; color: #128c3a; display: block; margin-bottom: 6px; font-size: 12.5px; }
+  .demo-wk button:hover { background: var(--teal-50); border-color: var(--teal-500); }
+  .demo-wk-lbl { text-align: center; min-width: 118px; line-height: 1.25; }
+  .demo-wk-lbl b { display: block; font-size: 13.5px; color: var(--teal-900); }
+  .demo-wk-lbl span { font-size: 11.5px; color: var(--muted); }
+  .demo-temp {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--ink-2); font-weight: 600;
+    border: 1px solid var(--line); border-radius: 10px; padding: 6px 11px;
+  }
+  .demo-temp svg { color: var(--amber); }
 
-  .wa-input {
-    padding: 8px 10px; background: transparent;
+  .demo-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .dt {
+    border: 0; background: none; cursor: pointer; font-family: inherit;
+    font-size: 13.5px; font-weight: 600; color: var(--muted);
+    padding: 13px 14px; position: relative; white-space: nowrap;
+    transition: color .2s ease;
+  }
+  .dt:hover { color: var(--teal-700); }
+  .dt.active { color: var(--green-700); }
+  .dt.active::after {
+    content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px;
+    height: 3px; background: var(--green-700); border-radius: 3px 3px 0 0;
+  }
+
+  .demo-body { padding: 18px 20px 22px; background: var(--bg-soft); }
+  .demo-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .dk {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .dk-l { font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+  .dk-v { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; line-height: 1.1; margin-top: 4px; color: var(--teal-900); }
+  .dk-v small { font-family: 'Manrope', sans-serif; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .dk-s { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+  .demo-split { display: grid; grid-template-columns: 1fr 268px; gap: 12px; align-items: start; }
+  .demo-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .demo-card-t {
+    font-size: 12px; font-weight: 700; color: var(--teal-900);
+    padding: 11px 14px; border-bottom: 1px solid var(--line);
     display: flex; align-items: center; gap: 8px;
-    flex-shrink: 0;
   }
-  .wa-input-field {
-    flex: 1; background: #fff; border-radius: 22px;
-    padding: 9px 14px; color: #667781; font-size: 13px;
-    box-shadow: 0 1px 0.5px rgba(0,0,0,.08);
+  .demo-scroll { overflow-x: auto; }
+  .demo-grid { width: 100%; min-width: 620px; border-collapse: collapse; }
+  .demo-grid th {
+    font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted); padding: 9px 6px; text-align: center; border-bottom: 1px solid var(--line);
   }
-  .wa-send {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #128c3a; color: #fff;
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+  .demo-grid th:first-child { text-align: left; padding-left: 14px; width: 148px; }
+  .demo-grid th b { display: block; font-family: 'Fraunces', serif; font-size: 15px; color: var(--teal-900); font-weight: 600; letter-spacing: 0; }
+  .demo-grid td { padding: 5px 4px; border-bottom: 1px solid #f1f5f6; vertical-align: middle; }
+  .demo-grid tr:last-child td { border-bottom: 0; }
+  .dz { padding-left: 14px !important; }
+  .dz-n { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 13px; color: var(--ink); }
+  .dz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dz-e { font-size: 11px; color: var(--muted); padding-left: 15px; }
+
+  .cell {
+    width: 100%; border: 1px solid transparent; border-radius: 9px;
+    padding: 8px 4px; text-align: center; cursor: pointer;
+    font-family: inherit; background: transparent;
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
   }
+  .cell.on:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .cell.on.sel { border-color: currentColor; box-shadow: 0 0 0 3px rgba(46,134,171,.12); }
+  .cell-h { font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .cell-s { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .cell-off { color: #c8d4d9; font-size: 13px; cursor: default; }
+
+  .demo-side { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .ds-empty { color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+  .ds-empty b { color: var(--teal-700); }
+  .ds-h { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: var(--teal-900); }
+  .ds-sub { font-size: 11.5px; color: var(--muted); margin: 2px 0 12px 15px; }
+  .ds-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 12.5px; }
+  .ds-row:last-child { border-bottom: 0; }
+  .ds-row span { color: var(--muted); }
+  .ds-row b { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .ds-note { margin-top: 12px; padding: 9px 11px; border-radius: 9px; background: var(--green-50); border: 1px solid rgba(30,132,73,.18); font-size: 11.5px; color: var(--green-900); line-height: 1.45; }
+
+  .nut { padding: 12px 14px; }
+  .nut-row { display: grid; grid-template-columns: 62px 1fr 78px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .nut-row:last-child { border-bottom: 0; }
+  .nut-k { font-weight: 800; font-size: 13px; color: var(--teal-900); }
+  .nut-k small { display: block; font-weight: 500; font-size: 10.5px; color: var(--muted); }
+  .nut-bar { height: 9px; border-radius: 999px; background: var(--sage-50); overflow: hidden; }
+  .nut-bar i { display: block; height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+  .nut-v { text-align: right; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .nut-v small { color: var(--muted); font-weight: 500; }
+
+  .demo-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    margin-top: 22px;
+  }
+  .demo-foot p { font-size: 13.5px; color: var(--muted); }
 
   @media (max-width: 900px) {
-    .wa-grid { grid-template-columns: 1fr; gap: 40px; }
-    .wa-copy { order: 1; }
-    .wa-phone-wrap { order: 2; }
+    .demo-kpis { grid-template-columns: repeat(2, 1fr); }
+    .demo-split { grid-template-columns: 1fr; }
+    .demo-wk { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-hint svg, .demo-live i { animation: none; }
+    .cell, .nut-bar i { transition: none; }
   }
 
   /* Benefits */
@@ -589,7 +639,7 @@
     <nav class="nav-links" id="navLinks">
       <a href="#problema">El problema</a>
       <a href="#como-funciona">Cómo funciona</a>
-      <a href="#whatsapp">WhatsApp</a>
+      <a href="#plataforma">La plataforma</a>
       <a href="#beneficios">Beneficios</a>
       <a href="#precios">Precios</a>
       <a href="#clientes">Clientes</a>
@@ -614,7 +664,7 @@
           Quiero mi plan de riego
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
-        <a href="#como-funciona" class="btn-ghost">Ver cómo funciona</a>
+        <a href="#plataforma" class="btn-ghost">Probar la plataforma</a>
       </div>
       <div class="hero-meta">
         <span>
@@ -632,7 +682,7 @@
       <div class="hero-card" aria-hidden="true">
         <div class="hc-head">
           <div class="hc-title">Recomendación semanal · Semana 47</div>
-          <span class="hc-badge">Vía WhatsApp</span>
+          <span class="hc-badge">En tu plataforma</span>
         </div>
         <div class="hc-row">
           <span class="hc-zone">Zona 01</span>
@@ -729,10 +779,10 @@
       <div class="step reveal d3">
         <div class="step-num">03</div>
         <div class="step-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
         </div>
         <h3>Recomendación semanal</h3>
-        <p>Tiempo y frecuencia de riego por zona, entregado cada semana directo a tu WhatsApp.</p>
+        <p>Tiempo y frecuencia de riego por zona, disponible cada semana en tu plataforma.</p>
       </div>
       <div class="step reveal d4">
         <div class="step-num">04</div>
@@ -746,96 +796,65 @@
   </div>
 </section>
 
-<!-- ===== WHATSAPP MOCKUP ===== -->
-<section class="whatsapp-section" id="whatsapp">
-  <div class="container wa-grid">
-    <div class="wa-copy reveal">
-      <span class="eyebrow">Vía WhatsApp</span>
-      <h2 class="section-title">Tu plan de riego llega al teléfono de tu jefe de campo.</h2>
-      <p class="section-lead">Cada semana recibes la recomendación exacta por zona — lista para programar. Y si tienes dudas, respondemos el mismo chat.</p>
-      <div class="wa-features">
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div>
-            <h4>Entrega puntual cada lunes</h4>
-            <p>Recibes el plan de la semana antes de programar los riegos.</p>
-          </div>
+<!-- ===== PLATAFORMA · DEMO INTERACTIVO ===== -->
+<section class="platform" id="plataforma">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">La plataforma</span>
+      <h2 class="section-title">Tu huerto completo, semana a semana, en una sola pantalla.</h2>
+      <p class="section-lead">Cada zona, cada día, cuánto tiempo regar y con qué fertilizante. Sin planillas ni llamadas — entras y está listo.</p>
+      <div class="demo-hint">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.5a1.5 1.5 0 0 1 3 0V13a7 7 0 0 1-7 7h-1a7 7 0 0 1-7-7v-1.5a1.5 1.5 0 0 1 3 0V13"/></svg>
+        Pruébala aquí mismo — cambia de semana, toca un riego
+      </div>
+    </div>
+
+    <div class="demo-frame reveal d2">
+      <div class="demo-chrome">
+        <div class="demo-dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <div class="demo-url">app.cronoriego.com</div>
+        <div class="demo-live"><i></i>DEMO</div>
+      </div>
+
+      <div class="demo-head">
+        <div class="demo-logo"><span class="a">CRONO</span><span class="b">RIEGO</span></div>
+        <div class="demo-chip"><span>PREDIO</span><b>Agrícola El Cruce</b></div>
+        <div class="demo-chip"><span>EQUIPO</span><b>Cabezal Norte</b></div>
+        <div class="demo-wk">
+          <button id="wPrev" aria-label="Semana anterior">‹</button>
+          <div class="demo-wk-lbl"><b id="wLbl">Semana 47</b><span id="wRange">18 – 24 nov</span></div>
+          <button id="wNext" aria-label="Semana siguiente">›</button>
         </div>
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          </div>
-          <div>
-            <h4>Consultas directas al equipo técnico</h4>
-            <p>Responde el chat y te contesta un agrónomo — sin formularios ni tickets.</p>
-          </div>
+        <div class="demo-temp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+          <b id="wTemp">24</b>°C
         </div>
-        <div class="wa-feat">
-          <div class="wa-feat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+
+      <div class="demo-tabs" role="tablist">
+        <button class="dt active" data-tab="riego" role="tab">Riego</button>
+        <button class="dt" data-tab="ferti" role="tab">Fertirriego</button>
+        <button class="dt" data-tab="balance" role="tab">Balance nutricional</button>
+      </div>
+
+      <div class="demo-body">
+        <div class="demo-kpis" id="dKpis"></div>
+        <div class="demo-split">
+          <div class="demo-card">
+            <div class="demo-card-t" id="dCardT">Programa semanal de riego</div>
+            <div class="demo-scroll"><div id="dMain"></div></div>
           </div>
-          <div>
-            <h4>Ajustes en tiempo real</h4>
-            <p>Cambió el clima o falló una bomba — nos avisas y ajustamos el balance.</p>
-          </div>
+          <div class="demo-side" id="dSide"></div>
         </div>
       </div>
     </div>
 
-    <div class="wa-phone-wrap reveal d2">
-      <div class="phone" aria-hidden="true">
-        <div class="phone-screen">
-          <div class="wa-header">
-            <svg class="wa-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <div class="wa-avatar">
-              <img src="https://customer-assets.emergentagent.com/job_cronoriego-landing/artifacts/jcwh689k_image.png" alt="CronoRiego" />
-            </div>
-            <div class="wa-contact">
-              <div class="name">CronoRiego</div>
-              <div class="status">en línea</div>
-            </div>
-            <div class="wa-icons">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </div>
-          </div>
-          <div class="wa-chat">
-            <div class="wa-date">Lunes, 24 de noviembre</div>
-            <div class="bubble received">
-              <span class="title">🌿 Plan de riego · Semana 47</span>
-              <div class="zone-line"><span>Zona 01 · Cerezos</span><b>4.2 h × 3/sem</b></div>
-              <div class="zone-line"><span>Zona 02 · Cerezos</span><b>3.5 h × 3/sem</b></div>
-              <div class="zone-line"><span>Zona 03 · Nogales</span><b>5.1 h × 2/sem</b></div>
-              <div class="zone-line"><span>Zona 04 · Nogales</span><b>2.8 h × 2/sem</b></div>
-              <span class="time">08:15</span>
-            </div>
-            <div class="bubble received">
-              ET₀ de la semana: <strong>5.8 mm/día</strong>. Viene más cálido que la anterior — mantenemos frecuencia y subimos 20 min en Zona 03.
-              <span class="time">08:15</span>
-            </div>
-            <div class="bubble sent">
-              Perfecto. Una consulta: ayer llovieron 6 mm en el sector norte, ¿ajustamos Zona 03 y 04?
-              <span class="time">09:42 <span class="tick">✓✓</span></span>
-            </div>
-            <div class="bubble received">
-              Sí. Con esa lluvia salta un riego en Zona 03 y bajas 40 min en Zona 04 esta semana. Actualizo el balance y te mando el detalle. 👍
-              <span class="time">09:45</span>
-            </div>
-            <div class="bubble sent">
-              Gracias, lo programo ahora.
-              <span class="time">09:46 <span class="tick">✓✓</span></span>
-            </div>
-          </div>
-          <div class="wa-input">
-            <div class="wa-input-field">Escribe un mensaje...</div>
-            <div class="wa-send">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="demo-foot reveal">
+      <p>Datos de demostración de un predio ficticio. Tu plataforma usa los datos reales de tu huerto.</p>
+      <a href="#contacto" class="btn-primary" style="padding:13px 22px;font-size:15px">
+        Quiero la mía
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
   </div>
 </section>
@@ -902,7 +921,7 @@
         <div class="price-amount">$13.200<small>por zona / mes</small></div>
         <ul class="price-features">
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Balance hídrico semanal</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Entrega por WhatsApp</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Acceso a la plataforma</li>
           <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Soporte técnico</li>
         </ul>
       </div>
@@ -1028,8 +1047,8 @@
           <a href="mailto:montti.manuel@gmail.com">montti.manuel@gmail.com</a>
         </div>
         <div class="cta-info-row">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          Recomendaciones vía WhatsApp
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          Plataforma web con tu plan semanal
         </div>
         <div class="cta-info-row">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1057,7 +1076,7 @@
           <input id="f-email" name="email" type="email" required placeholder="tu@correo.com" />
         </div>
         <div class="field">
-          <label for="f-phone">Teléfono / WhatsApp</label>
+          <label for="f-phone">Teléfono</label>
           <input id="f-phone" name="phone" type="tel" placeholder="+56 9 ..." />
         </div>
       </div>
@@ -1128,6 +1147,222 @@
   window.addEventListener('scroll', safety, { passive: true });
   window.addEventListener('resize', safety);
   window.addEventListener('load', safety);
+
+  /* ============================================================
+     DEMO INTERACTIVO DE LA PLATAFORMA
+     Datos ficticios. Para cambiar el predio de ejemplo, edita DEMO.
+  ============================================================ */
+  const DEMO = {
+    dias: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+    zonas: [
+      { n:'Zona 1', e:'Cerezos · Santina',  ha:2.1, c:'#2E86AB', riego:[0,3.7,0,3.9,0,4.1,0] },
+      { n:'Zona 2', e:'Cerezos · Lapins',   ha:1.8, c:'#1E8449', riego:[0,3.2,0,3.4,0,3.5,0] },
+      { n:'Zona 3', e:'Nogales · Chandler', ha:3.2, c:'#c68c1e', riego:[5.2,0,0,0,5.4,0,0] },
+      { n:'Zona 4', e:'Nogales · Serr',     ha:2.5, c:'#7C3AED', riego:[4.6,0,0,0,4.8,0,0] },
+      { n:'Zona 5', e:"Ciruelos · D'Agen",  ha:1.4, c:'#c0392b', riego:[0,0,2.9,0,0,0,3.1] },
+    ],
+    semanas: [
+      { lbl:'Semana 46', rng:'11 – 17 nov', temp:21, eto:4.9, f:0.86 },
+      { lbl:'Semana 47', rng:'18 – 24 nov', temp:24, eto:5.8, f:1.00 },
+      { lbl:'Semana 48', rng:'25 nov – 1 dic', temp:27, eto:6.6, f:1.14 },
+    ],
+    // fertirriego: [indice zona, indice dia, producto, kg, litros solución madre]
+    ferti: [
+      [0, 2, '15-5-35', 12.4, 800],
+      [1, 2, '15-5-35',  9.8, 800],
+      [2, 4, '20-13-20', 18.2, 1000],
+      [3, 4, '20-13-20', 15.6, 1000],
+      [4, 6, '3-11-38',   8.6, 600],
+    ],
+    nutrientes: [
+      { k:'N',    nom:'Nitrógeno', kg:128, c:'#2E86AB' },
+      { k:'P₂O₅', nom:'Fósforo',   kg:22,  c:'#c68c1e' },
+      { k:'K₂O',  nom:'Potasio',   kg:96,  c:'#7C3AED' },
+      { k:'Ca',   nom:'Calcio',    kg:41,  c:'#1E8449' },
+      { k:'Mg',   nom:'Magnesio',  kg:18,  c:'#c0392b' },
+    ],
+  };
+
+  let wIdx = 1;           // semana actual
+  let tab = 'riego';      // pestaña activa
+  let sel = null;         // celda seleccionada
+
+  const hm = (h) => {
+    const t = Math.round(h * 60);
+    return `${Math.floor(t/60)}h ${String(t%60).padStart(2,'0')}m`;
+  };
+  const nf = (v, d=0) => v.toLocaleString('es-CL', { minimumFractionDigits:d, maximumFractionDigits:d });
+  const horas = (z, d) => +(DEMO.zonas[z].riego[d] * DEMO.semanas[wIdx].f).toFixed(2);
+  const volumen = (z, d) => horas(z,d) * DEMO.zonas[z].ha * 9.4;
+  const lamina  = (z, d) => horas(z,d) * 1.6;
+
+  function kpis() {
+    const s = DEMO.semanas[wIdx];
+    let vol = 0, hrs = 0, act = 0;
+    DEMO.zonas.forEach((z, zi) => {
+      let zh = 0;
+      z.riego.forEach((_, di) => { vol += volumen(zi,di); zh += horas(zi,di); });
+      hrs += zh; if (zh > 0) act++;
+    });
+    if (tab === 'riego') return [
+      { l:'Volumen semana', v:nf(vol), u:'m³', s:'agua programada' },
+      { l:'ET₀ semana',     v:nf(s.eto,1), u:'mm/día', s:'demanda atmosférica' },
+      { l:'Horas de riego', v:nf(hrs,1), u:'h', s:'suma de todas las zonas' },
+      { l:'Zonas activas',  v:String(act), u:`/ ${DEMO.zonas.length}`, s:'con riego esta semana' },
+    ];
+    if (tab === 'ferti') {
+      const kg = DEMO.ferti.reduce((a,f) => a + f[3], 0);
+      const lt = [...new Set(DEMO.ferti.map(f => f[1]))].reduce((a,d) => a + DEMO.ferti.filter(f=>f[1]===d)[0][4], 0);
+      return [
+        { l:'Aplicaciones', v:String(DEMO.ferti.length), u:'', s:'programadas esta semana' },
+        { l:'Producto total', v:nf(kg,1), u:'kg', s:'sumando todas las zonas' },
+        { l:'Solución madre', v:nf(lt), u:'L', s:'a preparar en el estanque' },
+        { l:'Días con ferti', v:String(new Set(DEMO.ferti.map(f=>f[1])).size), u:'', s:'de 7 de la semana' },
+      ];
+    }
+    const tot = DEMO.nutrientes.reduce((a,n) => a + n.kg, 0);
+    return [
+      { l:'Demanda N',    v:nf(DEMO.nutrientes[0].kg), u:'kg', s:'nitrógeno · temporada' },
+      { l:'Demanda P₂O₅', v:nf(DEMO.nutrientes[1].kg), u:'kg', s:'fósforo · temporada' },
+      { l:'Demanda K₂O',  v:nf(DEMO.nutrientes[2].kg), u:'kg', s:'potasio · temporada' },
+      { l:'Demanda total',v:nf(tot), u:'kg', s:'todos los nutrientes' },
+    ];
+  }
+
+  function pintaKpis() {
+    document.getElementById('dKpis').innerHTML = kpis().map(k => `
+      <div class="dk">
+        <div class="dk-l">${k.l}</div>
+        <div class="dk-v">${k.v} <small>${k.u}</small></div>
+        <div class="dk-s">${k.s}</div>
+      </div>`).join('');
+  }
+
+  function cabecera() {
+    const s = DEMO.semanas[wIdx];
+    const base = new Date(2025, 10, 18 + (wIdx - 1) * 7);
+    return `<tr><th>Zona</th>${DEMO.dias.map((d,i) => {
+      const f = new Date(base); f.setDate(base.getDate() + i);
+      return `<th><b>${f.getDate()}</b>${d}</th>`;
+    }).join('')}</tr>`;
+  }
+
+  function tablaRiego() {
+    return `<table class="demo-grid"><thead>${cabecera()}</thead><tbody>` +
+      DEMO.zonas.map((z, zi) => `<tr>
+        <td class="dz">
+          <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+          <div class="dz-e">${z.e} · ${z.ha} ha</div>
+        </td>` +
+        DEMO.dias.map((_, di) => {
+          const h = horas(zi, di);
+          if (!h) return `<td><div class="cell cell-off">—</div></td>`;
+          const on = sel && sel.z === zi && sel.d === di;
+          return `<td><button class="cell on ${on?'sel':''}" style="color:${z.c};background:${z.c}12"
+            onclick="pick(${zi},${di})">
+            <div class="cell-h">${hm(h)}</div>
+            <div class="cell-s">${nf(volumen(zi,di))} m³</div>
+          </button></td>`;
+        }).join('') + `</tr>`).join('') + `</tbody></table>`;
+  }
+
+  function tablaFerti() {
+    return `<table class="demo-grid"><thead>${cabecera()}</thead><tbody>` +
+      DEMO.zonas.map((z, zi) => `<tr>
+        <td class="dz">
+          <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+          <div class="dz-e">${z.e} · ${z.ha} ha</div>
+        </td>` +
+        DEMO.dias.map((_, di) => {
+          const ev = DEMO.ferti.find(f => f[0] === zi && f[1] === di);
+          if (!ev) return `<td><div class="cell cell-off">—</div></td>`;
+          const on = sel && sel.z === zi && sel.d === di;
+          return `<td><button class="cell on ${on?'sel':''}" style="color:${z.c};background:${z.c}12"
+            onclick="pick(${zi},${di})">
+            <div class="cell-h">${nf(ev[3],1)} kg</div>
+            <div class="cell-s">${ev[2]}</div>
+          </button></td>`;
+        }).join('') + `</tr>`).join('') + `</tbody></table>`;
+  }
+
+  function tablaBalance() {
+    const max = Math.max(...DEMO.nutrientes.map(n => n.kg));
+    return `<div class="nut">` + DEMO.nutrientes.map(n => `
+      <div class="nut-row">
+        <div class="nut-k">${n.k}<small>${n.nom}</small></div>
+        <div class="nut-bar"><i style="width:${(n.kg/max*100).toFixed(1)}%;background:${n.c}"></i></div>
+        <div class="nut-v">${nf(n.kg)} <small>kg</small></div>
+      </div>`).join('') + `</div>`;
+  }
+
+  function panelLateral() {
+    if (tab === 'balance') {
+      const tot = DEMO.nutrientes.reduce((a,n) => a + n.kg, 0);
+      const ha = DEMO.zonas.reduce((a,z) => a + z.ha, 0);
+      return `<div class="ds-h">Resumen del predio</div>
+        <div class="ds-sub">Demanda neta de la temporada</div>
+        <div class="ds-row"><span>Superficie total</span><b>${nf(ha,1)} ha</b></div>
+        <div class="ds-row"><span>Zonas evaluadas</span><b>${DEMO.zonas.length}</b></div>
+        <div class="ds-row"><span>Demanda total</span><b>${nf(tot)} kg</b></div>
+        <div class="ds-row"><span>Promedio por ha</span><b>${nf(tot/ha,1)} kg/ha</b></div>
+        <div class="ds-note">La demanda se calcula por zona según especie, rendimiento esperado y lo que ya aporta el suelo.</div>`;
+    }
+    if (!sel) {
+      return `<div class="ds-empty">Toca un <b>${tab === 'riego' ? 'riego' : 'fertirriego'}</b> del calendario para ver el detalle de esa zona y ese día.</div>`;
+    }
+    const z = DEMO.zonas[sel.z], s = DEMO.semanas[wIdx];
+    if (tab === 'ferti') {
+      const ev = DEMO.ferti.find(f => f[0] === sel.z && f[1] === sel.d);
+      if (!ev) return `<div class="ds-empty">Sin aplicación en este día.</div>`;
+      return `<div class="ds-h"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+        <div class="ds-sub">${DEMO.dias[sel.d]} · ${z.e}</div>
+        <div class="ds-row"><span>Producto</span><b>${ev[2]}</b></div>
+        <div class="ds-row"><span>Dosis a aplicar</span><b>${nf(ev[3],1)} kg</b></div>
+        <div class="ds-row"><span>Solución madre</span><b>${nf(ev[4])} L</b></div>
+        <div class="ds-row"><span>Tiempo de fertirriego</span><b>${hm(horas(sel.z, 1) || 2.6)}</b></div>
+        <div class="ds-row"><span>Superficie</span><b>${z.ha} ha</b></div>
+        <div class="ds-note">Prepara la solución madre el mismo día e inyecta durante el riego programado.</div>`;
+    }
+    const h = horas(sel.z, sel.d);
+    return `<div class="ds-h"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+      <div class="ds-sub">${DEMO.dias[sel.d]} · ${z.e}</div>
+      <div class="ds-row"><span>Tiempo de riego</span><b>${hm(h)}</b></div>
+      <div class="ds-row"><span>Volumen</span><b>${nf(volumen(sel.z, sel.d))} m³</b></div>
+      <div class="ds-row"><span>Lámina neta</span><b>${nf(lamina(sel.z, sel.d),1)} mm</b></div>
+      <div class="ds-row"><span>ET₀ del día</span><b>${nf(s.eto,1)} mm</b></div>
+      <div class="ds-row"><span>Superficie</span><b>${z.ha} ha</b></div>
+      <div class="ds-note">Riego calculado con el balance hídrico de la zona: ET₀, cultivo, suelo y lo que aportó la lluvia.</div>`;
+  }
+
+  function pick(z, d) { sel = { z, d }; render(); }
+
+  function render() {
+    const s = DEMO.semanas[wIdx];
+    document.getElementById('wLbl').textContent = s.lbl;
+    document.getElementById('wRange').textContent = s.rng;
+    document.getElementById('wTemp').textContent = s.temp;
+    document.getElementById('dCardT').textContent =
+      tab === 'riego' ? 'Programa semanal de riego'
+      : tab === 'ferti' ? 'Programa semanal de fertirriego'
+      : 'Demanda de nutrientes del predio';
+    pintaKpis();
+    document.getElementById('dMain').innerHTML =
+      tab === 'riego' ? tablaRiego() : tab === 'ferti' ? tablaFerti() : tablaBalance();
+    document.getElementById('dSide').innerHTML = panelLateral();
+  }
+
+  document.querySelectorAll('.dt').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.dt').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    tab = b.dataset.tab; sel = null; render();
+  }));
+  document.getElementById('wPrev').addEventListener('click', () => {
+    wIdx = (wIdx - 1 + DEMO.semanas.length) % DEMO.semanas.length; render();
+  });
+  document.getElementById('wNext').addEventListener('click', () => {
+    wIdx = (wIdx + 1) % DEMO.semanas.length; render();
+  });
+  render();
 
   const form = document.getElementById('contactForm');
   const ok = document.getElementById('formOk');
