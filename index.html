@@ -396,6 +396,43 @@
   .dz-n { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 13px; color: var(--ink); }
   .dz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dz-e { font-size: 11px; color: var(--muted); padding-left: 15px; }
+  .dz-btn {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 1px solid transparent; border-radius: 9px;
+    padding: 6px 8px; margin-left: -8px; font-family: inherit;
+    transition: background .16s ease, border-color .16s ease;
+  }
+  .dz-btn:hover { background: var(--teal-50); border-color: rgba(46,134,171,.3); }
+  .dz-btn.sel { background: var(--teal-50); border-color: var(--teal-500); }
+  .dz-sat {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .04em;
+    color: var(--green-700); margin-top: 3px; padding-left: 15px;
+    opacity: 0; transition: opacity .16s ease;
+  }
+  .dz-btn:hover .dz-sat, .dz-btn.sel .dz-sat { opacity: 1; }
+
+  .ndvi-img { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #e8ecdf; margin-top: 10px; }
+  .ndvi-img svg { display: block; width: 100%; height: auto; }
+  .ndvi-pin {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-100%);
+    color: #fff; filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)); pointer-events: none;
+  }
+  .ndvi-tg { display: flex; gap: 4px; margin-top: 8px; }
+  .ndvi-tg button {
+    flex: 1; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 700;
+    border: 1px solid var(--line); background: #fff; color: var(--muted);
+    border-radius: 8px; padding: 6px 4px; transition: all .16s ease;
+  }
+  .ndvi-tg button:hover { border-color: var(--teal-500); color: var(--teal-700); }
+  .ndvi-tg button.on { background: var(--green-700); border-color: var(--green-700); color: #fff; }
+  .ndvi-scale { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 9.5px; color: var(--muted); }
+  .ndvi-scale i { flex: 1; height: 6px; border-radius: 999px; background: linear-gradient(90deg,#b45309,#eab308,#84cc16,#16a34a,#14532d); }
+  .ndvi-hist { display: flex; align-items: flex-end; gap: 3px; height: 38px; margin-top: 6px; }
+  .ndvi-hist div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; justify-content: flex-end; height: 100%; }
+  .ndvi-hist i { display: block; width: 100%; background: var(--green-500); border-radius: 3px 3px 0 0; opacity: .5; }
+  .ndvi-hist i.last { opacity: 1; background: var(--green-700); }
+  .ndvi-hist span { font-size: 8px; color: var(--muted); }
 
   .cell {
     width: 100%; border: 1px solid transparent; border-radius: 9px;
@@ -1155,11 +1192,11 @@
   const DEMO = {
     dias: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
     zonas: [
-      { n:'Zona 1', e:'Cerezos · Santina',  ha:2.1, c:'#2E86AB', riego:[0,3.7,0,3.9,0,4.1,0] },
-      { n:'Zona 2', e:'Cerezos · Lapins',   ha:1.8, c:'#1E8449', riego:[0,3.2,0,3.4,0,3.5,0] },
-      { n:'Zona 3', e:'Nogales · Chandler', ha:3.2, c:'#c68c1e', riego:[5.2,0,0,0,5.4,0,0] },
-      { n:'Zona 4', e:'Nogales · Serr',     ha:2.5, c:'#7C3AED', riego:[4.6,0,0,0,4.8,0,0] },
-      { n:'Zona 5', e:"Ciruelos · D'Agen",  ha:1.4, c:'#c0392b', riego:[0,0,2.9,0,0,0,3.1] },
+      { n:'Zona 1', e:'Cerezos · Santina',  ha:2.1, c:'#2E86AB', riego:[0,3.7,0,3.9,0,4.1,0], ndvi:0.72, kc:0.95, hist:[0.41,0.52,0.63,0.68,0.70,0.72] },
+      { n:'Zona 2', e:'Cerezos · Lapins',   ha:1.8, c:'#1E8449', riego:[0,3.2,0,3.4,0,3.5,0], ndvi:0.66, kc:0.89, hist:[0.38,0.47,0.58,0.62,0.65,0.66] },
+      { n:'Zona 3', e:'Nogales · Chandler', ha:3.2, c:'#c68c1e', riego:[5.2,0,0,0,5.4,0,0], ndvi:0.81, kc:1.04, hist:[0.44,0.58,0.69,0.76,0.79,0.81] },
+      { n:'Zona 4', e:'Nogales · Serr',     ha:2.5, c:'#7C3AED', riego:[4.6,0,0,0,4.8,0,0], ndvi:0.58, kc:0.82, hist:[0.35,0.44,0.51,0.55,0.57,0.58] },
+      { n:'Zona 5', e:"Ciruelos · D'Agen",  ha:1.4, c:'#c0392b', riego:[0,0,2.9,0,0,0,3.1], ndvi:0.34, kc:0.61, hist:[0.22,0.26,0.29,0.31,0.33,0.34] },
     ],
     semanas: [
       { lbl:'Semana 46', rng:'11 – 17 nov', temp:21, eto:4.9, f:0.86 },
@@ -1183,9 +1220,68 @@
     ],
   };
 
-  let wIdx = 1;           // semana actual
-  let tab = 'riego';      // pestaña activa
-  let sel = null;         // celda seleccionada
+  let wIdx = 1;             // semana actual
+  let tab = 'riego';        // pestaña activa
+  let sel = null;           // { t:'dia', z, d }  ó  { t:'zona', z }
+  let ndviMode = 'ndvi';    // 'ndvi' | 'rgb'
+
+  /* --- Imagen satelital sintética: NDVI y "foto real", estable por zona --- */
+  const rnd = (s) => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const colorNdvi = (v) =>
+    v < 0.2 ? '#b45309' : v < 0.4 ? '#eab308' : v < 0.6 ? '#84cc16' : v < 0.75 ? '#16a34a' : '#14532d';
+
+  function ndviSvg(zi, modo) {
+    const z = DEMO.zonas[zi], N = 16, S = 240, c = S / N;
+    const r = rnd(zi * 977 + 13);
+    let out = '';
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        // vigor: alto al centro del cuartel, con ruido — imita un huerto real
+        const dx = (x - N/2) / (N/2), dy = (y - N/2) / (N/2);
+        const centro = 1 - Math.min(1, Math.sqrt(dx*dx + dy*dy) / 1.25);
+        const v = Math.max(0.05, Math.min(0.95, z.ndvi * (0.55 + 0.65 * centro) + (r() - 0.5) * 0.16));
+        if (modo === 'ndvi') {
+          out += `<rect x="${x*c}" y="${y*c}" width="${c+0.5}" height="${c+0.5}" fill="${colorNdvi(v)}" opacity="${(0.55 + v*0.45).toFixed(2)}"/>`;
+        } else {
+          const t = Math.round(70 + v * 40), b = Math.round(52 + v * 26);
+          out += `<rect x="${x*c}" y="${y*c}" width="${c+0.5}" height="${c+0.5}" fill="rgb(${Math.round(96-v*34)},${t},${b})"/>`;
+        }
+      }
+    }
+    if (modo === 'rgb') { // hileras de árboles
+      for (let f = 1; f < 9; f++)
+        for (let a = 1; a < 13; a++)
+          out += `<circle cx="${f*S/9 + (a%2?3:-3)}" cy="${a*S/13}" r="${4.4 + r()*1.6}" fill="#2f4a26" opacity=".62"/>`;
+    }
+    return `<svg viewBox="0 0 ${S} ${S}" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Imagen satelital de demostración de ${z.n}">${out}
+      <rect x="1" y="1" width="${S-2}" height="${S-2}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="7 5" opacity=".85"/></svg>`;
+  }
+
+  function panelNdvi(zi) {
+    const z = DEMO.zonas[zi];
+    const maxH = Math.max(...z.hist);
+    const meses = ['jun','jul','ago','sep','oct','nov'];
+    return `<div class="ds-h"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+      <div class="ds-sub">${z.e} · ${z.ha} ha</div>
+      <div class="ds-row"><span>NDVI actual</span><b style="color:${colorNdvi(z.ndvi)}">${z.ndvi.toFixed(2)}</b></div>
+      <div class="ds-row"><span>Kc ajustado</span><b>${z.kc.toFixed(2)}</b></div>
+      <div class="ndvi-img">
+        ${ndviSvg(zi, ndviMode)}
+        <svg class="ndvi-pin" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+      </div>
+      <div class="ndvi-tg">
+        <button class="${ndviMode==='ndvi'?'on':''}" onclick="setNdvi('ndvi')">NDVI</button>
+        <button class="${ndviMode==='rgb'?'on':''}" onclick="setNdvi('rgb')">Foto real</button>
+      </div>
+      <div class="ndvi-scale"><span>Bajo</span><i></i><span>Alto</span></div>
+      <div class="ds-sub" style="margin:12px 0 0 0">Historial NDVI · últimos 6 meses</div>
+      <div class="ndvi-hist">
+        ${z.hist.map((v,i) => `<div><i class="${i===z.hist.length-1?'last':''}" style="height:${(v/maxH*100).toFixed(0)}%"></i><span>${meses[i]}</span></div>`).join('')}
+      </div>
+      <div class="ds-note">Imagen Sentinel-2 procesada cada semana. El NDVI mide el vigor del cultivo y ajusta el Kc — por eso el riego cambia solo cuando cambia el huerto.</div>`;
+  }
+  function setNdvi(m) { ndviMode = m; render(); }
 
   const hm = (h) => {
     const t = Math.round(h * 60);
@@ -1251,13 +1347,16 @@
     return `<table class="demo-grid"><thead>${cabecera()}</thead><tbody>` +
       DEMO.zonas.map((z, zi) => `<tr>
         <td class="dz">
-          <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
-          <div class="dz-e">${z.e} · ${z.ha} ha</div>
+          <button class="dz-btn ${sel && sel.t==='zona' && sel.z===zi ? 'sel':''}" onclick="pickZona(${zi})" title="Ver imagen satelital NDVI">
+            <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+            <div class="dz-e">${z.e} · ${z.ha} ha</div>
+            <div class="dz-sat">🛰 Ver NDVI</div>
+          </button>
         </td>` +
         DEMO.dias.map((_, di) => {
           const h = horas(zi, di);
           if (!h) return `<td><div class="cell cell-off">—</div></td>`;
-          const on = sel && sel.z === zi && sel.d === di;
+          const on = sel && sel.t === 'dia' && sel.z === zi && sel.d === di;
           return `<td><button class="cell on ${on?'sel':''}" style="color:${z.c};background:${z.c}12"
             onclick="pick(${zi},${di})">
             <div class="cell-h">${hm(h)}</div>
@@ -1270,13 +1369,16 @@
     return `<table class="demo-grid"><thead>${cabecera()}</thead><tbody>` +
       DEMO.zonas.map((z, zi) => `<tr>
         <td class="dz">
-          <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
-          <div class="dz-e">${z.e} · ${z.ha} ha</div>
+          <button class="dz-btn ${sel && sel.t==='zona' && sel.z===zi ? 'sel':''}" onclick="pickZona(${zi})" title="Ver imagen satelital NDVI">
+            <div class="dz-n"><i class="dz-dot" style="background:${z.c}"></i>${z.n}</div>
+            <div class="dz-e">${z.e} · ${z.ha} ha</div>
+            <div class="dz-sat">🛰 Ver NDVI</div>
+          </button>
         </td>` +
         DEMO.dias.map((_, di) => {
           const ev = DEMO.ferti.find(f => f[0] === zi && f[1] === di);
           if (!ev) return `<td><div class="cell cell-off">—</div></td>`;
-          const on = sel && sel.z === zi && sel.d === di;
+          const on = sel && sel.t === 'dia' && sel.z === zi && sel.d === di;
           return `<td><button class="cell on ${on?'sel':''}" style="color:${z.c};background:${z.c}12"
             onclick="pick(${zi},${di})">
             <div class="cell-h">${nf(ev[3],1)} kg</div>
@@ -1296,6 +1398,7 @@
   }
 
   function panelLateral() {
+    if (sel && sel.t === 'zona') return panelNdvi(sel.z);
     if (tab === 'balance') {
       const tot = DEMO.nutrientes.reduce((a,n) => a + n.kg, 0);
       const ha = DEMO.zonas.reduce((a,z) => a + z.ha, 0);
@@ -1308,7 +1411,7 @@
         <div class="ds-note">La demanda se calcula por zona según especie, rendimiento esperado y lo que ya aporta el suelo.</div>`;
     }
     if (!sel) {
-      return `<div class="ds-empty">Toca un <b>${tab === 'riego' ? 'riego' : 'fertirriego'}</b> del calendario para ver el detalle de esa zona y ese día.</div>`;
+      return `<div class="ds-empty">Toca un <b>${tab === 'riego' ? 'riego' : 'fertirriego'}</b> del calendario para ver el detalle del día — o toca una <b>zona</b> para ver su imagen satelital NDVI.</div>`;
     }
     const z = DEMO.zonas[sel.z], s = DEMO.semanas[wIdx];
     if (tab === 'ferti') {
@@ -1334,7 +1437,8 @@
       <div class="ds-note">Riego calculado con el balance hídrico de la zona: ET₀, cultivo, suelo y lo que aportó la lluvia.</div>`;
   }
 
-  function pick(z, d) { sel = { z, d }; render(); }
+  function pick(z, d) { sel = { t:'dia', z, d }; render(); }
+  function pickZona(z) { sel = { t:'zona', z }; render(); }
 
   function render() {
     const s = DEMO.semanas[wIdx];
