@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root {
     --teal-900: #0f3a52;
@@ -412,12 +414,16 @@
   }
   .dz-btn:hover .dz-sat, .dz-btn.sel .dz-sat { opacity: 1; }
 
-  .ndvi-img { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #e8ecdf; margin-top: 10px; }
-  .ndvi-img svg { display: block; width: 100%; height: auto; }
-  .ndvi-pin {
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-100%);
-    color: #fff; filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)); pointer-events: none;
+  .ndvi-map {
+    height: 210px; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--line); background: #dfe5da; margin-top: 10px;
+    position: relative; z-index: 0;
   }
+  .ndvi-map .leaflet-container { background: #dfe5da; font-family: inherit; }
+  .ndvi-loc { font-size: 10.5px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+  .ndvi-op { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .ndvi-op label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+  .ndvi-op input { flex: 1; accent-color: var(--green-700); height: 3px; }
   .ndvi-tg { display: flex; gap: 4px; margin-top: 8px; }
   .ndvi-tg button {
     flex: 1; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 700;
@@ -1311,6 +1317,8 @@
      Datos ficticios. Para cambiar el predio de ejemplo, edita DEMO.
   ============================================================ */
   const DEMO = {
+    // Ubicación del predio ficticio (Chimbarongo, VI Región — zona de cerezos y ciruelos)
+    loc: { lat: -34.7167, lon: -71.0500, delta: 0.0045, nombre: 'Chimbarongo · VI Región, Chile' },
     dias: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
     zonas: [
       { n:'Zona 1', e:'Cerezos · Santina',  ha:2.1, c:'#2E86AB', riego:[0,3.7,0,3.9,0,4.1,0], ndvi:0.72, kc:0.95, hist:[0.41,0.52,0.63,0.68,0.70,0.72] },
@@ -1346,37 +1354,78 @@
   let sel = null;           // { t:'dia', z, d }  ó  { t:'zona', z }
   let ndviMode = 'ndvi';    // 'ndvi' | 'rgb'
 
-  /* --- Imagen satelital sintética: NDVI y "foto real", estable por zona --- */
+  /* --- NDVI sobre imagen satelital real (Leaflet + Esri), igual que la plataforma --- */
   const rnd = (s) => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-  const colorNdvi = (v) =>
-    v < 0.2 ? '#b45309' : v < 0.4 ? '#eab308' : v < 0.6 ? '#84cc16' : v < 0.75 ? '#16a34a' : '#14532d';
 
-  function ndviSvg(zi, modo) {
-    const z = DEMO.zonas[zi], N = 16, S = 240, c = S / N;
-    const r = rnd(zi * 977 + 13);
-    let out = '';
-    for (let y = 0; y < N; y++) {
-      for (let x = 0; x < N; x++) {
-        // vigor: alto al centro del cuartel, con ruido — imita un huerto real
-        const dx = (x - N/2) / (N/2), dy = (y - N/2) / (N/2);
-        const centro = 1 - Math.min(1, Math.sqrt(dx*dx + dy*dy) / 1.25);
-        const v = Math.max(0.05, Math.min(0.95, z.ndvi * (0.55 + 0.65 * centro) + (r() - 0.5) * 0.16));
-        if (modo === 'ndvi') {
-          out += `<rect x="${x*c}" y="${y*c}" width="${c+0.5}" height="${c+0.5}" fill="${colorNdvi(v)}" opacity="${(0.55 + v*0.45).toFixed(2)}"/>`;
-        } else {
-          const t = Math.round(70 + v * 40), b = Math.round(52 + v * 26);
-          out += `<rect x="${x*c}" y="${y*c}" width="${c+0.5}" height="${c+0.5}" fill="rgb(${Math.round(96-v*34)},${t},${b})"/>`;
-        }
+  // Escala de color NDVI (café -> amarillo -> lima -> verde -> verde oscuro)
+  const NDVI_STOPS = [
+    [0.00, [180, 83,  9]], [0.25, [234, 179, 8]], [0.50, [132, 204, 22]],
+    [0.75, [ 22, 163, 74]], [1.00, [ 20,  83, 45]],
+  ];
+  function rgbNdvi(v) {
+    v = Math.max(0, Math.min(1, v));
+    for (let i = 1; i < NDVI_STOPS.length; i++) {
+      const [p1, c1] = NDVI_STOPS[i - 1], [p2, c2] = NDVI_STOPS[i];
+      if (v <= p2) {
+        const t = (v - p1) / (p2 - p1);
+        return [0,1,2].map(k => Math.round(c1[k] + (c2[k] - c1[k]) * t));
       }
     }
-    if (modo === 'rgb') { // hileras de árboles
-      for (let f = 1; f < 9; f++)
-        for (let a = 1; a < 13; a++)
-          out += `<circle cx="${f*S/9 + (a%2?3:-3)}" cy="${a*S/13}" r="${4.4 + r()*1.6}" fill="#2f4a26" opacity=".62"/>`;
+    return NDVI_STOPS[NDVI_STOPS.length - 1][1];
+  }
+  const colorNdvi = (v) => 'rgb(' + rgbNdvi(v).join(',') + ')';
+
+  // Genera la capa NDVI como imagen: ruido suave interpolado (sin cuadrículas duras)
+  function ndviCanvas(zi) {
+    const z = DEMO.zonas[zi], S = 256, G = 9;
+    const r = rnd(zi * 977 + 13);
+    const g = [];
+    for (let y = 0; y <= G; y++) {
+      g[y] = [];
+      for (let x = 0; x <= G; x++) {
+        const dx = (x - G/2) / (G/2), dy = (y - G/2) / (G/2);
+        const centro = 1 - Math.min(1, Math.sqrt(dx*dx + dy*dy) / 1.3);
+        g[y][x] = Math.max(0.05, Math.min(0.95, z.ndvi * (0.62 + 0.5 * centro) + (r() - 0.5) * 0.2));
+      }
     }
-    return `<svg viewBox="0 0 ${S} ${S}" xmlns="http://www.w3.org/2000/svg" role="img"
-      aria-label="Imagen satelital de demostración de ${z.n}">${out}
-      <rect x="1" y="1" width="${S-2}" height="${S-2}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="7 5" opacity=".85"/></svg>`;
+    const cv = document.createElement('canvas'); cv.width = cv.height = S;
+    const ctx = cv.getContext('2d');
+    const img = ctx.createImageData(S, S);
+    for (let py = 0; py < S; py++) {
+      for (let px = 0; px < S; px++) {
+        const fx = px / S * G, fy = py / S * G;
+        const x0 = Math.min(G - 1, Math.floor(fx)), y0 = Math.min(G - 1, Math.floor(fy));
+        const tx = fx - x0, ty = fy - y0;
+        const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);   // smoothstep
+        const v = g[y0][x0]     * (1-sx) * (1-sy) + g[y0][x0+1]   * sx * (1-sy)
+                + g[y0+1][x0]   * (1-sx) * sy     + g[y0+1][x0+1] * sx * sy;
+        const [R, Gc, B] = rgbNdvi(v);
+        const i = (py * S + px) * 4;
+        img.data[i] = R; img.data[i+1] = Gc; img.data[i+2] = B; img.data[i+3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return cv.toDataURL();
+  }
+
+  let _dmap = null, _dovl = null;
+  function initDemoMap(zi) {
+    const el = document.getElementById('demoMap');
+    if (!el || !window.L) return;
+    if (_dmap) { _dmap.remove(); _dmap = null; _dovl = null; }
+    const { lat, lon, delta } = DEMO.loc;
+    _dmap = L.map(el, {
+      zoomControl: false, attributionControl: false, dragging: false,
+      scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false,
+      boxZoom: false, keyboard: false,
+    });
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(_dmap);
+    const b = [[lat - delta, lon - delta], [lat + delta, lon + delta]];
+    _dovl = L.imageOverlay(ndviCanvas(zi), b, { opacity: ndviMode === 'ndvi' ? 0.8 : 0 }).addTo(_dmap);
+    L.rectangle(b, { color: '#fff', weight: 2, dashArray: '6 5', fill: false }).addTo(_dmap);
+    L.marker([lat, lon]).addTo(_dmap);
+    _dmap.fitBounds(b, { padding: [8, 8] });
+    [80, 300].forEach(t => setTimeout(() => { if (_dmap) _dmap.invalidateSize(); }, t));
   }
 
   function panelNdvi(zi) {
@@ -1387,13 +1436,18 @@
       <div class="ds-sub">${z.e} · ${z.ha} ha</div>
       <div class="ds-row"><span>NDVI actual</span><b style="color:${colorNdvi(z.ndvi)}">${z.ndvi.toFixed(2)}</b></div>
       <div class="ds-row"><span>Kc ajustado</span><b>${z.kc.toFixed(2)}</b></div>
-      <div class="ndvi-img">
-        ${ndviSvg(zi, ndviMode)}
-        <svg class="ndvi-pin" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+      <div class="ndvi-map" id="demoMap"></div>
+      <div class="ndvi-loc">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        ${DEMO.loc.nombre}
       </div>
       <div class="ndvi-tg">
-        <button class="${ndviMode==='ndvi'?'on':''}" onclick="setNdvi('ndvi')">NDVI</button>
-        <button class="${ndviMode==='rgb'?'on':''}" onclick="setNdvi('rgb')">Foto real</button>
+        <button data-m="ndvi" class="${ndviMode==='ndvi'?'on':''}" onclick="setNdvi('ndvi')">NDVI</button>
+        <button data-m="rgb" class="${ndviMode==='rgb'?'on':''}" onclick="setNdvi('rgb')">Foto real</button>
+      </div>
+      <div class="ndvi-op">
+        <label>OPACIDAD</label>
+        <input id="ndviOp" type="range" min="20" max="100" value="80" ${ndviMode!=='ndvi'?'disabled':''} oninput="setNdviOp(this.value)">
       </div>
       <div class="ndvi-scale"><span>Bajo</span><i></i><span>Alto</span></div>
       <div class="ds-sub" style="margin:12px 0 0 0">Historial NDVI · últimos 6 meses</div>
@@ -1402,7 +1456,15 @@
       </div>
       <div class="ds-note">Imagen Sentinel-2 procesada cada semana. El NDVI mide el vigor del cultivo y ajusta el Kc — por eso el riego cambia solo cuando cambia el huerto.</div>`;
   }
-  function setNdvi(m) { ndviMode = m; render(); }
+
+  function setNdvi(m) {
+    ndviMode = m;
+    document.querySelectorAll('.ndvi-tg button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    const sl = document.getElementById('ndviOp');
+    if (sl) sl.disabled = (m !== 'ndvi');
+    if (_dovl) _dovl.setOpacity(m === 'ndvi' ? (sl ? +sl.value / 100 : 0.8) : 0);
+  }
+  function setNdviOp(v) { if (_dovl && ndviMode === 'ndvi') _dovl.setOpacity(+v / 100); }
 
   const hm = (h) => {
     const t = Math.round(h * 60);
@@ -1574,6 +1636,8 @@
     document.getElementById('dMain').innerHTML =
       tab === 'riego' ? tablaRiego() : tab === 'ferti' ? tablaFerti() : tablaBalance();
     document.getElementById('dSide').innerHTML = panelLateral();
+    if (sel && sel.t === 'zona') initDemoMap(sel.z);
+    else if (_dmap) { _dmap.remove(); _dmap = null; _dovl = null; }
   }
 
   document.querySelectorAll('.dt').forEach(b => b.addEventListener('click', () => {
