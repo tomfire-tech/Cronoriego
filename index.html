@@ -512,7 +512,7 @@
   @media (max-width: 440px)  { .benefits-grid { grid-template-columns: 1fr; } }
 
   /* Pricing */
-  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
   .price {
     background: #fff; border: 1px solid var(--line);
     border-radius: var(--radius-lg); padding: 32px 26px;
@@ -552,8 +552,73 @@
   }
   .pricing-example strong { color: var(--teal-700); font-weight: 700; }
 
-  @media (max-width: 1000px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } .price.popular { transform: none; } }
-  @media (max-width: 560px)  { .pricing-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1000px) { .pricing-grid { grid-template-columns: 1fr; } .price.popular { transform: none; } }
+
+
+  /* ===== Planes ===== */
+  .plan-name { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--teal-900); line-height: 1; }
+  .plan-mod {
+    margin-top: 10px; font-size: 12.5px; font-weight: 600; color: var(--green-700);
+    background: var(--green-50); border: 1px solid rgba(30,132,73,.18);
+    border-radius: 8px; padding: 7px 10px; line-height: 1.4;
+  }
+  .plan-base { margin-top: 18px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 40px; color: var(--teal-900); line-height: 1; }
+  .plan-base sup { font-size: 16px; font-weight: 500; vertical-align: super; color: var(--muted); }
+  .plan-base small { font-family: 'Manrope', sans-serif; font-size: 13px; color: var(--muted); font-weight: 500; display: block; margin-top: 6px; letter-spacing: 0; }
+  .plan-add { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .plan-add-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ink-2); padding: 3px 0; }
+  .plan-add-row b { font-variant-numeric: tabular-nums; color: var(--teal-700); font-weight: 700; }
+  .plan-total {
+    margin-top: 14px; border-radius: 10px; padding: 10px 12px;
+    background: var(--teal-50); border: 1px solid rgba(26,82,118,.14);
+  }
+  .plan-total span { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .plan-total b { display: block; font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; color: var(--teal-700); line-height: 1.2; }
+  .plan-total i { font-style: normal; font-size: 11.5px; color: var(--muted); }
+
+  /* Calculadora */
+  .calc {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: 20px 24px; margin-bottom: 26px;
+    display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+  }
+  .calc-t { font-weight: 700; font-size: 14px; color: var(--teal-900); display: flex; align-items: center; gap: 9px; }
+  .calc-t svg { color: var(--teal-500); }
+  .calc-f { display: flex; align-items: center; gap: 9px; }
+  .calc-f label { font-size: 13px; color: var(--ink-2); font-weight: 600; }
+  .calc-f input {
+    width: 82px; padding: 8px 11px; border: 1.5px solid var(--line); border-radius: 9px;
+    font-family: inherit; font-size: 14px; font-weight: 700; color: var(--teal-900);
+    text-align: center; outline: none; transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .calc-f input:focus { border-color: var(--teal-700); box-shadow: 0 0 0 4px rgba(26,82,118,.12); }
+  .calc-note { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+  .calc-warn { color: #a06a00; font-weight: 600; }
+
+  /* Planes secundarios */
+  .plan-extra { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+  .xp {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: 20px 22px; box-shadow: var(--shadow-sm);
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .xp:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .xp-n { font-weight: 800; font-size: 14px; color: var(--teal-900); letter-spacing: .02em; }
+  .xp-m { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .xp-p { margin-top: 12px; font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--teal-700); line-height: 1; }
+  .xp-p small { font-family: 'Manrope', sans-serif; font-size: 12px; color: var(--muted); font-weight: 500; display: block; margin-top: 5px; }
+
+  .onb-note {
+    margin-top: 20px; padding: 16px 20px; border-radius: var(--radius-md);
+    background: var(--bg-soft); border: 1px solid var(--line);
+    font-size: 13.5px; color: var(--ink-2);
+  }
+  .onb-note b { color: var(--teal-900); }
+  .onb-note ul { margin: 8px 0 0; padding-left: 18px; }
+  .onb-note li { padding: 2px 0; }
+
+  @media (max-width: 900px) { .plan-extra { grid-template-columns: 1fr; } .calc-note { margin-left: 0; } }
 
   /* Clients */
   .clients { background: linear-gradient(180deg, var(--bg-soft), #fff); }
@@ -948,52 +1013,55 @@
 <section id="precios">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Precios</span>
-      <h2 class="section-title">Inversión mensual por zona</h2>
-      <p class="section-lead">Transparente, escalable y pensado para predios de cualquier tamaño. Valores en CLP.</p>
+      <span class="eyebrow">Planes</span>
+      <h2 class="section-title">Eliges los módulos que necesitas.</h2>
+      <p class="section-lead">Una tarifa base anual, más lo que crece contigo: tus hectáreas y tus zonas. Valores en USD, para producción agrícola de hasta 99 ha.</p>
     </div>
-    <div class="pricing-grid">
-      <div class="price reveal d1">
-        <div class="price-range">1–10 zonas</div>
-        <div class="price-amount">$13.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Balance hídrico semanal</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Acceso a la plataforma</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Soporte técnico</li>
-        </ul>
+
+    <div class="calc reveal">
+      <div class="calc-t">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="12" y1="16" x2="12" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+        Calcula tu plan
       </div>
-      <div class="price popular reveal d2">
-        <span class="popular-tag">Más popular</span>
-        <div class="price-range">11–20 zonas</div>
-        <div class="price-amount">$11.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Validación en terreno</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Ajustes por zona</li>
-        </ul>
+      <div class="calc-f">
+        <label for="cHa">Hectáreas</label>
+        <input id="cHa" type="number" min="0.25" max="99" step="0.5" value="15" />
       </div>
-      <div class="price reveal d3">
-        <div class="price-range">21–40 zonas</div>
-        <div class="price-amount">$10.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Reporte ejecutivo mensual</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Coordinación con jefe de campo</li>
-        </ul>
+      <div class="calc-f">
+        <label for="cZn">Zonas de riego</label>
+        <input id="cZn" type="number" min="1" max="99" step="1" value="8" />
       </div>
-      <div class="price reveal d4">
-        <div class="price-range">+41 zonas</div>
-        <div class="price-amount">$9.200<small>por zona / mes</small></div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Todo lo anterior</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Gestión multi-predio</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>SLA dedicado</li>
-        </ul>
-      </div>
+      <div class="calc-note" id="cNote"></div>
     </div>
-    <div class="pricing-example reveal">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg>
-      <div>Ejemplo: <strong>Predio de 15 zonas</strong> → <strong>$168.000/mes</strong> + IVA</div>
+
+    <div class="pricing-grid" id="planGrid"></div>
+
+    <div class="onb-note reveal">
+      <b>Fee de onboarding</b> — pago único al inicio, según el tamaño del predio. Cubre el levantamiento de datos, la configuración de tus zonas y la calibración inicial del balance.
+      <ul>
+        <li>Hasta 10 ha: <b>$300</b> · 11 a 50 ha: <b>$450</b> · 51 a 100 ha: <b>$600</b> · más de 100 ha: <b>$1.500</b></li>
+      </ul>
+    </div>
+
+    <div class="section-head reveal" style="margin: 56px 0 0">
+      <h3 style="font-size: 22px; color: var(--teal-900)">Otras modalidades</h3>
+    </div>
+    <div class="plan-extra">
+      <div class="xp reveal d1">
+        <div class="xp-n">PLAN INVIERNO</div>
+        <div class="xp-m">Clima y Balance · temporada de receso</div>
+        <div class="xp-p">$200<small>base anual + $15/ha + $15/zona</small></div>
+      </div>
+      <div class="xp reveal d2">
+        <div class="xp-n">ENTERPRISE B2B</div>
+        <div class="xp-m">Dashboard holding · 100 a 300 ha</div>
+        <div class="xp-p">$8.500<small>anual · sin costo por ha ni por zona</small></div>
+      </div>
+      <div class="xp reveal d3">
+        <div class="xp-n">ENTERPRISE B2B+</div>
+        <div class="xp-m">Dashboard holding · más de 300 ha</div>
+        <div class="xp-p">$12.000<small>anual · sin costo por ha ni por zona</small></div>
+      </div>
     </div>
   </div>
 </section>
@@ -1467,6 +1535,68 @@
     wIdx = (wIdx + 1) % DEMO.semanas.length; render();
   });
   render();
+
+  /* ============================================================
+     PLANES + CALCULADORA
+     Fórmula: base + (ha x tarifa_ha) + (zonas x 15) + onboarding
+  ============================================================ */
+  const PLANES = [
+    { n:'Estándar', mod:'Solo Riego', base:350, tha:20, tzn:15, pop:false, items:[
+      'Programa semanal de riego por zona',
+      'NDVI satelital y Kc ajustado',
+      'Plataforma web con tu plan',
+      'Soporte técnico',
+    ]},
+    { n:'Pro', mod:'Riego + Fertirriego + Estanque', base:600, tha:35, tzn:15, pop:true, items:[
+      'Todo lo del plan Estándar',
+      'Programa de fertirriego y dosis',
+      'Solución madre por evento',
+      'Dinámica del estanque',
+    ]},
+    { n:'Premium', mod:'Riego + Fertirriego + Estanque + Balance', base:900, tha:50, tzn:15, pop:false, items:[
+      'Todo lo del plan Pro',
+      'Balance nutricional por zona',
+      'Demanda de macro y micronutrientes',
+      'Reporte de temporada',
+    ]},
+  ];
+  const onboarding = (ha) => ha <= 10 ? 300 : ha <= 50 ? 450 : ha <= 100 ? 600 : 1500;
+  const usd = (v) => '$' + v.toLocaleString('es-CL', { maximumFractionDigits: 0 });
+
+  function pintaPlanes() {
+    const ha = Math.max(0.25, +document.getElementById('cHa').value || 0);
+    const zn = Math.max(1, Math.round(+document.getElementById('cZn').value || 1));
+    const onb = onboarding(ha);
+
+    document.getElementById('cNote').innerHTML = ha > 99
+      ? '<span class="calc-warn">Sobre 99 ha corresponde un plan Enterprise — conversemos.</span>'
+      : `Onboarding para ${ha} ha: <b>${usd(onb)}</b> (pago único)`;
+
+    document.getElementById('planGrid').innerHTML = PLANES.map((p, i) => {
+      const anual = p.base + ha * p.tha + zn * p.tzn;
+      return `<div class="price ${p.pop ? 'popular' : ''} reveal visible d${i+1}">
+        ${p.pop ? '<span class="popular-tag">Más elegido</span>' : ''}
+        <div class="plan-name">${p.n}</div>
+        <div class="plan-mod">${p.mod}</div>
+        <div class="plan-base"><sup>$</sup>${p.base}<small>tarifa base anual (USD)</small></div>
+        <div class="plan-add">
+          <div class="plan-add-row"><span>${ha} ha × ${usd(p.tha)}/ha</span><b>${usd(ha * p.tha)}</b></div>
+          <div class="plan-add-row"><span>${zn} zonas × ${usd(p.tzn)}/zona</span><b>${usd(zn * p.tzn)}</b></div>
+        </div>
+        <div class="plan-total">
+          <span>Tu año 1</span>
+          <b>${usd(anual + onb)}</b>
+          <i>${usd(anual)} anual + ${usd(onb)} de onboarding</i>
+        </div>
+        <ul class="price-features">
+          ${p.items.map(t => `<li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${t}</li>`).join('')}
+        </ul>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('cHa').addEventListener('input', pintaPlanes);
+  document.getElementById('cZn').addEventListener('input', pintaPlanes);
+  pintaPlanes();
 
   const form = document.getElementById('contactForm');
   const ok = document.getElementById('formOk');
