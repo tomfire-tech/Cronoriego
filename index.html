@@ -603,7 +603,7 @@
   .calc-warn { color: #a06a00; font-weight: 600; }
 
   /* Planes secundarios */
-  .plan-extra { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+  .plan-extra { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-top: 20px; }
   .xp {
     background: #fff; border: 1px solid var(--line); border-radius: var(--radius-md);
     padding: 20px 22px; box-shadow: var(--shadow-sm);
@@ -654,6 +654,20 @@
   .cot-f { padding:12px 18px; background:var(--bg-soft); border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
 
   @media (max-width: 700px) { .cot-h span { display:none; } }
+
+
+  .xp-cta { display:block; background:linear-gradient(135deg, var(--teal-50), #fff); border-color:rgba(26,82,118,.28); }
+  .xp-cta:hover { border-color:var(--teal-700); }
+  .xp-cta .xp-p { color:var(--teal-900); }
+  .xp-arrow { display:inline-flex; align-items:center; gap:6px; margin-top:12px; font-size:13px; font-weight:700; color:var(--teal-700); }
+  .xp-cta:hover .xp-arrow svg { transform:translateX(3px); }
+  .xp-arrow svg { transition:transform .2s ease; }
+  .cot-ent { text-align:center !important; padding:26px 18px !important; }
+  .cot-ent b { display:block; font-family:'Fraunces',serif; font-size:20px; color:var(--teal-900); font-weight:600; }
+  .cot-ent span { display:block; font-size:13px; color:var(--muted); margin-top:6px; }
+  .cot-ent a { display:inline-flex; align-items:center; gap:7px; margin-top:14px; background:var(--teal-700); color:#fff;
+               padding:10px 20px; border-radius:999px; font-size:13.5px; font-weight:700; }
+  .cot-ent a:hover { background:var(--teal-900); }
 
   /* Clients */
   .clients { background: linear-gradient(180deg, var(--bg-soft), #fff); }
@@ -1111,16 +1125,16 @@
         <div class="xp-m">Clima y Balance · temporada de receso</div>
         <div class="xp-p">$200<small>base anual + $15/ha + $15/zona</small></div>
       </div>
-      <div class="xp reveal d2">
-        <div class="xp-n">ENTERPRISE B2B</div>
-        <div class="xp-m">Dashboard holding · 100 a 300 ha</div>
-        <div class="xp-p">$8.500<small>anual · sin costo por ha ni por zona</small></div>
-      </div>
-      <div class="xp reveal d3">
-        <div class="xp-n">ENTERPRISE B2B+</div>
-        <div class="xp-m">Dashboard holding · más de 300 ha</div>
-        <div class="xp-p">$12.000<small>anual · sin costo por ha ni por zona</small></div>
-      </div>
+      <a href="#contacto" class="xp xp-cta reveal d2">
+        <div class="xp-n">GRANDES SUPERFICIES</div>
+        <div class="xp-m">Dashboard holding · multi-predio</div>
+        <div class="xp-p" style="font-size:19px">Sobre 100 hectáreas, consultar aquí
+          <small>Cotización a medida según tu operación</small>
+        </div>
+        <span class="xp-arrow">Conversemos
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
     </div>
   </div>
 </section>
@@ -1676,10 +1690,7 @@
       'Todo lo del plan Pro','Balance nutricional por zona','Demanda de macro y micronutrientes','Reporte de temporada'] },
     { id:'PL-04', n:'Plan Invierno',   mod:'Clima y Balance (receso)',
       base:200,   tha:15, tzn:15, onb:[300,450,600,1500], seg:'agri', pop:false, items:[] },
-    { id:'PL-05', n:'Enterprise B2B',  mod:'Dashboard holding · 100 a 299 ha',
-      base:8500,  tha:0,  tzn:0,  onb:[null,null,null,1500], seg:'ent', pop:false, items:[] },
-    { id:'PL-06', n:'Enterprise B2B+', mod:'Dashboard holding · desde 300 ha',
-      base:12000, tha:0,  tzn:0,  onb:[null,null,null,1500], seg:'ent', pop:false, items:[] },
+    // Sobre 100 ha (Enterprise B2B / B2B+) se cotiza a medida — no se publican precios.
   ];
   const usd = (v) => '$' + Math.round(v).toLocaleString('es-CL');
 
@@ -1695,8 +1706,8 @@
     return { cha, czn, onb, anual, total: anual + o, pie: anual/2 + o, saldo: anual/2 };
   }
 
-  // Plan sugerido segun el tamano del predio
-  const recomendado = (ha) => ha < 100 ? 'PL-02' : ha < 300 ? 'PL-05' : 'PL-06';
+  // Plan sugerido (solo aplica bajo 100 ha; sobre eso se cotiza a medida)
+  const recomendado = (ha) => ha < 100 ? 'PL-02' : null;
 
   function leerInputs() {
     const ha = Math.min(9999, Math.max(0.25, +document.getElementById('cHa').value || 0.25));
@@ -1710,11 +1721,12 @@
 
     document.getElementById('cNote').innerHTML = agri
       ? `Onboarding para ${ha} ha: <b>${usd(feeOnb(PLANES[0], ha))}</b> (pago único)`
-      : '<span class="calc-warn">Sobre 99 ha corresponde un plan Enterprise — míralo en el cotizador.</span>';
+      : '<span class="calc-warn">Sobre 100 ha la cotización es a medida — <a href="#contacto" style="color:var(--teal-700);text-decoration:underline">consultar aquí</a></span>';
     document.getElementById('cotSub').textContent = `${ha} ha · ${zn} zonas`;
 
     // --- Tarjetas (los 3 planes agrícolas principales) ---
-    document.getElementById('planGrid').innerHTML = PLANES.filter(p => p.items.length).map((p, i) => {
+    document.getElementById('planGrid').style.display = agri ? '' : 'none';
+    document.getElementById('planGrid').innerHTML = !agri ? '' : PLANES.filter(p => p.items.length).map((p, i) => {
       const c = cotiza(p, ha, zn);
       return `<div class="price ${p.pop ? 'popular' : ''} reveal visible d${i+1}">
         ${p.pop ? '<span class="popular-tag">Más elegido</span>' : ''}
@@ -1738,10 +1750,18 @@
 
     // --- Tabla del cotizador (los 6 planes, como en el Sheet) ---
     const rec = recomendado(ha);
+    if (!agri) {
+      document.getElementById('cotBody').innerHTML = `<tr><td colspan="8" class="cot-ent">
+        <b>Sobre 100 hectáreas, consultar aquí</b>
+        <span>Los predios grandes y los holding multi-predio se cotizan a medida, según tu operación.</span>
+        <a href="#contacto">Conversemos
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a></td></tr>`;
+      return;
+    }
     document.getElementById('cotBody').innerHTML = PLANES.map(p => {
       const c = cotiza(p, ha, zn);
-      const aplica = (p.seg === 'agri') === agri;
-      return `<tr class="${aplica ? '' : 'off'} ${p.id === rec ? 'rec' : ''}">
+      return `<tr class="${p.id === rec ? 'rec' : ''}">
         <td>
           <div class="cot-pn">${p.n}${p.id === rec ? '<span class="cot-tag">SUGERIDO</span>' : ''}</div>
           <div class="cot-pm">${p.mod}</div>
