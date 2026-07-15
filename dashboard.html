@@ -432,7 +432,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 <header class="hdr">
   <div class="logo">
-    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v22</span>
+    <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v21</span>
   </div>
   <div class="hdr-sep"></div>
   <div class="hdr-filters">
@@ -668,47 +668,6 @@ async function init(){
   const sp=document.getElementById('sp');
   sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
   if(ps.length)await onPredio();
-  diagCR(ps);
-}
-
-// ===== PANEL DE DIAGNÓSTICO TEMPORAL (para ver sin consola) =====
-async function diagCR(ps){
-  const L=[];const ok=v=>`<span style="color:#7EC8A0">${v}</span>`;const bad=v=>`<span style="color:#F1948A">${v}</span>`;
-  const box=document.getElementById('diagBox');box.style.display='block';
-  L.push(`Versión: <b>v22</b>`);
-  L.push(`Razón social (rsId): ${G.rsId?ok(G.rsId):bad('NO DETECTADA')}`);
-  L.push(`Plan (MODULOS): ${ok(MODULOS.join(', ')||'(vacío)')}`);
-  L.push(`Predios cargados: ${ps&&ps.length?ok(ps.length):bad('0')}`);
-  const prId=document.getElementById('sp').value||'—';
-  const eqId=document.getElementById('se').value||'—';
-  L.push(`Predio sel.: ${ok(prId)} · Equipo sel.: ${eqId&&eqId!=='—'?ok(eqId):bad('NINGUNO')}`);
-  const znIds=G.zonas.map(z=>z.id_zona);
-  L.push(`Zonas del equipo: ${znIds.length?ok(znIds.length):bad('0 — aquí se corta todo')}`);
-  if(znIds.length)L.push(`&nbsp;&nbsp;→ ${znIds.slice(0,6).join(', ')}${znIds.length>6?'…':''}`);
-  document.getElementById('diagBody').innerHTML=L.join('<br>');
-  if(!znIds.length){L.push(bad('<br>Sin zonas: revisa v_zonas / equipo seleccionado.'));document.getElementById('diagBody').innerHTML=L.join('<br>');return;}
-  // Probar cada tabla que alimenta las pestañas
-  const pruebas=[
-    ['sc_demanda_hidrica_diaria_zona','id_zona','Riego (diaria)'],
-    ['sc_calculos_estaticos_zona','id_zona','Ficha zona (cálculos)'],
-    ['sc_recomendacion_ferti','id_zona','Fertirriego'],
-    ['sc_balance_nutricional','id_zona','Balance'],
-  ];
-  L.push('<br><b style="color:#85C1E9">Consultas por zona:</b>');
-  for(const [tabla,col,etiqueta] of pruebas){
-    const {data,error}=await db.from(tabla).select(col).in(col,znIds).limit(500);
-    if(error)L.push(`${etiqueta}: ${bad('ERROR — '+error.message)}`);
-    else L.push(`${etiqueta}: ${data.length?ok(data.length+' filas'):bad('0 filas (RLS o zonas distintas)')}`);
-    document.getElementById('diagBody').innerHTML=L.join('<br>');
-  }
-  // Comparar: ¿qué zonas hay realmente en ferti?
-  const {data:zf}=await db.from('sc_recomendacion_ferti').select('id_zona').limit(500);
-  const setF=[...new Set((zf||[]).map(r=>r.id_zona))];
-  L.push(`<br><b style="color:#85C1E9">Zonas que SÍ están en sc_recomendacion_ferti:</b>`);
-  L.push(setF.length?ok(setF.slice(0,14).join(', ')+(setF.length>14?'…':'')):bad('ninguna visible (RLS bloquea la lectura)'));
-  const {data:eq}=await db.from('sc_demanda_hidrica_semanal_equipo').select('id_equipo').eq('id_equipo',eqId).limit(5);
-  L.push(`<br>Semanal para ${eqId}: ${eq&&eq.length?ok(eq.length+' filas'):bad('0 filas')}`);
-  document.getElementById('diagBody').innerHTML=L.join('<br>');
 }
 async function onPredio(){
   const prId=document.getElementById('sp').value;
@@ -1680,12 +1639,5 @@ initCustomDropdowns();
 
 init();
 </script>
-<div id="diagBox" style="display:none;position:fixed;right:14px;bottom:14px;z-index:9999;width:420px;max-height:70vh;overflow:auto;background:#0F172A;color:#E2E8F0;font:12px/1.6 monospace;padding:14px 16px;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.4)">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <b style="color:#7EC8A0">🔎 DIAGNÓSTICO</b>
-    <span onclick="document.getElementById('diagBox').style.display='none'" style="cursor:pointer;color:#94A3B8">✕</span>
-  </div>
-  <div id="diagBody">Ejecutando...</div>
-</div>
 </body>
 </html>
