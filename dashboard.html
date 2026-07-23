@@ -246,7 +246,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
 @media(max-width:1200px){.panel{width:260px;}}
 @media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
-@supports (height:100dvh){.app{height:100dvh;}}
 
 /* ===== MOBILE (tablet chico / celular) ===== */
 @media(max-width:820px){
@@ -287,10 +286,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .confirm-grid{grid-template-columns:1fr;}
   .d-grid2{grid-template-columns:1fr;}
 
-  /* Calendario: se sigue viendo con scroll lateral, pero la columna de Zona queda fija */
-  .cal-tbl thead tr th.th-zona{position:sticky;left:0;z-index:12;}
-  .zona-td{position:sticky;left:0;z-index:6;background:var(--bg);}
-
   .drawer,#fdrawer{width:100vw;}
 }
 @media(max-width:480px){
@@ -319,6 +314,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .lock-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E8449,#166534);color:#fff;border:none;font-weight:700;font-size:14px;padding:11px 22px;border-radius:11px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 20px rgba(30,132,73,.28);}
 .lock-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(30,132,73,.36);}
 .tab .tab-pro{font-size:8px;font-weight:800;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;padding:1px 5px;border-radius:6px;margin-left:5px;letter-spacing:.5px;vertical-align:middle;}
+/* ===== Fertirriego anidado junto a Riego (misma pestaña) ===== */
+.ferti-block{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;position:relative;border-top:2px solid var(--line);}
+.ferti-block.blurred{filter:blur(3px) saturate(.85);pointer-events:none;user-select:none;transition:filter .25s;}
+.ferti-divider{padding:7px 20px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);flex-shrink:0;}
+.ferti-divider i{color:#16A34A;font-size:14px;}
+.ferti-lock{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(248,250,252,.30),rgba(248,250,252,.55));}
+.ferti-lock.show{display:flex;}
+.ferti-lock .lock-card{padding:22px 26px;max-width:340px;}
+.ferti-lock .lock-title{font-size:16px;}
+.ferti-lock .lock-ico{width:44px;height:44px;font-size:22px;margin-bottom:10px;}
 #view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
 #view-ferti .franja{grid-template-columns:repeat(3,1fr);}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
@@ -469,245 +474,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .eq-op-btn{border:none;background:var(--line2);width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center;font-size:14px;transition:background .15s,color .15s;flex-shrink:0;}
 .eq-op-btn:hover{background:var(--line);color:var(--ink2);}
 
-
-/* =========================================================
-   AJUSTES RESPONSIVE FINALES — CRONORIEGO
-   ========================================================= */
-@media (max-width: 820px) {
-  html, body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  .app {
-    width: 100%;
-    height: 100dvh;
-    overflow: hidden;
-  }
-
-  .hdr {
-    height: auto;
-    min-height: 58px;
-    padding: 10px 12px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .hdr-sep { display: none; }
-  .logo { font-size: 14px; }
-  .hdr-right { order: 2; margin-left: auto; }
-
-  .hdr-filters {
-    order: 3;
-    flex: 0 0 100%;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .sel-wrap, .week-nav, .eq-op-btn { flex-shrink: 0; }
-  .sel-wrap select { max-width: 145px; }
-  .dlbtn { padding: 7px 10px; }
-  .dlbtn-txt, .clim-badge { display: none; }
-
-  .tabs {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0 8px;
-    flex-shrink: 0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tab {
-    flex: 0 0 auto;
-    padding: 0 12px;
-    white-space: nowrap;
-    font-size: 12px;
-  }
-
-  .kpi-bar,
-  #view-riego .kpi-bar,
-  #view-ferti .kpi-bar,
-  #view-estanque .kpi-bar,
-  #view-balance .kpi-bar {
-    width: 100%;
-    max-width: none;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .kpi-card,
-  #view-estanque .kpi-card,
-  #view-balance .kpi-card,
-  #view-ferti .kpi-card {
-    min-width: 0;
-    padding: 10px 11px;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    overflow: hidden;
-  }
-
-  .kpi-lbl, .kpi-sub { overflow-wrap: anywhere; }
-
-  .kpi-val,
-  #view-ferti .kpi-val,
-  #view-estanque .kpi-val,
-  #view-balance .kpi-val { font-size: 20px; }
-
-  .kpi-ico,
-  #view-ferti .kpi-ico,
-  #view-estanque .kpi-ico,
-  #view-balance .kpi-ico {
-    width: 36px;
-    height: 36px;
-    font-size: 17px;
-    flex-shrink: 0;
-  }
-
-  .cal-scroll {
-    padding: 8px 0 0 8px;
-    overflow-x: auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .cal-tbl { min-width: 850px; }
-
-  .cal-tbl thead tr th.th-zona {
-    position: sticky;
-    left: 0;
-    z-index: 15;
-    background: var(--bg);
-  }
-
-  .zona-td {
-    position: sticky;
-    left: 0;
-    z-index: 8;
-    width: 135px;
-    min-width: 135px;
-    background: var(--bg);
-  }
-
-  .zona-pill { padding: 10px; }
-  .zona-head { font-size: 13px; }
-  .zona-esp { font-size: 11px; }
-  .dia-td { min-width: 100px; }
-
-  .franja,
-  #view-ferti .franja {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .franja-card {
-    min-width: 0;
-    padding: 12px;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .franja-val { font-size: 22px; }
-
-  #view-estanque,
-  #view-balance {
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .est-wrap,
-  #view-balance .est-wrap {
-    width: 100%;
-    min-width: 0;
-    padding: 10px;
-    overflow: visible;
-  }
-
-  .est-grid,
-  .est-grid-bn,
-  #view-estanque .est-grid,
-  #view-balance .est-grid {
-    display: grid;
-    width: 100%;
-    min-width: 0;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 12px;
-  }
-
-  .est-col,
-  .est-side,
-  .bn-side,
-  .est-card {
-    width: 100%;
-    min-width: 0;
-  }
-
-  #view-balance .est-col,
-  #view-balance .bn-side {
-    overflow: visible;
-    padding-right: 0;
-  }
-
-  .est-chart-box {
-    width: 100%;
-    height: 240px;
-    min-width: 0;
-  }
-
-  .est-card {
-    padding: 13px;
-    overflow: hidden;
-  }
-
-  .est-tbl-scroll,
-  .bn-scroll {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .est-tbl-wide { min-width: 700px; }
-  .bn-scroll .est-tbl { min-width: 680px; }
-
-  .drawer,
-  #fdrawer {
-    width: 100vw;
-    max-width: 100vw;
-  }
-
-  .db { padding: 15px; }
-  .d-grid2, .dcols, .confirm-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .usr-name { display: none; }
-  .usr-btn { padding: 5px 8px; }
-
-  .kpi-card,
-  #view-estanque .kpi-card,
-  #view-balance .kpi-card,
-  #view-ferti .kpi-card {
-    gap: 8px;
-    padding: 9px;
-  }
-
-  .kpi-lbl { font-size: 9px; }
-  .kpi-sub { font-size: 10px; }
-
-  .kpi-val,
-  #view-ferti .kpi-val,
-  #view-estanque .kpi-val,
-  #view-balance .kpi-val { font-size: 18px; }
-
-  .est-chart-box { height: 220px; }
-}
-
 </style>
 </head>
 <body><div class="app">
@@ -794,8 +560,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
 </header>
 <div class="tabs">
-  <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego</div>
-  <div class="tab" id="tab-ferti" onclick="switchTab('ferti')"><i class="ti ti-flask-2"></i>Fertirriego</div>
+  <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego y Fertirriego</div>
   <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet-filled"></i>Dinámica de Estanque</div>
   <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
 </div>
@@ -824,15 +589,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
 </div>
-</div><!-- /view-riego -->
 
-<div id="view-ferti" class="view" style="display:none">
+<div id="view-ferti" class="ferti-block">
   <div class="scrim" id="fscrim" onclick="closeDF()"></div>
   <aside class="drawer" id="fdrawer">
     <div class="dh"><div class="dh-left"><div class="dt" id="fdt"></div><div class="ds" id="fds"></div></div>
       <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
     <div class="db" id="fdb"></div>
   </aside>
+  <div class="ferti-divider"><i class="ti ti-flask-2"></i>Fertirriego</div>
   <div class="body">
     <div class="cal-zone">
       <div class="cal-scroll"><table class="cal-tbl" id="fctbl"></table></div>
@@ -844,7 +609,18 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="p-block" id="fpprod"></div>
     </div>
   </div>
+  <div class="ferti-lock" id="fertiLock">
+    <div class="lock-card">
+      <div class="lock-badge"><i class="ti ti-crown"></i> PLAN PRO</div>
+      <div class="lock-ico"><i class="ti ti-flask-2"></i></div>
+      <div class="lock-title">Módulo Fertirriego</div>
+      <div class="lock-desc">El módulo de Fertirriego está disponible en el plan Pro. Actívalo para acceder a toda la información.</div>
+      <button class="lock-btn" onclick="cambiarPlan()"><i class="ti ti-arrow-up-circle"></i> Cambiar de plan</button>
+    </div>
+  </div>
 </div>
+</div><!-- /view-riego -->
+
 <div id="view-estanque" class="view" style="display:none">
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
@@ -1023,6 +799,7 @@ async function loadRender(){
   rKpi(dias,sc,sem);
   rCal(dias,sc);
   rPanel(dias,sc,ndvi);
+  loadRenderFerti();
 }
 
 function rKpi(dias,sc,sem){
@@ -1609,7 +1386,7 @@ const MOD_INFO={
 const MOD_PLAN={riego:'Estándar',ferti:'Pro',estanque:'Pro',balance:'Premium'};
 function tieneModulo(m){return MODULOS.includes(m);}
 function marcarTabsPlan(){
-  ['riego','ferti','estanque','balance'].forEach(m=>{
+  ['riego','estanque','balance'].forEach(m=>{
     const tab=document.getElementById('tab-'+m);if(!tab)return;
     const pro=tab.querySelector('.tab-pro');
     if(!tieneModulo(m)&&!pro)tab.insertAdjacentHTML('beforeend','<span class="tab-pro">'+MOD_PLAN[m].toUpperCase()+'</span>');
@@ -1617,7 +1394,7 @@ function marcarTabsPlan(){
   });
 }
 function aplicarBloqueo(tab){
-  ['riego','ferti','estanque','balance'].forEach(m=>document.getElementById('view-'+m)?.classList.remove('blurred'));
+  ['riego','estanque','balance'].forEach(m=>document.getElementById('view-'+m)?.classList.remove('blurred'));
   const lock=document.getElementById('planLock');
   if(!tieneModulo(tab)){
     document.getElementById('view-'+tab)?.classList.add('blurred');
@@ -1628,6 +1405,16 @@ function aplicarBloqueo(tab){
     document.getElementById('lockIco').innerHTML='<i class="ti '+info.ico+'"></i>';
     lock.classList.add('show');
   } else lock.classList.remove('show');
+  aplicarBloqueoFerti();
+}
+// Fertirriego ya no es una pestaña aparte — se bloquea/difumina solo, dentro de la pestaña Riego,
+// independiente de qué pestaña esté activa.
+function aplicarBloqueoFerti(){
+  const block=document.getElementById('view-ferti');
+  const lock=document.getElementById('fertiLock');
+  if(!block||!lock)return;
+  if(!tieneModulo('ferti')){block.classList.add('blurred');lock.classList.add('show');}
+  else{block.classList.remove('blurred');lock.classList.remove('show');}
 }
 function cambiarPlan(){
   // Placeholder — aquí irá el flujo real de cambio de plan / contacto comercial.
@@ -1636,13 +1423,11 @@ function cambiarPlan(){
 
 function switchTab(t){
   if(t===TAB)return;TAB=t;
-  const TABS=['riego','ferti','estanque','balance'];
+  const TABS=['riego','estanque','balance'];
   TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
-  document.getElementById('view-ferti').style.display=t==='ferti'?'flex':'none';
   document.getElementById('view-estanque').style.display=t==='estanque'?'flex':'none';
   document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
-  if(t==='ferti'&&G.zonas.length)loadRenderFerti();
   if(t==='estanque')loadRenderEstanque();
   if(t==='balance'&&G.zonas.length)loadRenderBalance();
   aplicarBloqueo(t);
@@ -1810,11 +1595,7 @@ function openEvF(znId,fecha,idx){
 function closeDF(){document.getElementById('fscrim').classList.remove('open');document.getElementById('fdrawer').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDF();});
 
-/* recargar fertirriego cuando cambie equipo o semana, sin tocar tu código de riego */
-const _onEquipoFerti=onEquipo;
-onEquipo=async function(){await _onEquipoFerti.apply(this,arguments);GF.loaded=false;if(TAB==='ferti'&&G.zonas.length)await loadRenderFerti();};
-const _chWFerti=chW;
-chW=function(){_chWFerti.apply(this,arguments);if(TAB==='ferti'&&G.zonas.length)loadRenderFerti();};
+/* Fertirriego ahora se carga directo desde loadRender() (misma pestaña que Riego) */
 
 
 /* ===== DINAMICA ESTANQUE ===== */
