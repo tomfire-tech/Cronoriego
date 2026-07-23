@@ -246,6 +246,59 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
 @media(max-width:1200px){.panel{width:260px;}}
 @media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
+@supports (height:100dvh){.app{height:100dvh;}}
+
+/* ===== MOBILE (tablet chico / celular) ===== */
+@media(max-width:820px){
+  /* Header: dos filas — arriba logo + acciones, abajo filtros con scroll horizontal */
+  .hdr{height:auto;min-height:58px;flex-wrap:wrap;padding:10px 14px;}
+  .hdr-sep{display:none;}
+  .hdr-filters{order:3;flex-basis:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;}
+  .hdr-filters::-webkit-scrollbar{height:4px;}
+  .hdr-right{order:2;margin-left:auto;}
+  .sel-wrap,.week-nav,.eq-op-btn{flex-shrink:0;}
+  .dlbtn{padding:7px 10px;}
+  .dlbtn-txt{display:none;}
+  .clim-badge{display:none;}
+  .logo{font-size:14px;}
+
+  /* Tabs: scroll horizontal en vez de recortarse */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;}
+  .tabs::-webkit-scrollbar{height:4px;}
+  .tab{flex:none;padding:0 12px;font-size:12px;white-space:nowrap;}
+
+  /* KPI bars: 2 columnas en todas las vistas (pisa los grid-template-columns específicos) */
+  .kpi-bar,#view-riego .kpi-bar,#view-ferti .kpi-bar,#view-estanque .kpi-bar,#view-balance .kpi-bar{grid-template-columns:repeat(2,1fr);}
+  .kpi-card{padding:10px 12px;border-right:none;border-bottom:1px solid var(--line);}
+  .kpi-card:nth-last-child(-n+2){border-bottom:none;}
+  .kpi-val{font-size:20px;}
+  #view-ferti .kpi-val{font-size:20px;}
+
+  /* Franja inferior: 2 columnas */
+  .franja,#view-ferti .franja{grid-template-columns:repeat(2,1fr);}
+  .franja-card{padding:12px 14px;border-right:none;border-bottom:1px solid var(--line);}
+  .franja-val{font-size:22px;}
+
+  /* Estanque / Balance: una sola columna, el panel lateral baja debajo del gráfico */
+  .est-grid{grid-template-columns:1fr;}
+  .est-chart-box{height:260px;}
+
+  /* Formularios: 1 columna para inputs más grandes y fáciles de tocar */
+  .confirm-grid{grid-template-columns:1fr;}
+  .d-grid2{grid-template-columns:1fr;}
+
+  /* Calendario: se sigue viendo con scroll lateral, pero la columna de Zona queda fija */
+  .cal-tbl thead tr th.th-zona{position:sticky;left:0;z-index:12;}
+  .zona-td{position:sticky;left:0;z-index:6;background:var(--bg);}
+
+  .drawer,#fdrawer{width:100vw;}
+}
+@media(max-width:480px){
+  .usr-name{display:none;}
+  .kpi-bar,#view-riego .kpi-bar,#view-ferti .kpi-bar,#view-estanque .kpi-bar,#view-balance .kpi-bar{grid-template-columns:repeat(2,1fr);}
+  .franja,#view-ferti .franja{grid-template-columns:1fr 1fr;}
+  .zona-td{width:130px;min-width:130px;}
+}
 /* ===== FERTIRRIEGO ===== */
 .tabs{height:42px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 20px;gap:2px;flex-shrink:0;}
 .tab{display:flex;align-items:center;gap:7px;padding:0 15px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
@@ -487,7 +540,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
   <div class="hdr-right">
-    <button class="dlbtn" id="dlEst" onclick="downloadEstacion()" title="Descargar datos de la estación (toda la temporada) en Excel"><i class="ti ti-download"></i>Estación</button>
+    <button class="dlbtn" id="dlEst" onclick="downloadEstacion()" title="Descargar datos de la estación (toda la temporada) en Excel"><i class="ti ti-download"></i><span class="dlbtn-txt">Estación</span></button>
     <div class="clim-badge"><i class="ti ti-temperature" style="color:var(--amber)"></i><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">°C</span></div>
     <div class="usr-btn" onclick="tgM(event)" id="ubtn">
       <div class="avatar" id="uini">—</div>
