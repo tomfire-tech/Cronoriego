@@ -687,6 +687,109 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-ferti-inline.locked .m-ferti-inline-btn{background:#D97706;}
   .m-riego-actions{display:grid;grid-template-columns:1fr;gap:7px;margin-top:10px;}
 
+
+/* ===== VISTA MÓVIL TIPO GOOGLE CALENDAR ===== */
+@media(max-width:820px){
+  #mView-riego .m-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:9px;}
+  #mView-riego .m-kpi{padding:7px 6px;border-radius:10px;text-align:left;}
+  #mView-riego .m-kpi-head{margin-bottom:3px;}
+  #mView-riego .m-kpi-icon{display:none;}
+  #mView-riego .m-kpi-label{font-size:7px;line-height:1.15;letter-spacing:.035em;}
+  #mView-riego .m-kpi-value{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #mView-riego .m-kpi-value.sm{font-size:9px;line-height:1.15;white-space:normal;}
+  #mView-riego .m-kpi-sub{display:none;}
+
+  .m-cal-toolbar{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:9px;margin:4px 0 8px;}
+  .m-cal-menu-btn,.m-cal-today-btn,.m-cal-arrow{height:38px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink2);font-family:inherit;font-weight:800;cursor:pointer;box-shadow:var(--shadow-sm);}
+  .m-cal-menu-btn{width:40px;font-size:19px;display:grid;place-items:center;}
+  .m-cal-today-btn{padding:0 12px;font-size:11px;color:#1E8449;border-color:#BBF7D0;background:#F0FDF4;}
+  .m-cal-heading{min-width:0;line-height:1.12;}
+  .m-cal-heading strong{display:block;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .m-cal-heading span{display:block;font-size:9.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .m-cal-range-nav{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:7px;margin-bottom:7px;}
+  .m-cal-arrow{font-size:18px;display:grid;place-items:center;}
+  .m-cal-mode-label{text-align:center;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+
+  .m-calendar-shell{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .m-calendar-grid{--m-cal-cols:7;display:grid;grid-template-columns:84px repeat(var(--m-cal-cols),minmax(0,1fr));width:100%;background:#fff;}
+  .m-cal-corner,.m-cal-day-head,.m-cal-zone-label,.m-cal-cell{min-width:0;border-right:1px solid #E9EEF4;border-bottom:1px solid #E9EEF4;}
+  .m-cal-corner{height:43px;display:flex;align-items:flex-end;padding:0 7px 7px;background:#F8FAFC;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);}
+  .m-cal-day-head{height:43px;background:#F8FAFC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--muted);}
+  .m-cal-day-head .dow{font-size:7.5px;font-weight:800;text-transform:uppercase;}
+  .m-cal-day-head .num{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--ink2);}
+  .m-cal-day-head.today .num{background:#2563EB;color:#fff;}
+  .m-cal-day-head.selected{background:#EFF6FF;}
+  .m-cal-day-head.selected:not(.today) .num{color:#1D4ED8;}
+
+  .m-cal-zone-label{appearance:none;border-top:none;border-left:none;min-height:61px;background:#fff;padding:6px 6px 5px;border-left:3px solid var(--zone-color,#2563EB);text-align:left;cursor:pointer;overflow:hidden;}
+  .m-cal-zone-label strong{display:block;font-size:9.5px;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .m-cal-zone-label span{display:block;font-size:7.5px;line-height:1.25;color:var(--muted);margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .m-cal-cell{appearance:none;min-height:61px;padding:4px 2px;background:#fff;border-top:none;border-left:none;font-family:inherit;color:var(--ink2);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;}
+  .m-cal-cell:active{filter:brightness(.96);}
+  .m-cal-cell.has-riego{background:color-mix(in srgb,var(--cell-color,#2563EB) 11%,white);box-shadow:inset 0 3px 0 var(--cell-color,#2563EB);}
+  .m-cal-cell.has-ferti:not(.has-riego){background:#F0FDF4;box-shadow:inset 0 3px 0 #16A34A;}
+  .m-cal-cell.done::after{content:'✓';position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;display:grid;place-items:center;background:#16A34A;color:#fff;font-size:7px;font-weight:900;}
+  .m-cal-time{font-family:'Fraunces',serif;font-size:10px;font-weight:800;line-height:1;color:var(--cell-color,#2563EB);white-space:nowrap;}
+  .m-cal-sub{font-size:7px;font-weight:800;color:var(--muted);white-space:nowrap;}
+  .m-cal-icons{height:12px;display:flex;align-items:center;justify-content:center;gap:2px;font-size:9px;}
+  .m-cal-icons .water{color:var(--cell-color,#2563EB);}
+  .m-cal-icons .ferti{color:#16A34A;}
+  .m-cal-empty-mark{font-size:12px;color:#D7DEE7;}
+  .m-calendar-grid.day{grid-template-columns:96px minmax(0,1fr);}
+  .m-calendar-grid.day .m-cal-zone-label,.m-calendar-grid.day .m-cal-cell{min-height:76px;}
+  .m-calendar-grid.day .m-cal-time{font-size:15px;}
+  .m-calendar-grid.day .m-cal-sub{font-size:9px;}
+  .m-calendar-grid.three{grid-template-columns:90px repeat(3,minmax(0,1fr));}
+  .m-calendar-grid.three .m-cal-zone-label,.m-calendar-grid.three .m-cal-cell{min-height:68px;}
+  .m-calendar-grid.three .m-cal-time{font-size:13px;}
+  .m-calendar-grid.three .m-cal-sub{font-size:8px;}
+  .m-cal-legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:7px 3px 0;font-size:8px;color:var(--muted);}
+  .m-cal-legend span{display:flex;align-items:center;gap:4px;}
+  .m-cal-legend i{font-size:10px;}
+
+  .m-calendar-scrim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:510;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .m-calendar-scrim.show{opacity:1;pointer-events:auto;}
+  .m-calendar-drawer{position:fixed;left:0;top:0;bottom:0;width:min(305px,82vw);background:#fff;z-index:511;transform:translateX(-102%);transition:transform .24s cubic-bezier(.32,.72,0,1);box-shadow:12px 0 32px rgba(15,23,42,.18);padding:24px 0 calc(18px + env(safe-area-inset-bottom));}
+  .m-calendar-drawer.show{transform:none;}
+  .m-calendar-drawer-brand{padding:8px 22px 23px;font-size:20px;font-weight:500;color:#334155;border-bottom:1px solid var(--line);}
+  .m-calendar-drawer-brand b:first-child{color:#1A5276;}.m-calendar-drawer-brand b:nth-child(2){color:#1E8449;}
+  .m-calendar-view-btn{width:calc(100% - 20px);height:54px;border:none;background:#fff;border-radius:0 28px 28px 0;padding:0 22px;font-family:inherit;font-size:14px;color:var(--ink2);display:flex;align-items:center;gap:18px;cursor:pointer;text-align:left;}
+  .m-calendar-view-btn i{font-size:23px;color:#334155;}
+  .m-calendar-view-btn.active{background:#DFF2FF;color:#075985;font-weight:800;}
+  .m-calendar-view-btn.active i{color:#075985;}
+
+  .m-cell-sheet-scrim{position:fixed;inset:0;background:rgba(15,23,42,.44);z-index:520;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .m-cell-sheet-scrim.show{opacity:1;pointer-events:auto;}
+  .m-cell-sheet{position:fixed;left:0;right:0;bottom:0;z-index:521;background:#fff;border-radius:21px 21px 0 0;box-shadow:0 -18px 45px rgba(15,23,42,.22);transform:translateY(105%);transition:transform .25s cubic-bezier(.32,.72,0,1);max-height:83dvh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);}
+  .m-cell-sheet.show{transform:none;}
+  .m-cell-sheet-handle{width:42px;height:4px;border-radius:99px;background:#CBD5E1;margin:9px auto 5px;flex:none;}
+  .m-cell-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 16px 12px;border-bottom:1px solid var(--line);}
+  .m-cell-sheet-head h3{font-size:16px;margin:0;color:var(--ink);}
+  .m-cell-sheet-head p{font-size:10px;color:var(--muted);margin:3px 0 0;}
+  .m-cell-sheet-close{width:31px;height:31px;border:none;border-radius:50%;background:#F1F5F9;color:var(--muted);display:grid;place-items:center;font-size:16px;cursor:pointer;}
+  .m-cell-sheet-body{padding:13px 16px 17px;overflow-y:auto;}
+  .m-sheet-block{border:1px solid var(--line);border-radius:13px;padding:11px;margin-bottom:9px;}
+  .m-sheet-block.riego{background:#EFF6FF;border-color:#BFDBFE;}
+  .m-sheet-block.ferti{background:#F0FDF4;border-color:#BBF7D0;}
+  .m-sheet-block-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:900;margin-bottom:8px;}
+  .m-sheet-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .m-sheet-metric{background:rgba(255,255,255,.72);border-radius:9px;padding:7px;min-width:0;}
+  .m-sheet-metric small{display:block;font-size:7px;text-transform:uppercase;font-weight:800;color:var(--subtle);}
+  .m-sheet-metric strong{display:block;font-size:11px;color:var(--ink2);margin-top:3px;overflow-wrap:anywhere;}
+  .m-sheet-product{font-size:12px;font-weight:800;color:#14532D;margin-bottom:8px;line-height:1.3;}
+  .m-sheet-actions{display:grid;grid-template-columns:1fr;gap:7px;margin-top:11px;}
+  .m-sheet-action{height:42px;border:none;border-radius:11px;font-family:inherit;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;}
+  .m-sheet-action.riego{background:#2563EB;color:#fff;}
+  .m-sheet-action.ferti{background:#16A34A;color:#fff;}
+  .m-sheet-action.zone{background:#F1F5F9;color:var(--ink2);}
+}
+@media(max-width:370px){
+  .m-calendar-grid{grid-template-columns:76px repeat(var(--m-cal-cols),minmax(0,1fr));}
+  .m-cal-zone-label{padding-left:4px;padding-right:3px;}
+  .m-cal-zone-label strong{font-size:8.5px;}
+  .m-cal-time{font-size:9px;}
+}
+
 </style>
 </head>
 <body><div class="app">
@@ -924,11 +1027,23 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <main class="m-main" id="mobileMain">
     <section class="m-view active" id="mView-riego">
       <div class="m-page-title">Riego y Fertirriego</div>
-      <div class="m-page-sub">Selecciona un día para revisar el riego y la recomendación de fertilización de cada zona.</div>
+      <div class="m-page-sub">Calendario compacto por zona. Toca cualquier casilla para revisar el detalle y confirmar la ejecución.</div>
       <div class="m-kpi-grid" id="mRiegoKpis"></div>
-      <div class="m-section-title"><span>Día seleccionado</span><span id="mRiegoDateText">—</span></div>
-      <div class="m-day-selector" id="mobileDaySelector"></div>
-      <div class="m-zone-list" id="mRiegoContent"><div class="m-empty"><i class="ti ti-loader-2"></i><strong>Cargando programación</strong></div></div>
+      <div class="m-cal-toolbar">
+        <button class="m-cal-menu-btn" onclick="openMobileCalendarDrawer()" aria-label="Cambiar vista"><i class="ti ti-menu-2"></i></button>
+        <div class="m-cal-heading"><strong id="mCalendarTitle">Semana</strong><span id="mCalendarSubtitle">—</span></div>
+        <button class="m-cal-today-btn" onclick="mobileCalendarToday()">Hoy</button>
+      </div>
+      <div class="m-cal-range-nav">
+        <button class="m-cal-arrow" onclick="mobileCalendarMove(-1)" aria-label="Periodo anterior"><i class="ti ti-chevron-left"></i></button>
+        <div class="m-cal-mode-label" id="mCalendarModeLabel">Vista semana</div>
+        <button class="m-cal-arrow" onclick="mobileCalendarMove(1)" aria-label="Periodo siguiente"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="m-calendar-shell"><div class="m-calendar-grid week" id="mCalendarGrid"></div></div>
+      <div class="m-cal-legend"><span><i class="ti ti-droplet" style="color:#2563EB"></i>Riego</span><span><i class="ti ti-flask-2" style="color:#16A34A"></i>Fertirriego</span><span><i class="ti ti-circle-check" style="color:#16A34A"></i>Confirmado</span></div>
+      <div id="mobileDaySelector" hidden></div>
+      <div id="mRiegoDateText" hidden></div>
+      <div id="mRiegoContent" hidden></div>
     </section>
 
     <section class="m-view" id="mView-estanque">
@@ -959,6 +1074,21 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="m-plan-actions"><button class="close" onclick="closeMobilePlanLock()">Volver</button><button class="upgrade" onclick="cambiarPlan()">Cambiar plan</button></div>
     </div>
   </div>
+
+  <div class="m-calendar-scrim" id="mCalendarScrim" onclick="closeMobileCalendarDrawer()"></div>
+  <aside class="m-calendar-drawer" id="mCalendarDrawer" aria-label="Selector de vista">
+    <div class="m-calendar-drawer-brand"><b>CRONO</b><b>RIEGO</b> Calendario</div>
+    <button class="m-calendar-view-btn" id="mCalendarView-day" onclick="mobileSetCalendarView('day')"><i class="ti ti-calendar-event"></i>Día</button>
+    <button class="m-calendar-view-btn" id="mCalendarView-3day" onclick="mobileSetCalendarView('3day')"><i class="ti ti-columns-3"></i>3 días</button>
+    <button class="m-calendar-view-btn active" id="mCalendarView-week" onclick="mobileSetCalendarView('week')"><i class="ti ti-calendar-week"></i>Semana</button>
+  </aside>
+
+  <div class="m-cell-sheet-scrim" id="mCellSheetScrim" onclick="closeMobileCellSheet()"></div>
+  <section class="m-cell-sheet" id="mCellSheet" aria-label="Detalle de programación">
+    <div class="m-cell-sheet-handle"></div>
+    <div class="m-cell-sheet-head"><div><h3 id="mCellSheetTitle">Detalle</h3><p id="mCellSheetSubtitle">—</p></div><button class="m-cell-sheet-close" onclick="closeMobileCellSheet()"><i class="ti ti-x"></i></button></div>
+    <div class="m-cell-sheet-body" id="mCellSheetBody"></div>
+  </section>
 </div>
 
 </div><!-- /app -->
@@ -1651,6 +1781,7 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   else document.querySelector('#'+uid+'_box .confirm-chk-row')?.insertAdjacentHTML('afterend',`<div id="${uid}_ts" style="font-size:10.5px;color:var(--muted);margin:-7px 0 11px 27px">${tsTxt}</div>`);
   // refresca las tarjetas del calendario combinado para mostrar el check (riego y fertirriego viven en la misma tabla ahora)
   rCal(semDias(G.off),G.scDia);
+  if(isMobileView())renderMobileRiego();
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
 }
 
@@ -2164,7 +2295,7 @@ document.addEventListener('click',()=>document.querySelectorAll('.cd-menu.open')
    INTERFAZ MÓVIL INDEPENDIENTE
    Consume el mismo estado G / GF / GE / GB del escritorio.
    ========================================================= */
-const MOBILE={module:'riego',dayIndex:null,estChart:null,bnMacroChart:null,bnMicroChart:null};
+const MOBILE={module:'riego',dayIndex:null,calendarView:'week',estChart:null,bnMacroChart:null,bnMicroChart:null};
 
 function isMobileView(){return window.matchMedia('(max-width: 820px)').matches;}
 function mobileSafeId(v){return String(v??'').replace(/[^a-zA-Z0-9_-]/g,'_');}
@@ -2284,42 +2415,122 @@ function mobileRiegoSummary(){
   return{eto,vol,coverage,energy,rain:avgSum(rainBy)};
 }
 
-function renderMobileRiego(){
-  const kpi=document.getElementById('mRiegoKpis'),content=document.getElementById('mRiegoContent');if(!kpi||!content)return;
-  renderMobileDaySelector();const s=mobileRiegoSummary(),ok=s.coverage>=75;
-  kpi.innerHTML=`
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Estado hídrico</span><span class="m-kpi-icon" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'#15803D':'#D97706'}"><i class="ti ti-droplet"></i></span></div><div class="m-kpi-value sm" style="color:${ok?'#15803D':'#D97706'}">${ok?'Agua disponible':'Revisar disponibilidad'}</div><div class="m-kpi-sub">${s.coverage}% de zonas con riego</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Volumen semana</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-waves"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${s.vol>0?mobileFmtInt(s.vol):'—'}</div><div class="m-kpi-sub">m³ estimados</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">ETo semana</span><span class="m-kpi-icon" style="background:#FFFBEB;color:#D97706"><i class="ti ti-sun"></i></span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm evapotranspiración</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía estimada</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-bolt"></i></span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh esta semana</div></div>`;
-  if(!G.zonas.length){content.innerHTML=mobileEmpty('ti-map-off','Sin zonas','El equipo seleccionado no tiene zonas activas.');return;}
-  const date=mobileSelectedDate();const puedeFerti=tieneModulo('ferti');
-  content.innerHTML=G.zonas.map((z,i)=>{
-    const r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date);
-    const l=r?(parseFloat(r.lamina_neta_riego_pronostico_mm)||0):0;
-    const t=r?(parseFloat(r.tiempo_de_riego_pronostico_horas)||0):0;
-    const ha=parseFloat(z.superficie_ha)||0,vol=l*ha*10;
-    const conf=G.confirmR?.[z.id_zona+'|'+date],c=ZC[i%ZC.length],has=l>0||t>0;
-    const fertiEvents=(GF.ferti||[]).filter(e=>e.id_zona===z.id_zona&&e.fecha_evento===date);
-    const ferti=fertiEvents[0],confF=G.confirmF?.[z.id_zona+'|'+date];
-    let fertiHtml='';
-    if(!puedeFerti){
-      fertiHtml=`<div class="m-ferti-inline locked"><div class="m-ferti-inline-head"><div class="m-ferti-inline-title"><i class="ti ti-lock"></i>Fertirriego</div><span class="m-ferti-inline-status">PLAN ${MOD_PLAN.ferti.toUpperCase()}</span></div><div class="m-ferti-inline-product">Activa este módulo para ver productos, dosis y tiempos de inyección.</div><button class="m-ferti-inline-btn" onclick="mobileShowPlanLock('ferti')"><i class="ti ti-crown"></i>Ver plan requerido</button></div>`;
-    }else if(ferti){
-      const dosis=fertiEvents.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0);
-      const madre=fertiEvents.reduce((a,e)=>a+numF(e.volumen_sol_madre_l),0);
-      const tiempo=fertiEvents.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0);
-      fertiHtml=`<div class="m-ferti-inline"><div class="m-ferti-inline-head"><div class="m-ferti-inline-title"><i class="ti ti-flask-2"></i>Fertirriego</div><span class="m-ferti-inline-status${confF?' done':''}">${confF?'Confirmado':'Programado'}</span></div><div class="m-ferti-inline-product">${ferti.producto_asignado||'Producto sin nombre'}${fertiEvents.length>1?` · +${fertiEvents.length-1} producto(s)`:''}</div><div class="m-ferti-inline-metrics"><div class="m-ferti-inline-metric"><small>Dosis</small><strong>${dosis>0?dosis.toFixed(1)+' kg':'—'}</strong></div><div class="m-ferti-inline-metric"><small>Inyección</small><strong>${tiempo>0?(hmF(tiempo)||hm(tiempo)||'—'):'—'}</strong></div><div class="m-ferti-inline-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div><button class="m-ferti-inline-btn" onclick="openEvF('${z.id_zona}','${date}',0)"><i class="ti ti-eye"></i>Ver recomendación y confirmar</button></div>`;
-    }else{
-      fertiHtml=`<div class="m-ferti-inline empty"><div class="m-ferti-inline-head" style="margin-bottom:0"><div class="m-ferti-inline-title"><i class="ti ti-flask-off"></i>Sin fertirriego programado</div></div></div>`;
-    }
-    return `<article class="m-zone-card" style="--zone-color:${c}"><div class="m-zone-top"><div><div class="m-zone-name"><span class="m-zone-dot"></span>${z.nombre||z.id_zona}</div><div class="m-zone-meta">${z.especie||'—'} ${z.variedad||''} · ${z.superficie_ha||'—'} ha</div></div><span class="m-status ${conf?'done':has?'pending':'none'}">${conf?'Riego confirmado':has?'Riego programado':'Sin riego'}</span></div>
-      <div class="m-riego-metrics"><div class="m-metric"><div class="m-metric-label">Tiempo</div><div class="m-metric-value primary">${has?(hm(t)||'—'):'—'}</div></div><div class="m-metric"><div class="m-metric-label">Lámina</div><div class="m-metric-value">${l>0?l.toFixed(0)+' mm':'—'}</div></div><div class="m-metric"><div class="m-metric-label">Volumen</div><div class="m-metric-value">${vol>0?mobileFmtInt(vol)+' m³':'—'}</div></div></div>
-      <div class="m-riego-actions">${has?`<button class="m-card-action" onclick="openDia('${date}','${z.id_zona}')"><i class="ti ti-eye"></i>Ver riego y confirmar</button>`:`<button class="m-card-action secondary" onclick="openZona('${z.id_zona}')"><i class="ti ti-info-circle"></i>Ver ficha de la zona</button>`}</div>
-      ${fertiHtml}</article>`;
-  }).join('');
+function mobileCalendarViewIndexes(){
+  mobileSetDefaultDay();
+  if(MOBILE.calendarView==='day')return [MOBILE.dayIndex];
+  if(MOBILE.calendarView==='3day'){
+    const start=Math.max(0,Math.min(4,(MOBILE.dayIndex??0)-1));
+    return [start,start+1,start+2];
+  }
+  return [0,1,2,3,4,5,6];
 }
-
+function mobileCompactTime(hours){
+  const n=parseFloat(hours)||0;if(n<=0)return '';
+  const h=Math.floor(n),m=Math.round((n-h)*60);
+  if(m===60)return `${h+1}h`;
+  return h>0?`${h}h${m?String(m).padStart(2,'0'):''}`:`${m}m`;
+}
+function mobileUpdateCalendarHeading(indexes){
+  const days=semDias(G.off),visible=indexes.map(i=>days[i]);
+  const first=visible[0],last=visible[visible.length-1];
+  const title=document.getElementById('mCalendarTitle'),sub=document.getElementById('mCalendarSubtitle'),label=document.getElementById('mCalendarModeLabel');
+  if(MOBILE.calendarView==='day'){
+    if(title)title.textContent=`${DS[first.getDay()]} ${first.getDate()}`;
+    if(sub)sub.textContent=`${MS[first.getMonth()]} de ${first.getFullYear()}`;
+    if(label)label.textContent='Vista día';
+  }else if(MOBILE.calendarView==='3day'){
+    if(title)title.textContent=`${first.getDate()}–${last.getDate()} ${MSS[last.getMonth()]}`;
+    if(sub)sub.textContent=`Semana ${isoW(first)} · ${first.getFullYear()}`;
+    if(label)label.textContent='Vista 3 días';
+  }else{
+    if(title)title.textContent=`Semana ${isoW(first)}`;
+    if(sub)sub.textContent=`${first.getDate()} ${MSS[first.getMonth()]} — ${last.getDate()} ${MSS[last.getMonth()]} ${last.getFullYear()}`;
+    if(label)label.textContent='Vista semana';
+  }
+}
+function openMobileCalendarDrawer(){
+  ['day','3day','week'].forEach(v=>document.getElementById('mCalendarView-'+v)?.classList.toggle('active',MOBILE.calendarView===v));
+  document.getElementById('mCalendarScrim')?.classList.add('show');
+  document.getElementById('mCalendarDrawer')?.classList.add('show');
+}
+function closeMobileCalendarDrawer(){document.getElementById('mCalendarScrim')?.classList.remove('show');document.getElementById('mCalendarDrawer')?.classList.remove('show');}
+function mobileSetCalendarView(view){
+  if(!['day','3day','week'].includes(view))return;
+  MOBILE.calendarView=view;closeMobileCalendarDrawer();renderMobileRiego();
+}
+function mobileCalendarMove(delta){
+  const d=Number(delta)||0;
+  if(MOBILE.calendarView==='week'){
+    G.off+=d;MOBILE.dayIndex=d>0?0:6;updW();mobileUpdateWeekLabel();if(G.zonas.length)loadRender();else renderMobileRiego();return;
+  }
+  const step=MOBILE.calendarView==='3day'?3:1;
+  let next=(MOBILE.dayIndex??0)+(d*step),weekDelta=0;
+  while(next<0){next+=7;weekDelta--;}
+  while(next>6){next-=7;weekDelta++;}
+  MOBILE.dayIndex=next;
+  if(weekDelta!==0){G.off+=weekDelta;updW();mobileUpdateWeekLabel();if(G.zonas.length)loadRender();else renderMobileRiego();}
+  else renderMobileRiego();
+}
+function mobileCalendarToday(){
+  G.off=0;MOBILE.dayIndex=(new Date().getDay()+6)%7;updW();mobileUpdateWeekLabel();if(G.zonas.length)loadRender();else renderMobileRiego();
+}
+function closeMobileCellSheet(){document.getElementById('mCellSheetScrim')?.classList.remove('show');document.getElementById('mCellSheet')?.classList.remove('show');}
+function mobileOpenRiegoDetail(znId,date){closeMobileCellSheet();openDia(date,znId);}
+function mobileOpenFertiDetail(znId,date){closeMobileCellSheet();if(!tieneModulo('ferti')){mobileShowPlanLock('ferti');return;}openEvF(znId,date,0);}
+function mobileOpenZoneDetail(znId){closeMobileCellSheet();openZona(znId);}
+function mobileOpenCalendarCell(znId,date){
+  const z=G.zonas.find(x=>x.id_zona===znId);if(!z)return;
+  const r=(G.scDia||[]).find(x=>x.id_zona===znId&&x.fecha===date);
+  const events=(GF.ferti||[]).filter(x=>x.id_zona===znId&&x.fecha_evento===date);
+  const d=new Date(date+'T00:00:00'),ha=parseFloat(z.superficie_ha)||0;
+  const l=r?(parseFloat(r.lamina_neta_riego_pronostico_mm)||0):0,t=r?(parseFloat(r.tiempo_de_riego_pronostico_horas)||0):0,vol=l*ha*10;
+  const hasR=!!r&&(l>0||t>0),hasF=tieneModulo('ferti')&&events.length>0,confR=G.confirmR?.[znId+'|'+date],confF=G.confirmF?.[znId+'|'+date];
+  const title=document.getElementById('mCellSheetTitle'),subtitle=document.getElementById('mCellSheetSubtitle'),body=document.getElementById('mCellSheetBody');
+  if(title)title.textContent=z.nombre||znId;
+  if(subtitle)subtitle.textContent=`${DS[d.getDay()]} ${d.getDate()} de ${MS[d.getMonth()]} · ${z.especie||'—'} ${z.variedad||''}`;
+  let html='';
+  if(hasR)html+=`<div class="m-sheet-block riego"><div class="m-sheet-block-title"><span><i class="ti ti-droplet"></i> Riego programado</span><span>${confR?'✓ Confirmado':'Pendiente'}</span></div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Tiempo</small><strong>${hm(t)||'—'}</strong></div><div class="m-sheet-metric"><small>Lámina</small><strong>${l>0?l.toFixed(1)+' mm':'—'}</strong></div><div class="m-sheet-metric"><small>Volumen</small><strong>${vol>0?mobileFmtInt(vol)+' m³':'—'}</strong></div></div></div>`;
+  if(hasF){
+    const dosis=events.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0),tiempo=events.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0),madre=events.reduce((a,e)=>a+numF(e.volumen_sol_madre_l),0);
+    html+=`<div class="m-sheet-block ferti"><div class="m-sheet-block-title"><span><i class="ti ti-flask-2"></i> Fertirriego</span><span>${confF?'✓ Confirmado':'Programado'}</span></div><div class="m-sheet-product">${events[0].producto_asignado||'Producto sin nombre'}${events.length>1?` · +${events.length-1} producto(s)`:''}</div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Dosis</small><strong>${dosis>0?dosis.toFixed(1)+' kg':'—'}</strong></div><div class="m-sheet-metric"><small>Inyección</small><strong>${tiempo>0?(hmF(tiempo)||hm(tiempo)||'—'):'—'}</strong></div><div class="m-sheet-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div></div>`;
+  }
+  if(!hasR&&!hasF)html+=mobileEmpty('ti-calendar-off','Sin programación','No hay riego ni fertirriego para esta zona en el día seleccionado.');
+  html+=`<div class="m-sheet-actions">${hasR?`<button class="m-sheet-action riego" onclick="mobileOpenRiegoDetail('${znId}','${date}')"><i class="ti ti-droplet"></i>Ver detalle del riego</button>`:''}${hasF?`<button class="m-sheet-action ferti" onclick="mobileOpenFertiDetail('${znId}','${date}')"><i class="ti ti-flask-2"></i>Ver detalle del fertirriego</button>`:''}<button class="m-sheet-action zone" onclick="mobileOpenZoneDetail('${znId}')"><i class="ti ti-map-pin"></i>Ver ficha de la zona</button></div>`;
+  if(body)body.innerHTML=html;
+  document.getElementById('mCellSheetScrim')?.classList.add('show');document.getElementById('mCellSheet')?.classList.add('show');
+}
+function renderMobileCalendarGrid(){
+  const grid=document.getElementById('mCalendarGrid');if(!grid)return;
+  const days=semDias(G.off),indexes=mobileCalendarViewIndexes(),today=fs(new Date());
+  mobileUpdateCalendarHeading(indexes);
+  const cls=MOBILE.calendarView==='day'?'day':MOBILE.calendarView==='3day'?'three':'week';
+  grid.className='m-calendar-grid '+cls;grid.style.setProperty('--m-cal-cols',indexes.length);
+  let html='<div class="m-cal-corner">Zonas</div>';
+  indexes.forEach(i=>{const d=days[i],date=fs(d);html+=`<div class="m-cal-day-head${date===today?' today':''}${i===MOBILE.dayIndex?' selected':''}"><span class="dow">${DSS[d.getDay()]}</span><span class="num">${d.getDate()}</span></div>`;});
+  G.zonas.forEach((z,zi)=>{
+    const c=ZC[zi%ZC.length],zn=String(z.id_zona).replace(/'/g,"\\'");
+    html+=`<button class="m-cal-zone-label" style="--zone-color:${c}" onclick="mobileOpenZoneDetail('${zn}')"><strong>${z.nombre||z.id_zona}</strong><span>${z.especie||'—'} ${z.variedad||''}<br>${z.superficie_ha||'—'} ha</span></button>`;
+    indexes.forEach(i=>{
+      const date=fs(days[i]),r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date),l=r?(parseFloat(r.lamina_neta_riego_pronostico_mm)||0):0,t=r?(parseFloat(r.tiempo_de_riego_pronostico_horas)||0):0;
+      const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!r&&(l>0||t>0),hasF=tieneModulo('ferti')&&ferti.length>0,done=!!G.confirmR?.[z.id_zona+'|'+date]||!!G.confirmF?.[z.id_zona+'|'+date];
+      const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
+      const main=hasR?mobileCompactTime(t):hasF?'Ferti':'',sub=hasR&&l>0?`${Math.round(l)}mm`:hasF?`${ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}kg`:'';
+      html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}</span></button>`;
+    });
+  });
+  grid.innerHTML=html;
+}
+function renderMobileRiego(){
+  const kpi=document.getElementById('mRiegoKpis');if(!kpi)return;
+  const s=mobileRiegoSummary(),ok=s.coverage>=75;
+  kpi.innerHTML=`
+    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Estado</span></div><div class="m-kpi-value sm" style="color:${ok?'#15803D':'#D97706'}">${ok?'Disponible':'Revisar'}</div><div class="m-kpi-sub">${s.coverage}%</div></div>
+    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Volumen</span></div><div class="m-kpi-value" style="color:#2563EB">${s.vol>0?mobileFmtInt(s.vol):'—'}</div><div class="m-kpi-sub">m³</div></div>
+    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">ETo</span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm</div></div>
+    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>`;
+  if(!G.zonas.length){const grid=document.getElementById('mCalendarGrid');if(grid){grid.className='m-calendar-grid day';grid.innerHTML='<div style="grid-column:1/-1;padding:10px">'+mobileEmpty('ti-map-off','Sin zonas','El equipo seleccionado no tiene zonas activas.')+'</div>';}return;}
+  renderMobileCalendarGrid();
+}
 
 
 function toggleMobileSection(id){document.getElementById(id)?.classList.toggle('open');}
