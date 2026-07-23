@@ -395,6 +395,26 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .bn-scroll .est-tbl th:first-child,.bn-scroll .est-tbl td:first-child{text-align:left;padding-left:8px;min-width:115px;}
 .bn-scroll .est-tbl tbody tr:nth-child(even){background:#FAFBFC;}
 .bn-scroll .est-tbl tbody tr:hover{background:#EFF6FF;}
+/* ===== Confirmacion de ejecucion ===== */
+.confirm-box{border:1.5px solid var(--line);border-radius:var(--r);padding:14px;background:var(--bg);}
+.confirm-box.done{border-color:#BBF7D0;background:#F0FDF4;}
+.confirm-chk-row{display:flex;align-items:center;gap:9px;margin-bottom:12px;cursor:pointer;}
+.confirm-chk-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);cursor:pointer;}
+.confirm-chk-lbl{font-size:13px;font-weight:700;color:var(--ink);}
+.confirm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.confirm-fl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:4px;}
+.confirm-fi{width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px;outline:none;transition:border-color .15s;background:var(--white);}
+.confirm-fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.confirm-fi:disabled{background:var(--line2);color:var(--subtle);cursor:not-allowed;}
+.confirm-save{margin-top:12px;width:100%;padding:9px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s;}
+.confirm-save:hover{background:#15803D;}
+.confirm-save:disabled{opacity:.55;cursor:not-allowed;}
+.confirm-msg{font-size:11px;padding:7px 10px;border-radius:7px;margin-top:9px;display:none;border:1px solid transparent;}
+.confirm-msg.ok{display:block;background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
+.confirm-msg.err{display:block;background:#FEF2F2;color:var(--red);border-color:#FECACA;}
+.card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2;}
+.eq-op-btn{border:none;background:var(--line2);width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center;font-size:14px;transition:background .15s,color .15s;flex-shrink:0;}
+.eq-op-btn:hover{background:var(--line);color:var(--ink2);}
 
 </style>
 </head>
@@ -430,6 +450,21 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
 </div>
 
+<div class="modal-ov" id="meq" onclick="if(event.target===this)closeEq()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><div class="m-t">Datos del equipo</div><div class="m-s">Operario y profesional por defecto para este equipo. Se precargan en cada confirmación de riego/fertirriego y se pueden editar en cada una.</div></div>
+      <button onclick="closeEq()" style="border:none;background:var(--line2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;"><i class="ti ti-x"></i></button>
+    </div>
+    <label class="fl">Operario (ejecuta)</label>
+    <div class="fi-w"><input type="text" id="eqOperario" class="fi" placeholder="Nombre del operario"></div>
+    <label class="fl">Profesional (recomienda)</label>
+    <div class="fi-w"><input type="text" id="eqProfesional" class="fi" placeholder="Nombre del profesional"></div>
+    <div class="m-msg" id="eqmsg"></div>
+    <button class="btn-p" id="beq" onclick="saveEqOp()">Guardar datos del equipo</button>
+  </div>
+</div>
+
 <header class="hdr">
   <div class="logo">
     <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v21</span>
@@ -444,6 +479,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <span class="sel-lbl">Equipo</span>
       <select id="se" onchange="onEquipo()"></select>
     </div>
+    <button class="eq-op-btn" onclick="openEq()" title="Operario y profesional por defecto de este equipo"><i class="ti ti-user-cog"></i></button>
     <div class="week-nav">
       <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
       <span id="wlbl" style="white-space:nowrap;display:flex;flex-direction:column;line-height:1.15;align-items:center"><span id="wlbl-sem" style="font-size:13px;font-weight:700;color:var(--ink)">Sem. —</span><span id="wlbl-fec" style="font-size:10px;color:var(--muted);font-weight:500">—</span></span>
@@ -679,6 +715,7 @@ async function onPredio(){
 async function onEquipo(){
   const eqId=document.getElementById('se').value;
   G.zonas=await qZ(eqId);
+  await qEquipoOpDefaults(eqId);
   if(G.zonas.length)await loadRender();
   marcarTabsPlan();
   aplicarBloqueo(TAB);
@@ -690,6 +727,7 @@ async function loadRender(){
   const znIds=G.zonas.map(z=>z.id_zona);
   const [sc,ndvi,sem,mapas,calc]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds)]);
   G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;
+  await qConfirmaciones(znIds,'riego',fi,ff);
   rKpi(dias,sc,sem);
   rCal(dias,sc);
   rPanel(dias,sc,ndvi);
@@ -778,12 +816,14 @@ function rCal(dias,sc){
         const t=r?parseFloat(r.tiempo_de_riego_pronostico_horas)||0:0;
         const ha=parseFloat(z.superficie_ha)||0;
         const vol=l>0?Math.round(l*ha*10):0;
+        const conf=G.confirmR[z.id_zona+'|'+dS];
 
         if(l>0&&hm(t)){
           return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="riego-card" style="background:${cl};border-color:${cm};--zc:${c}" onclick="openDia('${dS}','${z.id_zona}')">
                 <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
+                ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
                 <div class="rc-top">
                   <div class="rc-tiempo" style="color:${c}">${hm(t)}</div>
                   <i class="ti ti-droplet rc-ico" style="color:${c};opacity:.6"></i>
@@ -976,7 +1016,9 @@ function openDia(fecha,znId){
       <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
     </div>`;
 
-  const html=`${hero}${detalle}${meteo}`;
+  const confirmHtml=confirmBoxHtml('riego',znId,fecha,tP);
+
+  const html=`${hero}${detalle}${meteo}${confirmHtml}`;
   openD(tit,sub,html);
 }
 
@@ -1129,6 +1171,109 @@ async function downloadEstacion(){
   }
 }
 
+/* ===== CONFIRMACION DE EJECUCION (riego + fertirriego) ===== */
+// Cache de defaults por equipo: { operario_default, profesional_default }
+let EQ_OP={operario_default:'',profesional_default:''};
+// Confirmaciones cargadas de la semana visible, indexadas por "id_zona|fecha_recomendada"
+G.confirmR={};G.confirmF={};
+
+async function qEquipoOpDefaults(eqId){
+  EQ_OP={operario_default:'',profesional_default:''};
+  if(!eqId)return;
+  try{
+    const {data}=await db.from('sc_equipo_operarios').select('*').eq('id_equipo',eqId).limit(1);
+    if(data&&data[0]){EQ_OP.operario_default=data[0].operario_default||'';EQ_OP.profesional_default=data[0].profesional_default||'';}
+  }catch(e){/* tabla puede no existir todavía */}
+}
+function openEq(){
+  document.getElementById('eqOperario').value=EQ_OP.operario_default||'';
+  document.getElementById('eqProfesional').value=EQ_OP.profesional_default||'';
+  document.getElementById('eqmsg').style.display='none';document.getElementById('eqmsg').className='m-msg';
+  document.getElementById('meq').classList.add('open');
+}
+function closeEq(){document.getElementById('meq').classList.remove('open');}
+async function saveEqOp(){
+  const eqId=document.getElementById('se').value;
+  if(!eqId)return;
+  const operario=document.getElementById('eqOperario').value.trim();
+  const profesional=document.getElementById('eqProfesional').value.trim();
+  const btn=document.getElementById('beq'),msg=document.getElementById('eqmsg');
+  btn.disabled=true;btn.textContent='Guardando...';
+  const {error}=await db.from('sc_equipo_operarios').upsert({id_equipo:eqId,operario_default:operario,profesional_default:profesional,actualizado_en:new Date().toISOString()},{onConflict:'id_equipo'});
+  msg.style.display='block';
+  if(error){msg.className='m-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar datos del equipo';}
+  else{EQ_OP.operario_default=operario;EQ_OP.profesional_default=profesional;msg.className='m-msg ok';msg.textContent='✓ Guardado — se precargará en las próximas confirmaciones';btn.textContent='✓ Listo';setTimeout(()=>{closeEq();btn.disabled=false;btn.textContent='Guardar datos del equipo';},1400);}
+}
+
+async function qConfirmaciones(znIds,tipo,fi,ff){
+  const target=tipo==='riego'?'confirmR':'confirmF';
+  G[target]={};
+  if(!znIds.length)return;
+  try{
+    const {data}=await db.from('sc_confirmacion_ejecucion').select('*').in('id_zona',znIds).eq('tipo',tipo).gte('fecha_recomendada',fi).lte('fecha_recomendada',ff);
+    (data||[]).forEach(r=>{G[target][r.id_zona+'|'+r.fecha_recomendada]=r;});
+  }catch(e){/* tabla puede no existir todavía */}
+}
+
+// Genera el bloque de confirmación para insertar en el drawer de un día (riego o fertirriego)
+function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
+  const target=tipo==='riego'?G.confirmR:G.confirmF;
+  const existente=target[znId+'|'+fechaRecom];
+  const uid='cf_'+tipo+'_'+znId.replace(/[^a-zA-Z0-9]/g,'')+'_'+fechaRecom.replace(/-/g,'');
+  const checked=!!existente;
+  const fechaEjec=existente?existente.fecha_ejecucion:fechaRecom;
+  const tiempoVal=existente?(existente.tiempo_horas??tiempoRecom??''):(tiempoRecom??'');
+  const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
+  const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
+  return `<div class="d-section">
+    <div class="d-section-t">Confirmar ejecución</div>
+    <div class="confirm-box${checked?' done':''}" id="${uid}_box">
+      <label class="confirm-chk-row">
+        <input type="checkbox" id="${uid}_chk" ${checked?'checked':''} onchange="toggleConfirmFields('${uid}')">
+        <span class="confirm-chk-lbl">Riego${tipo==='fertirriego'?'/Fertirriego':''} ejecutado</span>
+      </label>
+      <div class="confirm-grid">
+        <div><label class="confirm-fl">Fecha ejecución</label><input type="date" class="confirm-fi" id="${uid}_fecha" value="${fechaEjec}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Tiempo (horas)</label><input type="number" step="0.1" min="0" class="confirm-fi" id="${uid}_tiempo" value="${tiempoVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Operario (ejecuta)</label><input type="text" class="confirm-fi" id="${uid}_operario" value="${operario}" placeholder="Nombre" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Profesional (recomienda)</label><input type="text" class="confirm-fi" id="${uid}_profesional" value="${profesional}" placeholder="Nombre" ${checked?'':'disabled'}></div>
+      </div>
+      <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('${tipo}','${znId}','${fechaRecom}','${uid}')">Guardar confirmación</button>
+      <div class="confirm-msg" id="${uid}_msg"></div>
+    </div>
+  </div>`;
+}
+function toggleConfirmFields(uid){
+  const on=document.getElementById(uid+'_chk').checked;
+  document.getElementById(uid+'_box').classList.toggle('done',on);
+  ['_fecha','_tiempo','_operario','_profesional'].forEach(s=>{document.getElementById(uid+s).disabled=!on;});
+}
+async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
+  const eqId=document.getElementById('se').value;
+  const btn=document.getElementById(uid+'_save'),msg=document.getElementById(uid+'_msg');
+  const confirmado=document.getElementById(uid+'_chk').checked;
+  const row={
+    id_zona:znId,id_equipo:eqId,tipo,
+    fecha_recomendada:fechaRecom,
+    fecha_ejecucion:document.getElementById(uid+'_fecha').value||fechaRecom,
+    tiempo_horas:document.getElementById(uid+'_tiempo').value?parseFloat(document.getElementById(uid+'_tiempo').value):null,
+    operario:document.getElementById(uid+'_operario').value.trim()||null,
+    profesional:document.getElementById(uid+'_profesional').value.trim()||null,
+    confirmado,
+    actualizado_en:new Date().toISOString()
+  };
+  btn.disabled=true;btn.textContent='Guardando...';
+  const {data,error}=await db.from('sc_confirmacion_ejecucion').upsert(row,{onConflict:'id_zona,tipo,fecha_recomendada'}).select();
+  msg.className='confirm-msg';msg.style.display='block';
+  if(error){msg.className='confirm-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar confirmación';return;}
+  msg.className='confirm-msg ok';msg.textContent='✓ Confirmación guardada';btn.textContent='✓ Guardado';
+  const target=tipo==='riego'?G.confirmR:G.confirmF;
+  target[znId+'|'+fechaRecom]=(data&&data[0])||row;
+  // refresca las tarjetas del calendario para mostrar el check, sin recargar todo
+  if(tipo==='riego')rCal(semDias(G.off),G.scDia);else if(typeof rCalF==='function')rCalF();
+  setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
+}
+
 /* ===== FERTIRRIEGO ===== */
 let TAB='riego';
 let GF={ferti:[],bal:{},loaded:false};
@@ -1197,11 +1342,13 @@ function switchTab(t){
 
 async function loadRenderFerti(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
+  const dias=semDias(G.off);const fi=fs(dias[0]),ff=fs(dias[6]);
   const [{data:fe},{data:ba}]=await Promise.all([
     db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
     db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
   ]);
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
+  await qConfirmaciones(znIds,'fertirriego',fi,ff);
   rCalF();rFranjaF();rPanelF();
 }
 function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
@@ -1239,8 +1386,10 @@ function rCalF(){
       if(evs&&evs.length){const e=evs[0];
         const vsm=numF(e.volumen_sol_madre_l);const dpe=numF(e.dosis_producto_estanque_kg);
         const fmtN=v=>v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(1);
+        const conf=G.confirmF[z.id_zona+'|'+dS];
         tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
+          ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
           <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-clock-hour-4" style="font-size:14px"></i>${hmF(e.tiempo_fertirriego_hrs)||'—'}</span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
           <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
           <div class="fc-foot" style="flex-direction:column;align-items:flex-start;gap:2px">
@@ -1333,6 +1482,7 @@ function openEvF(znId,fecha,idx){
   const ap=[{k:'N',c:'#2563EB',v:numF(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:numF(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:numF(e.k2o_aplicado_kg)}];
   const otros=evs.length>1?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">+${evs.length-1} producto(s) más este día: ${evs.slice(1).map(x=>prodShort(x.producto_asignado)).join(', ')}</div>`:'';
   const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,pct:covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,pct:covMicro(znId,mi)}))]:[];
+  const confirmHtml=confirmBoxHtml('fertirriego',znId,fecha,e.tiempo_fertirriego_hrs);
   document.getElementById('fdb').innerHTML=`${otros}
     <div class="dcols">
       <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0"><div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div><div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div><div class="dprod-sub">${numF(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
@@ -1345,7 +1495,8 @@ function openEvF(znId,fecha,idx){
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
     ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
-    ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}`;
+    ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}
+    ${confirmHtml}`;
   document.getElementById('fscrim').classList.add('open');document.getElementById('fdrawer').classList.add('open');
 }
 function closeDF(){document.getElementById('fscrim').classList.remove('open');document.getElementById('fdrawer').classList.remove('open');}
