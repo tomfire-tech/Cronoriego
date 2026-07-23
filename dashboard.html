@@ -246,7 +246,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
 @media(max-width:1200px){.panel{width:260px;}}
 @media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
-@supports (height:100dvh){.app{height:100dvh;}}
 
 /* ===== MOBILE (tablet chico / celular) ===== */
 @media(max-width:820px){
@@ -286,10 +285,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   /* Formularios: 1 columna para inputs más grandes y fáciles de tocar */
   .confirm-grid{grid-template-columns:1fr;}
   .d-grid2{grid-template-columns:1fr;}
-
-  /* Calendario: se sigue viendo con scroll lateral, pero la columna de Zona queda fija */
-  .cal-tbl thead tr th.th-zona{position:sticky;left:0;z-index:12;}
-  .zona-td{position:sticky;left:0;z-index:6;background:var(--bg);}
 
   .drawer,#fdrawer{width:100vw;}
 }
