@@ -1136,8 +1136,8 @@ function openZona(znId){
   const cz=G.calc?G.calc[znId]:null;
   const calcRows=cz?[
     ['Edad del huerto',cz.edad_huerto],
-    ['Densidad de plantación',cz.densidad_plantacion_pl_ha!=null?`${Number(cz.densidad_plantacion_pl_ha).toLocaleString('es-CL')} pl/ha`:null],
-    ['N° total de árboles',cz.numero_arboles_zona!=null?Number(cz.numero_arboles_zona).toLocaleString('es-CL'):null],
+    ['Densidad de plantación',cz.densidad_plantacion_pl_ha!=null?`${Number(cz.densidad_plantacion_pl_ha).toLocaleString('es-CL',{minimumFractionDigits: 0,maximumFractionDigits: 0})} pl/ha`: null],
+    ['N° total de árboles',cz.numero_arboles_zona!=null?Number(cz.numero_arboles_zona).toLocaleString('es-CL',{minimumFractionDigits: 0,maximumFractionDigits: 0})} pl/ha`: null],
     ['Emisores por planta',cz.emisores_por_planta],
     ['Caudal zona',cz.caudal_zona_m3h!=null?`${Number(cz.caudal_zona_m3h).toLocaleString('es-CL',{maximumFractionDigits:1})} m³/h`:null],
     ['Intensidad precip. neta',cz.intensidad_precip_neta_mmh!=null?`${Number(cz.intensidad_precip_neta_mmh).toLocaleString('es-CL',{maximumFractionDigits:2})} mm/h`:null],
