@@ -116,8 +116,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .leaflet-container{font-family:inherit;}
 .dia-td{padding:3px;vertical-align:top;min-width:100px;}
 .dia-td.hoy-col .riego-card{box-shadow:0 0 0 2px var(--blue),var(--shadow-md);}
-.dia-inner{height:88px;display:flex;align-items:center;justify-content:center;}
-.riego-card{width:100%;height:88px;border-radius:var(--r);padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
+.dia-inner{min-height:88px;height:auto;display:flex;align-items:center;justify-content:center;}
+.riego-card{width:100%;min-height:88px;height:auto;border-radius:var(--r);padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow);position:relative;overflow:hidden;border:1.5px solid transparent;}
 .riego-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
 .riego-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 .rc-top{display:flex;align-items:center;justify-content:space-between;}
@@ -314,16 +314,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .lock-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E8449,#166534);color:#fff;border:none;font-weight:700;font-size:14px;padding:11px 22px;border-radius:11px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 20px rgba(30,132,73,.28);}
 .lock-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(30,132,73,.36);}
 .tab .tab-pro{font-size:8px;font-weight:800;background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;padding:1px 5px;border-radius:6px;margin-left:5px;letter-spacing:.5px;vertical-align:middle;}
-/* ===== Fertirriego anidado junto a Riego (misma pestaña) ===== */
-.ferti-block{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;position:relative;border-top:2px solid var(--line);}
-.ferti-block.blurred{filter:blur(3px) saturate(.85);pointer-events:none;user-select:none;transition:filter .25s;}
-.ferti-divider{padding:7px 20px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);flex-shrink:0;}
-.ferti-divider i{color:#16A34A;font-size:14px;}
-.ferti-lock{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(248,250,252,.30),rgba(248,250,252,.55));}
-.ferti-lock.show{display:flex;}
-.ferti-lock .lock-card{padding:22px 26px;max-width:340px;}
-.ferti-lock .lock-title{font-size:16px;}
-.ferti-lock .lock-ico{width:44px;height:44px;font-size:22px;margin-bottom:10px;}
+/* ===== Fertirriego dentro de la misma casilla de Riego ===== */
+.riego-card.has-ferti{justify-content:flex-start;gap:6px;}
+.rc-ferti{display:flex;align-items:center;gap:5px;margin-top:2px;padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.65);border:1px solid rgba(22,163,74,.28);font-size:11px;font-weight:700;color:#15803D;cursor:pointer;transition:background .15s;}
+.rc-ferti:hover{background:rgba(255,255,255,.95);}
+.rc-ferti i{font-size:12px;flex-shrink:0;}
+.rc-ferti span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rc-ferti-ok{margin-left:auto;color:var(--green);}
+.rc-ferti.locked{color:var(--subtle);border-color:var(--line);background:rgba(255,255,255,.5);filter:blur(1px);opacity:.75;}
+.rc-ferti.locked:hover{filter:blur(0px);opacity:1;}
 #view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
 #view-ferti .franja{grid-template-columns:repeat(3,1fr);}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
@@ -566,6 +565,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </div>
 <div class="views" id="viewsWrap">
 <div id="view-riego" class="view">
+  <div class="scrim" id="fscrim" onclick="closeDF()"></div>
+  <aside class="drawer" id="fdrawer">
+    <div class="dh"><div class="dh-left"><div class="dt" id="fdt"></div><div class="ds" id="fds"></div></div>
+      <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
+    <div class="db" id="fdb"></div>
+  </aside>
 
 <div class="kpi-bar" id="kpib">
   <div class="kpi-card"><div class="loading" style="padding:0;font-size:12px">Cargando...</div></div>
@@ -587,36 +592,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="p-block no-flex" id="presum">
       <div class="p-title"><i class="ti ti-table"></i>Resumen semanal</div>
     </div>
-  </div>
-</div>
-
-<div id="view-ferti" class="ferti-block">
-  <div class="scrim" id="fscrim" onclick="closeDF()"></div>
-  <aside class="drawer" id="fdrawer">
-    <div class="dh"><div class="dh-left"><div class="dt" id="fdt"></div><div class="ds" id="fds"></div></div>
-      <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
-    <div class="db" id="fdb"></div>
-  </aside>
-  <div class="ferti-divider"><i class="ti ti-flask-2"></i>Fertirriego</div>
-  <div class="body">
-    <div class="cal-zone">
-      <div class="cal-scroll"><table class="cal-tbl" id="fctbl"></table></div>
-      <div class="franja" id="ffranja"></div>
-    </div>
-    <div class="panel">
-      <div class="p-block" id="fpprox"></div>
-      <div class="p-block" id="fpsummadre"></div>
-      <div class="p-block" id="fpprod"></div>
-    </div>
-  </div>
-  <div class="ferti-lock" id="fertiLock">
-    <div class="lock-card">
-      <div class="lock-badge"><i class="ti ti-crown"></i> PLAN PRO</div>
-      <div class="lock-ico"><i class="ti ti-flask-2"></i></div>
-      <div class="lock-title">Módulo Fertirriego</div>
-      <div class="lock-desc">El módulo de Fertirriego está disponible en el plan Pro. Actívalo para acceder a toda la información.</div>
-      <button class="lock-btn" onclick="cambiarPlan()"><i class="ti ti-arrow-up-circle"></i> Cambiar de plan</button>
-    </div>
+    <div class="p-block no-flex" id="fpprox"></div>
+    <div class="p-block no-flex" id="fpsummadre"></div>
+    <div class="p-block no-flex" id="fpprod"></div>
   </div>
 </div>
 </div><!-- /view-riego -->
@@ -795,11 +773,14 @@ async function loadRender(){
   const znIds=G.zonas.map(z=>z.id_zona);
   const [sc,ndvi,sem,mapas,calc]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds)]);
   G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;
-  await qConfirmaciones(znIds,'riego',fi,ff);
+  await Promise.all([
+    qConfirmaciones(znIds,'riego',fi,ff),
+    qConfirmaciones(znIds,'fertirriego',fi,ff),
+    loadRenderFerti()
+  ]);
   rKpi(dias,sc,sem);
   rCal(dias,sc);
   rPanel(dias,sc,ndvi);
-  loadRenderFerti();
 }
 
 function rKpi(dias,sc,sem){
@@ -858,6 +839,12 @@ function rKpi(dias,sc,sem){
 function rCal(dias,sc){
   const hoy=new Date();const hS=fs(hoy);
   const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
+  const ferMap={};
+  (GF.ferti||[]).forEach(e=>{
+    if(!ferMap[e.id_zona])ferMap[e.id_zona]={};
+    (ferMap[e.id_zona][e.fecha_evento]=ferMap[e.id_zona][e.fecha_evento]||[]).push(e);
+  });
+  const puedeFerti=tieneModulo('ferti');
 
   let thead=`<thead><tr>
     <th class="th-zona" style="padding-bottom:12px">Zona</th>
@@ -886,26 +873,51 @@ function rCal(dias,sc){
         const ha=parseFloat(z.superficie_ha)||0;
         const vol=l>0?Math.round(l*ha*10):0;
         const conf=G.confirmR[z.id_zona+'|'+dS];
+        const hayRiego=l>0&&hm(t);
 
-        if(l>0&&hm(t)){
-          return`<td class="dia-td${eh?' hoy-col':''}">
+        const fertiEvs=(ferMap[z.id_zona]&&ferMap[z.id_zona][dS])||[];
+        const hayFerti=fertiEvs.length>0;
+        const confF=G.confirmF[z.id_zona+'|'+dS];
+
+        if(!hayRiego&&!hayFerti){
+          return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
+        }
+
+        const dosisTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_aplicar_kg)||0),0);
+        const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg':(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
+        const clickMain=hayRiego?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
+
+        let ferRow='';
+        if(!puedeFerti){
+          ferRow=`<div class="rc-ferti locked" onclick="event.stopPropagation();cambiarPlan()">
+            <i class="ti ti-lock"></i><span>Fertirriego</span>
+          </div>`;
+        } else if(hayFerti){
+          ferRow=`<div class="rc-ferti" onclick="event.stopPropagation();openEvF('${z.id_zona}','${dS}',0)">
+            <i class="ti ti-flask-2"></i><span>${fertiTxt}</span>${confF?'<i class="ti ti-check rc-ferti-ok"></i>':''}
+          </div>`;
+        }
+
+        return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
-              <div class="riego-card" style="background:${cl};border-color:${cm};--zc:${c}" onclick="openDia('${dS}','${z.id_zona}')">
+              <div class="riego-card${ferRow?' has-ferti':''}" style="background:${cl};border-color:${cm};--zc:${c}" onclick="${clickMain}">
                 <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
-                <div class="rc-top">
+                ${hayRiego?`<div class="rc-top">
                   <div class="rc-tiempo" style="color:${c}">${hm(t)}</div>
                   <i class="ti ti-droplet rc-ico" style="color:${c};opacity:.6"></i>
                 </div>
                 <div class="rc-mid">
                   <div class="rc-mm">${l.toFixed(0)} mm</div>
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
-                </div>
+                </div>`:`<div class="rc-top">
+                  <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};font-size:14px">Fertirriego</div>
+                  <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
+                </div>`}
+                ${ferRow}
               </div>
             </div>
           </td>`;
-        }
-        return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
       }).join('')}
     </tr>`;
   });
@@ -1308,7 +1320,7 @@ function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
     <div class="confirm-box${checked?' done':''}" id="${uid}_box">
       <label class="confirm-chk-row">
         <input type="checkbox" id="${uid}_chk" ${checked?'checked':''} onchange="toggleConfirmFields('${uid}')">
-        <span class="confirm-chk-lbl">Riego${tipo==='fertirriego'?'/Fertirriego':''} ejecutado</span>
+        <span class="confirm-chk-lbl">${tipo==='fertirriego'?'Fertirriego':'Riego'} ejecutado</span>
       </label>
       ${ultGuardado?`<div id="${uid}_ts" style="font-size:10.5px;color:var(--muted);margin:-7px 0 11px 27px">Último registro guardado el ${ultGuardado}</div>`:''}
       <div class="confirm-grid">
@@ -1354,8 +1366,8 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   const tsEl=document.getElementById(uid+'_ts');
   if(tsEl)tsEl.textContent=tsTxt;
   else document.querySelector('#'+uid+'_box .confirm-chk-row')?.insertAdjacentHTML('afterend',`<div id="${uid}_ts" style="font-size:10.5px;color:var(--muted);margin:-7px 0 11px 27px">${tsTxt}</div>`);
-  // refresca las tarjetas del calendario para mostrar el check, sin recargar todo
-  if(tipo==='riego')rCal(semDias(G.off),G.scDia);else if(typeof rCalF==='function')rCalF();
+  // refresca las tarjetas del calendario combinado para mostrar el check (riego y fertirriego viven en la misma tabla ahora)
+  rCal(semDias(G.off),G.scDia);
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
 }
 
@@ -1405,17 +1417,9 @@ function aplicarBloqueo(tab){
     document.getElementById('lockIco').innerHTML='<i class="ti '+info.ico+'"></i>';
     lock.classList.add('show');
   } else lock.classList.remove('show');
-  aplicarBloqueoFerti();
 }
-// Fertirriego ya no es una pestaña aparte — se bloquea/difumina solo, dentro de la pestaña Riego,
-// independiente de qué pestaña esté activa.
-function aplicarBloqueoFerti(){
-  const block=document.getElementById('view-ferti');
-  const lock=document.getElementById('fertiLock');
-  if(!block||!lock)return;
-  if(!tieneModulo('ferti')){block.classList.add('blurred');lock.classList.add('show');}
-  else{block.classList.remove('blurred');lock.classList.remove('show');}
-}
+// Fertirriego ya no es pestaña ni bloque aparte — el bloqueo por plan se resuelve
+// casilla por casilla dentro de rCal() (insignia borrosa con candado si falta el módulo).
 function cambiarPlan(){
   // Placeholder — aquí irá el flujo real de cambio de plan / contacto comercial.
   alert('Aquí irá el flujo para cambiar de plan.\n\nMódulos activos: '+MODULOS.join(', '));
@@ -1435,14 +1439,12 @@ function switchTab(t){
 
 async function loadRenderFerti(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
-  const dias=semDias(G.off);const fi=fs(dias[0]),ff=fs(dias[6]);
   const [{data:fe},{data:ba}]=await Promise.all([
     db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
     db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
   ]);
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
-  await qConfirmaciones(znIds,'fertirriego',fi,ff);
-  rCalF();rFranjaF();rPanelF();
+  rPanelF();
 }
 function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
 function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
