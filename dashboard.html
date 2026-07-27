@@ -1252,6 +1252,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="maint-field"><label for="mtExportHasta">Hasta</label><input class="maint-input" type="date" id="mtExportHasta"></div>
       </div>
     </div>
+    <div class="maint-message" id="mtExportMessage" aria-live="polite"></div>
     <div class="maint-export-actions">
       <button class="maint-export-cancel" onclick="closeMaintenanceExport()">Cancelar</button>
       <button class="maint-export-download" id="mtExportDownloadBtn" onclick="downloadMaintenanceExcel()"><i class="ti ti-file-spreadsheet"></i> Descargar Excel</button>
@@ -2779,7 +2780,7 @@ chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments
 
 
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
-let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false};
+let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false,backendReady:null,lastError:null};
 const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona'};
 const mtEsc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const mtVal=id=>document.getElementById(id)?.value?.trim()??'';
@@ -2789,11 +2790,27 @@ const mtLocalNow=()=>{const d=new Date(Date.now()-new Date().getTimezoneOffset()
 const mtDate=v=>{if(!v)return '—';const d=new Date(v);return d.toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});};
 const mtDateOnly=v=>{if(!v)return '—';const d=new Date(v);return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});};
 const mtTimeOnly=v=>{if(!v)return '';const d=new Date(v);return d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});};
+function maintenanceIsMissingTableError(error){
+  const raw=String(error?.message||error||'');
+  return /Could not find the table|schema cache|PGRST205/i.test(raw);
+}
 function maintenanceFriendlyError(error){
   const raw=String(error?.message||error||'Error desconocido');
-  if(/Could not find the table|schema cache|PGRST205/i.test(raw))return 'Las tablas de Mantenimiento y Aforos todavía no existen en Supabase o el esquema no se ha actualizado. Ejecuta el archivo SQL de instalación en Supabase y vuelve a cargar la página.';
-  if(/row-level security|violates row-level security|permission denied/i.test(raw))return 'Supabase rechazó la operación por permisos. Revisa que el usuario esté asociado a una Razón Social en v_usuarios y que las políticas RLS estén creadas.';
-  return raw;
+  if(maintenanceIsMissingTableError(error))return 'El módulo de registros aún no está disponible. Inténtalo nuevamente en unos minutos o contacta al administrador.';
+  if(/row-level security|violates row-level security|permission denied/i.test(raw))return 'Tu usuario no tiene permisos para realizar esta operación.';
+  if(/Failed to fetch|NetworkError|fetch/i.test(raw))return 'No pudimos conectar con el servidor. Revisa tu conexión e inténtalo nuevamente.';
+  return 'No pudimos completar la operación. Inténtalo nuevamente.';
+}
+function maintenanceLogError(context,error){
+  console.error('Mantenimiento y Aforos · '+context,error);
+}
+function maintenanceEmptyHistoryMarkup(){
+  return `<div class="maint-empty"><i class="ti ti-clipboard-list"></i><strong style="display:block;color:var(--ink2);font-size:13px;margin-bottom:4px">Aquí se guardarán tus registros</strong><span>Aún no has registrado mediciones para esta sección.</span><span style="display:block;margin-top:5px">Completa el formulario y guarda tu primer registro.</span></div>`;
+}
+function mtSetExportMessage(text,type='err'){
+  const el=document.getElementById('mtExportMessage');if(!el)return;
+  if(!text){el.className='maint-message';el.textContent='';return;}
+  el.className='maint-message '+type;el.textContent=text;
 }
 function showMaintenanceToast(text){
   document.getElementById('mtToast')?.remove();
@@ -2923,29 +2940,34 @@ async function saveMaintenanceRecord(event){
     event?.target?.reset();
     const fecha=document.getElementById('mtFechaHora');if(fecha)fecha.value=mtLocalNow();
     if(GM.section==='equipo'){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();updateMaintenanceDelta();}
-    await loadMaintenanceHistory();
-  }catch(err){msg.className='maint-message err';msg.textContent='Error al guardar: '+maintenanceFriendlyError(err);}
+    await loadMaintenanceHistory(true);
+  }catch(err){maintenanceLogError('guardar registro',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;msg.className='maint-message err';msg.textContent=maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
 }
 
-async function loadMaintenanceHistory(){
+async function loadMaintenanceHistory(preserveOnError=false){
   if(!G.rsId||!mtCurrentPredio())return;GM.loading=true;renderMaintenanceHistory();
   const table=MT_TABLES[GM.section];let q=db.from(table).select('*').eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order('fecha_hora',{ascending:false}).limit(100);
   if(GM.section==='equipo'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
   if(GM.section==='zona'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
-  const {data,error}=await q;GM.loading=false;GM.history=error?[]:(data||[]);renderMaintenanceHistory(error?maintenanceFriendlyError(error):null);
+  const {data,error}=await q;GM.loading=false;
+  if(error){
+    maintenanceLogError('cargar historial',error);GM.lastError=error;GM.backendReady=maintenanceIsMissingTableError(error)?false:GM.backendReady;
+    if(!preserveOnError)GM.history=[];
+    renderMaintenanceHistory(error);return;
+  }
+  GM.backendReady=true;GM.lastError=null;GM.history=data||[];renderMaintenanceHistory();
 }
 function maintenanceSummary(r){
   if(GM.section==='fuente')return `${r.tipo_fuente} ${r.id_fuente} · ${Number(r.caudal_instantaneo_ls||0).toLocaleString('es-CL',{maximumFractionDigits:2})} L/s${r.tipo_fuente==='Pozo'&&r.totalizador_m3!=null?' · '+Number(r.totalizador_m3).toLocaleString('es-CL')+' m³':''}`;
   if(GM.section==='equipo')return `${r.id_equipo} · ΔP ${r.diferencia_presion_bar==null?'—':Number(r.diferencia_presion_bar).toFixed(2)} bar${r.retrolavado?' · '+r.retrolavado:''}`;
   return `${r.id_zona} · Aforo ${Number(r.aforo_goteros_ml_3min||0).toLocaleString('es-CL',{maximumFractionDigits:2})} mL/3 min`;
 }
-function renderMaintenanceHistory(errorText){
+function renderMaintenanceHistory(error){
   const el=document.getElementById('mtHistory'),count=document.getElementById('mtHistoryCount');if(!el)return;
   if(GM.loading){el.innerHTML='<div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div>';if(count)count.textContent='—';return;}
-  if(errorText){el.innerHTML=`<div class="maint-empty"><i class="ti ti-alert-triangle"></i>${mtEsc(errorText)}</div>`;if(count)count.textContent='Error';return;}
   if(count)count.textContent=`${GM.history.length} registro${GM.history.length===1?'':'s'}`;
-  if(!GM.history.length){el.innerHTML='<div class="maint-empty"><i class="ti ti-database-off"></i>No hay registros para el predio y sección seleccionados.</div>';return;}
+  if(!GM.history.length){el.innerHTML=maintenanceEmptyHistoryMarkup();return;}
   el.innerHTML=GM.history.map((r,i)=>{const kind=GM.section==='fuente'?(r.tipo_fuente||'Fuente'):GM.section==='equipo'?'Equipo':'Zona';return `<div class="maint-record" onclick="openMaintenanceDetail(${i})"><div class="maint-record-top"><div><div class="maint-record-title">Registro del ${mtEsc(mtDateOnly(r.fecha_hora))}</div><div class="maint-record-summary">${mtEsc(maintenanceSummary(r))}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="maint-record-saved"><i class="ti ti-check"></i>Guardado</span><span class="maint-record-kind">${mtEsc(kind)}</span><div class="maint-record-date">${mtEsc(mtTimeOnly(r.fecha_hora))}</div></div></div><div class="maint-record-meta">${mtEsc(r.observaciones||'Sin observaciones')}</div><div class="maint-record-user"><i class="ti ti-user"></i>${mtEsc(r.creado_por_email||r.creado_por||'Usuario')}</div></div>`;}).join('');
 }
 function openMaintenanceDetail(index){
@@ -2962,10 +2984,10 @@ function mtExportRows(section,rows){
   return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
 function openMaintenanceExport(){
-  if(!G.rsId){alert('No se pudo identificar la Razón Social.');return;}
-  document.getElementById('mtExportModal')?.classList.add('open');
+  if(!G.rsId){showMaintenanceToast('No se pudo identificar la Razón Social.');return;}
+  mtSetExportMessage('');document.getElementById('mtExportModal')?.classList.add('open');
 }
-function closeMaintenanceExport(){document.getElementById('mtExportModal')?.classList.remove('open');}
+function closeMaintenanceExport(){mtSetExportMessage('');document.getElementById('mtExportModal')?.classList.remove('open');}
 function mtSelectedExportSections(){
   return [
     {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque'},
@@ -2981,12 +3003,13 @@ async function mtFetchExportSection(section,scope,from,to){
   const {data,error}=await q;if(error)throw error;return data||[];
 }
 async function downloadMaintenanceExcel(){
-  if(!G.rsId){alert('No se pudo identificar la Razón Social.');return;}
-  const selected=mtSelectedExportSections();if(!selected.length){alert('Selecciona al menos un tipo de registro.');return;}
+  mtSetExportMessage('');
+  if(!G.rsId){mtSetExportMessage('No se pudo identificar la Razón Social.');return;}
+  const selected=mtSelectedExportSections();if(!selected.length){mtSetExportMessage('Selecciona al menos un tipo de registro.');return;}
   const scope=document.getElementById('mtExportScope')?.value||'predio';
   const from=document.getElementById('mtExportDesde')?.value||'';
   const to=document.getElementById('mtExportHasta')?.value||'';
-  if(from&&to&&from>to){alert('La fecha Desde no puede ser posterior a la fecha Hasta.');return;}
+  if(from&&to&&from>to){mtSetExportMessage('La fecha Desde no puede ser posterior a la fecha Hasta.');return;}
   const btn=document.getElementById('mtExportDownloadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Preparando…';}
   try{
     const results=await Promise.all(selected.map(async item=>({...item,rows:await mtFetchExportSection(item.section,scope,from,to)})));
@@ -2998,7 +3021,7 @@ async function downloadMaintenanceExcel(){
     const suffix=scope==='predio'&&mtCurrentPredio()?'_'+String(mtCurrentPredio()).replace(/[^a-zA-Z0-9_-]/g,'_'):'';
     XLSX.writeFile(book,`CronoRiego_Registros_${safe}${suffix}_${fs(new Date())}.xlsx`);
     closeMaintenanceExport();showMaintenanceToast(`Excel generado con ${total} registro${total===1?'':'s'}.`);
-  }catch(err){alert('No fue posible generar el Excel: '+maintenanceFriendlyError(err));}
+  }catch(err){maintenanceLogError('exportar Excel',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;mtSetExportMessage(maintenanceFriendlyError(err));}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-file-spreadsheet"></i> Descargar Excel';}}
 }
 
