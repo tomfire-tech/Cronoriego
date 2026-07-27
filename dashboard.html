@@ -871,6 +871,36 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .maint-segment i{font-size:18px;}
 }
 
+
+
+/* ===== EXPORTACIÓN SELECTIVA Y CONFIRMACIÓN DE REGISTROS ===== */
+.maint-record-saved{display:inline-flex;align-items:center;gap:4px;background:#DCFCE7;color:#15803D;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;white-space:nowrap;}
+.maint-record-kind{display:inline-flex;align-items:center;background:#EFF6FF;color:#1D4ED8;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;white-space:nowrap;}
+.maint-record-summary{font-size:10.5px;color:var(--ink2);font-weight:700;line-height:1.4;margin-top:5px;}
+.maint-toast{position:fixed;right:18px;bottom:22px;z-index:520;max-width:min(390px,calc(100vw - 30px));background:#14532D;color:#fff;border-radius:12px;padding:11px 14px;box-shadow:0 18px 45px rgba(15,23,42,.25);font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;animation:maintToastIn .2s ease;}
+@keyframes maintToastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.maint-export-ov{display:none;position:fixed;inset:0;z-index:510;background:rgba(15,23,42,.48);align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);}
+.maint-export-ov.open{display:flex;}
+.maint-export-box{width:min(500px,100%);max-height:min(720px,92dvh);overflow-y:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 24px 70px rgba(15,23,42,.3);}
+.maint-export-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px;}
+.maint-export-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;}
+.maint-export-sub{font-size:11px;color:var(--muted);line-height:1.45;margin-top:4px;}
+.maint-export-close{width:32px;height:32px;border:none;border-radius:50%;background:#F1F5F9;color:var(--muted);display:grid;place-items:center;font-size:16px;cursor:pointer;flex:none;}
+.maint-export-section{border-top:1px solid var(--line);padding-top:13px;margin-top:13px;}
+.maint-export-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.065em;color:var(--muted);margin-bottom:8px;}
+.maint-export-checks{display:grid;grid-template-columns:1fr;gap:7px;}
+.maint-export-check{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:10px 11px;cursor:pointer;background:#fff;}
+.maint-export-check input{width:17px;height:17px;accent-color:#1E8449;}
+.maint-export-check span{font-size:12px;font-weight:800;color:var(--ink2);}
+.maint-export-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.maint-export-grid .maint-field{margin:0;}
+.maint-export-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:9px;margin-top:17px;}
+.maint-export-actions button{height:42px;border:none;border-radius:10px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;}
+.maint-export-cancel{background:#F1F5F9;color:var(--ink2);}
+.maint-export-download{background:#1E8449;color:#fff;}
+.maint-export-download:disabled{opacity:.55;cursor:wait;}
+@media(max-width:520px){.maint-export-grid{grid-template-columns:1fr}.maint-export-box{padding:16px}.maint-toast{left:15px;right:15px;bottom:calc(78px + env(safe-area-inset-bottom));}}
+
 </style>
 </head>
 <body><div class="app">
@@ -1072,7 +1102,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="maint-shell">
     <div class="maint-hero">
       <div><h2>Registro de Mantenimiento y Aforos de Riego</h2><p>Registra mediciones de pozos y canales, condición del equipo de riego y aforos por zona. El historial queda compartido únicamente dentro de la Razón Social activa.</p></div>
-      <button class="maint-export" onclick="downloadMaintenanceExcel()"><i class="ti ti-file-spreadsheet"></i>Descargar Excel de la RS</button>
+      <button class="maint-export" onclick="openMaintenanceExport()"><i class="ti ti-file-spreadsheet"></i>Exportar registros</button>
     </div>
     <div id="maintenanceDesktopMount"><div id="maintenanceApp" class="maint-app"></div></div>
   </div>
@@ -1153,7 +1183,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <section class="m-view" id="mView-mantenimiento">
       <div class="m-page-title">Mantenimiento y Aforos</div>
       <div class="m-page-sub">Registros operacionales compartidos dentro de tu Razón Social.</div>
-      <button class="maint-export" onclick="downloadMaintenanceExcel()"><i class="ti ti-file-spreadsheet"></i>Descargar registros Excel</button>
+      <button class="maint-export" onclick="openMaintenanceExport()"><i class="ti ti-file-spreadsheet"></i>Exportar registros</button>
       <div id="maintenanceMobileMount"></div>
     </section>
   </main>
@@ -1192,6 +1222,42 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </div>
 
 </div><!-- /app -->
+
+
+<div class="maint-export-ov" id="mtExportModal" onclick="if(event.target===this)closeMaintenanceExport()">
+  <div class="maint-export-box" role="dialog" aria-modal="true" aria-labelledby="mtExportTitle">
+    <div class="maint-export-head">
+      <div><div class="maint-export-title" id="mtExportTitle">Exportar registros</div><div class="maint-export-sub">Selecciona qué información incluir, el alcance y el periodo. El archivo solo contendrá datos de tu Razón Social.</div></div>
+      <button class="maint-export-close" onclick="closeMaintenanceExport()" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="maint-export-section" style="border-top:none;padding-top:0;margin-top:0">
+      <div class="maint-export-label">Información a descargar</div>
+      <div class="maint-export-checks">
+        <label class="maint-export-check"><input type="checkbox" id="mtExportFuente" checked><span>Fuentes de agua — pozos y canales</span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportEquipo" checked><span>Condición de equipos de riego</span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportZona" checked><span>Aforos y mediciones por zona</span></label>
+      </div>
+    </div>
+    <div class="maint-export-section">
+      <div class="maint-export-label">Alcance</div>
+      <select class="maint-select" id="mtExportScope">
+        <option value="predio">Solo el predio actual</option>
+        <option value="rs">Toda la Razón Social</option>
+      </select>
+    </div>
+    <div class="maint-export-section">
+      <div class="maint-export-label">Periodo opcional</div>
+      <div class="maint-export-grid">
+        <div class="maint-field"><label for="mtExportDesde">Desde</label><input class="maint-input" type="date" id="mtExportDesde"></div>
+        <div class="maint-field"><label for="mtExportHasta">Hasta</label><input class="maint-input" type="date" id="mtExportHasta"></div>
+      </div>
+    </div>
+    <div class="maint-export-actions">
+      <button class="maint-export-cancel" onclick="closeMaintenanceExport()">Cancelar</button>
+      <button class="maint-export-download" id="mtExportDownloadBtn" onclick="downloadMaintenanceExcel()"><i class="ti ti-file-spreadsheet"></i> Descargar Excel</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const SU='https://lmexinxdmkgexpthuosn.supabase.co';
@@ -1233,7 +1299,7 @@ async function saveCl(){const pw=document.getElementById('pwa').value;const btn=
 
 function openD(t,s,h){document.getElementById('dt').textContent=t;document.getElementById('ds').innerHTML=s;document.getElementById('db').innerHTML=h;document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');}
 function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();closeMaintenanceExport?.();}});
 
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
@@ -2721,6 +2787,19 @@ const mtNum=id=>{const v=mtVal(id);if(v==='')return null;const n=Number(v.replac
 const mtInt=id=>{const n=mtNum(id);return n==null?null:Math.round(n);};
 const mtLocalNow=()=>{const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,16);};
 const mtDate=v=>{if(!v)return '—';const d=new Date(v);return d.toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'});};
+const mtDateOnly=v=>{if(!v)return '—';const d=new Date(v);return d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});};
+const mtTimeOnly=v=>{if(!v)return '';const d=new Date(v);return d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});};
+function maintenanceFriendlyError(error){
+  const raw=String(error?.message||error||'Error desconocido');
+  if(/Could not find the table|schema cache|PGRST205/i.test(raw))return 'Las tablas de Mantenimiento y Aforos todavía no existen en Supabase o el esquema no se ha actualizado. Ejecuta el archivo SQL de instalación en Supabase y vuelve a cargar la página.';
+  if(/row-level security|violates row-level security|permission denied/i.test(raw))return 'Supabase rechazó la operación por permisos. Revisa que el usuario esté asociado a una Razón Social en v_usuarios y que las políticas RLS estén creadas.';
+  return raw;
+}
+function showMaintenanceToast(text){
+  document.getElementById('mtToast')?.remove();
+  const el=document.createElement('div');el.id='mtToast';el.className='maint-toast';el.innerHTML='<i class="ti ti-circle-check"></i><span>'+mtEsc(text)+'</span>';document.body.appendChild(el);setTimeout(()=>el.remove(),4200);
+}
+
 const mtIso=id=>{const v=mtVal(id);return v?new Date(v).toISOString():new Date().toISOString();};
 const mtCurrentPredio=()=>document.getElementById('sp')?.value||'';
 const mtCurrentEquipo=()=>document.getElementById('se')?.value||'';
@@ -2836,10 +2915,16 @@ async function saveMaintenanceRecord(event){
       const {data:last,error:lastErr}=await db.from(MT_TABLES.fuente).select('totalizador_m3').eq('id_razon_social',G.rsId).eq('id_predio',p.id_predio).eq('id_fuente',p.id_fuente).eq('tipo_fuente','Pozo').order('totalizador_m3',{ascending:false}).limit(1);
       if(lastErr)throw lastErr;const prev=last?.[0]?.totalizador_m3;if(prev!=null&&p.totalizador_m3<Number(prev))throw new Error(`El totalizador no puede ser menor que la lectura anterior (${Number(prev).toLocaleString('es-CL')} m³).`);
     }
-    const {error}=await db.from(MT_TABLES[GM.section]).insert(p);if(error)throw error;
-    msg.className='maint-message ok';msg.textContent='✓ Registro guardado correctamente para la Razón Social.';
-    await loadMaintenanceHistory();setTimeout(()=>{renderMaintenance();loadMaintenanceHistory();},900);
-  }catch(err){msg.className='maint-message err';msg.textContent='Error al guardar: '+(err?.message||err);}
+    const {data:inserted,error}=await db.from(MT_TABLES[GM.section]).insert(p).select('*').single();if(error)throw error;
+    if(inserted){GM.history=[inserted,...GM.history.filter(r=>r.id!==inserted.id)];renderMaintenanceHistory();}
+    const savedText=`Registro guardado el ${mtDateOnly(inserted?.fecha_hora||p.fecha_hora)} a las ${mtTimeOnly(inserted?.fecha_hora||p.fecha_hora)}.`;
+    msg.className='maint-message ok';msg.textContent='✓ '+savedText;
+    showMaintenanceToast(savedText);
+    event?.target?.reset();
+    const fecha=document.getElementById('mtFechaHora');if(fecha)fecha.value=mtLocalNow();
+    if(GM.section==='equipo'){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();updateMaintenanceDelta();}
+    await loadMaintenanceHistory();
+  }catch(err){msg.className='maint-message err';msg.textContent='Error al guardar: '+maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
 }
 
@@ -2848,7 +2933,7 @@ async function loadMaintenanceHistory(){
   const table=MT_TABLES[GM.section];let q=db.from(table).select('*').eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order('fecha_hora',{ascending:false}).limit(100);
   if(GM.section==='equipo'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
   if(GM.section==='zona'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
-  const {data,error}=await q;GM.loading=false;GM.history=error?[]:(data||[]);renderMaintenanceHistory(error?.message);
+  const {data,error}=await q;GM.loading=false;GM.history=error?[]:(data||[]);renderMaintenanceHistory(error?maintenanceFriendlyError(error):null);
 }
 function maintenanceSummary(r){
   if(GM.section==='fuente')return `${r.tipo_fuente} ${r.id_fuente} · ${Number(r.caudal_instantaneo_ls||0).toLocaleString('es-CL',{maximumFractionDigits:2})} L/s${r.tipo_fuente==='Pozo'&&r.totalizador_m3!=null?' · '+Number(r.totalizador_m3).toLocaleString('es-CL')+' m³':''}`;
@@ -2861,7 +2946,7 @@ function renderMaintenanceHistory(errorText){
   if(errorText){el.innerHTML=`<div class="maint-empty"><i class="ti ti-alert-triangle"></i>${mtEsc(errorText)}</div>`;if(count)count.textContent='Error';return;}
   if(count)count.textContent=`${GM.history.length} registro${GM.history.length===1?'':'s'}`;
   if(!GM.history.length){el.innerHTML='<div class="maint-empty"><i class="ti ti-database-off"></i>No hay registros para el predio y sección seleccionados.</div>';return;}
-  el.innerHTML=GM.history.map((r,i)=>`<div class="maint-record" onclick="openMaintenanceDetail(${i})"><div class="maint-record-top"><div class="maint-record-title">${mtEsc(maintenanceSummary(r))}</div><div class="maint-record-date">${mtEsc(mtDate(r.fecha_hora))}</div></div><div class="maint-record-meta">${mtEsc(r.observaciones||'Sin observaciones')}</div><div class="maint-record-user"><i class="ti ti-user"></i>${mtEsc(r.creado_por_email||r.creado_por||'Usuario')}</div></div>`).join('');
+  el.innerHTML=GM.history.map((r,i)=>{const kind=GM.section==='fuente'?(r.tipo_fuente||'Fuente'):GM.section==='equipo'?'Equipo':'Zona';return `<div class="maint-record" onclick="openMaintenanceDetail(${i})"><div class="maint-record-top"><div><div class="maint-record-title">Registro del ${mtEsc(mtDateOnly(r.fecha_hora))}</div><div class="maint-record-summary">${mtEsc(maintenanceSummary(r))}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="maint-record-saved"><i class="ti ti-check"></i>Guardado</span><span class="maint-record-kind">${mtEsc(kind)}</span><div class="maint-record-date">${mtEsc(mtTimeOnly(r.fecha_hora))}</div></div></div><div class="maint-record-meta">${mtEsc(r.observaciones||'Sin observaciones')}</div><div class="maint-record-user"><i class="ti ti-user"></i>${mtEsc(r.creado_por_email||r.creado_por||'Usuario')}</div></div>`;}).join('');
 }
 function openMaintenanceDetail(index){
   const r=GM.history[index];if(!r)return;const ignore=new Set(['id','id_razon_social','id_predio','creado_en','actualizado_en']);
@@ -2876,17 +2961,45 @@ function mtExportRows(section,rows){
   if(section==='equipo')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Caudalímetro salida bomba (m3)':r.caudalimetro_salida_bomba_m3,'Presión antes del filtro (bar)':r.presion_antes_filtro_bar,'Presión después del filtro (bar)':r.presion_despues_filtro_bar,'Diferencia de presión (bar)':r.diferencia_presion_bar,'Retrolavado':r.retrolavado,'Gatillante automático':r.gatillante_automatico,'Valor gatillante':r.valor_gatillante,'Duración ciclo retrolavado (min)':r.duracion_ciclo_retrolavado_min,'Última calibración inyectores':r.ultima_calibracion_inyectores,'Última calibración caudalímetros':r.ultima_calibracion_caudalimetros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
+function openMaintenanceExport(){
+  if(!G.rsId){alert('No se pudo identificar la Razón Social.');return;}
+  document.getElementById('mtExportModal')?.classList.add('open');
+}
+function closeMaintenanceExport(){document.getElementById('mtExportModal')?.classList.remove('open');}
+function mtSelectedExportSections(){
+  return [
+    {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque'},
+    {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo'},
+    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'}
+  ].filter(x=>x.checked);
+}
+async function mtFetchExportSection(section,scope,from,to){
+  let q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order('fecha_hora',{ascending:true});
+  if(scope==='predio'&&mtCurrentPredio())q=q.eq('id_predio',mtCurrentPredio());
+  if(from)q=q.gte('fecha_hora',new Date(from+'T00:00:00').toISOString());
+  if(to)q=q.lte('fecha_hora',new Date(to+'T23:59:59.999').toISOString());
+  const {data,error}=await q;if(error)throw error;return data||[];
+}
 async function downloadMaintenanceExcel(){
   if(!G.rsId){alert('No se pudo identificar la Razón Social.');return;}
-  const [{data:f,error:ef},{data:e,error:ee},{data:z,error:ez}]=await Promise.all([
-    db.from(MT_TABLES.fuente).select('*').eq('id_razon_social',G.rsId).order('fecha_hora',{ascending:true}),
-    db.from(MT_TABLES.equipo).select('*').eq('id_razon_social',G.rsId).order('fecha_hora',{ascending:true}),
-    db.from(MT_TABLES.zona).select('*').eq('id_razon_social',G.rsId).order('fecha_hora',{ascending:true})]);
-  const err=ef||ee||ez;if(err){alert('No fue posible generar el Excel: '+err.message);return;}
-  const book=XLSX.utils.book_new();
-  const add=(name,rows)=>{const data=rows.length?rows:[{'Sin registros':'No existen registros para esta sección'}];const sheet=XLSX.utils.json_to_sheet(data);sheet['!cols']=Object.keys(data[0]).map(k=>({wch:Math.min(34,Math.max(12,k.length+2))}));XLSX.utils.book_append_sheet(book,sheet,name);};
-  add('RP Estanque',mtExportRows('fuente',f||[]));add('RP Equipo',mtExportRows('equipo',e||[]));add('RP',mtExportRows('zona',z||[]));
-  const safe=String(G.rsId).replace(/[^a-zA-Z0-9_-]/g,'_');XLSX.writeFile(book,`CronoRiego_Registros_${safe}_${fs(new Date())}.xlsx`);
+  const selected=mtSelectedExportSections();if(!selected.length){alert('Selecciona al menos un tipo de registro.');return;}
+  const scope=document.getElementById('mtExportScope')?.value||'predio';
+  const from=document.getElementById('mtExportDesde')?.value||'';
+  const to=document.getElementById('mtExportHasta')?.value||'';
+  if(from&&to&&from>to){alert('La fecha Desde no puede ser posterior a la fecha Hasta.');return;}
+  const btn=document.getElementById('mtExportDownloadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Preparando…';}
+  try{
+    const results=await Promise.all(selected.map(async item=>({...item,rows:await mtFetchExportSection(item.section,scope,from,to)})));
+    const book=XLSX.utils.book_new();
+    const add=(name,rows)=>{const data=rows.length?rows:[{'Sin registros':'No existen registros para los filtros seleccionados'}];const sheet=XLSX.utils.json_to_sheet(data);sheet['!cols']=Object.keys(data[0]).map(k=>({wch:Math.min(34,Math.max(12,k.length+2))}));XLSX.utils.book_append_sheet(book,sheet,name);};
+    results.forEach(item=>add(item.sheet,mtExportRows(item.section,item.rows)));
+    const total=results.reduce((sum,item)=>sum+item.rows.length,0);
+    const safe=String(G.rsId).replace(/[^a-zA-Z0-9_-]/g,'_');
+    const suffix=scope==='predio'&&mtCurrentPredio()?'_'+String(mtCurrentPredio()).replace(/[^a-zA-Z0-9_-]/g,'_'):'';
+    XLSX.writeFile(book,`CronoRiego_Registros_${safe}${suffix}_${fs(new Date())}.xlsx`);
+    closeMaintenanceExport();showMaintenanceToast(`Excel generado con ${total} registro${total===1?'':'s'}.`);
+  }catch(err){alert('No fue posible generar el Excel: '+maintenanceFriendlyError(err));}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-file-spreadsheet"></i> Descargar Excel';}}
 }
 
 const _maintenanceOnPredio=onPredio;
