@@ -24,6 +24,7 @@ Esta carpeta describe el sistema vigente y define la futura migración a un proy
 | [estrategia-migracion.md](estrategia-migracion.md) | Fases, paridad y criterios para el cambio |
 | [seguridad-y-riesgos.md](seguridad-y-riesgos.md) | Riesgos observados y controles requeridos |
 | [recomendaciones.md](recomendaciones.md) | Mejoras priorizadas sin alterar el alcance funcional |
+| [superpowers/plans/README.md](superpowers/plans/README.md) | Planes ejecutables para construir `Cronoriego-v2` |
 
 ## Convenciones
 
