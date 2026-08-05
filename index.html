@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --teal-900: #0f3a52;
@@ -153,6 +154,7 @@
   .btn-primary:hover { background: var(--teal-900); transform: translateY(-2px); box-shadow: 0 16px 32px rgba(26, 82, 118, 0.30); }
   .btn-primary svg { transition: transform .2s ease; }
   .btn-primary:hover svg { transform: translateX(4px); }
+  .btn-primary:disabled { opacity: .7; cursor: default; transform: none; }
 
   .btn-ghost {
     display: inline-flex; align-items: center; gap: 8px;
@@ -1247,7 +1249,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
       <div class="form-ok" id="formOk">
-        ¡Listo! Se abrirá tu cliente de correo con el mensaje preparado. Si no se abre, escríbenos directamente a <strong>montti.manuel@gmail.com</strong>.
+        ¡Listo! Tu mensaje fue enviado. Te responderemos a la brevedad.
+      </div>
+      <div class="form-ok" id="formError" style="background:#fdecea;color:#7a271a;border-color:rgba(192,57,43,.28)">
+        Ocurrió un problema al enviar tu mensaje. Por favor escríbenos directamente a <strong>montti.manuel@gmail.com</strong>.
       </div>
     </form>
   </div>
@@ -1262,6 +1267,8 @@
 </footer>
 
 <script>
+  emailjs.init({ publicKey: "Y-6kTW7r0vzyz34kF" });
+
   document.getElementById('year').textContent = new Date().getFullYear();
 
   const header = document.getElementById('header');
@@ -1748,23 +1755,44 @@
 
   const form = document.getElementById('contactForm');
   const ok = document.getElementById('formOk');
+  const errBox = document.getElementById('formError');
+  const submitBtn = form.querySelector('.form-submit');
+  const submitBtnHtml = submitBtn.innerHTML;
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+    ok.classList.remove('show');
+    errBox.classList.remove('show');
+
     const data = Object.fromEntries(new FormData(form).entries());
     if (!data.name || !data.email) { form.querySelector('#f-name').focus(); return; }
-    const subject = encodeURIComponent(`Solicitud CronoRiego — ${data.company || data.name}`);
-    const body = encodeURIComponent(
-`Nombre: ${data.name}
-Empresa / predio: ${data.company || '-'}
-Email: ${data.email}
-Teléfono: ${data.phone || '-'}
-Zonas: ${data.zones || '-'}
-Cultivo: ${data.crop || '-'}
 
-Mensaje:
-${data.message || '-'}`);
-    window.location.href = `mailto:montti.manuel@gmail.com?subject=${subject}&body=${body}`;
-    ok.classList.add('show');
+    const templateParams = {
+      nombre: data.name,
+      empresa: data.company || '-',
+      email: data.email,
+      telefono: data.phone || '-',
+      zonas: data.zones || '-',
+      cultivo: data.crop || '-',
+      mensaje: data.message || '-',
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Enviando...';
+
+    emailjs.send('service_c831llk', 'template_e668z5g', templateParams)
+      .then(() => {
+        ok.classList.add('show');
+        form.reset();
+      })
+      .catch((err) => {
+        console.error('EmailJS error:', err);
+        errBox.classList.add('show');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = submitBtnHtml;
+      });
   });
 </script>
 </body>
