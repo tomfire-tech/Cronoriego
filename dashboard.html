@@ -1664,13 +1664,19 @@ function openDia(fecha,znId){
   const cE=parseFloat(r.etc_estacion_mm_dia)||0;
   const llE=parseFloat(r.lluvia_estacion_mm_dia)||0;
   const volE=lE>0?Math.round(lE*ha*10):0;
-  const hayEstacion=pasado&&(lE>0||tE>0);
+  // hayDatoEstacion: la estación ya entregó ETo real para este día (columna
+  // eto_estacion_mm_dia poblada) — independiente de si esa zona regó o no.
+  // hayRiegoEstacion: además de haber dato, esta zona en particular cruzó su
+  // umbral de riego según estación ese día (cada zona acumula su propio saldo
+  // y dispara en fechas distintas, igual que ya pasa con el pronóstico).
+  const hayDatoEstacion=pasado&&eE>0;
+  const hayRiegoEstacion=hayDatoEstacion&&(lE>0||tE>0);
 
-  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · ${hayEstacion?'Estación (real)':'Pronóstico'}`;
+  const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · ${hayRiegoEstacion?'Estación (real)':(hayDatoEstacion?'Pronóstico · sin riego por estación':'Pronóstico')}`;
 
   const num=(v,dec=2,s='')=>v>0?v.toFixed(dec)+s:'—';
 
-  const hero=hayEstacion?`<div class="hero2">
+  const hero=hayRiegoEstacion?`<div class="hero2">
     <div class="hero-card est">
       <div class="hero-lbl"><i class="ti ti-antenna-bars-5"></i> Riego real (estación)</div>
       <div class="hero-big">${hm(tE)||'—'}</div>
@@ -1687,9 +1693,9 @@ function openDia(fecha,znId){
       <div class="hero-big">${hm(tP)||'—'}</div>
       <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
     </div>
-  </div>${pasado?`<div class="note" style="margin-top:10px">Sin datos de estación disponibles aún para este día — se muestra el pronóstico.</div>`:''}`;
+  </div>${pasado?(hayDatoEstacion?`<div class="note" style="margin-top:10px">Según la estación, esta zona no tuvo riego programado este día (no alcanzó su umbral acumulado) — se muestra el pronóstico como referencia.</div>`:`<div class="note" style="margin-top:10px">Sin datos de estación disponibles aún para este día — se muestra el pronóstico.</div>`):''}`;
 
-  const detalle=hayEstacion?`<div class="d-section">
+  const detalle=hayRiegoEstacion?`<div class="d-section">
       <div class="d-section-t">Detalle del riego</div>
       <div class="cmp-hd"><span class="cmp-h est">ESTACIÓN</span><span class="cmp-h pron">PRONÓSTICO</span></div>
       <div class="cmp-row"><span class="cmp-k">Tiempo de riego</span><div class="cmp-vs"><span class="ce">${hm(tE)||'—'}</span><span class="cp">${hm(tP)||'—'}</span></div></div>
@@ -1704,7 +1710,10 @@ function openDia(fecha,znId){
         <div class="d-kpi"><div class="l">Superficie</div><div class="v">${z.superficie_ha||'—'} ha</div></div>
       </div></div>`;
 
-  const meteo=hayEstacion?`<div class="d-section">
+  // La meteorología (ETo/ETc/lluvia) se muestra en cuanto la estación tiene
+  // dato para el día, SIN depender de si hubo riego — el ETo real de la
+  // estación es independiente de si esta zona en particular regó o no.
+  const meteo=hayDatoEstacion?`<div class="d-section">
       <div class="d-section-t">Meteorología — real vs pronóstico</div>
       <div class="cmp-hd"><span class="cmp-h est">ESTACIÓN</span><span class="cmp-h pron">PRONÓSTICO</span></div>
       <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="ce">${num(eE)}</span><span class="cp">${num(eP)}</span></div></div>
@@ -1718,7 +1727,7 @@ function openDia(fecha,znId){
       <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
     </div>`;
 
-  const confirmHtml=confirmBoxHtml('riego',znId,fecha,hayEstacion?tE:tP);
+  const confirmHtml=confirmBoxHtml('riego',znId,fecha,hayRiegoEstacion?tE:tP);
 
   const html=`${hero}${detalle}${meteo}${confirmHtml}`;
   openD(tit,sub,html);
