@@ -1239,6 +1239,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <label class="maint-export-check"><input type="checkbox" id="mtExportZona" checked><span>Aforos y mediciones por zona</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportFF" checked><span>Facturas de fertilizante</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportFEB" checked><span>Facturas de energía</span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportConf" checked><span>Confirmaciones de riego y fertirriego <small style="display:block;font-weight:600;color:var(--subtle);font-size:9px;margin-top:2px">Solo del equipo activo, sin importar el alcance elegido abajo</small></span></label>
       </div>
     </div>
     <div class="maint-export-section">
@@ -2891,8 +2892,8 @@ chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments
 
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
 let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false,backendReady:null,lastError:null};
-const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia'};
-const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',factura_ferti:'fecha_factura',factura_energia:'fecha_factura'};
+const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia',confirmaciones:'sc_confirmacion_ejecucion'};
+const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',factura_ferti:'fecha_factura',factura_energia:'fecha_factura',confirmaciones:'fecha_ejecucion'};
 const mtEsc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const mtVal=id=>document.getElementById(id)?.value?.trim()??'';
 const mtNum=id=>{const v=mtVal(id);if(v==='')return null;const n=Number(v.replace(',','.'));return Number.isFinite(n)?n:null;};
@@ -3199,6 +3200,7 @@ function mtExportRows(section,rows){
   if(section==='equipo')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Caudal instantáneo Equipo (l/s)':r.caudal_instantaneo_ls,'Caudalímetro salida bomba (m3)':r.caudalimetro_salida_bomba_m3,'Presión antes del filtro (bar)':r.presion_antes_filtro_bar,'Presión después del filtro (bar)':r.presion_despues_filtro_bar,'Diferencia de presión (bar)':r.diferencia_presion_bar,'Retrolavado':r.retrolavado,'Gatillante automático':r.gatillante_automatico,'Valor gatillante':r.valor_gatillante,'Duración ciclo retrolavado (min)':r.duracion_ciclo_retrolavado_min,'Última calibración inyectores':r.ultima_calibracion_inyectores,'Última calibración caudalímetros':r.ultima_calibracion_caudalimetros,'Profesional que recomienda':r.profesional,'Operario':r.operario,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='factura_ferti')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha Factura':mtExcelDate(r.fecha_factura),'ID Factura':r.id_factura,'Producto':r.producto,'Proveedor':r.proveedor,'Envase':r.envase,'Peso o Volumen Envase':r.peso_volumen_envase,'Unidad':r.unidad,'Envases Totales':r.envases_totales,'Peso o volumen Total':r.peso_volumen_total,'Stock Disponible Temporada Anterior':r.stock_disponible_temporada_anterior,'Stock Disponible Total Kg':r.stock_disponible_total_kg,'Precio Envase':r.precio_envase,'Moneda':r.moneda,'Valor Total':r.valor_total,'N input (%)':r.n_input_pct,'P2O5 input (%)':r.p2o5_input_pct,'K2O input (%)':r.k2o_input_pct,'Mg input (%)':r.mg_input_pct,'Ca input (%)':r.ca_input_pct,'S input (%)':r.s_input_pct,'Zn input (%)':r.zn_input_pct,'Mn input (%)':r.mn_input_pct,'Fe input (%)':r.fe_input_pct,'Cu input (%)':r.cu_input_pct,'B input (%)':r.b_input_pct,'Concetración ideal (gr/L)':r.concentracion_ideal_grl,'Disponible':r.disponible,'Concentración máxima en solución madre recomendada (gr/L)':r.concentracion_maxima_sol_madre_grl,'Orden de aplicacion':r.orden_aplicacion,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='factura_energia')return rows.map(r=>({'ID Predio':r.id_predio,'Fecha Factura':mtExcelDate(r.fecha_factura),'Numero de Factura':r.numero_factura,'Proveedor':r.proveedor,'Total a Pagar ($)':r.total_a_pagar,'Consumo Electrico (kWh)':r.consumo_electrico_kwh,'Demanda Suministrada (kW)':r.demanda_suministrada_kw,'Tipo de Combustible':r.tipo_combustible,'Combustible (Litros)':r.combustible_litros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  if(section==='confirmaciones')return rows.map(r=>({'ID Zona':r.id_zona,'ID Equipo':r.id_equipo,'Tipo':r.tipo==='riego'?'Riego':'Fertirriego','Fecha Recomendada':mtExcelDate(r.fecha_recomendada),'Fecha Ejecución':mtExcelDate(r.fecha_ejecucion),'Confirmado':r.confirmado?'Sí':'No','Tiempo (horas)':r.tiempo_horas,'Producto':r.producto_asignado,'Concentración Ideal (gr/L)':r.concentracion_ideal_grl,'Dosis a Aplicar (Kg)':r.dosis_aplicar_kg,'Vol. Sol. Madre a Preparar (L)':r.volumen_sol_madre_l,'Dosis Producto Estanque (Kg)':r.dosis_producto_estanque_kg,'Vol. Sol. Madre a Inyectar (L)':r.vol_sol_madre_inyectar_l,'% Inyección':r.pct_inyeccion,'Ratio Inyección':r.ratio_inyeccion,'Operario':r.operario,'Profesional':r.profesional,'Última actualización':mtExcelDate(r.actualizado_en)}));
   return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
 function openMaintenanceExport(){
@@ -3212,13 +3214,22 @@ function mtSelectedExportSections(){
     {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo'},
     {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'},
     {section:'factura_ferti',checked:document.getElementById('mtExportFF')?.checked,sheet:'FF'},
-    {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB'}
+    {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB'},
+    {section:'confirmaciones',checked:document.getElementById('mtExportConf')?.checked,sheet:'Confirmaciones'}
   ].filter(x=>x.checked);
 }
 async function mtFetchExportSection(section,scope,from,to){
   const dateField=MT_DATE_FIELD[section]||'fecha_hora';
-  let q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order(dateField,{ascending:true});
-  if(scope==='predio'&&mtCurrentPredio())q=q.eq('id_predio',mtCurrentPredio());
+  let q;
+  if(section==='confirmaciones'){
+    // sc_confirmacion_ejecucion no tiene id_razon_social ni id_predio (solo
+    // se relaciona por zona/equipo) — se acota siempre al equipo activo,
+    // independiente del selector de alcance (RS completa no aplica acá).
+    q=db.from(MT_TABLES[section]).select('*').eq('id_equipo',mtCurrentEquipo()).order(dateField,{ascending:true});
+  } else {
+    q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order(dateField,{ascending:true});
+    if(scope==='predio'&&mtCurrentPredio())q=q.eq('id_predio',mtCurrentPredio());
+  }
   if(from)q=q.gte(dateField,dateField==='fecha_hora'?new Date(from+'T00:00:00').toISOString():from);
   if(to)q=q.lte(dateField,dateField==='fecha_hora'?new Date(to+'T23:59:59.999').toISOString():to);
   const {data,error}=await q;if(error)throw error;return data||[];
