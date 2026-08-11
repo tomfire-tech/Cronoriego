@@ -1475,6 +1475,7 @@ function rCal(dias,sc){
 
         const dosisTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_aplicar_kg)||0),0);
         const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg':(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
+        const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
         const clickMain=hayRiego?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
 
         let ferRow='';
@@ -1502,7 +1503,7 @@ function rCal(dias,sc){
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
                   ${hayEstacion?`<span class="rc-badge" style="background:#F0FDF4;color:#15803D;margin-top:2px"><i class="ti ti-antenna-bars-5" style="font-size:9px"></i>Real</span>`:''}
                 </div>`:`<div class="rc-top">
-                  <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};font-size:14px">Fertirriego</div>
+                  <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>
                   <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
                 </div>`}
                 ${ferRow}
@@ -1944,7 +1945,8 @@ function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
   const uid='cf_'+tipo+'_'+znId.replace(/[^a-zA-Z0-9]/g,'')+'_'+fechaRecom.replace(/-/g,'');
   const checked=!!existente;
   const fechaEjec=existente?existente.fecha_ejecucion:fechaRecom;
-  const tiempoVal=existente?(existente.tiempo_horas??tiempoRecom??''):(tiempoRecom??'');
+  const tiempoValRaw=existente?(existente.tiempo_horas??tiempoRecom??''):(tiempoRecom??'');
+const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
   const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
   const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
   const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
@@ -1970,22 +1972,78 @@ function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
 function toggleConfirmFields(uid){
   const on=document.getElementById(uid+'_chk').checked;
   document.getElementById(uid+'_box').classList.toggle('done',on);
-  ['_fecha','_tiempo','_operario','_profesional'].forEach(s=>{document.getElementById(uid+s).disabled=!on;});
+  document.querySelectorAll('#'+uid+'_box .confirm-fi').forEach(el=>{el.disabled=!on;});
+}
+function confirmBoxHtmlFerti(znId,fecha,e){
+  const existente=G.confirmF[znId+'|'+fecha];
+  const uid='cf_fert_'+znId.replace(/[^a-zA-Z0-9]/g,'')+'_'+fecha.replace(/-/g,'');
+  const checked=!!existente;
+  const round2=v=>(v===''||v==null||isNaN(v))?'':Math.round(Number(v)*100)/100;
+  const val=(field,fallback)=>existente&&existente[field]!=null?existente[field]:fallback;
+  const fechaEjec=existente?existente.fecha_ejecucion:fecha;
+  const tiempoVal=round2(val('tiempo_horas',e.tiempo_fertirriego_hrs));
+  const concVal=round2(val('concentracion_ideal_grl',e.concentracion_ideal_grl));
+  const dosisAplicarVal=round2(val('dosis_aplicar_kg',e.dosis_aplicar_kg));
+  const volSolMadreVal=round2(val('volumen_sol_madre_l',e.volumen_sol_madre_l));
+  const dosisEstanqueVal=round2(val('dosis_producto_estanque_kg',e.dosis_producto_estanque_kg));
+  const volInyectarVal=round2(val('vol_sol_madre_inyectar_l',null));
+  const pctExistente=existente&&existente.pct_inyeccion!=null?existente.pct_inyeccion*100:null;
+  const pctIny=round2(pctExistente!=null?pctExistente:(e.pct_inyeccion!=null?e.pct_inyeccion*100:null));
+  const ratioVal=existente?(existente.ratio_inyeccion||e.ratio_inyeccion||''):(e.ratio_inyeccion||'');
+  const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
+  const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
+  const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
+  return `<div class="d-section">
+    <div class="d-section-t">Confirmar ejecución</div>
+    <div class="confirm-box${checked?' done':''}" id="${uid}_box">
+      <label class="confirm-chk-row">
+        <input type="checkbox" id="${uid}_chk" ${checked?'checked':''} onchange="toggleConfirmFields('${uid}')">
+        <span class="confirm-chk-lbl">Fertirriego ejecutado</span>
+      </label>
+      ${ultGuardado?`<div id="${uid}_ts" style="font-size:10.5px;color:var(--muted);margin:-7px 0 11px 27px">Último registro guardado el ${ultGuardado}</div>`:''}
+      <div class="confirm-grid">
+        <div><label class="confirm-fl">Fecha ejecución</label><input type="date" class="confirm-fi" id="${uid}_fecha" value="${fechaEjec}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Tiempo fertirriego (h)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_tiempo" value="${tiempoVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Concentración ideal (gr/L)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_conc" value="${concVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Dosis a aplicar (Kg)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_dosisAplicar" value="${dosisAplicarVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Vol. sol. madre a preparar (L)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_volSolMadre" value="${volSolMadreVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Dosis producto en estanque (Kg)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_dosisEstanque" value="${dosisEstanqueVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Vol. sol. madre a inyectar (L)</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_volInyectar" value="${volInyectarVal}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">% Inyección</label><input type="number" step="0.01" min="0" class="confirm-fi" id="${uid}_pctIny" value="${pctIny}" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Ratio inyección</label><input type="text" class="confirm-fi" id="${uid}_ratio" value="${ratioVal}" placeholder="Ej. 1:125" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Operario (ejecuta)</label><input type="text" class="confirm-fi" id="${uid}_operario" value="${operario}" placeholder="Nombre" ${checked?'':'disabled'}></div>
+        <div><label class="confirm-fl">Profesional (recomienda)</label><input type="text" class="confirm-fi" id="${uid}_profesional" value="${profesional}" placeholder="Nombre" ${checked?'':'disabled'}></div>
+      </div>
+      <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('fertirriego','${znId}','${fecha}','${uid}')">Guardar confirmación</button>
+      <div class="confirm-msg" id="${uid}_msg"></div>
+    </div>
+  </div>`;
 }
 async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   const eqId=document.getElementById('se').value;
   const btn=document.getElementById(uid+'_save'),msg=document.getElementById(uid+'_msg');
   const confirmado=document.getElementById(uid+'_chk').checked;
+  const getNum=id=>{const el=document.getElementById(uid+id);return (!el||el.value==='')?null:parseFloat(el.value);};
+  const getTxt=id=>{const el=document.getElementById(uid+id);return el?(el.value.trim()||null):null;};
   const row={
     id_zona:znId,id_equipo:eqId,tipo,
     fecha_recomendada:fechaRecom,
     fecha_ejecucion:document.getElementById(uid+'_fecha').value||fechaRecom,
-    tiempo_horas:document.getElementById(uid+'_tiempo').value?parseFloat(document.getElementById(uid+'_tiempo').value):null,
-    operario:document.getElementById(uid+'_operario').value.trim()||null,
-    profesional:document.getElementById(uid+'_profesional').value.trim()||null,
+    tiempo_horas:getNum('_tiempo'),
+    operario:getTxt('_operario'),
+    profesional:getTxt('_profesional'),
     confirmado,
     actualizado_en:new Date().toISOString()
   };
+  if(document.getElementById(uid+'_conc')){
+    row.concentracion_ideal_grl=getNum('_conc');
+    row.dosis_aplicar_kg=getNum('_dosisAplicar');
+    row.volumen_sol_madre_l=getNum('_volSolMadre');
+    row.dosis_producto_estanque_kg=getNum('_dosisEstanque');
+    row.vol_sol_madre_inyectar_l=getNum('_volInyectar');
+    const pct=getNum('_pctIny');row.pct_inyeccion=pct==null?null:pct/100;
+    row.ratio_inyeccion=getTxt('_ratio');
+  }
   btn.disabled=true;btn.textContent='Guardando...';
   const {data,error}=await db.from('sc_confirmacion_ejecucion').upsert(row,{onConflict:'id_zona,tipo,fecha_recomendada'}).select();
   msg.className='confirm-msg';msg.style.display='block';
@@ -2214,16 +2272,17 @@ function openEvF(znId,fecha,idx){
   const ap=[{k:'N',c:'#2563EB',v:numF(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:numF(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:numF(e.k2o_aplicado_kg)}];
   const otros=evs.length>1?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">+${evs.length-1} producto(s) más este día: ${evs.slice(1).map(x=>prodShort(x.producto_asignado)).join(', ')}</div>`:'';
   const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,pct:covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,pct:covMicro(znId,mi)}))]:[];
-  const confirmHtml=confirmBoxHtml('fertirriego',znId,fecha,e.tiempo_fertirriego_hrs);
+  const confirmHtml=confirmBoxHtmlFerti(znId,fecha,e);
   document.getElementById('fdb').innerHTML=`${otros}
     <div class="dcols">
       <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0"><div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div><div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div><div class="dprod-sub">${numF(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
       <div class="dcard" style="margin-bottom:0"><div class="dcard-t"><i class="ti ti-atom-2"></i>Nutrientes aportados</div><div class="naport">${ap.map(a=>`<div class="naport-c"><div class="naport-k" style="color:${a.c}">${a.k}</div><div class="naport-v">${a.v.toFixed(2)}</div><div class="naport-u">kg</div></div>`).join('')}</div></div>
     </div>
+    ${(numF(e.volumen_sol_madre_l)>0||numF(e.dosis_producto_estanque_kg)>0)?`<div class="dcard" style="background:#F0FDF4;border-color:#BBF7D0;margin-top:14px"><div class="dcard-t"><i class="ti ti-flask-2"></i>Preparación de solución madre — corresponde hoy</div><div class="naport"><div class="naport-c"><div class="naport-k" style="color:#15803D">Producto</div><div class="naport-v">${numF(e.dosis_producto_estanque_kg).toFixed(1)}</div><div class="naport-u">kg</div></div><div class="naport-c"><div class="naport-k" style="color:#0891B2">Agua</div><div class="naport-v">${numF(e.volumen_sol_madre_l).toFixed(0)}</div><div class="naport-u">L</div></div></div></div>`:`<div class="note" style="margin-top:14px">No corresponde preparar solución madre este día — se usa la preparada en una aplicación anterior.</div>`}
     <div class="dcard" style="margin-top:14px"><div class="dcard-t"><i class="ti ti-adjustments"></i>Parámetros de inyección</div>
       <div class="dcols" style="gap:0 24px">
         <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
-        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion??'—'} L/h</span></div></div>
+        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion!=null?numF(e.lh_inyeccion).toFixed(1):'—'} L/h</span></div></div>
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
     ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
