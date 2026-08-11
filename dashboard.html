@@ -801,7 +801,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .maint-export{border:1px solid #BBF7D0;background:#F0FDF4;color:#15803D;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;}
 .maint-app{width:100%;}
 .maint-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:9px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
-.maint-segments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:1;max-width:610px;}
+.maint-segments{display:flex;flex-wrap:wrap;gap:6px;flex:1;max-width:760px;}
+.maint-segments .maint-segment{flex:1 1 130px;}
 .maint-segment{border:none;background:#F8FAFC;color:var(--muted);height:39px;border-radius:9px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .maint-segment.active{background:#1E8449;color:#fff;box-shadow:0 4px 12px rgba(30,132,73,.18);}
 .maint-context{font-size:10px;color:var(--muted);text-align:right;line-height:1.35;}
@@ -1236,6 +1237,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <label class="maint-export-check"><input type="checkbox" id="mtExportFuente" checked><span>Fuentes de agua — pozos y canales</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportEquipo" checked><span>Condición de equipos de riego</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportZona" checked><span>Aforos y mediciones por zona</span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportFF" checked><span>Facturas de fertilizante</span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportFEB" checked><span>Facturas de energía</span></label>
       </div>
     </div>
     <div class="maint-export-section">
@@ -2829,7 +2832,8 @@ chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments
 
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
 let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false,backendReady:null,lastError:null};
-const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona'};
+const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia'};
+const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',factura_ferti:'fecha_factura',factura_energia:'fecha_factura'};
 const mtEsc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const mtVal=id=>document.getElementById(id)?.value?.trim()??'';
 const mtNum=id=>{const v=mtVal(id);if(v==='')return null;const n=Number(v.replace(',','.'));return Number.isFinite(n)?n:null;};
@@ -2889,6 +2893,8 @@ function maintenanceHeader(){
     <button class="maint-segment ${GM.section==='fuente'?'active':''}" onclick="setMaintenanceSection('fuente')"><i class="ti ti-waves"></i><span>Fuente de agua</span></button>
     <button class="maint-segment ${GM.section==='equipo'?'active':''}" onclick="setMaintenanceSection('equipo')"><i class="ti ti-adjustments"></i><span>Equipo de riego</span></button>
     <button class="maint-segment ${GM.section==='zona'?'active':''}" onclick="setMaintenanceSection('zona')"><i class="ti ti-droplet-search"></i><span>Aforo de zona</span></button>
+    <button class="maint-segment ${GM.section==='factura_ferti'?'active':''}" onclick="setMaintenanceSection('factura_ferti')"><i class="ti ti-receipt"></i><span>Factura fertilizante</span></button>
+    <button class="maint-segment ${GM.section==='factura_energia'?'active':''}" onclick="setMaintenanceSection('factura_energia')"><i class="ti ti-bolt"></i><span>Factura energía</span></button>
   </div><div class="maint-context"><strong>${mtEsc(mtCurrentPredioName())}</strong>${mtEsc(mtCurrentEquipoName())}</div></div>`;
 }
 function mtField(label,id,type='text',opts=''){return `<div class="maint-field"><label for="${id}">${label}</label><input class="maint-input" id="${id}" type="${type}" ${opts}></div>`;}
@@ -2910,6 +2916,8 @@ function maintenanceSourceForm(){
     ${pozo?mtField('Nivel freático (m)','mtNivelFreatico','number','step="0.01"'):''}
     ${pozo?mtField('Nivel estanque (m)','mtNivelEstanque','number','step="0.01"'):''}
     ${mtField('Última calibración caudalímetro','mtCalibracionCaudal','date')}
+    ${mtField('Operario (ejecuta)','mtOperario','text','placeholder="Nombre"')}
+    ${mtField('Profesional (recomienda)','mtProfesional','text','placeholder="Nombre"')}
     ${mtTextArea()}
   </div>${maintenanceActions()}</form></div>`;
 }
@@ -2918,6 +2926,7 @@ function maintenanceEquipmentForm(){
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
     ${mtField('Fecha y hora','mtFechaHora','datetime-local',`required value="${mtLocalNow()}"`)}
     ${mtField('ID Equipo','mtEquipoId','text',`readonly value="${mtEsc(mtCurrentEquipo())}"`)}
+    ${mtField('Caudal instantáneo (L/s)','mtCaudalInstantaneo','number','step="0.01" min="0"')}
     ${mtField('Caudalímetro salida bomba (m³)','mtCaudalBomba','number','step="0.01" min="0"')}
     ${mtField('Presión antes del filtro (bar)','mtPresionAntes','number','step="0.01" min="0" oninput="updateMaintenanceDelta()"')}
     ${mtField('Presión después del filtro (bar)','mtPresionDespues','number','step="0.01" min="0" oninput="updateMaintenanceDelta()"')}
@@ -2928,6 +2937,8 @@ function maintenanceEquipmentForm(){
     ${mtField('Duración ciclo retrolavado (min)','mtDuracionRetro','number','step="0.01" min="0"')}
     ${mtField('Última calibración inyectores','mtCalibracionInyectores','date')}
     ${mtField('Última calibración caudalímetros','mtCalibracionCaudal','date')}
+    ${mtField('Operario (ejecuta)','mtOperario','text','placeholder="Nombre"')}
+    ${mtField('Profesional (recomienda)','mtProfesional','text','placeholder="Nombre"')}
     ${mtTextArea()}
   </div>${maintenanceActions()}</form></div>`;
 }
@@ -2946,20 +2957,106 @@ function maintenanceZoneForm(){
   </div>${maintenanceActions()}</form></div>`;
 }
 function maintenanceActions(){return `<div class="maint-actions"><button class="maint-save" id="mtSaveBtn" type="submit"><i class="ti ti-device-floppy"></i>Guardar registro</button><button class="maint-clear" type="button" onclick="renderMaintenance()">Limpiar</button></div><div class="maint-message" id="mtMessage"></div>`;}
+function todayISODate(){return new Date().toISOString().slice(0,10);}
+const MT_NUTRIENTES_FF=[['N','mtN'],['P₂O₅','mtP2O5'],['K₂O','mtK2O'],['Mg','mtMg'],['Ca','mtCa'],['S','mtS'],['Zn','mtZn'],['Mn','mtMn'],['Fe','mtFe'],['Cu','mtCu'],['B','mtB']];
+
+function maintenanceFacturaFertiForm(){
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-receipt" style="color:#16A34A"></i>Nueva factura de fertilizante</div><div class="maint-card-sub">Cada factura carga stock al inventario. El sistema descuenta de aquí lo que ya se aplicó en fertirriego antes de proyectar lo que falta.</div>
+  <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
+    ${mtField('Fecha de la factura','mtFechaFactura','date',`required value="${todayISODate()}"`)}
+    ${mtField('ID Equipo','mtEquipoId','text',`readonly value="${mtEsc(mtCurrentEquipo())}"`)}
+    ${mtField('N° de factura','mtIdFactura','text','placeholder="Ej. SI-16322"')}
+    ${mtField('Producto','mtProducto','text','required placeholder="Ej. 15-5-35+2MgO+TE"')}
+    ${mtField('Proveedor','mtProveedor','text')}
+    ${mtField('Envase','mtEnvase','text','placeholder="Ej. Saco"')}
+    ${mtField('Peso o volumen por envase','mtPesoVolEnvase','number','step="0.01" min="0" oninput="updateFFTotales()"')}
+    <div class="maint-field"><label for="mtUnidad">Unidad</label><select class="maint-select" id="mtUnidad" onchange="updateFFTotales()"><option value="Kg">Kg</option><option value="L">L</option></select></div>
+    ${mtField('Envases totales','mtEnvasesTotales','number','step="1" min="0" oninput="updateFFTotales()"')}
+    <div class="maint-field"><label>Peso / volumen total</label><div class="maint-delta" id="mtPesoVolTotalDisplay">—</div></div>
+    ${mtField('Stock disponible temporada anterior','mtStockAnterior','number','step="0.01" min="0" oninput="updateFFTotales()"')}
+    <div class="maint-field"><label>Stock disponible total</label><div class="maint-delta" id="mtStockTotalDisplay">—</div></div>
+    ${mtField('Precio por envase','mtPrecioEnvase','number','step="0.01" min="0" oninput="updateFFTotales()"')}
+    <div class="maint-field"><label for="mtMoneda">Moneda</label><select class="maint-select" id="mtMoneda"><option value="CLP">CLP</option><option value="USD">USD</option><option value="CAD">CAD</option></select></div>
+    <div class="maint-field"><label>Valor total</label><div class="maint-delta" id="mtValorTotalDisplay">—</div></div>
+    ${mtField('Concentración ideal (gr/L)','mtConcIdeal','number','step="0.01" min="0"')}
+    <div class="maint-field"><label for="mtDisponible">Disponible</label><select class="maint-select" id="mtDisponible"><option value="Si">Sí</option><option value="Aplicado">Aplicado</option><option value="No">No</option></select></div>
+    ${mtField('Concentración máxima en solución madre (gr/L)','mtConcMaxSolMadre','number','step="0.01" min="0"')}
+    ${mtField('Orden de aplicación','mtOrdenAplicacion','number','step="1" min="1"')}
+  </div>
+  <div class="maint-help" style="margin:14px 0 6px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:9px">Composición del producto (% input)</div>
+  <div class="maint-form-grid">${MT_NUTRIENTES_FF.map(([lbl,id])=>mtField(lbl+' (%)',id,'number','step="0.01" min="0"')).join('')}</div>
+  <div class="maint-form-grid" style="margin-top:11px">${mtTextArea()}</div>
+  ${maintenanceActions()}</form></div>`;
+}
+function updateFFTotales(){
+  const envase=mtNum('mtPesoVolEnvase')||0,envases=mtNum('mtEnvasesTotales')||0,stockAnt=mtNum('mtStockAnterior')||0,precio=mtNum('mtPrecioEnvase')||0;
+  const unidad=document.getElementById('mtUnidad')?.value||'';
+  const pesoTotal=envase*envases,stockTotal=stockAnt+pesoTotal,valorTotal=precio*envases;
+  const elP=document.getElementById('mtPesoVolTotalDisplay');if(elP)elP.textContent=pesoTotal>0?`${pesoTotal.toLocaleString('es-CL')} ${unidad}`:'—';
+  const elS=document.getElementById('mtStockTotalDisplay');if(elS)elS.textContent=stockTotal>0?`${stockTotal.toLocaleString('es-CL')} ${unidad}`:'—';
+  const elV=document.getElementById('mtValorTotalDisplay');if(elV)elV.textContent=valorTotal>0?valorTotal.toLocaleString('es-CL',{maximumFractionDigits:2}):'—';
+}
+
+function maintenanceFacturaEnergiaForm(){
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-bolt" style="color:#D97706"></i>Nueva factura de energía</div><div class="maint-card-sub">Consumo eléctrico y/o combustible de la bomba, asociado al predio activo.</div>
+  <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
+    ${mtField('Fecha de la factura','mtFechaFactura','date',`required value="${todayISODate()}"`)}
+    ${mtField('Número de factura','mtNumFactura','text')}
+    ${mtField('Proveedor','mtProveedor','text')}
+    ${mtField('Total a pagar ($)','mtTotalPagar','number','step="1" min="0"')}
+    ${mtField('Consumo eléctrico (kWh)','mtConsumoKwh','number','step="0.01" min="0"')}
+    ${mtField('Demanda suministrada (kW)','mtDemandaKw','number','step="0.01" min="0"')}
+    ${mtField('Tipo de combustible','mtTipoCombustible','text','placeholder="Ej. Diesel (si aplica)"')}
+    ${mtField('Combustible (Litros)','mtCombustibleLitros','number','step="0.01" min="0"')}
+    ${mtTextArea()}
+  </div>${maintenanceActions()}</form></div>`;
+}
 
 function renderMaintenance(){
   mountMaintenance();const app=document.getElementById('maintenanceApp');if(!app)return;
-  const form=GM.section==='fuente'?maintenanceSourceForm():GM.section==='equipo'?maintenanceEquipmentForm():maintenanceZoneForm();
+  const formBuilders={fuente:maintenanceSourceForm,equipo:maintenanceEquipmentForm,zona:maintenanceZoneForm,factura_ferti:maintenanceFacturaFertiForm,factura_energia:maintenanceFacturaEnergiaForm};
+  const form=(formBuilders[GM.section]||maintenanceSourceForm)();
   app.innerHTML=maintenanceHeader()+`<div class="maint-grid"><div>${form}</div><div class="maint-card"><div class="maint-history-head"><div class="maint-card-title" style="margin:0"><i class="ti ti-history" style="color:#0891B2"></i>Historial</div><span id="mtHistoryCount">—</span></div><div class="maint-history" id="mtHistory"><div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div></div></div></div>`;
   if(GM.section==='equipo')updateMaintenanceDelta();
+  if(GM.section==='factura_ferti')updateFFTotales();
   renderMaintenanceHistory();
 }
 function updateMaintenanceDelta(){const a=mtNum('mtPresionAntes'),b=mtNum('mtPresionDespues'),el=document.getElementById('mtDeltaPresion');if(el)el.textContent=a==null||b==null?'— bar':`${(a-b).toFixed(2)} bar`;}
 
 function maintenancePayload(){
+  if(GM.section==='factura_ferti'){
+    const pesoVolTotal=(mtNum('mtPesoVolEnvase')||0)*(mtNum('mtEnvasesTotales')||0);
+    const stockTotal=(mtNum('mtStockAnterior')||0)+pesoVolTotal;
+    return {
+      id_razon_social:G.rsId,id_predio:mtCurrentPredio(),id_equipo:mtCurrentEquipo()||null,
+      fecha_factura:mtVal('mtFechaFactura')||null,id_factura:mtVal('mtIdFactura')||null,
+      producto:mtVal('mtProducto'),proveedor:mtVal('mtProveedor')||null,envase:mtVal('mtEnvase')||null,
+      peso_volumen_envase:mtNum('mtPesoVolEnvase'),unidad:document.getElementById('mtUnidad')?.value||null,
+      envases_totales:mtNum('mtEnvasesTotales'),stock_disponible_temporada_anterior:mtNum('mtStockAnterior')||0,
+      stock_disponible_total_kg:stockTotal,precio_envase:mtNum('mtPrecioEnvase'),
+      moneda:document.getElementById('mtMoneda')?.value||null,
+      n_input_pct:mtNum('mtN'),p2o5_input_pct:mtNum('mtP2O5'),k2o_input_pct:mtNum('mtK2O'),
+      mg_input_pct:mtNum('mtMg'),ca_input_pct:mtNum('mtCa'),s_input_pct:mtNum('mtS'),
+      zn_input_pct:mtNum('mtZn'),mn_input_pct:mtNum('mtMn'),fe_input_pct:mtNum('mtFe'),
+      cu_input_pct:mtNum('mtCu'),b_input_pct:mtNum('mtB'),
+      concentracion_ideal_grl:mtNum('mtConcIdeal'),disponible:document.getElementById('mtDisponible')?.value||null,
+      concentracion_maxima_sol_madre_grl:mtNum('mtConcMaxSolMadre'),orden_aplicacion:mtInt('mtOrdenAplicacion'),
+      observaciones:mtVal('mtObservaciones')||null,creado_por:G.userId,creado_por_email:G.userEmail
+    };
+  }
+  if(GM.section==='factura_energia'){
+    return {
+      id_razon_social:G.rsId,id_predio:mtCurrentPredio(),fecha_factura:mtVal('mtFechaFactura')||null,
+      numero_factura:mtVal('mtNumFactura')||null,proveedor:mtVal('mtProveedor')||null,
+      total_a_pagar:mtNum('mtTotalPagar'),consumo_electrico_kwh:mtNum('mtConsumoKwh'),
+      demanda_suministrada_kw:mtNum('mtDemandaKw'),tipo_combustible:mtVal('mtTipoCombustible')||null,
+      combustible_litros:mtNum('mtCombustibleLitros'),observaciones:mtVal('mtObservaciones')||null,
+      creado_por:G.userId,creado_por_email:G.userEmail
+    };
+  }
   const common={id_razon_social:G.rsId,id_predio:mtCurrentPredio(),fecha_hora:mtIso('mtFechaHora'),observaciones:mtVal('mtObservaciones')||null,creado_por:G.userId,creado_por_email:G.userEmail};
-  if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null};
-  if(GM.section==='equipo')return {...common,id_equipo:mtCurrentEquipo(),caudalimetro_salida_bomba_m3:mtNum('mtCaudalBomba'),presion_antes_filtro_bar:mtNum('mtPresionAntes'),presion_despues_filtro_bar:mtNum('mtPresionDespues'),retrolavado:mtVal('mtRetrolavado')||null,gatillante_automatico:mtVal('mtGatillante')||null,valor_gatillante:mtNum('mtValorGatillante'),duracion_ciclo_retrolavado_min:mtNum('mtDuracionRetro'),ultima_calibracion_inyectores:mtVal('mtCalibracionInyectores')||null,ultima_calibracion_caudalimetros:mtVal('mtCalibracionCaudal')||null};
+  if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
+  if(GM.section==='equipo')return {...common,id_equipo:mtCurrentEquipo(),caudal_instantaneo_ls:mtNum('mtCaudalInstantaneo'),caudalimetro_salida_bomba_m3:mtNum('mtCaudalBomba'),presion_antes_filtro_bar:mtNum('mtPresionAntes'),presion_despues_filtro_bar:mtNum('mtPresionDespues'),retrolavado:mtVal('mtRetrolavado')||null,gatillante_automatico:mtVal('mtGatillante')||null,valor_gatillante:mtNum('mtValorGatillante'),duracion_ciclo_retrolavado_min:mtNum('mtDuracionRetro'),ultima_calibracion_inyectores:mtVal('mtCalibracionInyectores')||null,ultima_calibracion_caudalimetros:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
   return {...common,id_equipo:mtCurrentEquipo(),id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero')};
 }
 function maintenanceValidate(p){
@@ -2969,6 +3066,8 @@ function maintenanceValidate(p){
   if(GM.section==='fuente'&&p.tipo_fuente==='Canal'&&p.altura_limnimetrica_cm==null)return 'Ingresa la altura limnimétrica del canal.';
   if(GM.section==='equipo'&&!p.id_equipo)return 'Selecciona un equipo de riego.';
   if(GM.section==='zona'&&(!p.id_zona||p.aforo_goteros_ml_3min==null))return 'Selecciona la zona e ingresa el aforo promedio.';
+  if(GM.section==='factura_ferti'&&(!p.fecha_factura||!p.producto))return 'Ingresa la fecha de la factura y el producto.';
+  if(GM.section==='factura_energia'&&!p.fecha_factura)return 'Ingresa la fecha de la factura.';
   return null;
 }
 async function saveMaintenanceRecord(event){
@@ -2982,12 +3081,17 @@ async function saveMaintenanceRecord(event){
     }
     const {data:inserted,error}=await db.from(MT_TABLES[GM.section]).insert(p).select('*').single();if(error)throw error;
     if(inserted){GM.history=[inserted,...GM.history.filter(r=>r.id!==inserted.id)];renderMaintenanceHistory();}
-    const savedText=`Registro guardado el ${mtDateOnly(inserted?.fecha_hora||p.fecha_hora)} a las ${mtTimeOnly(inserted?.fecha_hora||p.fecha_hora)}.`;
+    const dateFieldSave=MT_DATE_FIELD[GM.section]||'fecha_hora';
+    const savedVal=inserted?.[dateFieldSave]||p[dateFieldSave];
+    const savedText=dateFieldSave==='fecha_hora'?`Registro guardado el ${mtDateOnly(savedVal)} a las ${mtTimeOnly(savedVal)}.`:`Registro guardado el ${mtDateOnly(savedVal)}.`;
     msg.className='maint-message ok';msg.textContent='✓ '+savedText;
     showMaintenanceToast(savedText);
     event?.target?.reset();
     const fecha=document.getElementById('mtFechaHora');if(fecha)fecha.value=mtLocalNow();
-    if(GM.section==='equipo'){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();updateMaintenanceDelta();}
+    const fechaF=document.getElementById('mtFechaFactura');if(fechaF)fechaF.value=todayISODate();
+    if((GM.section==='equipo'||GM.section==='factura_ferti')){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();}
+    if(GM.section==='equipo')updateMaintenanceDelta();
+    if(GM.section==='factura_ferti')updateFFTotales();
     await loadMaintenanceHistory(true);
   }catch(err){maintenanceLogError('guardar registro',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;msg.className='maint-message err';msg.textContent=maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
@@ -2995,7 +3099,8 @@ async function saveMaintenanceRecord(event){
 
 async function loadMaintenanceHistory(preserveOnError=false){
   if(!G.rsId||!mtCurrentPredio())return;GM.loading=true;renderMaintenanceHistory();
-  const table=MT_TABLES[GM.section];let q=db.from(table).select('*').eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order('fecha_hora',{ascending:false}).limit(100);
+  const table=MT_TABLES[GM.section];const dateField=MT_DATE_FIELD[GM.section]||'fecha_hora';
+  let q=db.from(table).select('*').eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order(dateField,{ascending:false}).limit(100);
   if(GM.section==='equipo'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
   if(GM.section==='zona'&&mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
   const {data,error}=await q;GM.loading=false;
@@ -3009,6 +3114,8 @@ async function loadMaintenanceHistory(preserveOnError=false){
 function maintenanceSummary(r){
   if(GM.section==='fuente')return `${r.tipo_fuente} ${r.id_fuente} · ${Number(r.caudal_instantaneo_ls||0).toLocaleString('es-CL',{maximumFractionDigits:2})} L/s${r.tipo_fuente==='Pozo'&&r.totalizador_m3!=null?' · '+Number(r.totalizador_m3).toLocaleString('es-CL')+' m³':''}`;
   if(GM.section==='equipo')return `${r.id_equipo} · ΔP ${r.diferencia_presion_bar==null?'—':Number(r.diferencia_presion_bar).toFixed(2)} bar${r.retrolavado?' · '+r.retrolavado:''}`;
+  if(GM.section==='factura_ferti')return `${r.producto||'Producto'} · ${r.envases_totales||0} envase(s) · ${Number(r.peso_volumen_total||0).toLocaleString('es-CL',{maximumFractionDigits:1})} ${r.unidad||''}`;
+  if(GM.section==='factura_energia')return `${r.numero_factura||'Factura'} · ${Number(r.consumo_electrico_kwh||0).toLocaleString('es-CL')} kWh`;
   return `${r.id_zona} · Aforo ${Number(r.aforo_goteros_ml_3min||0).toLocaleString('es-CL',{maximumFractionDigits:2})} mL/3 min`;
 }
 function renderMaintenanceHistory(error){
@@ -3016,19 +3123,23 @@ function renderMaintenanceHistory(error){
   if(GM.loading){el.innerHTML='<div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div>';if(count)count.textContent='—';return;}
   if(count)count.textContent=`${GM.history.length} registro${GM.history.length===1?'':'s'}`;
   if(!GM.history.length){el.innerHTML=maintenanceEmptyHistoryMarkup();return;}
-  el.innerHTML=GM.history.map((r,i)=>{const kind=GM.section==='fuente'?(r.tipo_fuente||'Fuente'):GM.section==='equipo'?'Equipo':'Zona';return `<div class="maint-record" onclick="openMaintenanceDetail(${i})"><div class="maint-record-top"><div><div class="maint-record-title">Registro del ${mtEsc(mtDateOnly(r.fecha_hora))}</div><div class="maint-record-summary">${mtEsc(maintenanceSummary(r))}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="maint-record-saved"><i class="ti ti-check"></i>Guardado</span><span class="maint-record-kind">${mtEsc(kind)}</span><div class="maint-record-date">${mtEsc(mtTimeOnly(r.fecha_hora))}</div></div></div><div class="maint-record-meta">${mtEsc(r.observaciones||'Sin observaciones')}</div><div class="maint-record-user"><i class="ti ti-user"></i>${mtEsc(r.creado_por_email||r.creado_por||'Usuario')}</div></div>`;}).join('');
+  const dateField=MT_DATE_FIELD[GM.section]||'fecha_hora',hasTime=dateField==='fecha_hora';
+  const kindLabels={fuente:null,equipo:'Equipo',zona:'Zona',factura_ferti:'Factura fertilizante',factura_energia:'Factura energía'};
+  el.innerHTML=GM.history.map((r,i)=>{const kind=GM.section==='fuente'?(r.tipo_fuente||'Fuente'):(kindLabels[GM.section]||'Registro');const rv=r[dateField];return `<div class="maint-record" onclick="openMaintenanceDetail(${i})"><div class="maint-record-top"><div><div class="maint-record-title">Registro del ${mtEsc(mtDateOnly(rv))}</div><div class="maint-record-summary">${mtEsc(maintenanceSummary(r))}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="maint-record-saved"><i class="ti ti-check"></i>Guardado</span><span class="maint-record-kind">${mtEsc(kind)}</span>${hasTime?`<div class="maint-record-date">${mtEsc(mtTimeOnly(rv))}</div>`:''}</div></div><div class="maint-record-meta">${mtEsc(r.observaciones||'Sin observaciones')}</div><div class="maint-record-user"><i class="ti ti-user"></i>${mtEsc(r.creado_por_email||r.creado_por||'Usuario')}</div></div>`;}).join('');
 }
 function openMaintenanceDetail(index){
   const r=GM.history[index];if(!r)return;const ignore=new Set(['id','id_razon_social','id_predio','creado_en','actualizado_en']);
-  const labels={id_estanque:'ID Estanque',tipo_fuente:'Tipo de fuente',id_fuente:'ID Fuente',fecha_hora:'Fecha y hora',latitud:'Latitud',longitud:'Longitud',ce_agua_ds_m:'CE agua fuente',caudal_instantaneo_ls:'Caudal instantáneo',totalizador_m3:'Totalizador',nivel_freatico_m:'Nivel freático',nivel_estanque_m:'Nivel estanque',altura_limnimetrica_cm:'Altura limnimétrica',ultima_calibracion_caudalimetro:'Calibración caudalímetro',id_equipo:'ID Equipo',caudalimetro_salida_bomba_m3:'Caudalímetro salida bomba',presion_antes_filtro_bar:'Presión antes filtro',presion_despues_filtro_bar:'Presión después filtro',diferencia_presion_bar:'Diferencia presión',retrolavado:'Retrolavado',gatillante_automatico:'Gatillante',valor_gatillante:'Valor gatillante',duracion_ciclo_retrolavado_min:'Duración retrolavado',ultima_calibracion_inyectores:'Calibración inyectores',ultima_calibracion_caudalimetros:'Calibración caudalímetros',id_zona:'ID Zona',aforo_goteros_ml_3min:'Aforo goteros',numero_mediciones:'Número mediciones',presion_valvula_bar:'Presión válvula',presion_final_lateral_bar:'Presión final lateral',ce_salida_gotero_ds_m:'CE salida gotero',observaciones:'Observaciones',creado_por_email:'Registrado por',creado_por:'ID usuario'};
-  const rows=Object.entries(r).filter(([k,v])=>!ignore.has(k)&&v!==null&&v!=='').map(([k,v])=>`<div class="est-rrow"><span class="est-rk">${mtEsc(labels[k]||k)}</span><span class="est-rv">${mtEsc(k==='fecha_hora'?mtDate(v):v)}</span></div>`).join('');
+  const labels={id_estanque:'ID Estanque',tipo_fuente:'Tipo de fuente',id_fuente:'ID Fuente',fecha_hora:'Fecha y hora',latitud:'Latitud',longitud:'Longitud',ce_agua_ds_m:'CE agua fuente',caudal_instantaneo_ls:'Caudal instantáneo',totalizador_m3:'Totalizador',nivel_freatico_m:'Nivel freático',nivel_estanque_m:'Nivel estanque',altura_limnimetrica_cm:'Altura limnimétrica',ultima_calibracion_caudalimetro:'Calibración caudalímetro',id_equipo:'ID Equipo',caudalimetro_salida_bomba_m3:'Caudalímetro salida bomba',presion_antes_filtro_bar:'Presión antes filtro',presion_despues_filtro_bar:'Presión después filtro',diferencia_presion_bar:'Diferencia presión',retrolavado:'Retrolavado',gatillante_automatico:'Gatillante',valor_gatillante:'Valor gatillante',duracion_ciclo_retrolavado_min:'Duración retrolavado',ultima_calibracion_inyectores:'Calibración inyectores',ultima_calibracion_caudalimetros:'Calibración caudalímetros',id_zona:'ID Zona',aforo_goteros_ml_3min:'Aforo goteros',numero_mediciones:'Número mediciones',presion_valvula_bar:'Presión válvula',presion_final_lateral_bar:'Presión final lateral',ce_salida_gotero_ds_m:'CE salida gotero',observaciones:'Observaciones',creado_por_email:'Registrado por',creado_por:'ID usuario',operario:'Operario',profesional:'Profesional',fecha_factura:'Fecha factura',id_factura:'N° factura',producto:'Producto',proveedor:'Proveedor',envase:'Envase',peso_volumen_envase:'Peso/vol. por envase',unidad:'Unidad',envases_totales:'Envases totales',peso_volumen_total:'Peso/vol. total',stock_disponible_temporada_anterior:'Stock temporada anterior',stock_disponible_total_kg:'Stock disponible total',precio_envase:'Precio por envase',moneda:'Moneda',valor_total:'Valor total',n_input_pct:'N (%)',p2o5_input_pct:'P₂O₅ (%)',k2o_input_pct:'K₂O (%)',mg_input_pct:'Mg (%)',ca_input_pct:'Ca (%)',s_input_pct:'S (%)',zn_input_pct:'Zn (%)',mn_input_pct:'Mn (%)',fe_input_pct:'Fe (%)',cu_input_pct:'Cu (%)',b_input_pct:'B (%)',concentracion_ideal_grl:'Concentración ideal (gr/L)',disponible:'Disponible',concentracion_maxima_sol_madre_grl:'Conc. máxima sol. madre (gr/L)',orden_aplicacion:'Orden de aplicación',numero_factura:'N° factura',total_a_pagar:'Total a pagar',consumo_electrico_kwh:'Consumo eléctrico (kWh)',demanda_suministrada_kw:'Demanda suministrada (kW)',tipo_combustible:'Tipo de combustible',combustible_litros:'Combustible (L)'};
+  const rows=Object.entries(r).filter(([k,v])=>!ignore.has(k)&&v!==null&&v!=='').map(([k,v])=>`<div class="est-rrow"><span class="est-rk">${mtEsc(labels[k]||k)}</span><span class="est-rv">${mtEsc((k==='fecha_hora'||k==='fecha_factura')?mtDate(v):v)}</span></div>`).join('');
   openD('Detalle del registro',`<i class="ti ti-tool"></i> ${mtEsc(maintenanceSummary(r))}`,`<div class="d-section"><div class="d-section-t">Información registrada</div>${rows}</div>`);
 }
 
 function mtExcelDate(v){if(!v)return '';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('es-CL');}
 function mtExportRows(section,rows){
-  if(section==='fuente')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Estanque':r.id_estanque,'Tipo Fuente':r.tipo_fuente,'ID Pozo / Canal':r.id_fuente,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Latitud':r.latitud,'Longitud':r.longitud,'CE del agua de la fuente (dS/m)':r.ce_agua_ds_m,'Caudal instantáneo (L/s)':r.caudal_instantaneo_ls,'Totalizador acumulado (m3)':r.totalizador_m3,'Nivel freático (m)':r.nivel_freatico_m,'Nivel Estanque (m)':r.nivel_estanque_m,'Altura limnimétrica (cm)':r.altura_limnimetrica_cm,'Última calibración caudalímetro':r.ultima_calibracion_caudalimetro,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
-  if(section==='equipo')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Caudalímetro salida bomba (m3)':r.caudalimetro_salida_bomba_m3,'Presión antes del filtro (bar)':r.presion_antes_filtro_bar,'Presión después del filtro (bar)':r.presion_despues_filtro_bar,'Diferencia de presión (bar)':r.diferencia_presion_bar,'Retrolavado':r.retrolavado,'Gatillante automático':r.gatillante_automatico,'Valor gatillante':r.valor_gatillante,'Duración ciclo retrolavado (min)':r.duracion_ciclo_retrolavado_min,'Última calibración inyectores':r.ultima_calibracion_inyectores,'Última calibración caudalímetros':r.ultima_calibracion_caudalimetros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  if(section==='fuente')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Estanque':r.id_estanque,'Tipo Fuente':r.tipo_fuente,'ID Pozo / Canal':r.id_fuente,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Latitud':r.latitud,'Longitud':r.longitud,'CE del agua de la fuente (dS/m)':r.ce_agua_ds_m,'Caudal instantáneo (L/s)':r.caudal_instantaneo_ls,'Totalizador acumulado (m3)':r.totalizador_m3,'Nivel freático (m)':r.nivel_freatico_m,'Nivel Estanque (m)':r.nivel_estanque_m,'Altura limnimétrica (cm)':r.altura_limnimetrica_cm,'Última calibración caudalímetro':r.ultima_calibracion_caudalimetro,'Profesional que recomienda':r.profesional,'Operario':r.operario,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  if(section==='equipo')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Caudal instantáneo Equipo (l/s)':r.caudal_instantaneo_ls,'Caudalímetro salida bomba (m3)':r.caudalimetro_salida_bomba_m3,'Presión antes del filtro (bar)':r.presion_antes_filtro_bar,'Presión después del filtro (bar)':r.presion_despues_filtro_bar,'Diferencia de presión (bar)':r.diferencia_presion_bar,'Retrolavado':r.retrolavado,'Gatillante automático':r.gatillante_automatico,'Valor gatillante':r.valor_gatillante,'Duración ciclo retrolavado (min)':r.duracion_ciclo_retrolavado_min,'Última calibración inyectores':r.ultima_calibracion_inyectores,'Última calibración caudalímetros':r.ultima_calibracion_caudalimetros,'Profesional que recomienda':r.profesional,'Operario':r.operario,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  if(section==='factura_ferti')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha Factura':mtExcelDate(r.fecha_factura),'ID Factura':r.id_factura,'Producto':r.producto,'Proveedor':r.proveedor,'Envase':r.envase,'Peso o Volumen Envase':r.peso_volumen_envase,'Unidad':r.unidad,'Envases Totales':r.envases_totales,'Peso o volumen Total':r.peso_volumen_total,'Stock Disponible Temporada Anterior':r.stock_disponible_temporada_anterior,'Stock Disponible Total Kg':r.stock_disponible_total_kg,'Precio Envase':r.precio_envase,'Moneda':r.moneda,'Valor Total':r.valor_total,'N input (%)':r.n_input_pct,'P2O5 input (%)':r.p2o5_input_pct,'K2O input (%)':r.k2o_input_pct,'Mg input (%)':r.mg_input_pct,'Ca input (%)':r.ca_input_pct,'S input (%)':r.s_input_pct,'Zn input (%)':r.zn_input_pct,'Mn input (%)':r.mn_input_pct,'Fe input (%)':r.fe_input_pct,'Cu input (%)':r.cu_input_pct,'B input (%)':r.b_input_pct,'Concetración ideal (gr/L)':r.concentracion_ideal_grl,'Disponible':r.disponible,'Concentración máxima en solución madre recomendada (gr/L)':r.concentracion_maxima_sol_madre_grl,'Orden de aplicacion':r.orden_aplicacion,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  if(section==='factura_energia')return rows.map(r=>({'ID Predio':r.id_predio,'Fecha Factura':mtExcelDate(r.fecha_factura),'Numero de Factura':r.numero_factura,'Proveedor':r.proveedor,'Total a Pagar ($)':r.total_a_pagar,'Consumo Electrico (kWh)':r.consumo_electrico_kwh,'Demanda Suministrada (kW)':r.demanda_suministrada_kw,'Tipo de Combustible':r.tipo_combustible,'Combustible (Litros)':r.combustible_litros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
 function openMaintenanceExport(){
@@ -3040,14 +3151,17 @@ function mtSelectedExportSections(){
   return [
     {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque'},
     {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo'},
-    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'}
+    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'},
+    {section:'factura_ferti',checked:document.getElementById('mtExportFF')?.checked,sheet:'FF'},
+    {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB'}
   ].filter(x=>x.checked);
 }
 async function mtFetchExportSection(section,scope,from,to){
-  let q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order('fecha_hora',{ascending:true});
+  const dateField=MT_DATE_FIELD[section]||'fecha_hora';
+  let q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order(dateField,{ascending:true});
   if(scope==='predio'&&mtCurrentPredio())q=q.eq('id_predio',mtCurrentPredio());
-  if(from)q=q.gte('fecha_hora',new Date(from+'T00:00:00').toISOString());
-  if(to)q=q.lte('fecha_hora',new Date(to+'T23:59:59.999').toISOString());
+  if(from)q=q.gte(dateField,dateField==='fecha_hora'?new Date(from+'T00:00:00').toISOString():from);
+  if(to)q=q.lte(dateField,dateField==='fecha_hora'?new Date(to+'T23:59:59.999').toISOString():to);
   const {data,error}=await q;if(error)throw error;return data||[];
 }
 async function downloadMaintenanceExcel(){
