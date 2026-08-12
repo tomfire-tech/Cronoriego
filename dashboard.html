@@ -1851,24 +1851,45 @@ function initNdviMap(mp){
 }
 
 
-// Hoja con encabezados en verde suave y filas alternadas — sin franja de marca arriba
-async function craMakeSheet(wb, sheetName, headers, rows){
+// Hoja corporativa CronoRiego: franja de marca, encabezados verdes y filas alternadas
+async function craMakeSheet(wb, sheetName, reportTitle, headers, rows){
   const ws = wb.addWorksheet(sheetName);
-  ws.columns = headers.map(h => ({ header: h, key: h, width: Math.min(34, Math.max(12, h.length + 2)) }));
-  const headerRow = ws.getRow(1);
+  ws.columns = headers.map(h => ({ key:h, width:Math.min(34,Math.max(12,h.length+2)) }));
+
+  // Franja corporativa superior, inspirada en el encabezado del dashboard.
+  const lastCol = Math.max(1, headers.length);
+  ws.mergeCells(1,1,1,lastCol);
+  const brandCell = ws.getCell(1,1);
+  brandCell.value = {
+    richText:[
+      { text:'CRONO', font:{ bold:true, size:16, color:{ argb:'FFFFFFFF' } } },
+      { text:'RIEGO', font:{ bold:true, size:16, color:{ argb:'FF86EFAC' } } },
+      { text:'    '+reportTitle, font:{ bold:true, size:12, color:{ argb:'FFDCE6ED' } } }
+    ]
+  };
+  brandCell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A5276' } };
+  brandCell.alignment = { vertical:'middle', horizontal:'left' };
+  ws.getRow(1).height = 34;
+
+  // Separación visual entre la marca y la tabla.
+  ws.getRow(2).height = 8;
+
+  const headerRow = ws.getRow(3);
+  headerRow.values = headers;
   headerRow.eachCell(cell=>{
     cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9F2E3' } }; // verde suave
     cell.font = { bold:true, color:{ argb:'FF166534' } }; // verde oscuro, buen contraste
     cell.alignment = { vertical:'middle' };
   });
   headerRow.height = 20;
+
   rows.forEach((r,i)=>{
     const row = ws.addRow(r);
     if(i % 2 === 1){
       row.eachCell(cell=>{ cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFF7FAF8' } }; });
     }
   });
-  ws.views = [{ state:'frozen', ySplit:1 }];
+  ws.views = [{ state:'frozen', ySplit:3 }];
   return ws;
 }
 async function craDownloadWorkbook(wb, filename){
@@ -1907,7 +1928,7 @@ async function downloadEstacion(){
     if(!rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
     const headers=Object.keys(rows[0]);
     const wb=new ExcelJS.Workbook();
-    await craMakeSheet(wb,'Estación',headers,rows.map(r=>headers.map(h=>r[h])));
+    await craMakeSheet(wb,'Estación','Registro de Estación Meteorológica',headers,rows.map(r=>headers.map(h=>r[h])));
     const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
     await craDownloadWorkbook(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
   }catch(err){
@@ -3240,12 +3261,12 @@ function openMaintenanceExport(){
 function closeMaintenanceExport(){mtSetExportMessage('');document.getElementById('mtExportModal')?.classList.remove('open');}
 function mtSelectedExportSections(){
   return [
-    {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque'},
-    {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo'},
-    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'},
-    {section:'factura_ferti',checked:document.getElementById('mtExportFF')?.checked,sheet:'FF'},
-    {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB'},
-    {section:'confirmaciones',checked:document.getElementById('mtExportConf')?.checked,sheet:'Confirmaciones'}
+    {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque',title:'Registro de Fuente de Agua'},
+    {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo',title:'Registro de Equipo de Riego'},
+    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP',title:'Registro de Aforos por Zona'},
+    {section:'factura_ferti',checked:document.getElementById('mtExportFF')?.checked,sheet:'FF',title:'Registro de Facturas de Fertilizantes'},
+    {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB',title:'Registro de Facturas de Energía'},
+    {section:'confirmaciones',checked:document.getElementById('mtExportConf')?.checked,sheet:'Confirmaciones',title:'Confirmaciones de Riego y Fertirriego'}
   ].filter(x=>x.checked);
 }
 async function mtFetchExportSection(section,scope,from,to){
@@ -3278,7 +3299,7 @@ async function downloadMaintenanceExcel(){
     const book=new ExcelJS.Workbook();
     for(const item of results){
       const data=item.rows.length?mtExportRows(item.section,item.rows):[{'Sin registros':'No existen registros para los filtros seleccionados'}];
-      await craMakeSheet(book,item.sheet,Object.keys(data[0]),data.map(r=>Object.values(r)));
+      await craMakeSheet(book,item.sheet,item.title,Object.keys(data[0]),data.map(r=>Object.values(r)));
     }
     const total=results.reduce((sum,item)=>sum+item.rows.length,0);
     const safe=String(G.rsId).replace(/[^a-zA-Z0-9_-]/g,'_');
