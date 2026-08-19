@@ -1391,9 +1391,8 @@ function rCal(dias,sc){
         if(!hayRiego&&!hayFerti){
           return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
         }
-        const dosisTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_aplicar_kg)||0),0);
-        const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg':(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
         const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
+        const fertiTxt=hm(tiempoFertTot)||(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
         const clickMain=hayRiego?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
         let ferRow='';
         if(!puedeFerti){
