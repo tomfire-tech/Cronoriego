@@ -2130,17 +2130,16 @@ function rCalF(){
       <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
     dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
       if(evs&&evs.length){const e=evs[0];
-        const vsm=numF(e.volumen_sol_madre_l);const dpe=numF(e.dosis_producto_estanque_kg);
-        const fmtN=v=>v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(1);
+        const tRiego=hmF(e.tiempo_riego_hrs);const tFerti=hmF(e.tiempo_fertirriego_hrs);
         const conf=G.confirmF[z.id_zona+'|'+dS];
         tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
           ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
-          <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-clock-hour-4" style="font-size:14px"></i>${hmF(e.tiempo_fertirriego_hrs)||'—'}</span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
+          <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-clock-hour-4" style="font-size:14px"></i>${tFerti||'—'}</span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
           <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
           <div class="fc-foot" style="flex-direction:column;align-items:flex-start;gap:2px">
-            <span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${vsm>0?`${fmtN(vsm)} L madre`:'madre s/d'}</span>
-            <span class="fc-time"><i class="ti ti-box" style="font-size:11px"></i>${dpe>0?`${fmtN(dpe)} kg estanque`:'estanque s/d'}</span>
+            <span class="fc-time"><i class="ti ti-droplet" style="font-size:11px"></i>${tRiego?`Riego ${tRiego}`:'riego s/d'}</span>
+            <span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${tFerti?`Fertirriego ${tFerti}`:'fertirriego s/d'}</span>
           </div>
         </div></div></td>`;
       } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
