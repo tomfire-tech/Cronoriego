@@ -2073,18 +2073,19 @@ async function loadRenderFerti(){
   });
   rPanelF();
 }
-function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
+function accZona(znId,col){const hoy=fs(new Date());const ev=GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento<=hoy);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
 function covMacro(znId,m){
   const b=GF.bal[znId];if(!b)return null;
   const dem=numF(b[m.dem]);const aplicado=accZona(znId,m.acc);
-  if(dem<=0)return {aplicado,dem:0,pct:null};
-  return {aplicado,dem,pct:aplicado/dem*100};
+  if(dem<=0)return {aplicado,dem:0,pct:null,u:'kg'};
+  return {aplicado,dem,pct:aplicado/dem*100,u:'kg'};
 }
 function covMicro(znId,mi){
   const b=GF.bal[znId];if(!b)return null;
   const obj=numF(b[mi.p+'_objetivo_ppm']);const act=numF(b[mi.p+'_actual_ppm']);
-  if(obj<=0)return {aplicado:act,dem:0,pct:null};
-  return {aplicado:act,dem:obj,pct:act/obj*100};
+  const demKg=numF(b['demanda_neta_'+mi.p+'_kg_zona']);
+  if(obj<=0)return {aplicado:act,dem:0,pct:null,u:'ppm',demKg};
+  return {aplicado:act,dem:obj,pct:act/obj*100,u:'ppm',demKg};
 }
 function fmtKgShort(v){if(v==null)return '—';return v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(v>=10?1:2);}
 function stockAplicadoEquipo(producto){
@@ -2247,17 +2248,19 @@ function openEvF(znId,fecha,idx){
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
     ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div>
-    <table class="btbl"><thead><tr><th>Nutriente</th><th>Aplicado</th><th>Meta</th><th>Cob.</th></tr></thead><tbody>
-    ${balRows.map(r=>{
-      if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${fmtKgShort(r.aplicado)} kg</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;
+    <div style="font-size:10px;color:var(--muted);margin:-4px 0 8px">N/P₂O₅/K₂O: kg dosificados hasta hoy vs. meta de la temporada. Micronutrientes: nivel medido en suelo (ppm) vs. objetivo — no es una dosis aplicada.</div>
+    <table class="btbl"><thead><tr><th>Nutriente</th><th>Valor</th><th>Objetivo</th><th>Cob.</th></tr></thead><tbody>
+    ${balRows.map((r,idx)=>{
+      const divider=idx===MACRO.length?`<tr><td colspan="4" style="padding:6px 0 4px;border-top:1px solid var(--line2);font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.03em">Suelo (ppm)</td></tr>`:'';
+      if(r.pct==null)return divider+`<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${fmtKgShort(r.aplicado)} ${r.u}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;
       const pc=Math.round(r.pct);
       const estado=pc>150?'#DC2626':(pc>100?'#EA580C':(pc>=90?'#16A34A':'#D97706'));
       const label=pc>999?'>999%':pc+'%';
       const w=Math.min(pc,100);
-      return `<tr>
+      return divider+`<tr>
         <td style="color:${r.c};font-weight:600">${r.k}</td>
-        <td class="r">${fmtKgShort(r.aplicado)} kg</td>
-        <td class="r" style="color:var(--muted)">${fmtKgShort(r.dem)} kg</td>
+        <td class="r">${fmtKgShort(r.aplicado)} ${r.u}</td>
+        <td class="r" style="color:var(--muted)">${fmtKgShort(r.dem)} ${r.u}</td>
         <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
           <span style="font-weight:700;color:${estado};min-width:46px;text-align:right">${label}</span>
           <div class="mini-track" style="width:40px"><div class="mini-fill" style="width:${w}%;background:${estado}"></div></div>
