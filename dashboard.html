@@ -2074,9 +2074,14 @@ async function loadRenderFerti(){
   rPanelF();
 }
 function accZona(znId,col){const hoy=fs(new Date());const ev=GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento<=hoy);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
+function accZonaTotal(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
 function covMacro(znId,m){
   const b=GF.bal[znId];if(!b)return null;
-  const dem=numF(b[m.dem]);const aplicado=accZona(znId,m.acc);
+  // Objetivo = total del nutriente ya contenido en toda la dosis asignada a la zona en la temporada
+  // (dosis_aplicar_kg de cada evento × % de composición del producto en FF, ya resuelto en acumulado_x_kg).
+  // No es la demanda agronómica de sc_balance_nutricional — es cuánto de este nutriente entrega
+  // todo lo que ya está programado para esta zona, aplicado o no.
+  const dem=accZonaTotal(znId,m.acc);const aplicado=accZona(znId,m.acc);
   if(dem<=0)return {aplicado,dem:0,pct:null,u:'kg'};
   return {aplicado,dem,pct:aplicado/dem*100,u:'kg'};
 }
@@ -2248,7 +2253,7 @@ function openEvF(znId,fecha,idx){
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
     ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div>
-    <div style="font-size:10px;color:var(--muted);margin:-4px 0 8px">N/P₂O₅/K₂O: kg dosificados hasta hoy vs. meta de la temporada. Micronutrientes: nivel medido en suelo (ppm) vs. objetivo — no es una dosis aplicada.</div>
+    <div style="font-size:10px;color:var(--muted);margin:-4px 0 8px">N/P₂O₅/K₂O: kg dosificados hasta hoy vs. total ya asignado a la zona para toda la temporada (según los productos programados). Micronutrientes: nivel medido en suelo (ppm) vs. objetivo — no es una dosis aplicada.</div>
     <table class="btbl"><thead><tr><th>Nutriente</th><th>Valor</th><th>Objetivo</th><th>Cob.</th></tr></thead><tbody>
     ${balRows.map((r,idx)=>{
       const divider=idx===MACRO.length?`<tr><td colspan="4" style="padding:6px 0 4px;border-top:1px solid var(--line2);font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.03em">Suelo (ppm)</td></tr>`:'';
