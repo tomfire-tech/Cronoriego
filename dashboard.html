@@ -2744,7 +2744,8 @@ function renderMobileCalendarGrid(){
       const date=fs(days[i]),r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date),l=r?(parseFloat(r.lamina_neta_riego_pronostico_mm)||0):0,t=r?(parseFloat(r.tiempo_de_riego_pronostico_horas)||0):0;
       const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!r&&(l>0||t>0),hasF=tieneModulo('ferti')&&ferti.length>0,done=!!G.confirmR?.[z.id_zona+'|'+date]||!!G.confirmF?.[z.id_zona+'|'+date];
       const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
-      const main=hasR?mobileCompactTime(t):hasF?'Ferti':'',sub=hasR&&l>0?`${Math.round(l)}mm`:hasF?`${ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}kg`:'';
+      const tFertiTot=hasF?ferti.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0):0;
+      const main=hasR?mobileCompactTime(t):(hasF?(mobileCompactTime(tFertiTot)||'Fert'):''),sub=hasR&&l>0?`${Math.round(l)}mm`:'';
       html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}</span></button>`;
     });
   });
