@@ -122,6 +122,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .riego-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
 .riego-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 .rc-top{display:flex;align-items:center;justify-content:space-between;}
+.rc-cap{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:1px;}
 .rc-tiempo{font-family:'Fraunces',serif;font-size:21px;font-weight:700;line-height:1;letter-spacing:-.3px;}
 .rc-ico{font-size:14px;}
 .rc-mid{display:flex;flex-direction:column;gap:1px;}
@@ -1401,7 +1402,7 @@ function rCal(dias,sc){
           </div>`;
         } else if(hayFerti){
           ferRow=`<div class="rc-ferti" onclick="event.stopPropagation();openEvF('${z.id_zona}','${dS}',0)">
-            <i class="ti ti-flask-2"></i><span>${fertiTxt}</span>${confF?'<i class="ti ti-check rc-ferti-ok"></i>':''}
+            <i class="ti ti-flask-2"></i><span><span style="opacity:.75;font-weight:600">Tiempo fertirriego</span> ${fertiTxt}</span>${confF?'<i class="ti ti-check rc-ferti-ok"></i>':''}
           </div>`;
         }
         return`<td class="dia-td${eh?' hoy-col':''}">
@@ -1410,7 +1411,7 @@ function rCal(dias,sc){
                 <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
                 ${hayRiego?`<div class="rc-top">
-                  <div class="rc-tiempo" style="color:${c}">${hm(t)}</div>
+                  <div><div class="rc-cap" style="color:${c}">Tiempo riego</div><div class="rc-tiempo" style="color:${c}">${hm(t)}</div></div>
                   <i class="ti ti-droplet rc-ico" style="color:${c};opacity:.6"></i>
                 </div>
                 <div class="rc-mid">
@@ -1418,7 +1419,7 @@ function rCal(dias,sc){
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
                   ${hayEstacion?`<span class="rc-badge" style="background:#F0FDF4;color:#15803D;margin-top:2px"><i class="ti ti-antenna-bars-5" style="font-size:9px"></i>Real</span>`:''}
                 </div>`:`<div class="rc-top">
-                  <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>
+                  <div><div class="rc-cap" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">Tiempo fertirriego</div><div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div></div>
                   <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
                 </div>`}
                 ${ferRow}
@@ -2137,8 +2138,8 @@ function rCalF(){
           <div class="fc-top"><span class="fc-dosis" style="color:${c}"><i class="ti ti-clock-hour-4" style="font-size:14px"></i>${tFerti||'—'}</span>${evs.length>1?`<span style="font-size:10px;font-weight:700;color:${c};background:${cl};border:1px solid ${c}55;border-radius:5px;padding:1px 4px">+${evs.length-1}</span>`:`<i class="ti ti-chevron-right" style="font-size:13px;color:${c}99"></i>`}</div>
           <div class="fc-prod">${prodShort(e.producto_asignado)}</div>
           <div class="fc-foot" style="flex-direction:column;align-items:flex-start;gap:2px">
-            <span class="fc-time"><i class="ti ti-droplet" style="font-size:11px"></i>${tRiego?`Riego ${tRiego}`:'riego s/d'}</span>
-            <span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${tFerti?`Fertirriego ${tFerti}`:'fertirriego s/d'}</span>
+            <span class="fc-time"><i class="ti ti-droplet" style="font-size:11px"></i>${tRiego?`Tiempo riego ${tRiego}`:'Tiempo riego s/d'}</span>
+            <span class="fc-time"><i class="ti ti-flask-2" style="font-size:11px"></i>${tFerti?`Tiempo fertirriego ${tFerti}`:'Tiempo fertirriego s/d'}</span>
           </div>
         </div></div></td>`;
       } else tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
