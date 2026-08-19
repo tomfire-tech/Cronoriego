@@ -247,7 +247,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--muted);gap:8px;font-size:12px;}
 @media(max-width:1200px){.panel{width:260px;}}
 @media(max-width:1024px){.panel{display:none;}.kpi-bar{grid-template-columns:repeat(3,1fr);}.franja{grid-template-columns:repeat(3,1fr);}}
-
 /* ===== MOBILE (tablet chico / celular) ===== */
 @media(max-width:820px){
   /* Header: dos filas — arriba logo + acciones, abajo filtros con scroll horizontal */
@@ -261,32 +260,26 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .dlbtn-txt{display:none;}
   .clim-badge{display:none;}
   .logo{font-size:14px;}
-
   /* Tabs: scroll horizontal en vez de recortarse */
   .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;}
   .tabs::-webkit-scrollbar{height:4px;}
   .tab{flex:none;padding:0 12px;font-size:12px;white-space:nowrap;}
-
   /* KPI bars: 2 columnas en todas las vistas (pisa los grid-template-columns específicos) */
   .kpi-bar,#view-riego .kpi-bar,#view-ferti .kpi-bar,#view-estanque .kpi-bar,#view-balance .kpi-bar{grid-template-columns:repeat(2,1fr);}
   .kpi-card{padding:10px 12px;border-right:none;border-bottom:1px solid var(--line);}
   .kpi-card:nth-last-child(-n+2){border-bottom:none;}
   .kpi-val{font-size:20px;}
   #view-ferti .kpi-val{font-size:20px;}
-
   /* Franja inferior: 2 columnas */
   .franja,#view-ferti .franja{grid-template-columns:repeat(2,1fr);}
   .franja-card{padding:12px 14px;border-right:none;border-bottom:1px solid var(--line);}
   .franja-val{font-size:22px;}
-
   /* Estanque / Balance: una sola columna, el panel lateral baja debajo del gráfico */
   .est-grid{grid-template-columns:1fr;}
   .est-chart-box{height:260px;}
-
   /* Formularios: 1 columna para inputs más grandes y fáciles de tocar */
   .confirm-grid{grid-template-columns:1fr;}
   .d-grid2{grid-template-columns:1fr;}
-
   .drawer,#fdrawer{width:100vw;}
 }
 @media(max-width:480px){
@@ -473,19 +466,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2;}
 .eq-op-btn{border:none;background:var(--line2);width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center;font-size:14px;transition:background .15s,color .15s;flex-shrink:0;}
 .eq-op-btn:hover{background:var(--line);color:var(--ink2);}
-
-
 /* ===== INTERFAZ MÓVIL INDEPENDIENTE ===== */
 .mobile-dashboard{display:none;}
-
 @media(max-width:820px){
   html,body{width:100%;height:100%;overflow:hidden!important;background:#F4F7F5;}
   body{overscroll-behavior-y:none;}
   .app{height:100dvh!important;min-height:100dvh;width:100%;overflow:hidden!important;}
-
   /* La interfaz de escritorio queda montada, pero no visible. */
   .hdr,.tabs,.views{display:none!important;}
-
   .mobile-dashboard{
     display:flex;
     flex-direction:column;
@@ -496,7 +484,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     color:var(--ink);
     position:relative;
   }
-
   .m-header{
     flex:none;
     background:#fff;
@@ -518,7 +505,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-user-menu button{width:100%;border:none;background:none;border-radius:8px;padding:10px 11px;text-align:left;font-family:inherit;font-size:12px;font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:8px;cursor:pointer;}
   .m-user-menu button:active{background:var(--line2);}
   .m-user-menu button.danger{color:var(--red);}
-
   .m-filter-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 38px;gap:8px;align-items:end;}
   .m-field{min-width:0;}
   .m-field label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--subtle);margin:0 0 4px 2px;}
@@ -527,7 +513,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-week-nav button{height:100%;border:none;background:none;color:var(--muted);font-size:19px;cursor:pointer;}
   .m-week-label{text-align:center;font-size:12px;font-weight:800;color:var(--ink2);line-height:1.25;}
   .m-week-label small{display:block;font-size:10px;font-weight:600;color:var(--muted);}
-
   .m-main{
     flex:1;
     min-height:0;
@@ -542,7 +527,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   @keyframes mFade{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
   .m-page-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;letter-spacing:-.4px;margin:2px 1px 10px;}
   .m-page-sub{font-size:11px;color:var(--muted);margin:-6px 1px 12px;line-height:1.4;}
-
   .m-kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:13px;}
   .m-kpi{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow-sm);}
   .m-kpi-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;}
@@ -551,7 +535,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-kpi-value{font-family:'Fraunces',serif;font-size:22px;font-weight:700;line-height:1.05;overflow-wrap:anywhere;}
   .m-kpi-value.sm{font-family:'Inter',sans-serif;font-size:13px;font-weight:800;line-height:1.25;}
   .m-kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3;}
-
   .m-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:800;color:var(--ink);margin:14px 1px 8px;}
   .m-section-title span:last-child{font-size:10px;color:var(--muted);font-weight:600;}
   .m-day-selector{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:12px;}
@@ -561,7 +544,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-day-btn.today:not(.active){border-color:#BFDBFE;background:#EFF6FF;}
   .m-day-btn.active{border-color:#1E8449;background:#1E8449;color:#fff;box-shadow:0 5px 12px rgba(30,132,73,.2);}
   .m-day-btn.active .num{color:#fff;}
-
   .m-zone-list{display:flex;flex-direction:column;gap:10px;}
   .m-zone-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative;}
   .m-zone-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--zone-color,#2563EB);}
@@ -573,7 +555,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-status.done{background:#DCFCE7;color:#15803D;}
   .m-status.pending{background:#EFF6FF;color:#1D4ED8;}
   .m-status.none{background:#F1F5F9;color:#64748B;}
-
   .m-riego-metrics{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:7px;margin-bottom:11px;}
   .m-metric{background:#F8FAFC;border:1px solid #EEF2F6;border-radius:11px;padding:9px 8px;min-width:0;}
   .m-metric-label{font-size:8.5px;font-weight:800;text-transform:uppercase;color:var(--subtle);letter-spacing:.045em;line-height:1.2;}
@@ -582,7 +563,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-card-action{width:100%;height:39px;border:none;border-radius:10px;background:var(--zone-color,#2563EB);color:#fff;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
   .m-card-action.secondary{background:#F1F5F9;color:var(--ink2);}
   .m-card-action:active{transform:scale(.99);}
-
   .m-ferti-product{border-radius:11px;padding:10px 11px;background:#F0FDF4;border:1px solid #BBF7D0;margin-bottom:9px;}
   .m-ferti-product small{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;color:#15803D;letter-spacing:.05em;margin-bottom:4px;}
   .m-ferti-product strong{display:block;font-size:14px;color:#14532D;line-height:1.3;}
@@ -590,7 +570,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-nutrient{min-width:56px;flex:1;background:#F8FAFC;border-radius:9px;padding:7px;text-align:center;border:1px solid #EEF2F6;}
   .m-nutrient b{display:block;font-size:10px;}
   .m-nutrient span{display:block;font-size:12px;font-weight:800;color:var(--ink2);margin-top:2px;}
-
   .m-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow-sm);min-width:0;overflow:hidden;}
   .m-card-title{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:9px;}
   .m-summary-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2);font-size:12px;}
@@ -599,24 +578,20 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-summary-row strong{text-align:right;color:var(--ink2);}
   .m-chart-box{height:245px;position:relative;width:100%;}
   .m-chart-box.small{height:220px;}
-
   .m-accordion{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;margin-bottom:8px;}
   .m-accordion-btn{width:100%;border:none;background:#fff;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:inherit;font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;}
   .m-accordion-btn i{transition:transform .16s;}
   .m-accordion.open .m-accordion-btn i{transform:rotate(180deg);}
   .m-accordion-body{display:none;padding:0 12px 11px;}
   .m-accordion.open .m-accordion-body{display:block;}
-
   .m-zone-nutrients{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding-top:4px;}
   .m-zone-nutrient{background:#F8FAFC;border:1px solid #EEF2F6;border-radius:9px;padding:8px 5px;text-align:center;min-width:0;}
   .m-zone-nutrient b{display:block;font-size:10px;}
   .m-zone-nutrient span{display:block;font-size:11px;font-weight:800;color:var(--ink2);margin-top:3px;overflow-wrap:anywhere;}
-
   .m-empty{background:#fff;border:1.5px dashed #CBD5E1;border-radius:15px;padding:26px 18px;text-align:center;color:var(--muted);}
   .m-empty i{font-size:27px;color:var(--subtle);display:block;margin-bottom:7px;}
   .m-empty strong{display:block;color:var(--ink2);font-size:13px;margin-bottom:3px;}
   .m-empty span{font-size:11px;line-height:1.4;}
-
   .m-bottom-nav{
     position:fixed;
     left:0;right:0;bottom:0;
@@ -634,7 +609,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-bottom-btn i{font-size:21px;}
   .m-bottom-btn.active{color:#1E8449;background:#F0FDF4;}
   .m-plan-tag{position:absolute;right:5px;top:2px;font-size:6.5px;background:#D97706;color:#fff;padding:1px 4px;border-radius:5px;letter-spacing:.02em;}
-
   .m-plan-lock{display:none;position:fixed;inset:0;z-index:180;background:rgba(15,23,42,.48);align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
   .m-plan-lock.show{display:flex;}
   .m-plan-card{width:min(360px,100%);background:#fff;border-radius:20px;padding:25px 22px;text-align:center;box-shadow:0 22px 60px rgba(15,23,42,.25);}
@@ -646,13 +620,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-plan-actions button{height:41px;border:none;border-radius:10px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;}
   .m-plan-actions .close{background:#F1F5F9;color:var(--ink2);}
   .m-plan-actions .upgrade{background:#1E8449;color:#fff;}
-
   /* Drawers existentes reutilizados como detalle móvil. */
   .drawer,#fdrawer{width:100vw!important;max-width:100vw!important;}
   .db{padding:16px!important;}
   .dcols,.d-grid2,.confirm-grid{grid-template-columns:1fr!important;}
 }
-
 @media(max-width:380px){
   .m-header{padding-left:9px;padding-right:9px;}
   .m-main{padding-left:9px;padding-right:9px;}
@@ -665,8 +637,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-day-selector{gap:3px;}
   .m-day-btn{border-radius:9px;}
 }
-
-
   /* Riego y fertirriego combinados en la misma tarjeta móvil */
   .m-ferti-inline{margin-top:10px;border:1px solid #BBF7D0;background:#F0FDF4;border-radius:12px;padding:10px;}
   .m-ferti-inline-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;}
@@ -687,8 +657,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-ferti-inline.locked .m-ferti-inline-product{color:#78350F;font-size:11px;font-weight:700;}
   .m-ferti-inline.locked .m-ferti-inline-btn{background:#D97706;}
   .m-riego-actions{display:grid;grid-template-columns:1fr;gap:7px;margin-top:10px;}
-
-
 /* ===== VISTA MÓVIL TIPO GOOGLE CALENDAR ===== */
 @media(max-width:820px){
   #mView-riego .m-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:9px;}
@@ -699,7 +667,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   #mView-riego .m-kpi-value{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #mView-riego .m-kpi-value.sm{font-size:9px;line-height:1.15;white-space:normal;}
   #mView-riego .m-kpi-sub{display:none;}
-
   .m-cal-toolbar{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:9px;margin:4px 0 8px;}
   .m-cal-menu-btn,.m-cal-today-btn,.m-cal-arrow{height:38px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink2);font-family:inherit;font-weight:800;cursor:pointer;box-shadow:var(--shadow-sm);}
   .m-cal-menu-btn{width:40px;font-size:19px;display:grid;place-items:center;}
@@ -710,7 +677,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-range-nav{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:7px;margin-bottom:7px;}
   .m-cal-arrow{font-size:18px;display:grid;place-items:center;}
   .m-cal-mode-label{text-align:center;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
-
   .m-calendar-shell{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow-sm);}
   .m-calendar-grid{--m-cal-cols:7;display:grid;grid-template-columns:84px repeat(var(--m-cal-cols),minmax(0,1fr));width:100%;background:#fff;}
   .m-cal-corner,.m-cal-day-head,.m-cal-zone-label,.m-cal-cell{min-width:0;border-right:1px solid #E9EEF4;border-bottom:1px solid #E9EEF4;}
@@ -721,7 +687,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-day-head.today .num{background:#2563EB;color:#fff;}
   .m-cal-day-head.selected{background:#EFF6FF;}
   .m-cal-day-head.selected:not(.today) .num{color:#1D4ED8;}
-
   .m-cal-zone-label{appearance:none;border-top:none;border-left:none;min-height:61px;background:#fff;padding:6px 6px 5px;border-left:3px solid var(--zone-color,#2563EB);text-align:left;cursor:pointer;overflow:hidden;}
   .m-cal-zone-label strong{display:block;font-size:9.5px;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .m-cal-zone-label span{display:block;font-size:7.5px;line-height:1.25;color:var(--muted);margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
@@ -747,7 +712,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:7px 3px 0;font-size:8px;color:var(--muted);}
   .m-cal-legend span{display:flex;align-items:center;gap:4px;}
   .m-cal-legend i{font-size:10px;}
-
   .m-calendar-scrim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:510;opacity:0;pointer-events:none;transition:opacity .2s;}
   .m-calendar-scrim.show{opacity:1;pointer-events:auto;}
   .m-calendar-drawer{position:fixed;left:0;top:0;bottom:0;width:min(305px,82vw);background:#fff;z-index:511;transform:translateX(-102%);transition:transform .24s cubic-bezier(.32,.72,0,1);box-shadow:12px 0 32px rgba(15,23,42,.18);padding:24px 0 calc(18px + env(safe-area-inset-bottom));}
@@ -758,7 +722,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-calendar-view-btn i{font-size:23px;color:#334155;}
   .m-calendar-view-btn.active{background:#DFF2FF;color:#075985;font-weight:800;}
   .m-calendar-view-btn.active i{color:#075985;}
-
   .m-cell-sheet-scrim{position:fixed;inset:0;background:rgba(15,23,42,.44);z-index:520;opacity:0;pointer-events:none;transition:opacity .2s;}
   .m-cell-sheet-scrim.show{opacity:1;pointer-events:auto;}
   .m-cell-sheet{position:fixed;left:0;right:0;bottom:0;z-index:521;background:#fff;border-radius:21px 21px 0 0;box-shadow:0 -18px 45px rgba(15,23,42,.22);transform:translateY(105%);transition:transform .25s cubic-bezier(.32,.72,0,1);max-height:83dvh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);}
@@ -790,9 +753,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-zone-label strong{font-size:8.5px;}
   .m-cal-time{font-size:9px;}
 }
-
-
-
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
 #view-mantenimiento{overflow-y:auto;background:var(--bg);}
 .maint-shell{padding:18px 20px 28px;min-height:100%;}
@@ -845,7 +805,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .maint-type-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#F8FAFC;border:1px solid var(--line);border-radius:10px;padding:4px;}
 .maint-type-btn{border:none;background:transparent;height:34px;border-radius:7px;font-family:inherit;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;}
 .maint-type-btn.active{background:#fff;color:#1E8449;box-shadow:var(--shadow-sm);}
-
 @media(max-width:1024px){.maint-grid{grid-template-columns:1fr 320px;}}
 @media(max-width:820px){
   .m-bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr));}
@@ -872,9 +831,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .maint-segment span{display:none;}
   .maint-segment i{font-size:18px;}
 }
-
-
-
 /* ===== EXPORTACIÓN SELECTIVA Y CONFIRMACIÓN DE REGISTROS ===== */
 .maint-record-saved{display:inline-flex;align-items:center;gap:4px;background:#DCFCE7;color:#15803D;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;white-space:nowrap;}
 .maint-record-kind{display:inline-flex;align-items:center;background:#EFF6FF;color:#1D4ED8;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;white-space:nowrap;}
@@ -902,11 +858,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .maint-export-download{background:#1E8449;color:#fff;}
 .maint-export-download:disabled{opacity:.55;cursor:wait;}
 @media(max-width:520px){.maint-export-grid{grid-template-columns:1fr}.maint-export-box{padding:16px}.maint-toast{left:15px;right:15px;bottom:calc(78px + env(safe-area-inset-bottom));}}
-
 </style>
 </head>
 <body><div class="app">
-
 <div class="scrim" id="scrim" onclick="closeD()"></div>
 <aside class="drawer" id="drawer">
   <div class="dh">
@@ -915,7 +869,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
   <div class="db" id="db"></div>
 </aside>
-
 <div class="modal-ov" id="mcl" onclick="if(event.target===this)closeCl()">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -936,7 +889,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <button class="btn-p" id="bcl" onclick="saveCl()" disabled>Guardar contraseña</button>
   </div>
 </div>
-
 <div class="modal-ov" id="meq" onclick="if(event.target===this)closeEq()">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -951,7 +903,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <button class="btn-p" id="beq" onclick="saveEqOp()">Guardar datos del equipo</button>
   </div>
 </div>
-
 <header class="hdr">
   <div class="logo">
     <span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span><span style="font-size:9px;font-weight:600;color:#94A3B8;margin-left:5px;letter-spacing:0">v21</span>
@@ -1002,11 +953,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <button class="dclose" onclick="closeDF()"><i class="ti ti-x"></i></button></div>
     <div class="db" id="fdb"></div>
   </aside>
-
 <div class="kpi-bar" id="kpib">
   <div class="kpi-card"><div class="loading" style="padding:0;font-size:12px">Cargando...</div></div>
 </div>
-
 <div class="body">
   <div class="cal-zone">
     <div class="cal-scroll">
@@ -1029,7 +978,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
 </div>
 </div><!-- /view-riego -->
-
 <div id="view-estanque" class="view" style="display:none">
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
@@ -1099,7 +1047,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
 </div>
-
 <div id="view-mantenimiento" class="view" style="display:none">
   <div class="maint-shell">
     <div class="maint-hero">
@@ -1147,7 +1094,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <button onclick="mobileChangeWeek(1)" aria-label="Semana siguiente"><i class="ti ti-chevron-right"></i></button>
     </div>
   </header>
-
   <main class="m-main" id="mobileMain">
     <section class="m-view active" id="mView-riego">
       <div class="m-page-title">Riego y Fertirriego</div>
@@ -1169,19 +1115,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div id="mRiegoDateText" hidden></div>
       <div id="mRiegoContent" hidden></div>
     </section>
-
     <section class="m-view" id="mView-estanque">
       <div class="m-page-title">Dinámica de Estanque</div>
       <div class="m-page-sub">Oferta, demanda, cobertura y evolución semanal del almacenamiento del predio.</div>
       <div id="mEstanqueContent"><div class="m-empty"><i class="ti ti-loader-2"></i><strong>Cargando estanque</strong></div></div>
     </section>
-
     <section class="m-view" id="mView-balance">
       <div class="m-page-title">Balance Nutricional</div>
       <div class="m-page-sub">Demanda neta de macro y micronutrientes del predio, con detalle expandible por zona.</div>
       <div id="mBalanceContent"><div class="m-empty"><i class="ti ti-loader-2"></i><strong>Cargando balance</strong></div></div>
     </section>
-
     <section class="m-view" id="mView-mantenimiento">
       <div class="m-page-title">Mantenimiento y Aforos</div>
       <div class="m-page-sub">Registros operacionales compartidos dentro de tu Razón Social.</div>
@@ -1189,14 +1132,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div id="maintenanceMobileMount"></div>
     </section>
   </main>
-
   <nav class="m-bottom-nav" aria-label="Navegación principal">
     <button class="m-bottom-btn active" id="mNav-riego" onclick="mobileSwitchModule('riego')"><i class="ti ti-droplet"></i><span>Riego y Ferti</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-estanque" onclick="mobileSwitchModule('estanque')"><i class="ti ti-droplet-filled"></i><span>Estanque</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-balance" onclick="mobileSwitchModule('balance')"><i class="ti ti-chart-donut-3"></i><span>Balance</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-mantenimiento" onclick="mobileSwitchModule('mantenimiento')"><i class="ti ti-tool"></i><span>Mantención</span><span class="m-plan-tag" hidden></span></button>
   </nav>
-
   <div class="m-plan-lock" id="mPlanLock">
     <div class="m-plan-card">
       <div class="m-plan-icon" id="mPlanIcon"><i class="ti ti-lock"></i></div>
@@ -1206,7 +1147,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="m-plan-actions"><button class="close" onclick="closeMobilePlanLock()">Volver</button><button class="upgrade" onclick="cambiarPlan()">Cambiar plan</button></div>
     </div>
   </div>
-
   <div class="m-calendar-scrim" id="mCalendarScrim" onclick="closeMobileCalendarDrawer()"></div>
   <aside class="m-calendar-drawer" id="mCalendarDrawer" aria-label="Selector de vista">
     <div class="m-calendar-drawer-brand"><b>CRONO</b><b>RIEGO</b> Calendario</div>
@@ -1214,7 +1154,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <button class="m-calendar-view-btn" id="mCalendarView-3day" onclick="mobileSetCalendarView('3day')"><i class="ti ti-columns-3"></i>3 días</button>
     <button class="m-calendar-view-btn active" id="mCalendarView-week" onclick="mobileSetCalendarView('week')"><i class="ti ti-calendar-week"></i>Semana</button>
   </aside>
-
   <div class="m-cell-sheet-scrim" id="mCellSheetScrim" onclick="closeMobileCellSheet()"></div>
   <section class="m-cell-sheet" id="mCellSheet" aria-label="Detalle de programación">
     <div class="m-cell-sheet-handle"></div>
@@ -1222,10 +1161,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="m-cell-sheet-body" id="mCellSheetBody"></div>
   </section>
 </div>
-
 </div><!-- /app -->
-
-
 <div class="maint-export-ov" id="mtExportModal" onclick="if(event.target===this)closeMaintenanceExport()">
   <div class="maint-export-box" role="dialog" aria-modal="true" aria-labelledby="mtExportTitle">
     <div class="maint-export-head">
@@ -1264,13 +1200,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     </div>
   </div>
 </div>
-
 <script>
 const SU='https://lmexinxdmkgexpthuosn.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
 const {createClient}=supabase;
 const db=createClient(SU,SK);
-
 const ZC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626'];
 const ZL=['#EFF6FF','#F0FDF4','#FFF7ED','#F5F3FF','#ECFEFF','#FEF2F2'];
 const ZM=['#BFDBFE','#BBF7D0','#FED7AA','#DDD6FE','#A5F3FC','#FECACA'];
@@ -1278,35 +1212,27 @@ const DS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DSS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const MS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const MSS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-
 let G={rsId:null,userId:null,userEmail:null,zonas:[],scDia:[],ndvi:{},mapas:{},calc:{},off:0};
-
 function hm(h){const f=parseFloat(h);if(!f||f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00min`:`${hh}h ${String(mm).padStart(2,'0')}min`;}
 function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
 function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h);l.setDate(h.getDate()-(dw-1)+(o*7));l.setHours(0,0,0,0);return l;}
 function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
 function fs(d){return d.toISOString().slice(0,10);}
-
 async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='login.html';return null;}return session;}
 async function logout(){await db.auth.signOut();window.location.href='login.html';}
-
 function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
-
 function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
 function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl-sem').textContent=`Sem. ${nw}`;document.getElementById('wlbl-fec').textContent=`${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;}
-
 function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
 function closeCl(){document.getElementById('mcl').classList.remove('open');}
 function tv(id,ico){const i=document.getElementById(id),ic=document.getElementById(ico);i.type=i.type==='password'?'text':'password';ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';}
 function sR(id,ok){const el=document.getElementById(id);if(!el)return;el.className='req-i'+(ok?' ok':'');const ic=el.querySelector('i');ic.className=ok?'ti ti-circle-check':'ti ti-circle-dashed';ic.style.fontSize='10px';}
 function vCl(){const a=document.getElementById('pwa').value,b=document.getElementById('pwb').value;const l=a.length>=8,n=/[0-9]/.test(a),m=/[A-Z]/.test(a),x=a===b&&a.length>0;sR('rlen',l);sR('rnum',n);sR('rmay',m);sR('rmat',x);document.getElementById('bcl').disabled=!(l&&n&&m&&x);}
 async function saveCl(){const pw=document.getElementById('pwa').value;const btn=document.getElementById('bcl'),msg=document.getElementById('cmsg');btn.disabled=true;btn.textContent='Guardando...';const {error}=await db.auth.updateUser({password:pw});msg.style.display='block';if(error){msg.className='m-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar contraseña';}else{msg.className='m-msg ok';msg.textContent='✓ Contraseña actualizada correctamente';btn.textContent='✓ Listo';setTimeout(()=>closeCl(),1600);}}
-
 function openD(t,s,h){document.getElementById('dt').textContent=t;document.getElementById('ds').innerHTML=s;document.getElementById('db').innerHTML=h;document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');}
 function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();closeMaintenanceExport?.();}});
-
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí');return data||[];}
@@ -1315,7 +1241,6 @@ async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
-
 async function init(){
   const ses=await chkAuth();if(!ses)return;
   updW();
@@ -1369,7 +1294,6 @@ async function loadRender(){
   rCal(dias,sc);
   rPanel(dias,sc,ndvi);
 }
-
 function rKpi(dias,sc,sem){
   const hoy=new Date();
   const etoPorDia={},lluvPorDia={};
@@ -1387,13 +1311,11 @@ function rKpi(dias,sc,sem){
   const eMed=etoN?etoSum/etoN:0;
   const temp=eMed>0?Math.round(eMed*5+8):null;
   document.getElementById('ct').textContent=temp||'—';
-
   const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
   const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
   let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
   const ok=cob>=75;
-
   document.getElementById('kpib').innerHTML=`
   <div class="kpi-card">
     <div class="kpi-top">
@@ -1422,7 +1344,6 @@ function rKpi(dias,sc,sem){
   </div>
 `;
 }
-
 function rCal(dias,sc){
   const hoy=new Date();const hS=fs(hoy);
   const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
@@ -1432,14 +1353,12 @@ function rCal(dias,sc){
     (ferMap[e.id_zona][e.fecha_evento]=ferMap[e.id_zona][e.fecha_evento]||[]).push(e);
   });
   const puedeFerti=tieneModulo('ferti');
-
   let thead=`<thead><tr>
     <th class="th-zona" style="padding-bottom:12px">Zona</th>
     ${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px">
       <div class="th-num">${d.getDate()}</div>
       <div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div>
     </th>`;}).join('')}</tr></thead>`;
-
   let tbody='<tbody>';
   G.zonas.forEach((z,zi)=>{
     const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
@@ -1466,20 +1385,16 @@ function rCal(dias,sc){
         const vol=l>0?Math.round(l*ha*10):0;
         const conf=G.confirmR[z.id_zona+'|'+dS];
         const hayRiego=l>0&&hm(t);
-
         const fertiEvs=(ferMap[z.id_zona]&&ferMap[z.id_zona][dS])||[];
         const hayFerti=fertiEvs.length>0;
         const confF=G.confirmF[z.id_zona+'|'+dS];
-
         if(!hayRiego&&!hayFerti){
           return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
         }
-
         const dosisTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_aplicar_kg)||0),0);
         const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg':(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
         const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
         const clickMain=hayRiego?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
-
         let ferRow='';
         if(!puedeFerti){
           ferRow=`<div class="rc-ferti locked" onclick="event.stopPropagation();cambiarPlan()">
@@ -1490,7 +1405,6 @@ function rCal(dias,sc){
             <i class="ti ti-flask-2"></i><span>${fertiTxt}</span>${confF?'<i class="ti ti-check rc-ferti-ok"></i>':''}
           </div>`;
         }
-
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="riego-card${ferRow?' has-ferti':''}" style="background:${cl};border-color:${cm};--zc:${c}" onclick="${clickMain}">
@@ -1518,7 +1432,6 @@ function rCal(dias,sc){
   tbody+='</tbody>';
   document.getElementById('ctbl').innerHTML=thead+tbody;
 }
-
 function rFranja(sc,ndvi){
   let lamTP=0,volTP=0,tTP=0;let diasRiego=new Set();
   G.zonas.forEach(z=>{
@@ -1537,7 +1450,6 @@ function rFranja(sc,ndvi){
   const mm=v=>v>0?v.toFixed(0):'—';
   const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
   const hh=v=>hm(v)||'—';
-
   document.getElementById('franja').innerHTML=`
   <div class="franja-card">
     <div class="franja-top"><div class="franja-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-droplet"></i></div><div class="franja-lbl">Demanda total</div></div>
@@ -1565,11 +1477,9 @@ function rFranja(sc,ndvi){
     <div class="franja-sub">${nP?'NDVI promedio '+nP:'Sin datos NDVI'}</div>
   </div>`;
 }
-
 function rPanel(dias,sc,ndvi){
   const hoy=new Date();const hS=fs(hoy);
   const dm={};sc.forEach(r=>{if(!dm[r.id_zona])dm[r.id_zona]={};dm[r.id_zona][r.fecha]=r;});
-
   const prox=[];
   dias.forEach(d=>{
     const dS=fs(d);if(new Date(dS+'T00:00:00')<=hoy)return;
@@ -1595,7 +1505,6 @@ function rPanel(dias,sc,ndvi){
       </div>`;
     }).join('')}
     ${prox.length===0?'<div style="font-size:11px;color:var(--muted);padding:4px 0">Sin riegos próximos esta semana</div>':''}`;
-
   const als=[];
   const maxE=Math.max(0,...sc.map(r=>parseFloat(r.eto_pronostico_mm_dia)||0));
   if(maxE>6)als.push({cls:'warn',i:'ti-temperature-plus',t:'ETo alta pronosticada',s:`Máximo ${maxE.toFixed(1)} mm/día — aumenta la demanda hídrica`});
@@ -1611,7 +1520,6 @@ function rPanel(dias,sc,ndvi){
   document.getElementById('palertas').innerHTML=`
     <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
     ${als.map(a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`).join('')}`;
-
   const res=G.zonas.map((z,zi)=>{
     let lP=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
     sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
@@ -1645,7 +1553,6 @@ function rPanel(dias,sc,ndvi){
       </tbody>
     </table>`;
 }
-
 function openDia(fecha,znId){
   const r=G.scDia.find(d=>d.fecha===fecha&&d.id_zona===znId);
   const z=G.zonas.find(zz=>zz.id_zona===znId);
@@ -1655,7 +1562,6 @@ function openDia(fecha,znId){
   const zi=G.zonas.indexOf(z);const c=ZC[zi%ZC.length];const cl=ZL[zi%ZL.length];const cm=ZM[zi%ZM.length];
   const ha=parseFloat(z.superficie_ha)||0;
   const pasado=fecha<fs(new Date());
-
   const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
   const tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
   const eP=parseFloat(r.eto_pronostico_mm_dia)||0;
@@ -1663,7 +1569,6 @@ function openDia(fecha,znId){
   const llP=parseFloat(r.lluvia_pronostico_mm_dia)||0;
   const llR=parseFloat(r.lluvia_retenida_pronostico_mm_dia)||0;
   const volP=lP>0?Math.round(lP*ha*10):0;
-
   const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0;
   const tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
   const eE=parseFloat(r.eto_estacion_mm_dia)||0;
@@ -1677,11 +1582,8 @@ function openDia(fecha,znId){
   // y dispara en fechas distintas, igual que ya pasa con el pronóstico).
   const hayDatoEstacion=pasado&&eE>0;
   const hayRiegoEstacion=hayDatoEstacion&&(lE>0||tE>0);
-
   const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''} · ${hayRiegoEstacion?'Estación (real)':(hayDatoEstacion?'Pronóstico · sin riego por estación':'Pronóstico')}`;
-
   const num=(v,dec=2,s='')=>v>0?v.toFixed(dec)+s:'—';
-
   const hero=hayRiegoEstacion?`<div class="hero2">
     <div class="hero-card est">
       <div class="hero-lbl"><i class="ti ti-antenna-bars-5"></i> Riego real (estación)</div>
@@ -1700,7 +1602,6 @@ function openDia(fecha,znId){
       <div class="hero-sub">${lP>0?lP.toFixed(1)+' mm':'—'}${volP>0?' · '+volP.toLocaleString('es-CL')+' m³':''}</div>
     </div>
   </div>${pasado?(hayDatoEstacion?`<div class="note" style="margin-top:10px">Según la estación, esta zona no tuvo riego programado este día (no alcanzó su umbral acumulado) — se muestra el pronóstico como referencia.</div>`:`<div class="note" style="margin-top:10px">Sin datos de estación disponibles aún para este día — se muestra el pronóstico.</div>`):''}`;
-
   const detalle=hayRiegoEstacion?`<div class="d-section">
       <div class="d-section-t">Detalle del riego</div>
       <div class="cmp-hd"><span class="cmp-h est">ESTACIÓN</span><span class="cmp-h pron">PRONÓSTICO</span></div>
@@ -1715,7 +1616,6 @@ function openDia(fecha,znId){
         <div class="d-kpi"><div class="l">Volumen</div><div class="v b">${volP>0?volP.toLocaleString('es-CL')+' m³':'—'}</div></div>
         <div class="d-kpi"><div class="l">Superficie</div><div class="v">${z.superficie_ha||'—'} ha</div></div>
       </div></div>`;
-
   // La meteorología (ETo/ETc/lluvia) se muestra en cuanto la estación tiene
   // dato para el día, SIN depender de si hubo riego — el ETo real de la
   // estación es independiente de si esta zona en particular regó o no.
@@ -1732,13 +1632,10 @@ function openDia(fecha,znId){
       <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="cp">${num(llP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
     </div>`;
-
   const confirmHtml=confirmBoxHtml('riego',znId,fecha,hayRiegoEstacion?tE:tP);
-
   const html=`${hero}${detalle}${meteo}${confirmHtml}`;
   openD(tit,sub,html);
 }
-
 function openZona(znId){
   const z=G.zonas.find(zz=>zz.id_zona===znId);
   if(!z)return;
@@ -1746,7 +1643,6 @@ function openZona(znId){
   const nd=G.ndvi[znId];
   const tit=z.nombre||'Zona';
   const sub=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.especie||''} ${z.variedad||''} · ${z.superficie_ha||'—'} ha`;
-
   const fmtF=v=>{if(!v)return null;const s=String(v).slice(0,10);const p=s.split('-');return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:s;};
   const u=(v,suf='')=>(v!==undefined&&v!==null&&v!=='')?v+suf:null;
   const ficha=[
@@ -1763,13 +1659,11 @@ function openZona(znId){
     ['Densidad aparente',u(z.da,' g/cc')],
     ['Profundidad suelo',u(z.prof,' m')],
   ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
-
   const fichaHtml=`<div class="d-section">
       <div class="d-section-t">Ficha de la zona</div>
       <div class="d-grid2">
         ${ficha.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
       </div></div>`;
-
   const mp=G.mapas[znId];
   // NDVI/Kc: preferir ndvi_registros (trae historial); si no hay, usar el de la imagen (ndvi_imagenes)
   const ndviVal=nd?nd.ndvi:(mp&&mp.ndvi!=null?Number(mp.ndvi):null);
@@ -1784,9 +1678,7 @@ function openZona(znId){
       ${tieneHist?`<div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>`:''}
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
-
   const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
-
   const mapaHtml=hayMapa?`<div class="d-section">
       <div class="d-section-t">Imagen satelital NDVI${mp.fecha?` · ${fmtF(mp.fecha)}`:''}</div>
       <div id="ndvi-map"></div>
@@ -1796,7 +1688,6 @@ function openZona(znId){
         <label>Opacidad <input id="ndvi-op" type="range" min="0" max="100" value="80"></label>
       </div>
     </div>`:'';
-
   const cz=G.calc?G.calc[znId]:null;
   const calcRows=cz?[
     ['Edad del huerto',cz.edad_huerto],
@@ -1816,11 +1707,9 @@ function openZona(znId){
       <div class="d-grid2">
         ${calcRows.map(([k,v])=>`<div class="d-kpi"><div class="l">${k}</div><div class="v" style="font-size:14px">${v}</div></div>`).join('')}
       </div></div>`:'';
-
   openD(tit,sub,fichaHtml+cultivo+mapaHtml+calcHtml);
   if(hayMapa)initNdviMap(mp);
 }
-
 let _ndviMap=null;
 function initNdviMap(mp){
   if(_ndviMap){try{_ndviMap.remove();}catch(e){}_ndviMap=null;}
@@ -1849,13 +1738,10 @@ function initNdviMap(mp){
   };
   setTimeout(arranca,250);
 }
-
-
 // Hoja corporativa CronoRiego: franja de marca, encabezados verdes y filas alternadas
 async function craMakeSheet(wb, sheetName, reportTitle, headers, rows){
   const ws = wb.addWorksheet(sheetName);
   ws.columns = headers.map(h => ({ key:h, width:Math.min(34,Math.max(12,h.length+2)) }));
-
   // Franja corporativa superior, inspirada en el encabezado del dashboard.
   const lastCol = Math.max(1, headers.length);
   ws.mergeCells(1,1,1,lastCol);
@@ -1870,10 +1756,8 @@ async function craMakeSheet(wb, sheetName, reportTitle, headers, rows){
   brandCell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1A5276' } };
   brandCell.alignment = { vertical:'middle', horizontal:'left' };
   ws.getRow(1).height = 34;
-
   // Separación visual entre la marca y la tabla.
   ws.getRow(2).height = 8;
-
   const headerRow = ws.getRow(3);
   headerRow.values = headers;
   headerRow.eachCell(cell=>{
@@ -1882,7 +1766,6 @@ async function craMakeSheet(wb, sheetName, reportTitle, headers, rows){
     cell.alignment = { vertical:'middle' };
   });
   headerRow.height = 20;
-
   rows.forEach((r,i)=>{
     const row = ws.addRow(r);
     if(i % 2 === 1){
@@ -1901,7 +1784,6 @@ async function craDownloadWorkbook(wb, filename){
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-
 async function downloadEstacion(){
   const btn=document.getElementById('dlEst');
   if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
@@ -1937,13 +1819,11 @@ async function downloadEstacion(){
     btn.disabled=false;btn.innerHTML=orig;
   }
 }
-
 /* ===== CONFIRMACION DE EJECUCION (riego + fertirriego) ===== */
 // Cache de defaults por equipo: { operario_default, profesional_default }
 let EQ_OP={operario_default:'',profesional_default:''};
 // Confirmaciones cargadas de la semana visible, indexadas por "id_zona|fecha_recomendada"
 G.confirmR={};G.confirmF={};
-
 async function qEquipoOpDefaults(eqId){
   EQ_OP={operario_default:'',profesional_default:''};
   if(!eqId)return;
@@ -1971,7 +1851,6 @@ async function saveEqOp(){
   if(error){msg.className='m-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar datos del equipo';}
   else{EQ_OP.operario_default=operario;EQ_OP.profesional_default=profesional;msg.className='m-msg ok';msg.textContent='✓ Guardado — se precargará en las próximas confirmaciones';btn.textContent='✓ Listo';setTimeout(()=>{closeEq();btn.disabled=false;btn.textContent='Guardar datos del equipo';},1400);}
 }
-
 async function qConfirmaciones(znIds,tipo,fi,ff){
   const target=tipo==='riego'?'confirmR':'confirmF';
   G[target]={};
@@ -1981,7 +1860,6 @@ async function qConfirmaciones(znIds,tipo,fi,ff){
     (data||[]).forEach(r=>{G[target][r.id_zona+'|'+r.fecha_recomendada]=r;});
   }catch(e){/* tabla puede no existir todavía */}
 }
-
 // Formatea un timestamp ISO de Supabase a "DD-MM-AAAA HH:MM" (hora local del navegador)
 function fmtTS(iso){
   if(!iso)return null;
@@ -1989,7 +1867,6 @@ function fmtTS(iso){
   const p=n=>String(n).padStart(2,'0');
   return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
-
 // Genera el bloque de confirmación para insertar en el drawer de un día (riego o fertirriego)
 function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
   const target=tipo==='riego'?G.confirmR:G.confirmF;
@@ -2114,7 +1991,6 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   if(isMobileView())renderMobileRiego();
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
 }
-
 /* ===== FERTIRRIEGO ===== */
 let TAB='riego';
 let GF={ferti:[],bal:{},loaded:false};
@@ -2127,7 +2003,6 @@ const MICRO=[{k:'Ca',c:'#0891B2',p:'ca'},{k:'Mg',c:'#16A34A',p:'mg'},{k:'S',c:'#
 const numF=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
 function hmF(h){const f=numF(h);if(f<=0)return null;const hh=Math.floor(f),mm=Math.round((f-hh)*60);return mm===60?`${hh+1}h 00`:`${hh}h ${String(mm).padStart(2,'0')}`;}
 function prodShort(p){if(!p)return '—';const m=p.match(/\d{1,2}-\d{1,2}-\d{1,2}/);return m?m[0]:p.split('(')[0].trim().slice(0,16);}
-
 // ===== PLAN / MÓDULOS =====
 // Módulos que el agricultor tiene contratados. Se sobrescribe al cargar con el campo 'modulos' de Supabase.
 // Default = todo visible, para no bloquear a nadie mientras configuras los planes en la base.
@@ -2169,7 +2044,6 @@ function cambiarPlan(){
   // Placeholder — aquí irá el flujo real de cambio de plan / contacto comercial.
   alert('Aquí irá el flujo para cambiar de plan.\n\nMódulos activos: '+MODULOS.join(', '));
 }
-
 function switchTab(t){
   if(t===TAB)return;TAB=t;
   const TABS=['riego','estanque','balance','mantenimiento'];
@@ -2183,25 +2057,50 @@ function switchTab(t){
   if(t==='mantenimiento')openMaintenanceModule();
   aplicarBloqueo(t);
 }
-
 async function loadRenderFerti(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
-  const [{data:fe},{data:ba}]=await Promise.all([
+  const eqId=document.getElementById('se').value;
+  const [{data:fe},{data:ba},{data:fac}]=await Promise.all([
     db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
-    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
+    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds),
+    db.from('sc_registro_facturas_fertilizantes').select('producto,stock_disponible_total_kg').eq('id_equipo',eqId)
   ]);
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
+  GF.stock={};
+  (fac||[]).forEach(r=>{
+    const p=(r.producto||'').trim();if(!p)return;
+    GF.stock[p]=(GF.stock[p]||0)+numF(r.stock_disponible_total_kg);
+  });
   rPanelF();
 }
 function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
-function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
-function covMicro(znId,mi){const b=GF.bal[znId];if(!b)return null;const obj=numF(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return numF(b[mi.p+'_actual_ppm'])/obj*100;}
-
+function covMacro(znId,m){
+  const b=GF.bal[znId];if(!b)return null;
+  const dem=numF(b[m.dem]);const aplicado=accZona(znId,m.acc);
+  if(dem<=0)return {aplicado,dem:0,pct:null};
+  return {aplicado,dem,pct:aplicado/dem*100};
+}
+function covMicro(znId,mi){
+  const b=GF.bal[znId];if(!b)return null;
+  const obj=numF(b[mi.p+'_objetivo_ppm']);const act=numF(b[mi.p+'_actual_ppm']);
+  if(obj<=0)return {aplicado:act,dem:0,pct:null};
+  return {aplicado:act,dem:obj,pct:act/obj*100};
+}
+function fmtKgShort(v){if(v==null)return '—';return v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(v>=10?1:2);}
+function stockAplicadoEquipo(producto){
+  const porZona={};
+  GF.ferti.filter(e=>(e.producto_asignado||'').trim()===producto).forEach(e=>{
+    const v=numF(e.acumulado_producto_kg);
+    if(!(e.id_zona in porZona)||v>porZona[e.id_zona])porZona[e.id_zona]=v;
+  });
+  return Object.values(porZona).reduce((a,b)=>a+b,0);
+}
+function stockTotalProducto(producto){return GF.stock?.[producto]||0;}
 function rKpiF(){
   const dias=semDias(G.off);const fi=fs(dias[0]),ff=fs(dias[6]);
   const evSem=GF.ferti.filter(e=>e.fecha_evento>=fi&&e.fecha_evento<=ff);
   const kg=evSem.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0);
-  let cs=[];G.zonas.forEach(z=>{[...MACRO.map(m=>covMacro(z.id_zona,m)),...MICRO.map(mi=>covMicro(z.id_zona,mi))].forEach(v=>{if(v!=null)cs.push(Math.min(v,100));});});
+  let cs=[];G.zonas.forEach(z=>{[...MACRO.map(m=>covMacro(z.id_zona,m)),...MICRO.map(mi=>covMicro(z.id_zona,mi))].forEach(r=>{if(r&&r.pct!=null)cs.push(Math.min(r.pct,100));});});
   const cov=cs.length?Math.round(cs.reduce((a,b)=>a+b,0)/cs.length):null;
   const hoy=fs(new Date());const fut=GF.ferti.filter(e=>e.fecha_evento>=hoy).sort((a,b)=>a.fecha_evento<b.fecha_evento?-1:1);
   const px=fut[0];const pxZ=px?G.zonas.find(z=>z.id_zona===px.id_zona):null;const pxd=px?new Date(px.fecha_evento+'T00:00:00'):null;
@@ -2215,7 +2114,6 @@ function rKpiF(){
   <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-calendar-due"></i></div>
     <div class="kpi-body"><div class="kpi-lbl">Próxima aplicación</div><div class="kpi-val sm">${pxZ?(pxZ.nombre||px.id_zona):'—'}</div><div class="kpi-sub">${pxd?DSS[pxd.getDay()]+' '+pxd.getDate()+' '+MSS[pxd.getMonth()]:'sin programar'}</div></div></div>`;
 }
-
 function rCalF(){
   const dias=semDias(G.off);const hS=fs(new Date());
   const map={};GF.ferti.forEach(e=>{(map[e.id_zona]=map[e.id_zona]||{})[e.fecha_evento]=map[e.id_zona][e.fecha_evento]||[];map[e.id_zona][e.fecha_evento].push(e);});
@@ -2245,7 +2143,6 @@ function rCalF(){
   });
   document.getElementById('fctbl').innerHTML=th+tb+(GF.ferti.length===0?'<tr><td colspan="8" class="loading" style="color:var(--amber)">No hay aplicaciones para estas zonas. Navega a otra semana (mayo–octubre 2026).</td></tr>':'')+'</tbody>';
 }
-
 function rFranjaF(){
   const demT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+numF(GF.bal[z.id_zona]?.[m.dem]),0));
   const apoT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+accZona(z.id_zona,m.acc),0));
@@ -2258,7 +2155,6 @@ function rFranjaF(){
   <div class="franja-card"><div class="franja-top"><div class="franja-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-progress"></i></div><div class="franja-lbl">Demanda restante</div></div>${ng(restT)}<div class="franja-sub">kg por reponer</div></div>
 `;
 }
-
 function rPanelF(){
   // Próximas preparaciones de solución madre (agrupadas por fecha)
   const hoy=fs(new Date());
@@ -2276,7 +2172,6 @@ function rPanelF(){
     const p=porFecha[f];const d2=new Date(f+'T00:00:00');
     return `<div class="prox-item"><div class="zona-dot" style="background:${ZC[i%ZC.length]}"></div><div class="prox-body"><div class="prox-zona">${DSS[d2.getDay()]} ${d2.getDate()} ${MSS[d2.getMonth()]}</div><div class="prox-prod">${p.vol>0?`Vol. solución madre: ${Math.round(p.vol).toLocaleString('es-CL')} L`:'Sin datos de solución madre'}</div></div><div class="prox-r"><div class="prox-dosis" style="color:${ZC[i%ZC.length]}">${p.dosis>0?p.dosis.toFixed(1)+' kg':'—'}</div><div class="prox-fecha">producto estanque</div></div></div>`;
   }).join(''):'<div style="font-size:11px;color:var(--muted)">Sin preparaciones futuras.</div>');
-
   // Resumen de solución madre (toda la temporada cargada)
   let totVol=0,totDosis=0,nPrep=0;
   GF.ferti.forEach(e=>{const v=numF(e.volumen_sol_madre_l),d=numF(e.dosis_producto_estanque_kg);if(v>0||d>0){totVol+=v;totDosis+=d;nPrep++;}});
@@ -2284,37 +2179,37 @@ function rPanelF(){
     <div class="est-rrow"><span class="est-rk">Preparaciones</span><span class="est-rv">${nPrep}</span></div>
     <div class="est-rrow"><span class="est-rk">Vol. solución madre</span><span class="est-rv">${Math.round(totVol).toLocaleString('es-CL')} L</span></div>
     <div class="est-rrow"><span class="est-rk">Producto en estanque</span><span class="est-rv">${totDosis.toFixed(1)} kg</span></div>`:'<div style="font-size:11px;color:var(--muted)">Sin datos de solución madre. Corre el sync con las columnas nuevas.</div>');
-
-  // Resumen de productos (agrupado por producto)
+  // Stock de productos · equipo (% del stock comprado ya consumido, no % del total aplicado)
   const prod={};
   GF.ferti.forEach(e=>{
     const p=e.producto_asignado||'Sin nombre';
-    if(!prod[p])prod[p]={kg:0,apps:0};
-    prod[p].kg+=numF(e.dosis_aplicar_kg);prod[p].apps++;
+    if(!prod[p])prod[p]={kgAplicado:0,apps:0};
+    if(e.fecha_evento<=hoy){ // solo lo ya administrado, no lo proyectado a futuro
+      prod[p].kgAplicado+=numF(e.dosis_aplicar_kg);
+      prod[p].apps++;
+    }
   });
-  const lista=Object.entries(prod).sort((a,b)=>b[1].kg-a[1].kg);
-  const totKg=lista.reduce((a,[_,v])=>a+v.kg,0);
-  const PC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04','#DB2777'];
-  let ph=`<div class="p-title"><i class="ti ti-package"></i>Resumen de productos</div>`;
+  const lista=Object.entries(prod).sort((a,b)=>(GF.stock?.[b[0]]||0)-(GF.stock?.[a[0]]||0));
+  let ph=`<div class="p-title"><i class="ti ti-package"></i>Stock de productos · equipo</div>`;
   if(lista.length){
-    ph+=lista.map(([p,v],i)=>{
-      const pct=totKg>0?v.kg/totKg*100:0;const c=PC[i%PC.length];
+    ph+=lista.map(([p,v])=>{
+      const total=GF.stock?.[p]||0;
+      const pct=total>0?Math.min(100,Math.round(v.kgAplicado/total*100)):null;
+      const c=pct==null?'#94A3B8':(pct>90?'#DC2626':(pct>70?'#EA580C':'#16A34A'));
       return `<div style="margin-bottom:11px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${prodShort(p)}</span>
-          <span style="font-size:12px;font-weight:700;color:${c}">${v.kg.toFixed(0)} kg</span>
+          <span style="font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px">${prodShort(p)}</span>
+          <span style="font-size:12px;font-weight:700;color:${c}">${v.kgAplicado.toFixed(0)}${total>0?` / ${total.toFixed(0)}`:''} kg</span>
         </div>
-        <div style="height:6px;border-radius:4px;background:var(--line2);overflow:hidden"><div style="height:100%;width:${pct}%;background:${c};border-radius:4px"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">${v.apps} aplicaciones · ${pct.toFixed(0)}% del total</div>
+        <div style="height:6px;border-radius:4px;background:var(--line2);overflow:hidden"><div style="height:100%;width:${pct??0}%;background:${c};border-radius:4px"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${v.apps} aplicaciones${pct!=null?` · ${pct}% del stock consumido`:' · sin factura registrada'}</div>
       </div>`;
     }).join('');
-    ph+=`<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:700;color:var(--ink)">Total temporada</span><span style="font-size:13px;font-weight:700;color:var(--green)">${totKg.toFixed(0)} kg</span></div>`;
   }else{
     ph+='<div style="font-size:11px;color:var(--muted)">Sin productos registrados.</div>';
   }
   document.getElementById('fpprod').innerHTML=ph;
 }
-
 function openEvF(znId,fecha,idx){
   const evs=GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento===fecha);const e=evs[idx]||evs[0];if(!e)return;
   const i=G.zonas.findIndex(z=>z.id_zona===znId);const z=G.zonas[i];const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];const b=GF.bal[znId];
@@ -2323,37 +2218,65 @@ function openEvF(znId,fecha,idx){
   document.getElementById('fds').innerHTML=`${z?.especie||''} ${z?.variedad||''} · ${z?.superficie_ha||'—'} ha · ${DSS[d.getDay()]} ${d.getDate()} ${MSS[d.getMonth()]} ${d.getFullYear()} · ${past?'Aplicado':'Programado'}`;
   const ap=[{k:'N',c:'#2563EB',v:numF(e.n_aplicado_kg)},{k:'P₂O₅',c:'#EA580C',v:numF(e.p2o5_aplicado_kg)},{k:'K₂O',c:'#7C3AED',v:numF(e.k2o_aplicado_kg)}];
   const otros=evs.length>1?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px">+${evs.length-1} producto(s) más este día: ${evs.slice(1).map(x=>prodShort(x.producto_asignado)).join(', ')}</div>`:'';
-  const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,pct:covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,pct:covMicro(znId,mi)}))]:[];
+  const balRows=b?[...MACRO.map(m=>({k:m.k,c:m.c,...covMacro(znId,m)})),...MICRO.slice(0,4).map(mi=>({k:mi.k,c:mi.c,...covMicro(znId,mi)}))]:[];
   const confirmHtml=confirmBoxHtmlFerti(znId,fecha,e);
+  const prodNombre=(e.producto_asignado||'').trim();
+  const stockAplicado=stockAplicadoEquipo(prodNombre);
+  const stockTotal=stockTotalProducto(prodNombre);
+  const stockPct=stockTotal>0?Math.round(Math.min(100,stockAplicado/stockTotal*100)):null;
+  const stockCard=stockTotal>0?`<div class="dcard" style="margin-top:14px">
+    <div class="dcard-t"><i class="ti ti-package"></i>Stock del producto — todo el equipo</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:20px;font-weight:700;color:var(--ink)">${fmtKgShort(stockAplicado)} <span style="font-size:12px;color:var(--muted);font-weight:500">kg aplicados</span></span>
+      <span style="font-size:12px;color:var(--muted)">de ${fmtKgShort(stockTotal)} kg comprados</span>
+    </div>
+    <div class="mini-track" style="height:8px"><div class="mini-fill" style="width:${stockPct}%;background:${stockPct>90?'#DC2626':(stockPct>70?'#EA580C':'#16A34A')}"></div></div>
+    <div style="text-align:right;font-size:12px;font-weight:700;color:var(--ink2);margin-top:4px">${stockPct}% del stock consumido</div>
+  </div>`:(prodNombre?`<div class="note" style="margin-top:14px">Sin factura registrada para "${prodNombre}" — no se puede calcular el stock consumido.</div>`:'');
   document.getElementById('fdb').innerHTML=`${otros}
     <div class="dcols">
       <div class="dcard" style="background:${cl};border-color:${c}33;margin-bottom:0"><div class="dcard-t"><i class="ti ti-flask-2"></i>Producto aplicado</div><div class="dprod" style="color:${c}">${e.producto_asignado||'—'}</div><div class="dprod-sub">${numF(e.dosis_aplicar_kg).toFixed(1)} kg · ${e.semana||''}</div></div>
       <div class="dcard" style="margin-bottom:0"><div class="dcard-t"><i class="ti ti-atom-2"></i>Nutrientes aportados</div><div class="naport">${ap.map(a=>`<div class="naport-c"><div class="naport-k" style="color:${a.c}">${a.k}</div><div class="naport-v">${a.v.toFixed(2)}</div><div class="naport-u">kg</div></div>`).join('')}</div></div>
     </div>
     ${(numF(e.volumen_sol_madre_l)>0||numF(e.dosis_producto_estanque_kg)>0)?`<div class="dcard" style="background:#F0FDF4;border-color:#BBF7D0;margin-top:14px"><div class="dcard-t"><i class="ti ti-flask-2"></i>Preparación de solución madre — corresponde hoy</div><div class="naport"><div class="naport-c"><div class="naport-k" style="color:#15803D">Producto</div><div class="naport-v">${numF(e.dosis_producto_estanque_kg).toFixed(1)}</div><div class="naport-u">kg</div></div><div class="naport-c"><div class="naport-k" style="color:#0891B2">Agua</div><div class="naport-v">${numF(e.volumen_sol_madre_l).toFixed(0)}</div><div class="naport-u">L</div></div></div></div>`:`<div class="note" style="margin-top:14px">No corresponde preparar solución madre este día — se usa la preparada en una aplicación anterior.</div>`}
+    ${stockCard}
     <div class="dcard" style="margin-top:14px"><div class="dcard-t"><i class="ti ti-adjustments"></i>Parámetros de inyección</div>
       <div class="dcols" style="gap:0 24px">
         <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
         <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion!=null?numF(e.lh_inyeccion).toFixed(1):'—'} L/h</span></div></div>
       </div>
       <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
-    ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
-    ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}
+    ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div>
+    <table class="btbl"><thead><tr><th>Nutriente</th><th>Aplicado</th><th>Meta</th><th>Cob.</th></tr></thead><tbody>
+    ${balRows.map(r=>{
+      if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${fmtKgShort(r.aplicado)} kg</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;
+      const pc=Math.round(r.pct);
+      const estado=pc>150?'#DC2626':(pc>100?'#EA580C':(pc>=90?'#16A34A':'#D97706'));
+      const label=pc>999?'>999%':pc+'%';
+      const w=Math.min(pc,100);
+      return `<tr>
+        <td style="color:${r.c};font-weight:600">${r.k}</td>
+        <td class="r">${fmtKgShort(r.aplicado)} kg</td>
+        <td class="r" style="color:var(--muted)">${fmtKgShort(r.dem)} kg</td>
+        <td><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <span style="font-weight:700;color:${estado};min-width:46px;text-align:right">${label}</span>
+          <div class="mini-track" style="width:40px"><div class="mini-fill" style="width:${w}%;background:${estado}"></div></div>
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`:''}
+    ${b&&covMacro(znId,MACRO[1])?.pct>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}
     ${confirmHtml}`;
   document.getElementById('fscrim').classList.add('open');document.getElementById('fdrawer').classList.add('open');
 }
 function closeDF(){document.getElementById('fscrim').classList.remove('open');document.getElementById('fdrawer').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDF();});
-
 /* Fertirriego ahora se carga directo desde loadRender() (misma pestaña que Riego) */
-
-
 /* ===== DINAMICA ESTANQUE ===== */
 let GE={rows:[],loaded:false,prId:null,chart:null,gauge:null};
 const numE=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
 function covCat(p){if(p>200)return{c:'#7C3AED',t:'Excedente',cls:'exc'};if(p>=130)return{c:'#2563EB',t:'Holgado',cls:'hol'};if(p>=100)return{c:'#16A34A',t:'Adecuado',cls:'ade'};if(p>=80)return{c:'#EA580C',t:'Ajustado',cls:'aju'};return{c:'#DC2626',t:'Crítico',cls:'cri'};}
 function wkNum(w){const m=String(w).match(/\d+/);return m?parseInt(m[0]):0;}
-
 async function loadRenderEstanque(){
   const prId=document.getElementById('sp').value;
   if(GE.loaded && GE.prId===prId){return;}
@@ -2373,7 +2296,6 @@ async function loadRenderEstanque(){
   }
   estKpis(rows);estChart(rows);estResumen(rows);estStats(rows);estTabla(rows);
 }
-
 function estFilaActual(rows){
   const wActual='W'+isoW(new Date());
   return rows.find(r=>String(r.numero_semana).toUpperCase()===wActual)||rows[rows.length-1];
@@ -2390,7 +2312,6 @@ function estKpis(rows){
   <div class="kpi-card"><div class="kpi-ico" style="background:#ECFEFF;color:#0891B2"><i class="ti ti-businessplan"></i></div>
     <div><div class="kpi-lbl">Oferta base</div><div class="kpi-val">${fmt(ofertaBase)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Semana ${act.numero_semana}</div></div></div>`;
 }
-
 function estChart(rows){
   const labels=rows.map(r=>r.numero_semana);
   const ofertaBase=rows.map(r=>numE(r.oferta_extraible_base_m3));
@@ -2413,7 +2334,6 @@ function estChart(rows){
         x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16}}}}
   });
 }
-
 function estResumen(rows){
   const act=estFilaActual(rows);
   const aporte=numE(act.aporte_lluvia_semanal_m3);
@@ -2433,7 +2353,6 @@ function estResumen(rows){
     <div class="est-rrow"><span class="est-rk">Balance</span><span class="est-rv" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>`;
 }
-
 function estStats(rows){
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
   const n=rows.length;
@@ -2456,7 +2375,6 @@ function estStats(rows){
     <div class="est-rrow"><span class="est-rk">Balance acumulado</span><span class="est-rv" style="color:${balAcum>=0?'var(--green)':'var(--red)'}">${balAcum>=0?'+':''}${fmt(balAcum)} m³</span></div>
     ${critica?`<div class="est-rrow"><span class="est-rk">Semana más crítica</span><span class="est-rv">${critica.numero_semana} · ${minCob.toFixed(0)}%</span></div>`:''}`;
 }
-
 function estTabla(rows){
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
   let h=`<thead><tr><th>Semana</th><th>Oferta planif. (m³)</th><th>Oferta base (m³)</th><th>Aporte lluvia (m³)</th><th>Demanda 3 años (m³)</th><th>Balance (m³)</th><th>Cobertura</th><th>Estado</th></tr></thead><tbody>`;
@@ -2467,12 +2385,9 @@ function estTabla(rows){
   });
   document.getElementById('estTabla').innerHTML=h+'</tbody>';
 }
-
 /* recargar estanque al cambiar de predio, sin tocar el resto */
 const _onPredioEst=onPredio;
 onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=false;if(TAB==='estanque')await loadRenderEstanque();};
-
-
 /* ===== BALANCE NUTRICIONAL (pestaña) ===== */
 let GB={chart:null,loaded:false};
 const NUT_MACRO=[
@@ -2496,7 +2411,6 @@ function demZona(znId,n){const b=GF.bal[znId];if(!b)return null;const v=b[n.col]
 function demTotal(n){return G.zonas.reduce((a,z)=>{const v=demZona(z.id_zona,n);return a+(v||0);},0);}
 function demZonaTot(znId){return NUT_ALL.reduce((a,n)=>{const v=demZona(znId,n);return a+(v||0);},0);}
 const fmtKg=v=>v==null?'—':(v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(2));
-
 async function loadRenderBalance(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
   document.getElementById('bnkpi').innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando balance...</div></div>';
@@ -2505,7 +2419,6 @@ async function loadRenderBalance(){
   GB.loaded=true;
   bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
 }
-
 function bnKpis(){
   const tN=demTotal(NUT_MACRO[0]),tP=demTotal(NUT_MACRO[1]),tK=demTotal(NUT_MACRO[2]);
   document.getElementById('bnkpi').innerHTML=`
@@ -2518,7 +2431,6 @@ function bnKpis(){
   <div class="kpi-card"><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-map-2"></i></div>
     <div><div class="kpi-lbl">Zonas evaluadas</div><div class="kpi-val" style="color:var(--green)">${G.zonas.length}</div><div class="kpi-sub">con demanda calculada</div></div></div>`;
 }
-
 function bnChartGrupo(nutrientes,canvasId,chartKey){
   const labels=nutrientes.map(n=>n.k);
   const data=nutrientes.map(n=>demTotal(n));
@@ -2542,7 +2454,6 @@ function bnChart(){
   bnChartGrupo(NUT_MACRO,'bnChartMacro','chartMacro');
   bnChartGrupo(NUT_MICRO,'bnChartMicro','chartMicro');
 }
-
 function bnTablaGrupo(nutrientes,tablaId){
   let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+nutrientes.map(n=>`<th>${n.k}</th>`).join('')+`<th>Total zona</th></tr></thead><tbody>`;
   G.zonas.forEach((z,zi)=>{
@@ -2558,7 +2469,6 @@ function bnTabla(){
   bnTablaGrupo(NUT_MACRO,'bnTablaMacro');
   bnTablaGrupo(NUT_MICRO,'bnTablaMicro');
 }
-
 function bnResumen(){
   const tN=demTotal(NUT_MACRO[0]),tP=demTotal(NUT_MACRO[1]),tK=demTotal(NUT_MACRO[2]);
   const totalPredio=NUT_ALL.reduce((a,n)=>a+demTotal(n),0);
@@ -2569,23 +2479,18 @@ function bnResumen(){
     <div class="est-rrow"><span class="est-rk">Demanda total predio</span><span class="est-rv">${fmtKg(totalPredio)} kg</span></div>
     <div class="est-rrow"><span class="est-rk">Zonas evaluadas</span><span class="est-rv">${G.zonas.length}</span></div>`;
 }
-
 function bnSecundarios(){
   const items=[...NUT_MACRO.slice(3),...NUT_MICRO]; // Mg, Ca, S, Zn, Mn, Fe, Cu, B
   const rows=items.map(n=>({k:n.k,c:n.c,v:demTotal(n)})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v);
   document.getElementById('bnAlertas').innerHTML=rows.length?rows.map(r=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${r.c};display:inline-block;margin-right:6px"></div>${r.k}</span><span class="est-rv">${fmtKg(r.v)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin demanda de secundarios/micros.</div>';
 }
-
 function bnZonas(){
   const ranked=G.zonas.map((z,zi)=>({z,zi,tot:demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
   document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv">${fmtKg(x.tot)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
 }
-
 /* recargar balance al cambiar equipo */
 const _onEquipoBal=onEquipo;
 onEquipo=async function(){await _onEquipoBal.apply(this,arguments);GB.loaded=false;if(TAB==='balance'&&G.zonas.length)await loadRenderBalance();};
-
-
 /* ===== Dropdowns custom (mantiene el <select> oculto como fuente de verdad) ===== */
 function initCustomDropdowns(){
   document.querySelectorAll('.sel-wrap').forEach(wrap=>{
@@ -2630,7 +2535,6 @@ document.addEventListener('click',()=>document.querySelectorAll('.cd-menu.open')
    Consume el mismo estado G / GF / GE / GB del escritorio.
    ========================================================= */
 const MOBILE={module:'riego',dayIndex:null,calendarView:'week',estChart:null,bnMacroChart:null,bnMicroChart:null};
-
 function isMobileView(){return window.matchMedia('(max-width: 820px)').matches;}
 function mobileSafeId(v){return String(v??'').replace(/[^a-zA-Z0-9_-]/g,'_');}
 function mobileSelectedDate(){const days=semDias(G.off);const i=Math.max(0,Math.min(6,MOBILE.dayIndex??0));return fs(days[i]);}
@@ -2638,19 +2542,16 @@ function mobileSelectedDay(){const days=semDias(G.off);return days[Math.max(0,Ma
 function mobileEmpty(icon,title,text=''){return `<div class="m-empty"><i class="ti ${icon}"></i><strong>${title}</strong>${text?`<span>${text}</span>`:''}</div>`;}
 function mobileFmtInt(v){const n=parseFloat(v);return isNaN(n)?'—':Math.round(n).toLocaleString('es-CL');}
 function mobileFmt1(v){const n=parseFloat(v);return isNaN(n)?'—':n.toFixed(1);}
-
 function mobileSetDefaultDay(force=false){
   if(!force&&MOBILE.dayIndex!=null&&MOBILE.dayIndex>=0&&MOBILE.dayIndex<=6)return;
   const today=fs(new Date());const idx=semDias(G.off).findIndex(d=>fs(d)===today);
   MOBILE.dayIndex=idx>=0?idx:0;
 }
-
 function mobileUpdateWeekLabel(){
   const el=document.getElementById('mWeekLabel');if(!el)return;
   const days=semDias(G.off),a=days[0],b=days[6];
   el.innerHTML=`Semana ${isoW(a)}<small>${a.getDate()} ${MSS[a.getMonth()]} — ${b.getDate()} ${MSS[b.getMonth()]}</small>`;
 }
-
 function renderMobileDaySelector(){
   mobileSetDefaultDay();
   const days=semDias(G.off);const today=fs(new Date());
@@ -2659,14 +2560,12 @@ function renderMobileDaySelector(){
   const selected=mobileSelectedDay();const label=`${DS[selected.getDay()]} ${selected.getDate()} de ${MS[selected.getMonth()]}`;
   const text=document.getElementById('mRiegoDateText');if(text)text.textContent=label;
 }
-
 function mobileSelectDay(index){
   MOBILE.dayIndex=Math.max(0,Math.min(6,Number(index)||0));
   renderMobileDaySelector();
   renderMobileRiego();
   document.getElementById('mobileMain')?.scrollTo({top:0,behavior:'smooth'});
 }
-
 function mobileSyncSelectors(){
   const sp=document.getElementById('sp'),se=document.getElementById('se');
   const mp=document.getElementById('mPredio'),me=document.getElementById('mEquipo');
@@ -2675,29 +2574,23 @@ function mobileSyncSelectors(){
   const ini=document.getElementById('uini')?.textContent||'—';const mi=document.getElementById('mUserInitial');if(mi)mi.textContent=ini;
   mobileUpdateWeekLabel();renderMobileDaySelector();mobileUpdatePlanNav();
 }
-
 async function mobilePredioChanged(){
   const src=document.getElementById('sp'),mob=document.getElementById('mPredio');if(!src||!mob)return;
   src.value=mob.value;MOBILE.dayIndex=null;GE.loaded=false;GB.loaded=false;GF.loaded=false;
   await onPredio();mobileSyncSelectors();renderMobileAll();
 }
-
 async function mobileEquipoChanged(){
   const src=document.getElementById('se'),mob=document.getElementById('mEquipo');if(!src||!mob)return;
   src.value=mob.value;MOBILE.dayIndex=null;GB.loaded=false;GF.loaded=false;
   await onEquipo();mobileSyncSelectors();renderMobileAll();
 }
-
 function mobileChangeWeek(delta){
   MOBILE.dayIndex=null;chW(delta);mobileSetDefaultDay(true);mobileUpdateWeekLabel();renderMobileDaySelector();
 }
-
 function toggleMobileUser(e){e.stopPropagation();document.getElementById('mUserMenu')?.classList.toggle('open');}
 function closeMobileUser(){document.getElementById('mUserMenu')?.classList.remove('open');}
 function closeMobilePlanLock(){document.getElementById('mPlanLock')?.classList.remove('show');}
-
 document.addEventListener('click',e=>{if(!e.target.closest('.m-header-actions'))closeMobileUser();});
-
 function mobileUpdatePlanNav(){
   ['estanque','balance'].forEach(m=>{
     const btn=document.getElementById('mNav-'+m);if(!btn)return;
@@ -2705,7 +2598,6 @@ function mobileUpdatePlanNav(){
     if(tag){tag.hidden=!locked;tag.textContent=locked?MOD_PLAN[m].toUpperCase():'';}
   });
 }
-
 function mobileShowPlanLock(module){
   const info=MOD_INFO[module],plan=MOD_PLAN[module];
   document.getElementById('mPlanBadge').textContent='PLAN '+plan.toUpperCase();
@@ -2714,7 +2606,6 @@ function mobileShowPlanLock(module){
   document.getElementById('mPlanIcon').innerHTML='<i class="ti '+info.ico+'"></i>';
   document.getElementById('mPlanLock').classList.add('show');
 }
-
 function mobileMirrorDesktopTab(module){
   TAB=module;
   ['riego','estanque','balance','mantenimiento'].forEach(x=>{
@@ -2723,7 +2614,6 @@ function mobileMirrorDesktopTab(module){
   });
   aplicarBloqueo(module);
 }
-
 async function mobileSwitchModule(module){
   if(module!=='riego'&&!tieneModulo(module)){mobileShowPlanLock(module);return;}
   closeMobilePlanLock();MOBILE.module=module;mobileMirrorDesktopTab(module);
@@ -2738,7 +2628,6 @@ async function mobileSwitchModule(module){
   if(module==='mantenimiento')await openMaintenanceModule();
   renderMobileAll();
 }
-
 function mobileRiegoSummary(){
   const sc=G.scDia||[];const etoBy={},rainBy={};
   sc.forEach(r=>{const e=parseFloat(r.eto_pronostico_mm_dia);if(!isNaN(e)&&e>0)(etoBy[r.fecha]=etoBy[r.fecha]||[]).push(e);const ll=parseFloat(r.lluvia_pronostico_mm_dia);if(!isNaN(ll))(rainBy[r.fecha]=rainBy[r.fecha]||[]).push(ll);});
@@ -2749,7 +2638,6 @@ function mobileRiegoSummary(){
   const energy=parseFloat(G.sem?.energia_total_kwh??G.sem?.energia_kwh??0)||0;
   return{eto,vol,coverage,energy,rain:avgSum(rainBy)};
 }
-
 function mobileCalendarViewIndexes(){
   mobileSetDefaultDay();
   if(MOBILE.calendarView==='day')return [MOBILE.dayIndex];
@@ -2866,11 +2754,8 @@ function renderMobileRiego(){
   if(!G.zonas.length){const grid=document.getElementById('mCalendarGrid');if(grid){grid.className='m-calendar-grid day';grid.innerHTML='<div style="grid-column:1/-1;padding:10px">'+mobileEmpty('ti-map-off','Sin zonas','El equipo seleccionado no tiene zonas activas.')+'</div>';}return;}
   renderMobileCalendarGrid();
 }
-
-
 function toggleMobileSection(id){document.getElementById(id)?.classList.toggle('open');}
 function toggleMobileZone(id){toggleMobileSection(id);}
-
 function renderMobileEstanque(){
   const content=document.getElementById('mEstanqueContent');if(!content)return;
   const rows=GE.rows||[];if(!GE.loaded){content.innerHTML=mobileEmpty('ti-loader-2','Cargando estanque','Consultando la dinámica semanal.');return;}
@@ -2892,12 +2777,10 @@ function renderMobileEstanque(){
   if(MOBILE.estChart)MOBILE.estChart.destroy();const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
   MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels:rows.map(r=>r.numero_semana),datasets:[{type:'bar',label:'Demanda',data:rows.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderRadius:3},{type:'line',label:'Oferta base',data:rows.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2},{type:'line',label:'Lluvia',data:rows.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
 }
-
 function mobileNutrientChart(canvasId,nutrients,key){
   if(MOBILE[key])MOBILE[key].destroy();const canvas=document.getElementById(canvasId);if(!canvas)return;
   MOBILE[key]=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:nutrients.map(n=>n.k),datasets:[{data:nutrients.map(n=>demTotal(n)),backgroundColor:nutrients.map(n=>n.c),borderRadius:4,maxBarThickness:35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v+' kg'},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:10,weight:'700'}},grid:{display:false}}}}});
 }
-
 function renderMobileBalance(){
   const content=document.getElementById('mBalanceContent');if(!content)return;
   if(!GB.loaded){content.innerHTML=mobileEmpty('ti-loader-2','Cargando balance','Consultando la demanda nutricional.');return;}
@@ -2912,7 +2795,6 @@ function renderMobileBalance(){
   if(MOBILE.module!=='balance'||!isMobileView())return;
   mobileNutrientChart('mBalanceMacroChart',NUT_MACRO,'bnMacroChart');mobileNutrientChart('mBalanceMicroChart',NUT_MICRO,'bnMicroChart');
 }
-
 function renderMobileAll(){
   if(!isMobileView())return;mobileSyncSelectors();
   if(MOBILE.module==='riego')renderMobileRiego();
@@ -2920,7 +2802,6 @@ function renderMobileAll(){
   else if(MOBILE.module==='balance')renderMobileBalance();
   else if(MOBILE.module==='mantenimiento')mountMaintenance();
 }
-
 /* Wrappers: esperan la carga original y luego actualizan la vista móvil. */
 const _mobileLoadRender=loadRender;
 loadRender=async function(){const result=await _mobileLoadRender.apply(this,arguments);if(isMobileView()){mobileSyncSelectors();renderMobileRiego();}return result;};
@@ -2938,9 +2819,6 @@ const _mobileUpdW=updW;
 updW=function(){const result=_mobileUpdW.apply(this,arguments);if(isMobileView()){mobileUpdateWeekLabel();renderMobileDaySelector();}return result;};
 const _mobileChW=chW;
 chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments);mobileSetDefaultDay(true);if(isMobileView()){mobileUpdateWeekLabel();renderMobileDaySelector();}return result;};
-
-
-
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
 let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false,backendReady:null,lastError:null};
 const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia',confirmaciones:'sc_confirmacion_ejecucion'};
@@ -2979,26 +2857,21 @@ function showMaintenanceToast(text){
   document.getElementById('mtToast')?.remove();
   const el=document.createElement('div');el.id='mtToast';el.className='maint-toast';el.innerHTML='<i class="ti ti-circle-check"></i><span>'+mtEsc(text)+'</span>';document.body.appendChild(el);setTimeout(()=>el.remove(),4200);
 }
-
 const mtIso=id=>{const v=mtVal(id);return v?new Date(v).toISOString():new Date().toISOString();};
 const mtCurrentPredio=()=>document.getElementById('sp')?.value||'';
 const mtCurrentEquipo=()=>document.getElementById('se')?.value||'';
 const mtCurrentPredioName=()=>document.getElementById('sp')?.selectedOptions?.[0]?.textContent||mtCurrentPredio();
 const mtCurrentEquipoName=()=>document.getElementById('se')?.selectedOptions?.[0]?.textContent||mtCurrentEquipo();
-
 function mountMaintenance(){
   const app=document.getElementById('maintenanceApp');if(!app)return;
   const target=isMobileView()?document.getElementById('maintenanceMobileMount'):document.getElementById('maintenanceDesktopMount');
   if(target&&app.parentElement!==target)target.appendChild(app);
 }
-
 async function openMaintenanceModule(){mountMaintenance();renderMaintenance();await loadMaintenanceHistory();}
-
 function setMaintenanceSection(section){
   if(!MT_TABLES[section])return;GM.section=section;renderMaintenance();loadMaintenanceHistory();
 }
 function setMaintenanceSourceType(type){GM.sourceType=type==='Canal'?'Canal':'Pozo';renderMaintenance();}
-
 function maintenanceHeader(){
   return `<div class="maint-toolbar"><div class="maint-segments">
     <button class="maint-segment ${GM.section==='fuente'?'active':''}" onclick="setMaintenanceSection('fuente')"><i class="ti ti-waves"></i><span>Fuente de agua</span></button>
@@ -3010,7 +2883,6 @@ function maintenanceHeader(){
 }
 function mtField(label,id,type='text',opts=''){return `<div class="maint-field"><label for="${id}">${label}</label><input class="maint-input" id="${id}" type="${type}" ${opts}></div>`;}
 function mtTextArea(){return `<div class="maint-field full"><label for="mtObservaciones">Observaciones</label><textarea class="maint-textarea" id="mtObservaciones" maxlength="2000" placeholder="Condición observada, mantenimiento realizado o comentario relevante"></textarea></div>`;}
-
 function maintenanceSourceForm(){
   const pozo=GM.sourceType==='Pozo';
   return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-waves" style="color:#2563EB"></i>Nuevo registro de fuente</div><div class="maint-card-sub">Asocia la lectura al predio activo. El totalizador del pozo no puede disminuir respecto del registro anterior.</div>
@@ -3070,7 +2942,6 @@ function maintenanceZoneForm(){
 function maintenanceActions(){return `<div class="maint-actions"><button class="maint-save" id="mtSaveBtn" type="submit"><i class="ti ti-device-floppy"></i>Guardar registro</button><button class="maint-clear" type="button" onclick="renderMaintenance()">Limpiar</button></div><div class="maint-message" id="mtMessage"></div>`;}
 function todayISODate(){return new Date().toISOString().slice(0,10);}
 const MT_NUTRIENTES_FF=[['N','mtN'],['P₂O₅','mtP2O5'],['K₂O','mtK2O'],['Mg','mtMg'],['Ca','mtCa'],['S','mtS'],['Zn','mtZn'],['Mn','mtMn'],['Fe','mtFe'],['Cu','mtCu'],['B','mtB']];
-
 function maintenanceFacturaFertiForm(){
   return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-receipt" style="color:#16A34A"></i>Nueva factura de fertilizante</div><div class="maint-card-sub">Cada factura carga stock al inventario. El sistema descuenta de aquí lo que ya se aplicó en fertirriego antes de proyectar lo que falta.</div>
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
@@ -3107,7 +2978,6 @@ function updateFFTotales(){
   const elS=document.getElementById('mtStockTotalDisplay');if(elS)elS.textContent=stockTotal>0?`${stockTotal.toLocaleString('es-CL')} ${unidad}`:'—';
   const elV=document.getElementById('mtValorTotalDisplay');if(elV)elV.textContent=valorTotal>0?valorTotal.toLocaleString('es-CL',{maximumFractionDigits:2}):'—';
 }
-
 function maintenanceFacturaEnergiaForm(){
   return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-bolt" style="color:#D97706"></i>Nueva factura de energía</div><div class="maint-card-sub">Consumo eléctrico y/o combustible de la bomba, asociado al predio activo.</div>
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
@@ -3122,7 +2992,6 @@ function maintenanceFacturaEnergiaForm(){
     ${mtTextArea()}
   </div>${maintenanceActions()}</form></div>`;
 }
-
 function renderMaintenance(){
   mountMaintenance();const app=document.getElementById('maintenanceApp');if(!app)return;
   const formBuilders={fuente:maintenanceSourceForm,equipo:maintenanceEquipmentForm,zona:maintenanceZoneForm,factura_ferti:maintenanceFacturaFertiForm,factura_energia:maintenanceFacturaEnergiaForm};
@@ -3133,7 +3002,6 @@ function renderMaintenance(){
   renderMaintenanceHistory();
 }
 function updateMaintenanceDelta(){const a=mtNum('mtPresionAntes'),b=mtNum('mtPresionDespues'),el=document.getElementById('mtDeltaPresion');if(el)el.textContent=a==null||b==null?'— bar':`${(a-b).toFixed(2)} bar`;}
-
 function maintenancePayload(){
   if(GM.section==='factura_ferti'){
     const pesoVolTotal=(mtNum('mtPesoVolEnvase')||0)*(mtNum('mtEnvasesTotales')||0);
@@ -3207,7 +3075,6 @@ async function saveMaintenanceRecord(event){
   }catch(err){maintenanceLogError('guardar registro',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;msg.className='maint-message err';msg.textContent=maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
 }
-
 async function loadMaintenanceHistory(preserveOnError=false){
   if(!G.rsId||!mtCurrentPredio())return;GM.loading=true;renderMaintenanceHistory();
   const table=MT_TABLES[GM.section];const dateField=MT_DATE_FIELD[GM.section]||'fecha_hora';
@@ -3244,7 +3111,6 @@ function openMaintenanceDetail(index){
   const rows=Object.entries(r).filter(([k,v])=>!ignore.has(k)&&v!==null&&v!=='').map(([k,v])=>`<div class="est-rrow"><span class="est-rk">${mtEsc(labels[k]||k)}</span><span class="est-rv">${mtEsc((k==='fecha_hora'||k==='fecha_factura')?mtDate(v):v)}</span></div>`).join('');
   openD('Detalle del registro',`<i class="ti ti-tool"></i> ${mtEsc(maintenanceSummary(r))}`,`<div class="d-section"><div class="d-section-t">Información registrada</div>${rows}</div>`);
 }
-
 function mtExcelDate(v){if(!v)return '';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('es-CL');}
 function mtExportRows(section,rows){
   if(section==='fuente')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Estanque':r.id_estanque,'Tipo Fuente':r.tipo_fuente,'ID Pozo / Canal':r.id_fuente,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Latitud':r.latitud,'Longitud':r.longitud,'CE del agua de la fuente (dS/m)':r.ce_agua_ds_m,'Caudal instantáneo (L/s)':r.caudal_instantaneo_ls,'Totalizador acumulado (m3)':r.totalizador_m3,'Nivel freático (m)':r.nivel_freatico_m,'Nivel Estanque (m)':r.nivel_estanque_m,'Altura limnimétrica (cm)':r.altura_limnimetrica_cm,'Última calibración caudalímetro':r.ultima_calibracion_caudalimetro,'Profesional que recomienda':r.profesional,'Operario':r.operario,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
@@ -3309,24 +3175,18 @@ async function downloadMaintenanceExcel(){
   }catch(err){maintenanceLogError('exportar Excel',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;mtSetExportMessage(maintenanceFriendlyError(err));}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-file-spreadsheet"></i> Descargar Excel';}}
 }
-
 const _maintenanceOnPredio=onPredio;
 onPredio=async function(){const result=await _maintenanceOnPredio.apply(this,arguments);if(TAB==='mantenimiento'||MOBILE?.module==='mantenimiento')await openMaintenanceModule();return result;};
 const _maintenanceOnEquipo=onEquipo;
 onEquipo=async function(){const result=await _maintenanceOnEquipo.apply(this,arguments);if(TAB==='mantenimiento'||MOBILE?.module==='mantenimiento')await openMaintenanceModule();return result;};
-
-
 function mobileSetup(){
   /* El drawer de fertirriego estaba dentro de la vista de escritorio. Se mueve al body para reutilizarlo en móvil. */
   const fscrim=document.getElementById('fscrim'),fdrawer=document.getElementById('fdrawer');if(fscrim)document.body.appendChild(fscrim);if(fdrawer)document.body.appendChild(fdrawer);
   mobileSetDefaultDay(true);mobileUpdateWeekLabel();renderMobileDaySelector();mobileUpdatePlanNav();
   window.matchMedia('(max-width: 820px)').addEventListener?.('change',e=>{mountMaintenance();if(e.matches){mobileSyncSelectors();renderMobileAll();}});
 }
-
 mobileSetup();
-
 initCustomDropdowns();
-
 init();
 </script>
 </body>
