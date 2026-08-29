@@ -1730,14 +1730,10 @@ function openDia(fecha,znId){
   const meteo=hayDatoEstacion?`<div class="d-section">
       <div class="d-section-t">Meteorología — real vs pronóstico</div>
       <div class="cmp-hd"><span class="cmp-h est">ESTACIÓN</span><span class="cmp-h pron">PRONÓSTICO</span></div>
-      <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="ce">${num(eE)}</span><span class="cp">${num(eP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="ce">${num(cE)}</span><span class="cp">${num(cP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="ce">${num(llE)}</span><span class="cp">${num(llP)}</span></div></div>
     </div>`:`<div class="d-section">
       <div class="d-section-t">Meteorología pronosticada</div>
-      <div class="cmp-row"><span class="cmp-k">ETo (mm/día)</span><div class="cmp-vs"><span class="cp">${num(eP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="cp">${num(cP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">Lluvia (mm)</span><div class="cmp-vs"><span class="cp">${num(llP)}</span></div></div>
       <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
     </div>`;
 
@@ -2291,10 +2287,11 @@ function openEvF(znId,fecha,idx){
     ${(numF(e.volumen_sol_madre_l)>0||numF(e.dosis_producto_estanque_kg)>0)?`<div class="dcard" style="background:#F0FDF4;border-color:#BBF7D0;margin-top:14px"><div class="dcard-t"><i class="ti ti-flask-2"></i>Preparación de solución madre — corresponde hoy</div><div class="naport"><div class="naport-c"><div class="naport-k" style="color:#15803D">Producto</div><div class="naport-v">${numF(e.dosis_producto_estanque_kg).toFixed(1)}</div><div class="naport-u">kg</div></div><div class="naport-c"><div class="naport-k" style="color:#0891B2">Agua</div><div class="naport-v">${numF(e.volumen_sol_madre_l).toFixed(0)}</div><div class="naport-u">L</div></div></div></div>`:`<div class="note" style="margin-top:14px">No corresponde preparar solución madre este día — se usa la preparada en una aplicación anterior.</div>`}
     <div class="dcard" style="margin-top:14px"><div class="dcard-t"><i class="ti ti-adjustments"></i>Parámetros de inyección</div>
       <div class="dcols" style="gap:0 24px">
-        <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div></div>
-        <div><div class="iny-row"><span class="iny-k">Concentración</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion!=null?numF(e.lh_inyeccion).toFixed(1):'—'} L/h</span></div></div>
+        <div><div class="iny-row"><span class="iny-k">Tiempo fertirriego</span><span class="iny-v">${hmF(e.tiempo_fertirriego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Tiempo de riego</span><span class="iny-v">${hmF(e.tiempo_riego_hrs)||'—'}</span></div><div class="iny-row"><span class="iny-k">Volumen riego</span><span class="iny-v">${numF(e.volumen_riego_m3).toFixed(1)} m³</span></div><div class="iny-row"><span class="iny-k">Dosis a aplicar</span><span class="iny-v">${numF(e.dosis_aplicar_kg).toFixed(1)} kg</span></div></div>
+        <div><div class="iny-row"><span class="iny-k">Concentración ideal</span><span class="iny-v">${numF(e.concentracion_ideal_grl).toFixed(1)} g/L</span></div><div class="iny-row"><span class="iny-k">Caudal zona</span><span class="iny-v">${numF(e.caudal_zona_m3h).toFixed(2)} m³/h</span></div><div class="iny-row"><span class="iny-k">Inyección</span><span class="iny-v">${e.lh_inyeccion!=null?numF(e.lh_inyeccion).toFixed(1):'—'} L/h</span></div><div class="iny-row"><span class="iny-k">% Inyección</span><span class="iny-v">${e.pct_inyeccion!=null?(numF(e.pct_inyeccion)*100).toFixed(2)+'%':'—'}</span></div></div>
       </div>
-      <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
+      <div class="iny-row" style="border-top:1px solid var(--line2)"><span class="iny-k">Vol. sol. madre a inyectar</span><span class="iny-v">${numF(e.volumen_sol_madre_l)>0?numF(e.volumen_sol_madre_l).toFixed(0)+' L':'—'}</span></div>
+      <div class="iny-row"><span class="iny-k">Ratio inyección</span><span class="iny-v">${e.ratio_inyeccion||'—'}</span></div></div>
     ${b?`<div class="dcard"><div class="dcard-t"><i class="ti ti-chart-bar"></i>Balance nutricional de la zona</div><table class="btbl"><thead><tr><th>Nutriente</th><th>Cob.</th><th>Estado</th></tr></thead><tbody>${balRows.map(r=>{if(r.pct==null)return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r" style="color:var(--subtle)">s/d</td><td></td></tr>`;const pc=Math.round(r.pct);const w=Math.min(pc,100);return `<tr><td style="color:${r.c};font-weight:600">${r.k}</td><td class="r">${pc}%</td><td><div class="mini-track"><div class="mini-fill" style="width:${w}%;background:${r.c}"></div>${pc>100?`<div class="mini-over" style="width:${Math.min(pc-100,30)}%"></div>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`:''}
     ${b&&covMacro(znId,MACRO[1])>120?`<div class="reco"><i class="ti ti-bulb" style="font-size:18px;color:var(--z2);flex-shrink:0"></i><div><div class="reco-t">Recomendación</div><div class="reco-s">El fósforo (P₂O₅) superó el objetivo en esta zona. Considera una fórmula con mayor N y menor P para las próximas aplicaciones.</div></div></div>`:''}
     ${confirmHtml}`;
@@ -2417,8 +2414,11 @@ function estStats(rows){
 
 function estTabla(rows){
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
+  let lastIdx=-1;
+  rows.forEach((r,i)=>{if(numE(r.oferta_planificada_m3)>0||numE(r.oferta_extraible_base_m3)>0)lastIdx=i;});
+  const rowsConDatos=lastIdx>=0?rows.slice(0,lastIdx+1):rows;
   let h=`<thead><tr><th>Semana</th><th>Oferta planif. (m³)</th><th>Oferta base (m³)</th><th>Aporte lluvia (m³)</th><th>Demanda 3 años (m³)</th></tr></thead><tbody>`;
-  rows.slice().reverse().forEach(r=>{
+  rowsConDatos.slice().reverse().forEach(r=>{
     const aporte=numE(r.aporte_lluvia_semanal_m3);
     h+=`<tr><td>${r.numero_semana}</td><td>${fmt(numE(r.oferta_planificada_m3))}</td><td>${fmt(numE(r.oferta_extraible_base_m3))}</td><td style="${aporte>0?'color:var(--green);font-weight:600':''}">${fmt(aporte)}</td><td>${fmt(numE(r.demanda_promedio_3a_m3))}</td></tr>`;
   });
