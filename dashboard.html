@@ -1326,6 +1326,44 @@ async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 
+
+async function qEstanquesNombres(prId){
+  if(!prId)return [];
+  try{
+    const {data,error}=await db.from('v_estanques').select('id_estanque,nombre,tipo').eq('id_predio',prId);
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.warn('[Estanques] No se pudo cargar la lista de nombres — se usa texto libre como respaldo.',e.message||e);
+    return [];
+  }
+}
+
+async function qPozosNombres(prId){
+  if(!prId)return [];
+  try{
+    const {data,error}=await db.from('v_pozos').select('id_pozo,nombre,tipo').eq('id_predio',prId);
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.warn('[Pozos] No se pudo cargar la lista de nombres — se usa texto libre como respaldo.',e.message||e);
+    return [];
+  }
+}
+
+async function qProductosFerti(){
+  if(!G.rsId)return [];
+  try{
+    const {data,error}=await db.from('sc_registro_facturas_fertilizantes').select('producto').eq('id_razon_social',G.rsId);
+    if(error)throw error;
+    const set=new Set((data||[]).map(r=>r.producto).filter(Boolean));
+    return Array.from(set).sort((a,b)=>a.localeCompare(b,'es'));
+  }catch(e){
+    console.warn('[Productos] No se pudo cargar el catálogo de productos.',e.message||e);
+    return [];
+  }
+}
+
 async function init(){
   const ses=await chkAuth();if(!ses)return;
   updW();
@@ -1336,6 +1374,10 @@ async function init(){
   const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
   G.rsId=u?.[0]?.id_rs||null;
   if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
+  qProductosFerti().then(list=>{
+    G.productosFerti=list;
+    if(GM.section==='factura_ferti')renderMaintenance();
+  });
   // Plan del agricultor: leer 'modulos' de razones_sociales (lo gestiona el panel admin). Si falla o no viene, queda el default.
   try{
     const {data:rsRow}=await db.from('razones_sociales').select('modulos').eq('"ID Razón Social (PK)"',G.rsId).limit(1);
@@ -1353,6 +1395,8 @@ async function onPredio(){
   const es=await qE(prId);
   const se=document.getElementById('se');
   se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  G.estanques=await qEstanquesNombres(prId);
+  G.pozos=await qPozosNombres(prId);
   if(es.length)await onEquipo();
 }
 async function onEquipo(){
@@ -2906,7 +2950,7 @@ chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments
 
 
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
-let GM={section:'fuente',sourceType:'Pozo',history:[],loading:false,backendReady:null,lastError:null};
+let GM={section:'fuente',sourceType:'Pozo',estanqueId:null,history:[],loading:false,backendReady:null,lastError:null};
 const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia',confirmaciones:'sc_confirmacion_ejecucion'};
 const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',factura_ferti:'fecha_factura',factura_energia:'fecha_factura',confirmaciones:'fecha_ejecucion'};
 const mtEsc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -2960,6 +3004,9 @@ async function openMaintenanceModule(){mountMaintenance();renderMaintenance();aw
 
 function setMaintenanceSection(section){
   if(!MT_TABLES[section])return;GM.section=section;renderMaintenance();loadMaintenanceHistory();
+  if(section==='factura_ferti'){
+    qProductosFerti().then(list=>{G.productosFerti=list;if(GM.section==='factura_ferti')renderMaintenance();});
+  }
 }
 function setMaintenanceSourceType(type){GM.sourceType=type==='Canal'?'Canal':'Pozo';renderMaintenance();}
 
@@ -2973,6 +3020,39 @@ function maintenanceHeader(){
   </div><div class="maint-context"><strong>${mtEsc(mtCurrentPredioName())}</strong>${mtEsc(mtCurrentEquipoName())}</div></div>`;
 }
 function mtField(label,id,type='text',opts=''){const im=type==='number'&&!/inputmode=/.test(opts)?'inputmode="decimal"':'';return `<div class="maint-field"><label for="${id}">${label}</label><input class="maint-input" id="${id}" type="${type}" ${im} ${opts}></div>`;}
+
+function mtEstanqueField(){
+  if(G.estanques && G.estanques.length){
+    const opts=G.estanques.map(e=>`<option value="${mtEsc(e.id_estanque)}" ${e.id_estanque===GM.estanqueId?'selected':''}>${mtEsc(e.nombre||e.id_estanque)}</option>`).join('');
+    return `<div class="maint-field"><label for="mtEstanque">Estanque</label><select class="maint-select" id="mtEstanque" onchange="onEstanqueSeleccionado()"><option value="">Seleccionar estanque</option>${opts}</select></div>`;
+  }
+  return mtField('ID Estanque','mtEstanque','text','placeholder="Ej. ES-01"');
+}
+
+function onEstanqueSeleccionado(){
+  const id=document.getElementById('mtEstanque')?.value||null;
+  GM.estanqueId=id;
+  const est=(G.estanques||[]).find(e=>e.id_estanque===id);
+  GM.sourceType=est?.tipo||'Pozo';
+  renderMaintenance();
+}
+
+function mtFuenteField(){
+  const tipo=GM.sourceType;
+  if(tipo==='Lluvia')return '';
+  const lista=(G.pozos||[]).filter(p=>!p.tipo||p.tipo===tipo);
+  if(lista.length){
+    const opts=lista.map(p=>`<option value="${mtEsc(p.id_pozo)}">${mtEsc(p.nombre||p.id_pozo)}</option>`).join('');
+    return `<div class="maint-field"><label for="mtFuenteId">${tipo==='Canal'?'Canal':'Pozo'}</label><select class="maint-select" id="mtFuenteId" required><option value="">Seleccionar ${tipo==='Canal'?'canal':'pozo'}</option>${opts}</select></div>`;
+  }
+  return mtField(tipo==='Canal'?'ID Canal':'ID Pozo','mtFuenteId','text',`required placeholder="Ej. ${tipo==='Canal'?'CA-01':'PZ-01'}"`);
+}
+
+function mtProductoField(){
+  const lista=G.productosFerti||[];
+  const datalist=lista.length?`<datalist id="mtProductoList">${lista.map(p=>`<option value="${mtEsc(p)}">`).join('')}</datalist>`:'';
+  return `<div class="maint-field"><label for="mtProducto">Producto</label><input class="maint-input" id="mtProducto" required list="mtProductoList" placeholder="Ej. 15-5-35+2MgO+TE">${datalist}</div>`;
+}
 let _mtMap=null,_mtMarker=null;
 function mtDefaultLatLon(){
   const lat=mtNum('mtLatitud'),lon=mtNum('mtLongitud');
@@ -3035,14 +3115,17 @@ function mtUseLocation(){
 function mtTextArea(){return `<div class="maint-field full"><label for="mtObservaciones">Observaciones</label><textarea class="maint-textarea" id="mtObservaciones" maxlength="2000" placeholder="Condición observada, mantenimiento realizado o comentario relevante"></textarea></div>`;}
 
 function maintenanceSourceForm(){
-  const pozo=GM.sourceType==='Pozo';
-  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-waves" style="color:#2563EB"></i>Nuevo registro de fuente</div><div class="maint-card-sub">Asocia la lectura al predio activo. El totalizador del pozo no puede disminuir respecto del registro anterior.</div>
+  const tipo=GM.sourceType;
+  const sinCatalogoEstanque=!(G.estanques && G.estanques.length);
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-waves" style="color:#2563EB"></i>Nuevo registro de fuente</div><div class="maint-card-sub">Elige el estanque; el tipo de fuente (Pozo, Canal o Lluvia) se detecta automáticamente. El totalizador del pozo no puede disminuir respecto del registro anterior.</div>
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
     <div class="maint-subhead"><i class="ti ti-list-details"></i>Identificación</div>
-    <div class="maint-field full"><label>Tipo de fuente</label><div class="maint-type-switch"><button type="button" class="maint-type-btn ${pozo?'active':''}" onclick="setMaintenanceSourceType('Pozo')">Pozo</button><button type="button" class="maint-type-btn ${!pozo?'active':''}" onclick="setMaintenanceSourceType('Canal')">Canal</button></div></div>
+    ${mtEstanqueField()}
+    ${sinCatalogoEstanque?`<div class="maint-field full"><label>Tipo de fuente</label><div class="maint-type-switch"><button type="button" class="maint-type-btn ${tipo==='Pozo'?'active':''}" onclick="GM.sourceType='Pozo';renderMaintenance()">Pozo</button><button type="button" class="maint-type-btn ${tipo==='Canal'?'active':''}" onclick="GM.sourceType='Canal';renderMaintenance()">Canal</button><button type="button" class="maint-type-btn ${tipo==='Lluvia'?'active':''}" onclick="GM.sourceType='Lluvia';renderMaintenance()">Lluvia</button></div></div>`
+      :`<div class="maint-field"><label>Tipo de fuente</label><div class="maint-delta">${mtEsc(tipo)}</div></div>`}
     ${mtField('Fecha y hora','mtFechaHora','datetime-local',`required value="${mtLocalNow()}"`)}
-    ${mtField('ID Estanque','mtEstanque','text','placeholder="Ej. ES-01"')}
-    ${mtField(pozo?'ID Pozo':'ID Canal','mtFuenteId','text',`required placeholder="Ej. ${pozo?'PZ-01':'CA-01'}"`)}
+    ${mtFuenteField()}
+    ${tipo!=='Lluvia'?`
     <div class="maint-subhead"><i class="ti ti-map-pin"></i>Ubicación</div>
     <div class="maint-field full" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <button type="button" class="maint-geo-btn" id="mtGeoBtn" onclick="mtUseLocation()"><i class="ti ti-current-location"></i>Usar mi ubicación</button>
@@ -3052,16 +3135,17 @@ function maintenanceSourceForm(){
     ${mtField('Longitud','mtLongitud','number','step="0.0000001" placeholder="-70.1234567" oninput="mtSyncMapFromInputs()"')}
     <div class="maint-field full">
       <div class="maint-map" id="mtMap"></div>
-      <div class="maint-map-ctrl"><i class="ti ti-hand-move"></i>Arrastra el pin para ajustar el punto exacto (pozo, canal) sobre la foto satelital.</div>
+      <div class="maint-map-ctrl"><i class="ti ti-hand-move"></i>Arrastra el pin para ajustar el punto exacto sobre la foto satelital.</div>
     </div>
     <div class="maint-subhead"><i class="ti ti-gauge"></i>Lecturas</div>
-    ${pozo?mtField('CE agua fuente (dS/m)','mtCeFuente','number','step="0.001" min="0"'):''}
+    ${tipo==='Pozo'?mtField('CE agua fuente (dS/m)','mtCeFuente','number','step="0.001" min="0"'):''}
     ${mtField('Caudal instantáneo (L/s)','mtCaudal','number','required step="0.01" min="0"')}
-    ${pozo?mtField('Totalizador acumulado (m³)','mtTotalizador','number','required step="1" min="0"'):mtField('Altura limnimétrica (cm)','mtAlturaLim','number','required step="1" min="0"')}
-    ${pozo?mtField('Nivel freático (m)','mtNivelFreatico','number','step="0.01"'):''}
-    ${pozo?mtField('Nivel estanque (m)','mtNivelEstanque','number','step="0.01"'):''}
+    ${tipo==='Pozo'?mtField('Totalizador acumulado (m³)','mtTotalizador','number','required step="1" min="0"'):mtField('Altura limnimétrica (cm)','mtAlturaLim','number','required step="1" min="0"')}
+    ${tipo==='Pozo'?mtField('Nivel freático (m)','mtNivelFreatico','number','step="0.01"'):''}
+    ${tipo==='Pozo'?mtField('Nivel estanque (m)','mtNivelEstanque','number','step="0.01"'):''}
     <div class="maint-subhead"><i class="ti ti-user"></i>Responsables</div>
     ${mtField('Última calibración caudalímetro','mtCalibracionCaudal','date')}
+    `:'<div class="maint-subhead"><i class="ti ti-user"></i>Responsables</div>'}
     ${mtField('Operario (ejecuta)','mtOperario','text','placeholder="Nombre"')}
     ${mtField('Profesional (recomienda)','mtProfesional','text','placeholder="Nombre"')}
     ${mtTextArea()}
@@ -3116,7 +3200,7 @@ function maintenanceFacturaFertiForm(){
     ${mtField('Fecha de la factura','mtFechaFactura','date',`required value="${todayISODate()}"`)}
     ${mtField('ID Equipo','mtEquipoId','text',`readonly value="${mtEsc(mtCurrentEquipo())}"`)}
     ${mtField('N° de factura','mtIdFactura','text','placeholder="Ej. SI-16322"')}
-    ${mtField('Producto','mtProducto','text','required placeholder="Ej. 15-5-35+2MgO+TE"')}
+    ${mtProductoField()}
     ${mtField('Proveedor','mtProveedor','text')}
     <div class="maint-subhead"><i class="ti ti-box"></i>Envase y stock</div>
     ${mtField('Envase','mtEnvase','text','placeholder="Ej. Saco"')}
@@ -3251,13 +3335,13 @@ function maintenancePayload(){
     };
   }
   const common={id_razon_social:G.rsId,id_predio:mtCurrentPredio(),fecha_hora:mtIso('mtFechaHora'),observaciones:mtVal('mtObservaciones')||null,creado_por:G.userId,creado_por_email:G.userEmail};
-  if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
+  if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:GM.sourceType==='Lluvia'?null:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:GM.sourceType==='Lluvia'?null:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
   if(GM.section==='equipo')return {...common,id_equipo:mtCurrentEquipo(),caudal_instantaneo_ls:mtNum('mtCaudalInstantaneo'),caudalimetro_salida_bomba_m3:mtNum('mtCaudalBomba'),presion_antes_filtro_bar:mtNum('mtPresionAntes'),presion_despues_filtro_bar:mtNum('mtPresionDespues'),retrolavado:mtVal('mtRetrolavado')||null,gatillante_automatico:mtVal('mtGatillante')||null,valor_gatillante:mtNum('mtValorGatillante'),duracion_ciclo_retrolavado_min:mtNum('mtDuracionRetro'),ultima_calibracion_inyectores:mtVal('mtCalibracionInyectores')||null,ultima_calibracion_caudalimetros:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
   return {...common,id_equipo:mtCurrentEquipo(),id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero')};
 }
 function maintenanceValidate(p){
   if(!G.rsId||!p.id_predio||!G.userId)return 'No fue posible identificar la Razón Social, el predio o el usuario.';
-  if(GM.section==='fuente'&&(!p.id_fuente||p.caudal_instantaneo_ls==null))return 'Completa el ID de la fuente y el caudal instantáneo.';
+  if(GM.section==='fuente'&&p.tipo_fuente!=='Lluvia'&&(!p.id_fuente||p.caudal_instantaneo_ls==null))return 'Completa el pozo/canal y el caudal instantáneo.';
   if(GM.section==='fuente'&&p.tipo_fuente==='Pozo'&&p.totalizador_m3==null)return 'Ingresa el totalizador acumulado del pozo.';
   if(GM.section==='fuente'&&p.tipo_fuente==='Canal'&&p.altura_limnimetrica_cm==null)return 'Ingresa la altura limnimétrica del canal.';
   if(GM.section==='equipo'&&!p.id_equipo)return 'Selecciona un equipo de riego.';
