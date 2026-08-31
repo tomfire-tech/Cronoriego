@@ -821,6 +821,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .maint-input:focus,.maint-select:focus,.maint-textarea:focus{border-color:#1E8449;box-shadow:0 0 0 3px rgba(30,132,73,.1);}
 .maint-input[readonly]{background:#F8FAFC;color:var(--muted);}
 .maint-help{font-size:9px;color:var(--subtle);line-height:1.35;margin-top:4px;}
+.maint-map{height:260px;border-radius:10px;overflow:hidden;margin-top:9px;border:1px solid var(--line);background:#eef1ef;}
+.maint-map-ctrl{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:11px;color:var(--muted);}
 .maint-conn-banner{display:none;align-items:center;gap:8px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:12px;}
 .maint-draft-banner{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:600;margin-bottom:12px;}
 .maint-draft-banner button{border:none;border-radius:7px;padding:6px 11px;font-family:inherit;font-size:11.5px;font-weight:800;cursor:pointer;background:#1D4ED8;color:#fff;}
@@ -1484,7 +1486,8 @@ function rCal(dias,sc){
         }
 
         const dosisTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_aplicar_kg)||0),0);
-        const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg':(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
+        const volSolMadreTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.volumen_sol_madre_l)||0),0);
+        const fertiTxt=dosisTot>0?dosisTot.toFixed(1)+' kg'+(volSolMadreTot>0?' · '+volSolMadreTot.toFixed(0)+' L':''):(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
         const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
         const clickMain=hayRiego?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
 
@@ -1765,7 +1768,7 @@ function openZona(znId){
     ['Cap. de campo',u(z.cc,' %')],
     ['Punto marchitez',u(z.pmp,' %')],
     ['Densidad aparente',u(z.da,' g/cc')],
-    ['Profundidad suelo',u(z.prof,' m')],
+    ['Profundidad suelo',(z.prof!==undefined&&z.prof!==null&&z.prof!=='')?Math.round(Number(z.prof)*100)+' cm':null],
   ].filter(([_,v])=>v!==undefined&&v!==null&&v!=='');
 
   const fichaHtml=`<div class="d-section">
@@ -1783,7 +1786,7 @@ function openZona(znId){
       <div class="d-section-t">Estado del cultivo</div>
       <div class="d-grid2">
         <div class="d-kpi"><div class="l">NDVI</div><div class="v g">${ndviVal.toFixed(3)}</div></div>
-        ${kcVal!=null?`<div class="d-kpi"><div class="l">Kc ajustado</div><div class="v b">${kcVal.toFixed(2)}</div></div>`:''}
+        ${kcVal!=null?`<div class="d-kpi"><div class="l">Kc</div><div class="v b">${kcVal.toFixed(2)}</div></div>`:''}
       </div>
       ${tieneHist?`<div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
       <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>`:''}
@@ -2970,6 +2973,42 @@ function maintenanceHeader(){
   </div><div class="maint-context"><strong>${mtEsc(mtCurrentPredioName())}</strong>${mtEsc(mtCurrentEquipoName())}</div></div>`;
 }
 function mtField(label,id,type='text',opts=''){const im=type==='number'&&!/inputmode=/.test(opts)?'inputmode="decimal"':'';return `<div class="maint-field"><label for="${id}">${label}</label><input class="maint-input" id="${id}" type="${type}" ${im} ${opts}></div>`;}
+let _mtMap=null,_mtMarker=null;
+function mtDefaultLatLon(){
+  const lat=mtNum('mtLatitud'),lon=mtNum('mtLongitud');
+  if(lat!=null&&lon!=null)return [lat,lon];
+  return [-33.45,-70.6]; // fallback: Santiago, mientras no haya ubicación
+}
+function initMtMap(){
+  const el=document.getElementById('mtMap');
+  if(!el||typeof L==='undefined')return;
+  if(_mtMap){try{_mtMap.remove();}catch(e){}_mtMap=null;_mtMarker=null;}
+  let intentos=0;
+  const arranca=()=>{
+    const cont=document.getElementById('mtMap');
+    if(!cont){if(++intentos<20)setTimeout(arranca,120);return;}
+    if((cont.clientWidth===0||cont.clientHeight===0)&&++intentos<20){setTimeout(arranca,120);return;}
+    const start=mtDefaultLatLon();
+    const map=L.map(cont,{scrollWheelZoom:true,attributionControl:false}).setView(start,17);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
+    const marker=L.marker(start,{draggable:true}).addTo(map);
+    marker.on('dragend',()=>{
+      const p=marker.getLatLng();
+      const latEl=document.getElementById('mtLatitud'),lonEl=document.getElementById('mtLongitud');
+      if(latEl)latEl.value=p.lat.toFixed(7);
+      if(lonEl)lonEl.value=p.lng.toFixed(7);
+    });
+    _mtMap=map;_mtMarker=marker;
+    setTimeout(()=>{try{map.invalidateSize();}catch(e){}},200);
+  };
+  setTimeout(arranca,150);
+}
+function mtSyncMapFromInputs(){
+  const lat=mtNum('mtLatitud'),lon=mtNum('mtLongitud');
+  if(lat==null||lon==null||!_mtMap||!_mtMarker)return;
+  _mtMarker.setLatLng([lat,lon]);
+  _mtMap.panTo([lat,lon]);
+}
 function mtUseLocation(){
   const btn=document.getElementById('mtGeoBtn'),status=document.getElementById('mtGeoStatus');
   if(!btn||!status)return;
@@ -2983,6 +3022,7 @@ function mtUseLocation(){
       status.style.color='var(--green)';
       status.textContent=`Ubicación capturada (precisión ±${Math.round(pos.coords.accuracy)} m)`;
       btn.disabled=false;
+      mtSyncMapFromInputs();
     },
     err=>{
       btn.disabled=false;status.style.color='var(--red)';
@@ -3008,8 +3048,12 @@ function maintenanceSourceForm(){
       <button type="button" class="maint-geo-btn" id="mtGeoBtn" onclick="mtUseLocation()"><i class="ti ti-current-location"></i>Usar mi ubicación</button>
       <span class="maint-geo-status" id="mtGeoStatus"></span>
     </div>
-    ${mtField('Latitud','mtLatitud','number','step="0.0000001" placeholder="-33.1234567"')}
-    ${mtField('Longitud','mtLongitud','number','step="0.0000001" placeholder="-70.1234567"')}
+    ${mtField('Latitud','mtLatitud','number','step="0.0000001" placeholder="-33.1234567" oninput="mtSyncMapFromInputs()"')}
+    ${mtField('Longitud','mtLongitud','number','step="0.0000001" placeholder="-70.1234567" oninput="mtSyncMapFromInputs()"')}
+    <div class="maint-field full">
+      <div class="maint-map" id="mtMap"></div>
+      <div class="maint-map-ctrl"><i class="ti ti-hand-move"></i>Arrastra el pin para ajustar el punto exacto (pozo, canal) sobre la foto satelital.</div>
+    </div>
     <div class="maint-subhead"><i class="ti ti-gauge"></i>Lecturas</div>
     ${pozo?mtField('CE agua fuente (dS/m)','mtCeFuente','number','step="0.001" min="0"'):''}
     ${mtField('Caudal instantáneo (L/s)','mtCaudal','number','required step="0.01" min="0"')}
@@ -3167,6 +3211,7 @@ function renderMaintenance(){
   app.innerHTML=maintenanceHeader()+`<div id="mtConnBanner" class="maint-conn-banner"><i class="ti ti-wifi-off"></i>Sin conexión — sigue completando el formulario, tu borrador se guarda en el teléfono y podrás enviarlo cuando vuelva la señal.</div><div class="maint-grid"><div>${form}</div><div class="maint-card"><div class="maint-history-head"><div class="maint-card-title" style="margin:0"><i class="ti ti-history" style="color:#0891B2"></i>Historial</div><span id="mtHistoryCount">—</span></div><div class="maint-history" id="mtHistory"><div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div></div></div></div>`;
   if(GM.section==='equipo')updateMaintenanceDelta();
   if(GM.section==='factura_ferti')updateFFTotales();
+  if(GM.section==='fuente')initMtMap();
   renderMaintenanceHistory();
   mtConnBannerUpdate();
   mtRestoreDraftIfAny();
@@ -3244,6 +3289,7 @@ async function saveMaintenanceRecord(event){
     if((GM.section==='equipo'||GM.section==='factura_ferti')){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();}
     if(GM.section==='equipo')updateMaintenanceDelta();
     if(GM.section==='factura_ferti')updateFFTotales();
+    if(GM.section==='fuente')initMtMap();
     await loadMaintenanceHistory(true);
   }catch(err){maintenanceLogError('guardar registro',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;msg.className='maint-message err';msg.textContent=maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
