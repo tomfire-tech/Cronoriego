@@ -1091,6 +1091,19 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
           <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Demanda de micronutrientes por zona</div>
           <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMicro"></table></div>
         </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#16A34A"></i>% de avance por zona</div>
+          <div class="est-card-s">Selecciona una zona para ver el % aplicado a la fecha respecto a lo planificado</div>
+          <div class="maint-field" style="max-width:320px;margin-bottom:14px">
+            <label for="bnZonaSel">Zona</label>
+            <select class="maint-select" id="bnZonaSel" onchange="onBnZonaChange()"></select>
+          </div>
+          <div class="est-card-t" style="margin-top:6px"><i class="ti ti-flask-2" style="color:#16A34A"></i>% de avance por producto</div>
+          <div class="est-chart-box" style="height:260px"><canvas id="bnChartProductoPct"></canvas></div>
+          <div class="est-card-t" style="margin-top:18px"><i class="ti ti-atom-2" style="color:#2563EB"></i>% de avance por nutriente</div>
+          <div class="est-card-s">Por ahora solo N, P₂O₅ y K₂O — los micronutrientes aún no tienen acumulado de aplicación sincronizado</div>
+          <div class="est-chart-box" style="height:220px"><canvas id="bnChartNutrientePct"></canvas></div>
+        </div>
       </div>
       <div class="est-side bn-side">
         <div class="est-card">
@@ -1361,6 +1374,24 @@ async function qProductosFerti(){
   }catch(e){
     console.warn('[Productos] No se pudo cargar el catálogo de productos.',e.message||e);
     return [];
+  }
+}
+
+async function qFacturasFertiEquipo(eqId){
+  if(!eqId)return [];
+  try{
+    const {data,error}=await db.from('sc_registro_facturas_fertilizantes')
+      .select('producto,stock_disponible_total_kg,fecha_factura')
+      .eq('id_equipo',eqId).order('fecha_factura',{ascending:true});
+    if(error)throw error;
+    // Para cada producto, nos quedamos con el stock de la FACTURA MÁS
+    // RECIENTE (ya viene acumulado: incluye temporada anterior + compras).
+    const m={};
+    (data||[]).forEach(r=>{ if(r.producto) m[r.producto]=numF(r.stock_disponible_total_kg); });
+    return m; // { "IPE 20-13-20 (...)": 375, ... }
+  }catch(e){
+    console.warn('[Facturas Ferti] No se pudo cargar stock por producto.',e.message||e);
+    return {};
   }
 }
 
@@ -2478,7 +2509,7 @@ onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=fal
 
 
 /* ===== BALANCE NUTRICIONAL (pestaña) ===== */
-let GB={chart:null,loaded:false};
+let GB={chart:null,loaded:false,zonaSel:null,stockProducto:{}};
 const NUT_MACRO=[
   {k:'N',c:'#2563EB',col:'demanda_neta_n_kg_zona'},
   {k:'P₂O₅',c:'#EA580C',col:'demanda_neta_p2o5_kg_zona'},
@@ -2504,10 +2535,18 @@ const fmtKg=v=>v==null?'—':(v>=100?Math.round(v).toLocaleString('es-CL'):v.toF
 async function loadRenderBalance(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
   document.getElementById('bnkpi').innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando balance...</div></div>';
-  const {data:ba}=await db.from('sc_balance_nutricional').select('*').in('id_zona',znIds);
+  const eqId=document.getElementById('se').value;
+  const [{data:ba},stockProducto]=await Promise.all([
+    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds),
+    qFacturasFertiEquipo(eqId)
+  ]);
   GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);
   GB.loaded=true;
+  GB.stockProducto=stockProducto;
   bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
+  renderBnZonaSelector();
+  bnChartProductoPct();
+  bnChartNutrientePct();
 }
 
 function bnKpis(){
@@ -2587,6 +2626,68 @@ function bnSecundarios(){
 function bnZonas(){
   const ranked=G.zonas.map((z,zi)=>({z,zi,tot:demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
   document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv">${fmtKg(x.tot)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
+}
+
+function renderBnZonaSelector(){
+  const sel=document.getElementById('bnZonaSel');
+  if(!sel)return;
+  if(!GB.zonaSel || !G.zonas.find(z=>z.id_zona===GB.zonaSel)){
+    GB.zonaSel=G.zonas[0]?.id_zona||null;
+  }
+  sel.innerHTML=G.zonas.map(z=>`<option value="${z.id_zona}" ${z.id_zona===GB.zonaSel?'selected':''}>${z.nombre||z.id_zona}</option>`).join('');
+}
+
+function onBnZonaChange(){
+  GB.zonaSel=document.getElementById('bnZonaSel')?.value||null;
+  bnChartProductoPct();
+  bnChartNutrientePct();
+}
+
+function bnChartProductoPct(){
+  const znId=GB.zonaSel;
+  const canvas=document.getElementById('bnChartProductoPct');
+  if(!canvas)return;
+  const productos=Array.from(new Set((GF.ferti||[]).filter(e=>e.id_zona===znId).map(e=>e.producto_asignado).filter(Boolean)));
+  const labels=[], data=[], colors=[];
+  const PC=['#16A34A','#2563EB','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04','#DB2777'];
+  productos.forEach((p,i)=>{
+    const total=GB.stockProducto[p];
+    if(!total||total<=0)return;
+    const acumulado=accZona(znId,'acumulado_producto_kg');
+    labels.push(prodShort(p));
+    data.push(Math.round(Math.min(acumulado/total*100,999)*10)/10);
+    colors.push(PC[i%PC.length]);
+  });
+  if(GB.chartProducto)GB.chartProducto.destroy();
+  if(!labels.length){
+    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+  GB.chartProducto=new Chart(canvas.getContext('2d'),{type:'bar',
+    data:{labels,datasets:[{label:'% avance',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aplicado'}}},
+      scales:{y:{beginAtZero:true,max:110,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+  });
+}
+
+function bnChartNutrientePct(){
+  const znId=GB.zonaSel;
+  const canvas=document.getElementById('bnChartNutrientePct');
+  if(!canvas)return;
+  const labels=MACRO.map(m=>m.k);
+  const colors=MACRO.map(m=>m.c);
+  const data=MACRO.map(m=>{
+    const pct=covMacro(znId,m);
+    return pct==null?0:Math.round(Math.min(pct,999)*10)/10;
+  });
+  if(GB.chartNutriente)GB.chartNutriente.destroy();
+  GB.chartNutriente=new Chart(canvas.getContext('2d'),{type:'bar',
+    data:{labels,datasets:[{label:'% avance',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aplicado'}}},
+      scales:{y:{beginAtZero:true,max:110,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+  });
 }
 
 /* recargar balance al cambiar equipo */
