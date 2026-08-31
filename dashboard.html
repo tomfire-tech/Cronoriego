@@ -2643,31 +2643,64 @@ function onBnZonaChange(){
   bnChartNutrientePct();
 }
 
+function bnChartEmptyState(canvas,texto){
+  // Muestra un mensaje centrado dentro del área del canvas en vez de dejarlo en blanco.
+  const box=canvas.closest('.est-chart-box');
+  if(!box)return;
+  let msg=box.querySelector('.bn-chart-empty');
+  if(!msg){
+    msg=document.createElement('div');
+    msg.className='bn-chart-empty';
+    msg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.5';
+    box.style.position='relative';
+    box.appendChild(msg);
+  }
+  msg.textContent=texto;
+  msg.style.display='flex';
+}
+function bnChartHideEmptyState(canvas){
+  const box=canvas.closest('.est-chart-box');
+  const msg=box?.querySelector('.bn-chart-empty');
+  if(msg)msg.style.display='none';
+}
+
 function bnChartProductoPct(){
   const znId=GB.zonaSel;
   const canvas=document.getElementById('bnChartProductoPct');
   if(!canvas)return;
-  const productos=Array.from(new Set((GF.ferti||[]).filter(e=>e.id_zona===znId).map(e=>e.producto_asignado).filter(Boolean)));
-  const labels=[], data=[], colors=[];
+  if(GB.chartProducto){GB.chartProducto.destroy();GB.chartProducto=null;}
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const productosZona=Array.from(new Set((GF.ferti||[]).filter(e=>e.id_zona===znId).map(e=>e.producto_asignado).filter(Boolean)));
+  if(!productosZona.length){
+    bnChartEmptyState(canvas,'Esta zona no tiene aplicaciones de fertirriego registradas todavía.');
+    return;
+  }
+
+  const labels=[], data=[], colors=[], sinStock=[];
   const PC=['#16A34A','#2563EB','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04','#DB2777'];
-  productos.forEach((p,i)=>{
+  productosZona.forEach((p,i)=>{
     const total=GB.stockProducto[p];
-    if(!total||total<=0)return;
+    if(!total||total<=0){sinStock.push(p);return;}
     const acumulado=accZona(znId,'acumulado_producto_kg');
     labels.push(prodShort(p));
     data.push(Math.round(Math.min(acumulado/total*100,999)*10)/10);
     colors.push(PC[i%PC.length]);
   });
-  if(GB.chartProducto)GB.chartProducto.destroy();
+
   if(!labels.length){
-    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+    bnChartEmptyState(canvas,`No encontré factura con stock cargado para "${prodShort(productosZona[0])}". Revisa que el nombre del producto en la factura coincida exactamente con el usado en la recomendación de fertirriego.`);
+    console.warn('[Balance % avance] Productos sin match de stock:',sinStock,'— productos disponibles en facturas:',Object.keys(GB.stockProducto));
     return;
   }
-  GB.chartProducto=new Chart(canvas.getContext('2d'),{type:'bar',
+  bnChartHideEmptyState(canvas);
+
+  const suggestedMax=Math.max(110,...data)*1.08;
+  GB.chartProducto=new Chart(ctx,{type:'bar',
     data:{labels,datasets:[{label:'% avance',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aplicado'}}},
-      scales:{y:{beginAtZero:true,max:110,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+      scales:{y:{beginAtZero:true,suggestedMax,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
   });
 }
 
@@ -2675,18 +2708,28 @@ function bnChartNutrientePct(){
   const znId=GB.zonaSel;
   const canvas=document.getElementById('bnChartNutrientePct');
   if(!canvas)return;
+  if(GB.chartNutriente){GB.chartNutriente.destroy();GB.chartNutriente=null;}
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+
   const labels=MACRO.map(m=>m.k);
   const colors=MACRO.map(m=>m.c);
   const data=MACRO.map(m=>{
     const pct=covMacro(znId,m);
     return pct==null?0:Math.round(Math.min(pct,999)*10)/10;
   });
-  if(GB.chartNutriente)GB.chartNutriente.destroy();
-  GB.chartNutriente=new Chart(canvas.getContext('2d'),{type:'bar',
+
+  if(data.every(v=>v===0)){
+    bnChartEmptyState(canvas,'Sin demanda o acumulado registrado para N, P₂O₅ y K₂O en esta zona.');
+    return;
+  }
+  bnChartHideEmptyState(canvas);
+
+  const suggestedMax=Math.max(110,...data)*1.08;
+  GB.chartNutriente=new Chart(ctx,{type:'bar',
     data:{labels,datasets:[{label:'% avance',data,backgroundColor:colors,borderRadius:5,maxBarThickness:46}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% aplicado'}}},
-      scales:{y:{beginAtZero:true,max:110,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+      scales:{y:{beginAtZero:true,suggestedMax,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
   });
 }
 
