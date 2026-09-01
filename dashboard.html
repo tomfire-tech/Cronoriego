@@ -697,7 +697,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 
 /* ===== VISTA MÓVIL TIPO GOOGLE CALENDAR ===== */
 @media(max-width:820px){
-  #mView-riego .m-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:9px;}
+  #mView-riego .m-kpi-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-bottom:9px;}
   #mView-riego .m-kpi{padding:7px 6px;border-radius:10px;text-align:left;}
   #mView-riego .m-kpi-head{margin-bottom:3px;}
   #mView-riego .m-kpi-icon{display:none;}
@@ -741,6 +741,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-icons{height:12px;display:flex;align-items:center;justify-content:center;gap:2px;font-size:9px;}
   .m-cal-icons .water{color:var(--cell-color,#2563EB);}
   .m-cal-icons .ferti{color:#16A34A;}
+  .m-cal-icons .pending{color:#D97706;font-size:9px;filter:drop-shadow(0 0 2px #fff);}
   .m-cal-empty-mark{font-size:12px;color:#D7DEE7;}
   .m-calendar-grid.day{grid-template-columns:96px minmax(0,1fr);}
   .m-calendar-grid.day .m-cal-zone-label,.m-calendar-grid.day .m-cal-cell{min-height:76px;}
@@ -1181,7 +1182,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <button class="m-cal-arrow" onclick="mobileCalendarMove(1)" aria-label="Periodo siguiente"><i class="ti ti-chevron-right"></i></button>
       </div>
       <div class="m-calendar-shell"><div class="m-calendar-grid week" id="mCalendarGrid"></div></div>
-      <div class="m-cal-legend"><span><i class="ti ti-droplet" style="color:#2563EB"></i>Riego</span><span><i class="ti ti-flask-2" style="color:#16A34A"></i>Fertirriego</span><span><i class="ti ti-circle-check" style="color:#16A34A"></i>Confirmado</span></div>
+      <div class="m-cal-legend"><span><i class="ti ti-droplet" style="color:#2563EB"></i>Riego</span><span><i class="ti ti-flask-2" style="color:#16A34A"></i>Fertirriego</span><span><i class="ti ti-circle-check" style="color:#16A34A"></i>Confirmado</span><span><i class="ti ti-alert-triangle" style="color:#D97706"></i>Pendiente</span></div>
       <div id="mobileDaySelector" hidden></div>
       <div id="mRiegoDateText" hidden></div>
       <div id="mRiegoContent" hidden></div>
@@ -2912,10 +2913,12 @@ function renderMobileCalendarGrid(){
     html+=`<button class="m-cal-zone-label" style="--zone-color:${c}" onclick="mobileOpenZoneDetail('${zn}')"><strong>${z.nombre||z.id_zona}</strong><span>${z.especie||'—'} ${z.variedad||''}<br>${z.superficie_ha||'—'} ha</span></button>`;
     indexes.forEach(i=>{
       const date=fs(days[i]),r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date),l=r?(parseFloat(r.lamina_neta_riego_pronostico_mm)||0):0,t=r?(parseFloat(r.tiempo_de_riego_pronostico_horas)||0):0;
-      const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!r&&(l>0||t>0),hasF=tieneModulo('ferti')&&ferti.length>0,done=!!G.confirmR?.[z.id_zona+'|'+date]||!!G.confirmF?.[z.id_zona+'|'+date];
+      const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!r&&(l>0||t>0),hasF=tieneModulo('ferti')&&ferti.length>0;
+      const confR=!hasR||!!G.confirmR?.[z.id_zona+'|'+date],confF=!hasF||!!G.confirmF?.[z.id_zona+'|'+date];
+      const done=(hasR||hasF)&&confR&&confF,pendingR=hasR&&date<=today&&!confR;
       const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
       const main=hasR?mobileCompactTime(t):hasF?'Ferti':'',sub=hasR&&l>0?`${Math.round(l)}mm`:hasF?`${ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}kg`:'';
-      html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}</span></button>`;
+      html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
     });
   });
   grid.innerHTML=html;
@@ -2923,11 +2926,15 @@ function renderMobileCalendarGrid(){
 function renderMobileRiego(){
   const kpi=document.getElementById('mRiegoKpis');if(!kpi)return;
   const s=mobileRiegoSummary(),ok=s.coverage>=75;
+  const {total:confTotal,hechos:confHechos}=confirmacionesHoy();
+  const confAllDone=confTotal>0&&confHechos===confTotal;
+  const confColor=confTotal===0?'#64748B':(confAllDone?'#15803D':'#D97706');
   kpi.innerHTML=`
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Estado</span></div><div class="m-kpi-value sm" style="color:${ok?'#15803D':'#D97706'}">${ok?'Disponible':'Revisar'}</div><div class="m-kpi-sub">${s.coverage}%</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Volumen</span></div><div class="m-kpi-value" style="color:#2563EB">${s.vol>0?mobileFmtInt(s.vol):'—'}</div><div class="m-kpi-sub">m³</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">ETo</span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>`;
+    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>
+    <div class="m-kpi" title="Confirmaciones de riego y fertirriego para hoy"><div class="m-kpi-head"><span class="m-kpi-label">Conf. hoy</span></div><div class="m-kpi-value" style="color:${confColor}">${confTotal>0?`${confHechos}/${confTotal}`:'—'}</div><div class="m-kpi-sub">${confTotal===0?'Sin tareas':(confAllDone?'Todo listo':'Pendientes')}</div></div>`;
   if(!G.zonas.length){const grid=document.getElementById('mCalendarGrid');if(grid){grid.className='m-calendar-grid day';grid.innerHTML='<div style="grid-column:1/-1;padding:10px">'+mobileEmpty('ti-map-off','Sin zonas','El equipo seleccionado no tiene zonas activas.')+'</div>';}return;}
   renderMobileCalendarGrid();
 }
