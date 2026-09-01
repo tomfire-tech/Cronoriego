@@ -323,7 +323,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .rc-ferti-ok{margin-left:auto;color:var(--green);}
 .rc-ferti.locked{color:var(--subtle);border-color:var(--line);background:rgba(255,255,255,.5);filter:blur(1px);opacity:.75;}
 .rc-ferti.locked:hover{filter:blur(0px);opacity:1;}
-#view-riego .kpi-bar{grid-template-columns:1.5fr 1fr 1fr 1fr;}
+#view-riego .kpi-bar{grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;}
 #view-ferti .franja{grid-template-columns:repeat(3,1fr);}
 #view-ferti .kpi-bar{grid-template-columns:repeat(4,1fr);}
 #view-ferti .kpi-card{flex-direction:row;align-items:center;gap:13px;padding:14px 18px;}
@@ -470,6 +470,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .confirm-msg.ok{display:block;background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
 .confirm-msg.err{display:block;background:#FEF2F2;color:var(--red);border-color:#FECACA;}
 .card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2;}
+.rc-noconfirm{display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;color:#B45309;background:#FFFBEB;border:1px solid #FDE68A;border-radius:5px;padding:2px 6px;margin-top:3px;align-self:flex-start;white-space:nowrap;}
+.rc-noconfirm i{font-size:10px;}
+@keyframes confirmPulse{0%{transform:scale(1)}30%{transform:scale(1.015)}100%{transform:scale(1)}}
+.confirm-box.celebrate{animation:confirmPulse .4s ease;}
+.confirm-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);z-index:520;max-width:min(380px,calc(100vw - 30px));background:#14532D;color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 18px 45px rgba(15,23,42,.28);font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .25s ease,transform .25s ease;pointer-events:none;}
+.confirm-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.confirm-toast i{font-size:19px;color:#4ADE80;flex-shrink:0;}
 .eq-op-btn{border:none;background:var(--line2);width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center;font-size:14px;transition:background .15s,color .15s;flex-shrink:0;}
 .eq-op-btn:hover{background:var(--line);color:var(--ink2);}
 
@@ -1297,6 +1304,15 @@ function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h
 function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
 function fs(d){return d.toISOString().slice(0,10);}
 
+function showConfirmToast(text){
+  let el=document.getElementById('confirmToast');
+  if(!el){el=document.createElement('div');el.id='confirmToast';el.className='confirm-toast';document.body.appendChild(el);}
+  el.innerHTML='<i class="ti ti-circle-check"></i><span>'+text+'</span>';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
 async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='login.html';return null;}return session;}
 async function logout(){await db.auth.signOut();window.location.href='login.html';}
 
@@ -1425,6 +1441,22 @@ async function loadRender(){
   rPanel(dias,sc,ndvi);
 }
 
+function confirmacionesHoy(){
+  const hS=fs(new Date());
+  let total=0,hechos=0;
+  G.zonas.forEach(z=>{
+    const rHoy=(G.scDia||[]).find(r=>r.id_zona===z.id_zona&&r.fecha===hS);
+    const lP=rHoy?parseFloat(rHoy.lamina_neta_riego_pronostico_mm)||0:0;
+    const tP=rHoy?parseFloat(rHoy.tiempo_de_riego_pronostico_horas)||0:0;
+    if(lP>0||tP>0){total++;if(G.confirmR[z.id_zona+'|'+hS])hechos++;}
+    if(tieneModulo('ferti')){
+      const fHoy=(GF.ferti||[]).filter(e=>e.id_zona===z.id_zona&&e.fecha_evento===hS);
+      if(fHoy.length){total++;if(G.confirmF[z.id_zona+'|'+hS])hechos++;}
+    }
+  });
+  return{total,hechos};
+}
+
 function rKpi(dias,sc,sem){
   const hoy=new Date();
   const etoPorDia={},lluvPorDia={};
@@ -1448,6 +1480,11 @@ function rKpi(dias,sc,sem){
   let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
   const ok=cob>=75;
+  const {total:confTotal,hechos:confHechos}=confirmacionesHoy();
+  const confAllDone=confTotal>0&&confHechos===confTotal;
+  const confColor=confTotal===0?'':(confAllDone?'green':'amber');
+  const confIco=confTotal===0?'ti-clipboard-list':(confAllDone?'ti-circle-check':'ti-clipboard-list');
+  const confSub=confTotal===0?'Sin tareas para hoy':(confAllDone?'¡Todo confirmado!':'Riegos y fertirriegos pendientes');
 
   document.getElementById('kpib').innerHTML=`
   <div class="kpi-card">
@@ -1474,6 +1511,11 @@ function rKpi(dias,sc,sem){
     <div class="kpi-top"><div class="kpi-lbl">Energía estimada</div><div class="kpi-ico" style="background:#F5F3FF;color:var(--purple,#7C3AED)"><i class="ti ti-bolt"></i></div></div>
     <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
     <div class="kpi-sub">kWh esta semana</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-top"><div class="kpi-lbl">Confirmaciones hoy</div><div class="kpi-ico" style="background:${confAllDone?'#F0FDF4':'#FFFBEB'};color:${confAllDone?'var(--green)':'var(--amber)'}"><i class="ti ${confIco}"></i></div></div>
+    <div class="kpi-val ${confColor}">${confTotal>0?confHechos:'—'}${confTotal>0?`<span style="font-size:15px;color:var(--muted)"> / ${confTotal}</span>`:''}</div>
+    <div class="kpi-sub">${confSub}</div>
   </div>
 `;
 }
@@ -1560,6 +1602,7 @@ function rCal(dias,sc){
                   <div class="rc-mm">${l.toFixed(0)} mm</div>
                   ${vol>0?`<div class="rc-m3">${vol.toLocaleString('es-CL')} m³</div>`:''}
                   ${hayEstacion?`<span class="rc-badge" style="background:#F0FDF4;color:#15803D;margin-top:2px"><i class="ti ti-antenna-bars-5" style="font-size:9px"></i>Real</span>`:''}
+                  ${(!conf&&(pasado||eh))?`<div class="rc-noconfirm"><i class="ti ti-alert-triangle"></i>Riego sin confirmación</div>`:''}
                 </div>`:`<div class="rc-top">
                   <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>
                   <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
@@ -2111,7 +2154,15 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   const tsEl=document.getElementById(uid+'_ts');
   if(tsEl)tsEl.textContent=tsTxt;
   else document.querySelector('#'+uid+'_box .confirm-chk-row')?.insertAdjacentHTML('afterend',`<div id="${uid}_ts" style="font-size:10.5px;color:var(--muted);margin:-7px 0 11px 27px">${tsTxt}</div>`);
-  // refresca las tarjetas del calendario combinado para mostrar el check (riego y fertirriego viven en la misma tabla ahora)
+  // celebración: solo cuando queda marcado como ejecutado (no al desmarcar)
+  if(confirmado){
+    const zNombre=(G.zonas.find(zz=>zz.id_zona===znId)||{}).nombre||'La zona';
+    showConfirmToast(`¡Buen trabajo! ${zNombre} quedó al día en ${tipo==='fertirriego'?'fertirriego':'riego'}.`);
+    const boxEl=document.getElementById(uid+'_box');
+    if(boxEl){boxEl.classList.add('celebrate');setTimeout(()=>boxEl.classList.remove('celebrate'),450);}
+  }
+  // refresca KPI y calendario para reflejar el nuevo conteo de confirmaciones
+  rKpi(semDias(G.off),G.scDia,G.sem);
   rCal(semDias(G.off),G.scDia);
   if(isMobileView())renderMobileRiego();
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
