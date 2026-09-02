@@ -1094,8 +1094,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="est-grid est-grid-bn">
       <div class="est-col">
         <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Demanda de macronutrientes</div>
-          <div class="est-card-s">Demanda neta total del predio por nutriente — N, P₂O₅, K₂O, Mg, Ca, S (Kg)</div>
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Avance de fertilización — N, P₂O₅, K₂O</div>
+          <div class="est-card-s">Barra oscura = % aplicado · barra clara = % de demanda restante. Base: acumulado en "DASHBOARD - RECOMENDACIONES FERTIRIEGO" sobre la demanda neta de N, P₂O₅ y K₂O</div>
           <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
         </div>
         <div class="est-card">
@@ -1110,11 +1110,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Demanda de micronutrientes por zona</div>
           <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMicro"></table></div>
-        </div>
-        <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#16A34A"></i>% Suministrado vs. Demanda</div>
-          <div class="est-card-s">N, P₂O₅ y K₂O — acumulado aplicado (columnas AC/AD/AE de "DASHBOARD - RECOMENDACIONES FERTIRIEGO", último registro por zona) respecto a la demanda neta</div>
-          <div class="est-chart-box" style="height:260px"><canvas id="bnChartPct"></canvas></div>
         </div>
       </div>
       <div class="est-side bn-side">
@@ -2642,7 +2637,6 @@ async function loadRenderBalance(){
   if(!GB.zonaFiltro || !GB.zonasPredio.find(z=>z.id_zona===GB.zonaFiltro))GB.zonaFiltro=null;
   renderBnScope();
   bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
-  bnChartPct();
 }
 
 function renderBnScope(){
@@ -2665,7 +2659,6 @@ function onBnZonaFiltroChange(){
   GB.zonaFiltro=document.getElementById('bnZonaFiltro')?.value||null;
   renderBnScope();
   bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
-  bnChartPct();
 }
 
 function bnKpis(){
@@ -2701,7 +2694,7 @@ function bnChartGrupo(nutrientes,canvasId,chartKey){
   });
 }
 function bnChart(){
-  bnChartGrupo(NUT_MACRO,'bnChartMacro','chartMacro');
+  bnChartMacroPct();
   bnChartGrupo(NUT_MICRO,'bnChartMicro','chartMicro');
 }
 
@@ -2769,23 +2762,28 @@ function bnChartHideEmptyState(canvas){
   if(msg)msg.style.display='none';
 }
 
-function bnChartPct(){
-  const canvas=document.getElementById('bnChartPct');
+function bnChartMacroPct(){
+  const canvas=document.getElementById('bnChartMacro');
   if(!canvas)return;
-  if(GB.chartPct){GB.chartPct.destroy();GB.chartPct=null;}
+  if(GB.chartMacro){GB.chartMacro.destroy();GB.chartMacro=null;}
   const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
 
+  // Oscuro = color base del nutriente (aplicado) · Claro = versión pastel (demanda restante)
   const items=[
-    {k:'N',c:'#2563EB',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
-    {k:'P₂O₅',c:'#EA580C',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
-    {k:'K₂O',c:'#7C3AED',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
   ];
-  const labels=[],data=[],colors=[];
+  const labels=[],aplicado=[],restante=[],darkColors=[],lightColors=[],rawPct=[];
   items.forEach(it=>{
     if(!it.dem||it.dem<=0)return;
+    const pct=Math.round(it.sum/it.dem*1000)/10;
     labels.push(it.k);
-    data.push(Math.round(Math.min(it.sum/it.dem*100,999)*10)/10);
-    colors.push(it.c);
+    aplicado.push(pct);
+    restante.push(Math.max(100-pct,0));
+    darkColors.push(it.dark);
+    lightColors.push(it.light);
+    rawPct.push(pct);
   });
 
   if(!labels.length){
@@ -2793,12 +2791,26 @@ function bnChartPct(){
     return;
   }
   bnChartHideEmptyState(canvas);
-  const suggestedMax=Math.max(110,...data)*1.08;
-  GB.chartPct=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'% suministrado',data,backgroundColor:colors,borderRadius:5,maxBarThickness:60}]},
+  const suggestedMax=Math.max(110,...aplicado)*1.08;
+  GB.chartMacro=new Chart(ctx,{
+    data:{labels,datasets:[
+      {type:'bar',label:'Aplicado',data:aplicado,backgroundColor:darkColors,stack:'s',borderRadius:4,maxBarThickness:60,categoryPercentage:.6,barPercentage:.85},
+      {type:'bar',label:'Demanda restante',data:restante,backgroundColor:lightColors,stack:'s',borderRadius:4,maxBarThickness:60,categoryPercentage:.6,barPercentage:.85},
+    ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% suministrado'}}},
-      scales:{y:{beginAtZero:true,suggestedMax,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+      plugins:{legend:{position:'bottom',labels:{boxWidth:11,usePointStyle:true,font:{size:10.5}}},
+        tooltip:{callbacks:{
+          title:items2=>items2[0].label,
+          label:c=>{
+            if(c.datasetIndex===0)return `Aplicado: ${rawPct[c.dataIndex]}%`;
+            const pct=rawPct[c.dataIndex];
+            return pct>=100?'Demanda cubierta':`Restante: ${(100-pct).toFixed(1)}%`;
+          }
+        }}},
+      scales:{
+        y:{stacked:true,beginAtZero:true,suggestedMax,ticks:{callback:v=>v+'%'}},
+        x:{stacked:true,grid:{display:false}}
+      }}
   });
 }
 
