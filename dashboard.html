@@ -1095,7 +1095,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div>
-          <div class="est-card-s">Barra oscura = kg aplicado · barra clara = kg de demanda. Eje izquierdo = kg · eje derecho = % aplicado. Base: acumulado en "DASHBOARD - RECOMENDACIONES FERTIRIEGO" sobre la demanda neta de N, P₂O₅ y K₂O</div>
+          <div class="est-card-s">Barra oscura = kg aplicado · barra clara = kg de demanda. Eje izquierdo = kg · eje derecho = % aplicado.</div>
           <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
         </div>
         <div class="est-card">
@@ -2649,9 +2649,9 @@ function renderBnScope(){
   if(lbl){
     if(GB.zonaFiltro){
       const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
-      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO".`;
+      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona `;
     } else {
-      lbl.textContent='Suma de TODAS las zonas del predio — demanda: Columna M de "DASHBOARD - BALANCE NUTRICIONAL"; suministrado: último acumulado de cada zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO", sumado entre zonas.';
+      lbl.textContent='Gráfico de balance nutricional por Predio y Zona';
     }
   }
 }
