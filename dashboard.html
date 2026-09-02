@@ -1079,6 +1079,18 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 <div id="view-balance" class="view" style="display:none">
   <div class="est-wrap">
     <div class="kpi-bar" id="bnkpi"></div>
+    <div class="est-card" style="padding:14px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="est-card-t" style="margin-bottom:2px"><i class="ti ti-map-2" style="color:#16A34A"></i>Alcance</div>
+          <div class="est-card-s" id="bnScopeLabel" style="margin-bottom:0">Cargando...</div>
+        </div>
+        <div class="maint-field" style="max-width:260px;margin-bottom:0">
+          <label for="bnZonaFiltro">Ver</label>
+          <select class="maint-select" id="bnZonaFiltro" onchange="onBnZonaFiltroChange()"><option value="">Todo el predio</option></select>
+        </div>
+      </div>
+    </div>
     <div class="est-grid est-grid-bn">
       <div class="est-col">
         <div class="est-card chart">
@@ -1098,6 +1110,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Demanda de micronutrientes por zona</div>
           <div class="est-tbl-scroll bn-scroll"><table class="est-tbl" id="bnTablaMicro"></table></div>
+        </div>
+        <div class="est-card">
+          <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#16A34A"></i>% Suministrado vs. Demanda</div>
+          <div class="est-card-s">N, P₂O₅ y K₂O — acumulado aplicado (columnas AC/AD/AE de "DASHBOARD - RECOMENDACIONES FERTIRIEGO", último registro por zona) respecto a la demanda neta</div>
+          <div class="est-chart-box" style="height:260px"><canvas id="bnChartPct"></canvas></div>
         </div>
       </div>
       <div class="est-side bn-side">
@@ -1342,6 +1359,45 @@ async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
+
+// Todas las zonas del PREDIO (no solo del equipo seleccionado): recorre
+// todos los equipos del predio y junta sus zonas.
+async function qZonasPredio(prId){
+  if(!prId)return [];
+  try{
+    const equipos=await qE(prId);
+    if(!equipos.length)return [];
+    const results=await Promise.all(equipos.map(e=>qZ(e.id_equipo)));
+    return results.flat();
+  }catch(e){
+    console.warn('[Balance] No se pudo cargar zonas del predio.',e.message||e);
+    return [];
+  }
+}
+
+// Último acumulado (por fecha_evento) de N/P2O5/K2O de cada zona, desde
+// sc_recomendacion_ferti (= "DASHBOARD - RECOMENDACIONES FERTIRIEGO").
+async function qAcumuladoUltimoPorZona(znIds){
+  if(!znIds.length)return {};
+  try{
+    const {data,error}=await db.from('sc_recomendacion_ferti')
+      .select('id_zona,fecha_evento,acumulado_n_kg,acumulado_p2o5_kg,acumulado_k2o_kg')
+      .in('id_zona',znIds).order('fecha_evento',{ascending:false});
+    if(error)throw error;
+    const m={};
+    (data||[]).forEach(r=>{
+      // Como viene ordenado desc por fecha, la primera fila que aparece
+      // por cada zona ES la más reciente — por eso solo guardamos si aún
+      // no existe esa zona en el mapa.
+      if(!m[r.id_zona])m[r.id_zona]={n:numF(r.acumulado_n_kg),p:numF(r.acumulado_p2o5_kg),k:numF(r.acumulado_k2o_kg),fecha:r.fecha_evento};
+    });
+    return m;
+  }catch(e){
+    console.warn('[Balance] No se pudo cargar el acumulado por zona.',e.message||e);
+    return {};
+  }
+}
+
 
 
 async function qEstanquesNombres(prId){
@@ -2233,7 +2289,7 @@ function switchTab(t){
   document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
   document.getElementById('view-mantenimiento').style.display=t==='mantenimiento'?'flex':'none';
   if(t==='estanque')loadRenderEstanque();
-  if(t==='balance'&&G.zonas.length)loadRenderBalance();
+  if(t==='balance')loadRenderBalance();
   if(t==='mantenimiento')openMaintenanceModule();
   aplicarBloqueo(t);
 }
@@ -2530,8 +2586,8 @@ const _onPredioEst=onPredio;
 onPredio=async function(){await _onPredioEst.apply(this,arguments);GE.loaded=false;if(TAB==='estanque')await loadRenderEstanque();};
 
 
-/* ===== BALANCE NUTRICIONAL (pestaña) ===== */
-let GB={chart:null,loaded:false};
+/* ===== BALANCE NUTRICIONAL (pestaña) — alcance: PREDIO completo ===== */
+let GB={chart:null,loaded:false,zonasPredio:[],zonaFiltro:null,acumuladoZona:{}};
 const NUT_MACRO=[
   {k:'N',c:'#2563EB',col:'demanda_neta_n_kg_zona'},
   {k:'P₂O₅',c:'#EA580C',col:'demanda_neta_p2o5_kg_zona'},
@@ -2548,32 +2604,81 @@ const NUT_MICRO=[
   {k:'B',c:'#0D9488',col:'demanda_neta_b_kg_zona'},
 ];
 const NUT_ALL=[...NUT_MACRO,...NUT_MICRO];
-// Demanda neta (Kg/Zona) de un nutriente en una zona — única fuente: sc_balance_nutricional
+
+// Lista de zonas sobre la que se calcula todo: si hay filtro de zona
+// puesto, es solo esa zona; si no, son TODAS las zonas del predio.
+function bnZonasScope(){
+  if(GB.zonaFiltro){
+    const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
+    return z?[z]:[];
+  }
+  return GB.zonasPredio;
+}
+
 function demZona(znId,n){const b=GF.bal[znId];if(!b)return null;const v=b[n.col];return v==null?null:numF(v);}
-function demTotal(n){return G.zonas.reduce((a,z)=>{const v=demZona(z.id_zona,n);return a+(v||0);},0);}
+function demTotal(n){return bnZonasScope().reduce((a,z)=>{const v=demZona(z.id_zona,n);return a+(v||0);},0);}
 function demZonaTot(znId){return NUT_ALL.reduce((a,n)=>{const v=demZona(znId,n);return a+(v||0);},0);}
+// Suma del acumulado (último registro por zona) para N/P2O5/K2O, sobre el alcance actual.
+function sumAcumulado(key){return bnZonasScope().reduce((a,z)=>a+(GB.acumuladoZona[z.id_zona]?.[key]||0),0);}
 const fmtKg=v=>v==null?'—':(v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(2));
 
 async function loadRenderBalance(){
-  const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
+  const prId=document.getElementById('sp').value;
   document.getElementById('bnkpi').innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando balance...</div></div>';
-  const {data:ba}=await db.from('sc_balance_nutricional').select('*').in('id_zona',znIds);
+  GB.zonasPredio=await qZonasPredio(prId);
+  const znIds=GB.zonasPredio.map(z=>z.id_zona);
+  if(!znIds.length){
+    document.getElementById('bnkpi').innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--amber)">Este predio no tiene zonas activas.</div></div>';
+    GB.loaded=true;
+    return;
+  }
+  const [{data:ba},acumuladoZona]=await Promise.all([
+    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds),
+    qAcumuladoUltimoPorZona(znIds)
+  ]);
   GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);
+  GB.acumuladoZona=acumuladoZona;
   GB.loaded=true;
+  if(!GB.zonaFiltro || !GB.zonasPredio.find(z=>z.id_zona===GB.zonaFiltro))GB.zonaFiltro=null;
+  renderBnScope();
   bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
+  bnChartPct();
+}
+
+function renderBnScope(){
+  const sel=document.getElementById('bnZonaFiltro');
+  if(sel){
+    const opts=GB.zonasPredio.map(z=>`<option value="${z.id_zona}" ${z.id_zona===GB.zonaFiltro?'selected':''}>${z.nombre||z.id_zona}</option>`).join('');
+    sel.innerHTML=`<option value="">Todo el predio</option>`+opts;
+  }
+  const lbl=document.getElementById('bnScopeLabel');
+  if(lbl){
+    if(GB.zonaFiltro){
+      const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
+      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO".`;
+    } else {
+      lbl.textContent='Suma de TODAS las zonas del predio — demanda: Columna M de "DASHBOARD - BALANCE NUTRICIONAL"; suministrado: último acumulado de cada zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO", sumado entre zonas.';
+    }
+  }
+}
+function onBnZonaFiltroChange(){
+  GB.zonaFiltro=document.getElementById('bnZonaFiltro')?.value||null;
+  renderBnScope();
+  bnKpis();bnChart();bnTabla();bnResumen();bnSecundarios();bnZonas();
+  bnChartPct();
 }
 
 function bnKpis(){
   const tN=demTotal(NUT_MACRO[0]),tP=demTotal(NUT_MACRO[1]),tK=demTotal(NUT_MACRO[2]);
   document.getElementById('bnkpi').innerHTML=`
   <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></div>
-    <div><div class="kpi-lbl">Demanda total N</div><div class="kpi-val" style="color:#2563EB">${fmtKg(tN)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">nitrógeno · predio</div></div></div>
+    <div><div class="kpi-lbl">Demanda total N</div><div class="kpi-val" style="color:#2563EB">${fmtKg(tN)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">nitrógeno</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></div>
-    <div><div class="kpi-lbl">Demanda total P₂O₅</div><div class="kpi-val" style="color:#EA580C">${fmtKg(tP)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">fósforo · predio</div></div></div>
+    <div><div class="kpi-lbl">Demanda total P₂O₅</div><div class="kpi-val" style="color:#EA580C">${fmtKg(tP)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">fósforo</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></div>
-    <div><div class="kpi-lbl">Demanda total K₂O</div><div class="kpi-val" style="color:#7C3AED">${fmtKg(tK)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">potasio · predio</div></div></div>
+    <div><div class="kpi-lbl">Demanda total K₂O</div><div class="kpi-val" style="color:#7C3AED">${fmtKg(tK)} <span style="font-size:13px;color:var(--muted)">kg</span></div><div class="kpi-sub">potasio</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-map-2"></i></div>
-    <div><div class="kpi-lbl">Zonas evaluadas</div><div class="kpi-val" style="color:var(--green)">${G.zonas.length}</div><div class="kpi-sub">con demanda calculada</div></div></div>`;
+    <div><div class="kpi-lbl">Zonas evaluadas</div><div class="kpi-val" style="color:var(--green)">${bnZonasScope().length}</div><div class="kpi-sub">con demanda calculada</div></div></div>`;
 }
 
 function bnChartGrupo(nutrientes,canvasId,chartKey){
@@ -2601,16 +2706,17 @@ function bnChart(){
 }
 
 function bnTablaGrupo(nutrientes,tablaId){
+  const zonas=bnZonasScope();
   let h=`<thead><tr><th>Zona</th><th>Área (ha)</th>`+nutrientes.map(n=>`<th>${n.k}</th>`).join('')+`</tr></thead><tbody>`;
   let areaTot=0;
-  G.zonas.forEach((z,zi)=>{
+  zonas.forEach((z,zi)=>{
     const vals=nutrientes.map(n=>demZona(z.id_zona,n));
     areaTot+=Number(z.superficie_ha)||0;
     h+=`<tr><td><div class="zona-dot" style="background:${ZC[zi%ZC.length]};display:inline-block;margin-right:5px"></div>${z.nombre||'Zona'}</td><td>${z.superficie_ha||'—'}</td>`;
     h+=vals.map(v=>v==null?'<td style="color:var(--subtle)">—</td>':`<td>${fmtKg(v)}</td>`).join('');
     h+=`</tr>`;
   });
-  h+=`<tr style="font-weight:700;border-top:2px solid var(--border)"><td>Total predio</td><td>${Number(areaTot.toFixed(2))}</td>`;
+  h+=`<tr style="font-weight:700;border-top:2px solid var(--border)"><td>Total ${GB.zonaFiltro?'zona':'predio'}</td><td>${Number(areaTot.toFixed(2))}</td>`;
   h+=nutrientes.map(n=>`<td>${fmtKg(demTotal(n))}</td>`).join('');
   h+=`</tr>`;
   document.getElementById(tablaId).innerHTML=h+'</tbody>';
@@ -2627,29 +2733,79 @@ function bnResumen(){
     <div class="est-rrow"><span class="est-rk">Demanda N</span><span class="est-rv" style="color:#2563EB">${fmtKg(tN)} kg</span></div>
     <div class="est-rrow"><span class="est-rk">Demanda P₂O₅</span><span class="est-rv" style="color:#EA580C">${fmtKg(tP)} kg</span></div>
     <div class="est-rrow"><span class="est-rk">Demanda K₂O</span><span class="est-rv" style="color:#7C3AED">${fmtKg(tK)} kg</span></div>
-    <div class="est-rrow"><span class="est-rk">Demanda total predio</span><span class="est-rv">${fmtKg(totalPredio)} kg</span></div>
-    <div class="est-rrow"><span class="est-rk">Zonas evaluadas</span><span class="est-rv">${G.zonas.length}</span></div>`;
+    <div class="est-rrow"><span class="est-rk">Demanda total</span><span class="est-rv">${fmtKg(totalPredio)} kg</span></div>
+    <div class="est-rrow"><span class="est-rk">Zonas evaluadas</span><span class="est-rv">${bnZonasScope().length}</span></div>`;
 }
 
 function bnSecundarios(){
-  const items=[...NUT_MACRO.slice(3),...NUT_MICRO]; // Mg, Ca, S, Zn, Mn, Fe, Cu, B
+  const items=[...NUT_MACRO.slice(3),...NUT_MICRO];
   const rows=items.map(n=>({k:n.k,c:n.c,v:demTotal(n)})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v);
   document.getElementById('bnAlertas').innerHTML=rows.length?rows.map(r=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${r.c};display:inline-block;margin-right:6px"></div>${r.k}</span><span class="est-rv">${fmtKg(r.v)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin demanda de secundarios/micros.</div>';
 }
 
 function bnZonas(){
-  const ranked=G.zonas.map((z,zi)=>({z,zi,tot:demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
+  // Ranking siempre sobre TODO el predio, tenga o no filtro de zona puesto.
+  const ranked=GB.zonasPredio.map((z,zi)=>({z,zi,tot:demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
   document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv">${fmtKg(x.tot)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
 }
 
+function bnChartEmptyState(canvas,texto){
+  const box=canvas.closest('.est-chart-box');
+  if(!box)return;
+  let msg=box.querySelector('.bn-chart-empty');
+  if(!msg){
+    msg=document.createElement('div');
+    msg.className='bn-chart-empty';
+    msg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.5';
+    box.style.position='relative';
+    box.appendChild(msg);
+  }
+  msg.textContent=texto;
+  msg.style.display='flex';
+}
+function bnChartHideEmptyState(canvas){
+  const box=canvas.closest('.est-chart-box');
+  const msg=box?.querySelector('.bn-chart-empty');
+  if(msg)msg.style.display='none';
+}
 
+function bnChartPct(){
+  const canvas=document.getElementById('bnChartPct');
+  if(!canvas)return;
+  if(GB.chartPct){GB.chartPct.destroy();GB.chartPct=null;}
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
 
+  const items=[
+    {k:'N',c:'#2563EB',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',c:'#EA580C',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',c:'#7C3AED',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+  ];
+  const labels=[],data=[],colors=[];
+  items.forEach(it=>{
+    if(!it.dem||it.dem<=0)return;
+    labels.push(it.k);
+    data.push(Math.round(Math.min(it.sum/it.dem*100,999)*10)/10);
+    colors.push(it.c);
+  });
 
+  if(!labels.length){
+    bnChartEmptyState(canvas,'Sin demanda registrada para N, P₂O₅ o K₂O en este alcance.');
+    return;
+  }
+  bnChartHideEmptyState(canvas);
+  const suggestedMax=Math.max(110,...data)*1.08;
+  GB.chartPct=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{label:'% suministrado',data,backgroundColor:colors,borderRadius:5,maxBarThickness:60}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% suministrado'}}},
+      scales:{y:{beginAtZero:true,suggestedMax,ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}
+  });
+}
 
-
-/* recargar balance al cambiar equipo */
+/* recargar balance al cambiar equipo o predio */
 const _onEquipoBal=onEquipo;
-onEquipo=async function(){await _onEquipoBal.apply(this,arguments);GB.loaded=false;if(TAB==='balance'&&G.zonas.length)await loadRenderBalance();};
+onEquipo=async function(){await _onEquipoBal.apply(this,arguments);GB.loaded=false;if(TAB==='balance')await loadRenderBalance();};
+
 
 
 /* ===== Dropdowns custom (mantiene el <select> oculto como fuente de verdad) ===== */
@@ -2800,7 +2956,7 @@ async function mobileSwitchModule(module){
   document.getElementById('mobileMain')?.scrollTo({top:0,behavior:'auto'});
   if(module==='riego'&&G.zonas.length&&!G.scDia.length)await loadRender();
   if(module==='estanque'&&(!GE.loaded||GE.prId!==document.getElementById('sp')?.value))await loadRenderEstanque();
-  if(module==='balance'&&G.zonas.length&&!GB.loaded)await loadRenderBalance();
+  if(module==='balance'&&!GB.loaded)await loadRenderBalance();
   if(module==='mantenimiento')await openMaintenanceModule();
   renderMobileAll();
 }
