@@ -1054,8 +1054,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div class="est-grid">
       <div class="est-col">
         <div class="est-card chart">
-          <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de volumen del estanque</div>
-          <div class="est-card-s" id="estChartSub">Demanda (barras), volumen actual, oferta planificada y aporte de lluvia por semana</div>
+          <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Dinámica de estanque de acumulación (Reservorio de agua del predio)</div>
+          <div class="est-card-s" id="estChartSub">Configura tu temporada de riego (panel derecho) para comparar con el año anterior</div>
           <div class="est-chart-box"><canvas id="estChart"></canvas></div>
         </div>
         <div class="est-card">
@@ -1064,8 +1064,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         </div>
       </div>
       <div class="est-side">
+        <div id="estTemporadaBox"></div>
         <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Resumen de la semana</div>
+          <div class="est-card-t"><i class="ti ti-clipboard-data" style="color:var(--green)"></i>Proyección temporada actual</div>
           <div id="estResumen"></div>
         </div>
         <div class="est-card">
@@ -2455,10 +2456,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDF();});
 
 
 /* ===== DINAMICA ESTANQUE ===== */
-let GE={rows:[],loaded:false,prId:null,chart:null,gauge:null};
+let GE={rows:[],loaded:false,prId:null,chart:null,gauge:null,estanques:[],estanqueId:null,temporada:null,rowsTemporada:[]};
 const numE=v=>{const n=parseFloat(v);return isNaN(n)?0:n;};
 function covCat(p){if(p>200)return{c:'#7C3AED',t:'Excedente',cls:'exc'};if(p>=130)return{c:'#2563EB',t:'Holgado',cls:'hol'};if(p>=100)return{c:'#16A34A',t:'Adecuado',cls:'ade'};if(p>=80)return{c:'#EA580C',t:'Ajustado',cls:'aju'};return{c:'#DC2626',t:'Crítico',cls:'cri'};}
-function wkNum(w){const m=String(w).match(/\d+/);return m?parseInt(m[0]):0;}
+// numero_semana viene como "2025-W37" (año + semana ISO) — antes se leía mal (tomaba el año como si fuera la semana).
+function wkNum(w){const m=String(w).match(/W(\d{1,2})/i);return m?parseInt(m[1]):0;}
+function wkYear(w){const m=String(w).match(/^(\d{4})/);return m?parseInt(m[1]):null;}
 
 async function loadRenderEstanque(){
   const prId=document.getElementById('sp').value;
@@ -2468,22 +2471,125 @@ async function loadRenderEstanque(){
   cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0">Cargando estanque...</div></div>';
   const {data,error}=await db.from('sc_dinamica_estanque').select('*').eq('id_predio',prId);
   if(error){cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--red)">Error: '+error.message+'</div></div>';return;}
-  let rows=(data||[]).slice().sort((a,b)=>wkNum(a.numero_semana)-wkNum(b.numero_semana));
+  let rows=(data||[]).slice().sort((a,b)=>{
+    const ya=wkYear(a.numero_semana)||0,yb=wkYear(b.numero_semana)||0;
+    if(ya!==yb)return ya-yb;
+    return wkNum(a.numero_semana)-wkNum(b.numero_semana);
+  });
   GE.rows=rows;GE.loaded=true;
   if(!rows.length){
     cont.innerHTML='<div class="kpi-card"><div class="loading" style="padding:0;color:var(--amber)">Este predio no tiene estanque registrado.</div></div>';
     document.getElementById('estResumen').innerHTML='';
     document.getElementById('estTabla').innerHTML='';
+    const tb=document.getElementById('estTemporadaBox');if(tb)tb.innerHTML='';
     if(GE.chart){GE.chart.destroy();GE.chart=null;}
     return;
   }
-  estKpis(rows);estChart(rows);estResumen(rows);estStats(rows);estTabla(rows);
+  GE.estanques=[...new Set(rows.map(r=>r.id_estanque))].filter(Boolean);
+  if(!GE.estanqueId||!GE.estanques.includes(GE.estanqueId))GE.estanqueId=GE.estanques[0]||null;
+  await qTemporadaRiego();
+  renderEstanqueTemporadaBox();
+  const rowsEst=rows.filter(r=>r.id_estanque===GE.estanqueId);
+  estKpis(rowsEst);estChart();estResumen(rowsEst);estStats(rowsEst);estTabla(rowsEst);
 }
 
 function estFilaActual(rows){
-  const wActual='W'+isoW(new Date());
-  return rows.find(r=>String(r.numero_semana).toUpperCase()===wActual)||rows[rows.length-1];
+  const semActual=isoW(new Date()),anioActual=new Date().getFullYear();
+  return rows.find(r=>wkYear(r.numero_semana)===anioActual&&wkNum(r.numero_semana)===semActual)||rows[rows.length-1];
 }
+
+/* ===== Temporada de riego (por estanque) — permite comparar el año anterior con la temporada actual ===== */
+async function qTemporadaRiego(){
+  GE.temporada=null;
+  if(!GE.estanqueId)return;
+  try{
+    const {data,error}=await db.from('sc_temporada_riego').select('*').eq('id_estanque',GE.estanqueId).limit(1);
+    if(error)throw error;
+    if(data&&data[0])GE.temporada={mesInicio:data[0].mes_inicio,diaInicio:data[0].dia_inicio,mesTermino:data[0].mes_termino,diaTermino:data[0].dia_termino};
+  }catch(e){console.warn('[Temporada de riego] No se pudo cargar.',e.message||e);}
+}
+function estSelectorHtml(){
+  if(!GE.estanques||GE.estanques.length<=1)return '';
+  const nombres=G.estanques||[];
+  const opts=GE.estanques.map(id=>{
+    const n=nombres.find(e=>e.id_estanque===id);
+    return `<option value="${id}" ${id===GE.estanqueId?'selected':''}>${n?.nombre||id}</option>`;
+  }).join('');
+  return `<div class="maint-field" style="margin-bottom:12px"><label for="estEstanqueSel">Estanque</label><select class="maint-select" id="estEstanqueSel" onchange="onEstanqueSelChange()">${opts}</select></div>`;
+}
+async function onEstanqueSelChange(){
+  GE.estanqueId=document.getElementById('estEstanqueSel').value;
+  await qTemporadaRiego();
+  renderEstanqueTemporadaBox();
+  const rowsEst=GE.rows.filter(r=>r.id_estanque===GE.estanqueId);
+  estKpis(rowsEst);estChart();estResumen(rowsEst);estStats(rowsEst);estTabla(rowsEst);
+}
+function estTemporadaHtml(){
+  const t=GE.temporada||{};
+  const monthOpts=sel=>MS.map((m,i)=>`<option value="${i+1}" ${sel===i+1?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('');
+  return `<div class="est-card">
+    <div class="est-card-t"><i class="ti ti-calendar-time" style="color:#16A34A"></i>Temporada de riego</div>
+    <div class="est-card-s">Define el rango de fechas de tu temporada (ej. 15 de mayo al 15 de septiembre). Se usa para comparar la demanda del año anterior en ese mismo período y planificar la temporada actual.</div>
+    <div class="confirm-grid">
+      <div><label class="confirm-fl">Mes inicio</label><select class="confirm-fi" id="estTempMesIni">${monthOpts(t.mesInicio)}</select></div>
+      <div><label class="confirm-fl">Día inicio</label><input type="number" min="1" max="31" class="confirm-fi" id="estTempDiaIni" value="${t.diaInicio||''}"></div>
+      <div><label class="confirm-fl">Mes término</label><select class="confirm-fi" id="estTempMesTer">${monthOpts(t.mesTermino)}</select></div>
+      <div><label class="confirm-fl">Día término</label><input type="number" min="1" max="31" class="confirm-fi" id="estTempDiaTer" value="${t.diaTermino||''}"></div>
+    </div>
+    <button class="confirm-save" id="estTempSave" onclick="guardarTemporadaRiego()">Guardar temporada</button>
+    <div class="confirm-msg" id="estTempMsg"></div>
+  </div>`;
+}
+function renderEstanqueTemporadaBox(){
+  const el=document.getElementById('estTemporadaBox');
+  if(el)el.innerHTML=estSelectorHtml()+estTemporadaHtml();
+}
+async function guardarTemporadaRiego(){
+  if(!GE.estanqueId){alert('No hay estanque seleccionado.');return;}
+  const mi=parseInt(document.getElementById('estTempMesIni').value,10);
+  const di=parseInt(document.getElementById('estTempDiaIni').value,10);
+  const mt=parseInt(document.getElementById('estTempMesTer').value,10);
+  const dt=parseInt(document.getElementById('estTempDiaTer').value,10);
+  const btn=document.getElementById('estTempSave'),msg=document.getElementById('estTempMsg');
+  if(!mi||!di||!mt||!dt){msg.className='confirm-msg err';msg.style.display='block';msg.textContent='Completa día y mes de inicio y término.';return;}
+  if(di<1||di>31||dt<1||dt>31){msg.className='confirm-msg err';msg.style.display='block';msg.textContent='El día debe estar entre 1 y 31.';return;}
+  btn.disabled=true;btn.textContent='Guardando...';
+  const {error}=await db.from('sc_temporada_riego').upsert({id_estanque:GE.estanqueId,id_predio:GE.prId,mes_inicio:mi,dia_inicio:di,mes_termino:mt,dia_termino:dt,actualizado_en:new Date().toISOString()},{onConflict:'id_estanque'});
+  msg.style.display='block';
+  if(error){msg.className='confirm-msg err';msg.textContent='Error: '+error.message;btn.disabled=false;btn.textContent='Guardar temporada';return;}
+  GE.temporada={mesInicio:mi,diaInicio:di,mesTermino:mt,diaTermino:dt};
+  msg.className='confirm-msg ok';msg.textContent='✓ Temporada guardada';btn.textContent='✓ Guardado';
+  const rowsEst=GE.rows.filter(r=>r.id_estanque===GE.estanqueId);
+  estKpis(rowsEst);estResumen(rowsEst);estChart();
+  setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar temporada';},1400);
+}
+// Filtra las filas del ESTANQUE ACTIVO correspondientes al año anterior, acotadas
+// al rango de semanas ISO que cae dentro de la temporada de riego configurada.
+function estRangoTemporadaAnioAnterior(rows){
+  if(!GE.temporada)return [];
+  const anioAnterior=new Date().getFullYear()-1;
+  const {mesInicio,diaInicio,mesTermino,diaTermino}=GE.temporada;
+  const dIni=new Date(anioAnterior,mesInicio-1,diaInicio);
+  const dTer=new Date(anioAnterior,mesTermino-1,diaTermino);
+  const wIni=isoW(dIni),wTer=isoW(dTer);
+  let candidatos=rows.filter(r=>r.id_estanque===GE.estanqueId&&wkYear(r.numero_semana)===anioAnterior);
+  candidatos=dTer>=dIni
+    ?candidatos.filter(r=>{const w=wkNum(r.numero_semana);return w>=wIni&&w<=wTer;})
+    :candidatos.filter(r=>{const w=wkNum(r.numero_semana);return w>=wIni||w<=wTer;}); // temporada que cruza fin de año
+  return candidatos.sort((a,b)=>wkNum(a.numero_semana)-wkNum(b.numero_semana));
+}
+function estChartMsg(text){
+  const box=document.getElementById('estChart')?.closest('.est-chart-box');
+  if(!box)return;
+  let msg=box.querySelector('.est-chart-empty');
+  if(!msg){msg=document.createElement('div');msg.className='est-chart-empty';msg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted);font-size:12px;line-height:1.5;background:var(--white)';box.style.position='relative';box.appendChild(msg);}
+  msg.textContent=text;msg.style.display='flex';
+}
+function estChartMsgHide(){
+  const m=document.getElementById('estChart')?.closest('.est-chart-box')?.querySelector('.est-chart-empty');
+  if(m)m.style.display='none';
+}
+
 function estKpis(rows){
   const act=estFilaActual(rows);
   const demProm=numE(act.demanda_promedio_3a_m3);
@@ -2497,12 +2603,29 @@ function estKpis(rows){
     <div><div class="kpi-lbl">Oferta base</div><div class="kpi-val">${fmt(ofertaBase)} <span style="font-size:13px;color:var(--muted)">m³</span></div><div class="kpi-sub">Semana ${act.numero_semana}</div></div></div>`;
 }
 
-function estChart(rows){
-  const labels=rows.map(r=>r.numero_semana);
-  const ofertaBase=rows.map(r=>numE(r.oferta_extraible_base_m3));
-  const ofertaPlanif=rows.map(r=>numE(r.oferta_planificada_m3));
-  const aporte=rows.map(r=>numE(r.aporte_lluvia_semanal_m3));
-  const demanda=rows.map(r=>numE(r.demanda_promedio_3a_m3));
+function estChart(){
+  const anioAnterior=new Date().getFullYear()-1;
+  const sub=document.getElementById('estChartSub');
+  if(!GE.temporada){
+    if(GE.chart){GE.chart.destroy();GE.chart=null;}
+    if(sub)sub.textContent='Configura tu temporada de riego (panel derecho) para comparar con el año anterior';
+    estChartMsg('Configura tu temporada de riego (panel derecho) para ver la comparación con el año anterior.');
+    return;
+  }
+  const rowsTemp=estRangoTemporadaAnioAnterior(GE.rows);
+  GE.rowsTemporada=rowsTemp;
+  if(sub)sub.textContent=`Temporada ${anioAnterior} (año anterior) — demanda promedio 3 años, oferta y aporte de lluvia por semana`;
+  if(!rowsTemp.length){
+    if(GE.chart){GE.chart.destroy();GE.chart=null;}
+    estChartMsg(`No hay datos registrados para la temporada ${anioAnterior} en el rango de fechas configurado.`);
+    return;
+  }
+  estChartMsgHide();
+  const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
+  const ofertaBase=rowsTemp.map(r=>numE(r.oferta_extraible_base_m3));
+  const ofertaPlanif=rowsTemp.map(r=>numE(r.oferta_planificada_m3));
+  const aporte=rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3));
+  const demanda=rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3));
   if(GE.chart)GE.chart.destroy();
   const ctx=document.getElementById('estChart').getContext('2d');
   GE.chart=new Chart(ctx,{
@@ -2530,6 +2653,21 @@ function estResumen(rows){
   const cobPct=numE(act.cobertura_pct)*100;
   const cat=covCat(cobPct);
   const fmt=v=>Math.round(v).toLocaleString('es-CL');
+
+  let temporadaHtml;
+  if(GE.temporada){
+    const anioAnterior=new Date().getFullYear()-1;
+    const rowsTemp=estRangoTemporadaAnioAnterior(rows);
+    const sumDemanda=rowsTemp.reduce((a,r)=>a+numE(r.demanda_promedio_3a_m3),0);
+    const sumOfertaPlanif=rowsTemp.reduce((a,r)=>a+numE(r.oferta_planificada_m3),0);
+    temporadaHtml=`
+    <div class="est-rrow"><span class="est-rk">Suma de demanda temporada</span><span class="est-rv">${fmt(sumDemanda)} m³</span></div>
+    <div class="est-rrow"><span class="est-rk">Oferta planificada (temporada ${anioAnterior})</span><span class="est-rv">${fmt(sumOfertaPlanif)} m³</span></div>
+    <div class="note" style="margin-top:8px">La oferta planificada es la oferta base + el aporte de lluvia.</div>`;
+  } else {
+    temporadaHtml=`<div class="note" style="margin-top:8px">Configura la temporada de riego (panel derecho) para ver la proyección de la temporada.</div>`;
+  }
+
   document.getElementById('estResumen').innerHTML=`
     <div class="est-rrow"><span class="est-rk">Semana actual</span><span class="est-rv">${act.numero_semana}</span></div>
     <div class="est-rrow"><span class="est-rk">Oferta planificada</span><span class="est-rv">${fmt(ofertaPlanif)} m³</span></div>
@@ -2537,7 +2675,8 @@ function estResumen(rows){
     <div class="est-rrow"><span class="est-rk">Aporte lluvia</span><span class="est-rv">${fmt(aporte)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Demanda (3 años)</span><span class="est-rv">${fmt(demanda)} m³</span></div>
     <div class="est-rrow"><span class="est-rk">Balance</span><span class="est-rv" style="color:${balance>=0?'var(--green)':'var(--red)'}">${balance>=0?'+':''}${fmt(balance)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>`;
+    <div class="est-rrow"><span class="est-rk">Cobertura</span><span class="est-badge ${cat.cls}">${cat.t} · ${cobPct.toFixed(0)}%</span></div>
+    ${temporadaHtml}`;
 }
 
 function estStats(rows){
