@@ -738,6 +738,22 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .m-cal-cell.done::after{content:'✓';position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;display:grid;place-items:center;background:#16A34A;color:#fff;font-size:7px;font-weight:900;}
   .m-cal-time{font-family:'Fraunces',serif;font-size:10px;font-weight:800;line-height:1;color:var(--cell-color,#2563EB);white-space:nowrap;}
   .m-cal-sub{font-size:7px;font-weight:800;color:var(--muted);white-space:nowrap;}
+  .m-cal-ferti-pill{max-width:calc(100% - 4px);padding:2px 4px;border-radius:5px;background:#DCFCE7;border:1px solid #86EFAC;color:#15803D;font-size:6.5px;font-weight:900;line-height:1.15;text-align:center;white-space:normal;overflow-wrap:anywhere;}
+  .m-cal-cell.has-riego.has-ferti{min-height:72px;}
+  .m-calendar-grid.day .m-cal-ferti-pill{font-size:9px;padding:3px 6px;border-radius:7px;}
+  .m-calendar-grid.three .m-cal-ferti-pill{font-size:8px;}
+
+  .m-mobile-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;}
+  .m-mobile-form-field{min-width:0;}
+  .m-mobile-form-field label{display:block;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--subtle);margin:0 0 4px 2px;}
+  .m-mobile-input,.m-mobile-select{width:100%;height:39px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 9px;font-family:inherit;font-size:11px;font-weight:700;color:var(--ink2);outline:none;}
+  .m-mobile-save{width:100%;height:40px;margin-top:9px;border:none;border-radius:10px;background:#16A34A;color:#fff;font-family:inherit;font-size:11px;font-weight:900;cursor:pointer;}
+  .m-mobile-save:disabled{opacity:.6;cursor:wait;}
+  .m-mobile-msg{display:none;margin-top:7px;padding:7px 9px;border-radius:8px;font-size:10px;font-weight:700;}
+  .m-mobile-msg.ok{display:block;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+  .m-mobile-msg.err{display:block;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
+  .m-mobile-note{font-size:10px;line-height:1.45;color:var(--muted);background:#F8FAFC;border:1px solid var(--line2);border-radius:9px;padding:8px 9px;margin-top:8px;}
+  .m-scope-select{margin:7px 0 2px;}
   .m-cal-icons{height:12px;display:flex;align-items:center;justify-content:center;gap:2px;font-size:9px;}
   .m-cal-icons .water{color:var(--cell-color,#2563EB);}
   .m-cal-icons .ferti{color:#16A34A;}
@@ -1371,8 +1387,7 @@ async function qZonasPredio(prId){
   }
 }
 
-// Último acumulado (por fecha_evento) de N/P2O5/K2O de cada zona, desde
-// sc_recomendacion_ferti (= "DASHBOARD - RECOMENDACIONES FERTIRIEGO").
+// Último acumulado registrado de N/P2O5/K2O por zona.
 async function qAcumuladoUltimoPorZona(znIds){
   if(!znIds.length)return {};
   try{
@@ -2787,9 +2802,9 @@ function renderBnScope(){
   if(lbl){
     if(GB.zonaFiltro){
       const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
-      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}"
+      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — muestra la demanda nutricional y el avance acumulado de fertilización de esta zona.`;
     } else {
-      lbl.textContent='Suma de TODAS las zonas del predio ;
+      lbl.textContent='Suma de todas las zonas del predio — muestra la demanda nutricional total y el avance acumulado de fertilización.';
     }
   }
 }
@@ -3259,8 +3274,8 @@ function mobileOpenCalendarCell(znId,date){
   let html='';
   if(hasR)html+=`<div class="m-sheet-block riego"><div class="m-sheet-block-title"><span><i class="ti ti-droplet"></i> Riego programado</span><span>${confR?'✓ Confirmado':'Pendiente'}</span></div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Tiempo</small><strong>${hm(t)||'—'}</strong></div><div class="m-sheet-metric"><small>Lámina</small><strong>${l>0?l.toFixed(1)+' mm':'—'}</strong></div><div class="m-sheet-metric"><small>Volumen</small><strong>${vol>0?mobileFmtInt(vol)+' m³':'—'}</strong></div></div></div>`;
   if(hasF){
-    const dosis=events.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0),tiempo=events.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0),madre=events.reduce((a,e)=>a+numF(e.volumen_sol_madre_l),0);
-    html+=`<div class="m-sheet-block ferti"><div class="m-sheet-block-title"><span><i class="ti ti-flask-2"></i> Fertirriego</span><span>${confF?'✓ Confirmado':'Programado'}</span></div><div class="m-sheet-product">${events[0].producto_asignado||'Producto sin nombre'}${events.length>1?` · +${events.length-1} producto(s)`:''}</div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Dosis</small><strong>${dosis>0?dosis.toFixed(1)+' kg':'—'}</strong></div><div class="m-sheet-metric"><small>Inyección</small><strong>${tiempo>0?(hmF(tiempo)||hm(tiempo)||'—'):'—'}</strong></div><div class="m-sheet-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div></div>`;
+    const dosisEstanque=events.reduce((a,e)=>a+numF(e.dosis_producto_estanque_kg),0),tiempo=events.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0),madre=events.reduce((a,e)=>a+numF(e.volumen_sol_madre_l),0);
+    html+=`<div class="m-sheet-block ferti"><div class="m-sheet-block-title"><span><i class="ti ti-flask-2"></i> Fertirriego</span><span>${confF?'✓ Confirmado':'Programado'}</span></div><div class="m-sheet-product">${events[0].producto_asignado||'Producto sin nombre'}${events.length>1?` · +${events.length-1} producto(s)`:''}</div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Dosis estanque</small><strong>${dosisEstanque>0?dosisEstanque.toFixed(1)+' kg':'—'}</strong></div><div class="m-sheet-metric"><small>Inyección</small><strong>${tiempo>0?(hm(tiempo)||'—'):'—'}</strong></div><div class="m-sheet-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div></div>`;
   }
   if(!hasR&&!hasF)html+=mobileEmpty('ti-calendar-off','Sin programación','No hay riego ni fertirriego para esta zona en el día seleccionado.');
   html+=`<div class="m-sheet-actions">${hasR?`<button class="m-sheet-action riego" onclick="mobileOpenRiegoDetail('${znId}','${date}')"><i class="ti ti-droplet"></i>Ver detalle del riego</button>`:''}${hasF?`<button class="m-sheet-action ferti" onclick="mobileOpenFertiDetail('${znId}','${date}')"><i class="ti ti-flask-2"></i>Ver detalle del fertirriego</button>`:''}<button class="m-sheet-action zone" onclick="mobileOpenZoneDetail('${znId}')"><i class="ti ti-map-pin"></i>Ver ficha de la zona</button></div>`;
@@ -3284,8 +3299,11 @@ function renderMobileCalendarGrid(){
       const confR=!hasR||!!G.confirmR?.[z.id_zona+'|'+date],confF=!hasF||!!G.confirmF?.[z.id_zona+'|'+date];
       const done=(hasR||hasF)&&confR&&confF,pendingR=hasR&&date<=today&&!confR;
       const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
-      const main=hasR?mobileCompactTime(t):hasF?'Ferti':'',sub=hasR&&l>0?`${Math.round(l)}mm`:hasF?`${ferti.reduce((a,e)=>a+numF(e.dosis_aplicar_kg),0).toFixed(0)}kg`:'';
-      html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
+      const tiempoFertTot=ferti.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
+      const dosisEstanqueTot=ferti.reduce((a,e)=>a+(parseFloat(e.dosis_producto_estanque_kg)||0),0);
+      const fertiTxt=[hm(tiempoFertTot),dosisEstanqueTot>0?dosisEstanqueTot.toFixed(1)+' kg':null].filter(Boolean).join(' · ')||(ferti[0]?prodShort(ferti[0].producto_asignado):'');
+      const main=hasR?mobileCompactTime(t):hasF?'Ferti':'',sub=hasR&&l>0?`${Math.round(l)}mm`:'';
+      html+=`<button class="${classes}" style="--cell-color:${c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub">${sub}</span>`:''}${hasF&&fertiTxt?`<span class="m-cal-ferti-pill">${fertiTxt}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
     });
   });
   grid.innerHTML=html;
@@ -3310,48 +3328,121 @@ function renderMobileRiego(){
 function toggleMobileSection(id){document.getElementById(id)?.classList.toggle('open');}
 function toggleMobileZone(id){toggleMobileSection(id);}
 
+function mobileEstanqueSelectorHtml(){
+  if(!GE.estanques||GE.estanques.length<=1)return '';
+  const nombres=G.estanques||[];
+  const opts=GE.estanques.map(id=>{const n=nombres.find(e=>e.id_estanque===id);return `<option value="${id}" ${id===GE.estanqueId?'selected':''}>${n?.nombre||id}</option>`;}).join('');
+  return `<div class="m-mobile-form-field" style="grid-column:1/-1"><label for="mEstanqueSel">Estanque</label><select class="m-mobile-select" id="mEstanqueSel" onchange="mobileEstanqueSelChange()">${opts}</select></div>`;
+}
+
+async function mobileEstanqueSelChange(){
+  const sel=document.getElementById('mEstanqueSel');if(!sel)return;
+  GE.estanqueId=sel.value;
+  await qTemporadaRiego();
+  renderEstanqueTemporadaBox();
+  renderMobileEstanque();
+}
+
+async function guardarTemporadaRiegoMobile(){
+  if(!GE.estanqueId)return;
+  const mi=parseInt(document.getElementById('mEstTempMesIni')?.value,10),di=parseInt(document.getElementById('mEstTempDiaIni')?.value,10),mt=parseInt(document.getElementById('mEstTempMesTer')?.value,10),dt=parseInt(document.getElementById('mEstTempDiaTer')?.value,10);
+  const btn=document.getElementById('mEstTempSave'),msg=document.getElementById('mEstTempMsg');
+  const show=(txt,cls)=>{if(msg){msg.className='m-mobile-msg '+cls;msg.textContent=txt;}};
+  if(!mi||!di||!mt||!dt){show('Completa día y mes de inicio y término.','err');return;}
+  if(di<1||di>31||dt<1||dt>31){show('El día debe estar entre 1 y 31.','err');return;}
+  if(btn){btn.disabled=true;btn.textContent='Guardando...';}
+  const {error}=await db.from('sc_temporada_riego').upsert({id_estanque:GE.estanqueId,id_predio:GE.prId,mes_inicio:mi,dia_inicio:di,mes_termino:mt,dia_termino:dt,actualizado_en:new Date().toISOString()},{onConflict:'id_estanque'});
+  if(error){if(btn){btn.disabled=false;btn.textContent='Guardar temporada';}show('Error: '+error.message,'err');return;}
+  GE.temporada={mesInicio:mi,diaInicio:di,mesTermino:mt,diaTermino:dt};
+  renderEstanqueTemporadaBox();
+  renderMobileEstanque();
+  const msg2=document.getElementById('mEstTempMsg');if(msg2){msg2.className='m-mobile-msg ok';msg2.textContent='✓ Temporada guardada';}
+}
+
 function renderMobileEstanque(){
   const content=document.getElementById('mEstanqueContent');if(!content)return;
-  const rows=GE.rows||[];if(!GE.loaded){content.innerHTML=mobileEmpty('ti-loader-2','Cargando estanque','Consultando la dinámica semanal.');return;}
-  if(!rows.length){content.innerHTML=mobileEmpty('ti-droplet-off','Sin estanque registrado','Este predio no tiene datos de dinámica de estanque.');return;}
+  if(MOBILE.estChart){MOBILE.estChart.destroy();MOBILE.estChart=null;}
+  const allRows=GE.rows||[];if(!GE.loaded){content.innerHTML=mobileEmpty('ti-loader-2','Cargando estanque','Consultando la dinámica semanal.');return;}
+  if(!allRows.length){content.innerHTML=mobileEmpty('ti-droplet-off','Sin estanque registrado','Este predio no tiene datos de dinámica de estanque.');return;}
+  const rows=GE.estanqueId?allRows.filter(r=>r.id_estanque===GE.estanqueId):allRows;
+  if(!rows.length){content.innerHTML=mobileEmpty('ti-droplet-off','Sin datos del estanque','El estanque seleccionado no tiene registros de dinámica.');return;}
   const act=estFilaActual(rows),d=numE(act.demanda_promedio_3a_m3),base=numE(act.oferta_extraible_base_m3),plan=numE(act.oferta_planificada_m3),rain=numE(act.aporte_lluvia_semanal_m3),balance=numE(act.balance_m3),cov=numE(act.cobertura_pct)*100,cat=covCat(cov);
   const n=rows.length,cobs=rows.map(r=>numE(r.cobertura_pct)*100),deficit=cobs.filter(x=>x<80).length,totalRain=rows.reduce((a,r)=>a+numE(r.aporte_lluvia_semanal_m3),0),balAccum=rows.reduce((a,r)=>a+numE(r.balance_m3),0);
+  const t=GE.temporada||{},monthOpts=sel=>MS.map((m,i)=>`<option value="${i+1}" ${sel===i+1?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('');
+  const anioAnterior=new Date().getFullYear()-1;
+  const rowsTemp=GE.temporada?estRangoTemporadaAnioAnterior(GE.rows):[];
+  GE.rowsTemporada=rowsTemp;
+  const sumDemanda=rowsTemp.reduce((a,r)=>a+numE(r.demanda_promedio_3a_m3),0),sumOfertaPlanif=rowsTemp.reduce((a,r)=>a+numE(r.oferta_planificada_m3),0);
+  const temporadaProjection=GE.temporada?`<div class="m-summary-row"><span>Suma de demanda temporada</span><strong>${mobileFmtInt(sumDemanda)} m³</strong></div><div class="m-summary-row"><span>Oferta planificada (temporada ${anioAnterior})</span><strong>${mobileFmtInt(sumOfertaPlanif)} m³</strong></div><div class="m-mobile-note">La oferta planificada es la oferta base + el aporte de lluvia.</div>`:`<div class="m-mobile-note">Configura la temporada de riego para ver la proyección de la temporada.</div>`;
+  const chartHtml=!GE.temporada?mobileEmpty('ti-calendar-time','Configura tu temporada','Define las fechas de inicio y término para comparar con el año anterior.'):rowsTemp.length?`<div class="m-chart-box"><canvas id="mEstanqueChart"></canvas></div>`:mobileEmpty('ti-chart-line','Sin datos en el rango',`No hay datos registrados para la temporada ${anioAnterior} en las fechas configuradas.`);
   content.innerHTML=`<div class="m-kpi-grid">
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-droplet"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${mobileFmtInt(d)}</div><div class="m-kpi-sub">m³ · semana ${act.numero_semana}</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Oferta base</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-waves"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${mobileFmtInt(base)}</div><div class="m-kpi-sub">m³ disponibles</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Cobertura</span><span class="m-kpi-icon" style="background:${cat.c}18;color:${cat.c}"><i class="ti ti-percentage"></i></span></div><div class="m-kpi-value" style="color:${cat.c}">${cov.toFixed(0)}%</div><div class="m-kpi-sub">${cat.t}</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Balance</span><span class="m-kpi-icon" style="background:${balance>=0?'#F0FDF4':'#FEF2F2'};color:${balance>=0?'#16A34A':'#DC2626'}"><i class="ti ti-scale"></i></span></div><div class="m-kpi-value" style="color:${balance>=0?'#16A34A':'#DC2626'}">${balance>=0?'+':''}${mobileFmtInt(balance)}</div><div class="m-kpi-sub">m³ semanales</div></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-clipboard-data" style="color:#16A34A"></i>Resumen de la semana</div>
-      <div class="m-summary-row"><span>Semana</span><strong>${act.numero_semana}</strong></div><div class="m-summary-row"><span>Oferta planificada</span><strong>${mobileFmtInt(plan)} m³</strong></div><div class="m-summary-row"><span>Oferta base</span><strong>${mobileFmtInt(base)} m³</strong></div><div class="m-summary-row"><span>Aporte de lluvia</span><strong style="color:#16A34A">${mobileFmtInt(rain)} m³</strong></div><div class="m-summary-row"><span>Demanda promedio</span><strong>${mobileFmtInt(d)} m³</strong></div><div class="m-summary-row"><span>Estado</span><strong style="color:${cat.c}">${cat.t} · ${cov.toFixed(0)}%</strong></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-line" style="color:#2563EB"></i>Evolución semanal</div><div class="m-chart-box"><canvas id="mEstanqueChart"></canvas></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-histogram" style="color:#7C3AED"></i>Temporada</div><div class="m-summary-row"><span>Semanas registradas</span><strong>${n}</strong></div><div class="m-summary-row"><span>Semanas en déficit</span><strong style="color:${deficit?'#DC2626':'#16A34A'}">${deficit}</strong></div><div class="m-summary-row"><span>Aporte lluvia acumulado</span><strong>${mobileFmtInt(totalRain)} m³</strong></div><div class="m-summary-row"><span>Balance acumulado</span><strong style="color:${balAccum>=0?'#16A34A':'#DC2626'}">${balAccum>=0?'+':''}${mobileFmtInt(balAccum)} m³</strong></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-calendar-time" style="color:#16A34A"></i>Temporada de riego</div><div class="m-page-sub" style="margin:0">Define el rango de tu temporada. Se guarda por estanque y se reutiliza cada año.</div><div class="m-mobile-form-grid">${mobileEstanqueSelectorHtml()}<div class="m-mobile-form-field"><label for="mEstTempMesIni">Mes inicio</label><select class="m-mobile-select" id="mEstTempMesIni">${monthOpts(t.mesInicio)}</select></div><div class="m-mobile-form-field"><label for="mEstTempDiaIni">Día inicio</label><input class="m-mobile-input" type="number" min="1" max="31" id="mEstTempDiaIni" value="${t.diaInicio||''}"></div><div class="m-mobile-form-field"><label for="mEstTempMesTer">Mes término</label><select class="m-mobile-select" id="mEstTempMesTer">${monthOpts(t.mesTermino)}</select></div><div class="m-mobile-form-field"><label for="mEstTempDiaTer">Día término</label><input class="m-mobile-input" type="number" min="1" max="31" id="mEstTempDiaTer" value="${t.diaTermino||''}"></div></div><button class="m-mobile-save" id="mEstTempSave" onclick="guardarTemporadaRiegoMobile()">Guardar temporada</button><div class="m-mobile-msg" id="mEstTempMsg"></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-clipboard-data" style="color:#16A34A"></i>Proyección temporada actual</div><div class="m-summary-row"><span>Semana actual</span><strong>${act.numero_semana}</strong></div><div class="m-summary-row"><span>Oferta planificada</span><strong>${mobileFmtInt(plan)} m³</strong></div><div class="m-summary-row"><span>Oferta base</span><strong>${mobileFmtInt(base)} m³</strong></div><div class="m-summary-row"><span>Aporte de lluvia</span><strong style="color:#16A34A">${mobileFmtInt(rain)} m³</strong></div><div class="m-summary-row"><span>Demanda (3 años)</span><strong>${mobileFmtInt(d)} m³</strong></div><div class="m-summary-row"><span>Balance</span><strong style="color:${balance>=0?'#16A34A':'#DC2626'}">${balance>=0?'+':''}${mobileFmtInt(balance)} m³</strong></div><div class="m-summary-row"><span>Cobertura</span><strong style="color:${cat.c}">${cat.t} · ${cov.toFixed(0)}%</strong></div>${temporadaProjection}</div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-line" style="color:#2563EB"></i>Dinámica de estanque de acumulación (Reservorio de agua del predio)</div><div class="m-page-sub" style="margin:0 0 8px">${GE.temporada?`Temporada ${anioAnterior} (año anterior) — semanas del rango configurado`:'Configura tu temporada para comparar con el año anterior'}</div>${chartHtml}</div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-histogram" style="color:#7C3AED"></i>Estadísticas de la temporada</div><div class="m-summary-row"><span>Semanas registradas</span><strong>${n}</strong></div><div class="m-summary-row"><span>Semanas en déficit</span><strong style="color:${deficit?'#DC2626':'#16A34A'}">${deficit}</strong></div><div class="m-summary-row"><span>Aporte lluvia acumulado</span><strong>${mobileFmtInt(totalRain)} m³</strong></div><div class="m-summary-row"><span>Balance acumulado</span><strong style="color:${balAccum>=0?'#16A34A':'#DC2626'}">${balAccum>=0?'+':''}${mobileFmtInt(balAccum)} m³</strong></div></div>
     <div class="m-section-title"><span>Detalle semanal</span><span>${rows.length} semanas</span></div>
     ${rows.slice().reverse().map((r,i)=>{const rcov=numE(r.cobertura_pct)*100,rcat=covCat(rcov),rbal=numE(r.balance_m3),id='mEstWeek_'+i;return `<div class="m-accordion" id="${id}"><button class="m-accordion-btn" onclick="toggleMobileSection('${id}')"><span>${r.numero_semana} · <span style="color:${rcat.c}">${rcat.t} ${rcov.toFixed(0)}%</span></span><i class="ti ti-chevron-down"></i></button><div class="m-accordion-body"><div class="m-summary-row"><span>Oferta base</span><strong>${mobileFmtInt(r.oferta_extraible_base_m3)} m³</strong></div><div class="m-summary-row"><span>Oferta planificada</span><strong>${mobileFmtInt(r.oferta_planificada_m3)} m³</strong></div><div class="m-summary-row"><span>Lluvia</span><strong>${mobileFmtInt(r.aporte_lluvia_semanal_m3)} m³</strong></div><div class="m-summary-row"><span>Demanda</span><strong>${mobileFmtInt(r.demanda_promedio_3a_m3)} m³</strong></div><div class="m-summary-row"><span>Balance</span><strong style="color:${rbal>=0?'#16A34A':'#DC2626'}">${rbal>=0?'+':''}${mobileFmtInt(rbal)} m³</strong></div></div></div>`;}).join('')}`;
-  if(MOBILE.module!=='estanque'||!isMobileView())return;
-  if(MOBILE.estChart)MOBILE.estChart.destroy();const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
-  MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels:rows.map(r=>r.numero_semana),datasets:[{type:'bar',label:'Demanda',data:rows.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderRadius:3},{type:'line',label:'Oferta base',data:rows.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2},{type:'line',label:'Lluvia',data:rows.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
+  if(MOBILE.module!=='estanque'||!isMobileView()||!GE.temporada||!rowsTemp.length)return;
+  const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
+  const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
+  MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels,datasets:[{type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},{type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2,order:1},{type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',backgroundColor:'#94A3B8',borderDash:[5,4],tension:0,pointRadius:0,borderWidth:1.5,order:2},{type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
+}
+function mobileNutrientChart(canvasId,nutrients,key){
+  if(MOBILE[key]){MOBILE[key].destroy();MOBILE[key]=null;}const canvas=document.getElementById(canvasId);if(!canvas)return;
+  MOBILE[key]=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:nutrients.map(n=>n.k),datasets:[{data:nutrients.map(n=>demTotal(n)),backgroundColor:nutrients.map(n=>n.c),borderRadius:4,maxBarThickness:35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v+' kg'},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:10,weight:'700'}},grid:{display:false}}}}});
 }
 
-function mobileNutrientChart(canvasId,nutrients,key){
-  if(MOBILE[key])MOBILE[key].destroy();const canvas=document.getElementById(canvasId);if(!canvas)return;
-  MOBILE[key]=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:nutrients.map(n=>n.k),datasets:[{data:nutrients.map(n=>demTotal(n)),backgroundColor:nutrients.map(n=>n.c),borderRadius:4,maxBarThickness:35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v+' kg'},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:10,weight:'700'}},grid:{display:false}}}}});
+function mobileBnZonaFiltroChange(){
+  GB.zonaFiltro=document.getElementById('mBnZonaFiltro')?.value||null;
+  renderMobileBalance();
+}
+
+function mobileBalanceMacroChart(){
+  if(MOBILE.bnMacroChart){MOBILE.bnMacroChart.destroy();MOBILE.bnMacroChart=null;}
+  const canvas=document.getElementById('mBalanceMacroChart');if(!canvas)return;
+  const items=[
+    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+  ];
+  const labels=[],demandaKg=[],aplicadoKg=[],pctAplicado=[],darkColors=[],lightColors=[];
+  items.forEach(it=>{if(!it.dem||it.dem<=0)return;const dem=Number(it.dem)||0,apl=Number(it.sum)||0,pct=dem>0?Math.round(apl/dem*1000)/10:0;labels.push(it.k);demandaKg.push(dem);aplicadoKg.push(apl);pctAplicado.push(pct);darkColors.push(it.dark);lightColors.push(it.light);});
+  if(!labels.length)return;
+  const maxKg=Math.max(1,...demandaKg,...aplicadoKg),maxPct=Math.max(110,...pctAplicado);
+  const mBnPctPointLabels={id:'mBnPctPointLabels',afterDatasetsDraw(chart){const idx=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');if(idx<0)return;const meta=chart.getDatasetMeta(idx),c=chart.ctx;c.save();c.font='700 9px Inter, system-ui, sans-serif';c.fillStyle='#0F172A';c.textAlign='center';c.textBaseline='bottom';meta.data.forEach((pt,i)=>{const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';c.fillText(label,pt.x,Math.max(pt.y-7,11));});c.restore();}};
+  MOBILE.bnMacroChart=new Chart(canvas.getContext('2d'),{plugins:[mBnPctPointLabels],data:{labels,datasets:[
+    {type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,grouped:false,order:3,maxBarThickness:48,categoryPercentage:.7,barPercentage:.98,borderRadius:5},
+    {type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,grouped:false,order:2,maxBarThickness:28,categoryPercentage:.7,barPercentage:.82,borderRadius:5},
+    {type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:3.5,tension:.25,order:1},
+    {type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,borderDash:[5,4],borderWidth:1.5,tension:0,order:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,font:{size:8.5}}},tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{label:c=>{const i=c.dataIndex;if(c.dataset.label==='Demanda (kg)')return `Demanda: ${fmtKg(demandaKg[i])} kg`;if(c.dataset.label==='Aplicado (kg)')return `Aplicado: ${fmtKg(aplicadoKg[i])} kg`;return `Aplicado: ${pctAplicado[i]}%`;}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10,weight:'700'}}},yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,title:{display:true,text:'kg',font:{size:9}},ticks:{font:{size:8},callback:v=>v+' kg'},grid:{color:'#EEF2F6'},border:{display:false}},yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,title:{display:true,text:'%',font:{size:9}},ticks:{font:{size:8},callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}}}});
 }
 
 function renderMobileBalance(){
   const content=document.getElementById('mBalanceContent');if(!content)return;
+  if(MOBILE.bnMacroChart){MOBILE.bnMacroChart.destroy();MOBILE.bnMacroChart=null;}if(MOBILE.bnMicroChart){MOBILE.bnMicroChart.destroy();MOBILE.bnMicroChart=null;}
   if(!GB.loaded){content.innerHTML=mobileEmpty('ti-loader-2','Cargando balance','Consultando la demanda nutricional.');return;}
-  const available=G.zonas.filter(z=>GF.bal?.[z.id_zona]);if(!available.length){content.innerHTML=mobileEmpty('ti-chart-donut-off','Sin balance nutricional','No existen registros para las zonas del equipo.');return;}
-  const tN=demTotal(NUT_MACRO[0]),tP=demTotal(NUT_MACRO[1]),tK=demTotal(NUT_MACRO[2]),total=NUT_ALL.reduce((a,n)=>a+demTotal(n),0);const secondary=[...NUT_MACRO.slice(3),...NUT_MICRO].map(n=>({n,v:demTotal(n)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
-  content.innerHTML=`<div class="m-kpi-grid"><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Nitrógeno N</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${fmtKg(tN)}</div><div class="m-kpi-sub">kg · predio</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Fósforo P₂O₅</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${fmtKg(tP)}</div><div class="m-kpi-sub">kg · predio</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Potasio K₂O</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#7C3AED">${fmtKg(tK)}</div><div class="m-kpi-sub">kg · predio</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda total</span><span class="m-kpi-icon" style="background:#F0FDF4;color:#16A34A"><i class="ti ti-sum"></i></span></div><div class="m-kpi-value">${fmtKg(total)}</div><div class="m-kpi-sub">kg · ${available.length} zonas</div></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Macronutrientes</div><div class="m-chart-box small"><canvas id="mBalanceMacroChart"></canvas></div></div>
+  const predioZones=GB.zonasPredio||[];
+  if(!predioZones.length){content.innerHTML=mobileEmpty('ti-chart-donut-off','Sin balance nutricional','El predio no tiene zonas activas para evaluar.');return;}
+  const scopeZones=bnZonasScope(),available=scopeZones.filter(z=>GF.bal?.[z.id_zona]);
+  if(!available.length){content.innerHTML=mobileEmpty('ti-chart-donut-off','Sin balance nutricional','No existen registros para el alcance seleccionado.');return;}
+  const tN=demTotal(NUT_MACRO[0]),tP=demTotal(NUT_MACRO[1]),tK=demTotal(NUT_MACRO[2]),total=NUT_ALL.reduce((a,n)=>a+demTotal(n),0),secondary=[...NUT_MACRO.slice(3),...NUT_MICRO].map(n=>({n,v:demTotal(n)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const filterOpts=predioZones.map(z=>`<option value="${z.id_zona}" ${z.id_zona===GB.zonaFiltro?'selected':''}>${z.nombre||z.id_zona}</option>`).join('');
+  const scopeText=GB.zonaFiltro?`Zona ${predioZones.find(z=>z.id_zona===GB.zonaFiltro)?.nombre||GB.zonaFiltro}`:`Todo el predio · ${predioZones.length} zonas`;
+  content.innerHTML=`<div class="m-card"><div class="m-card-title"><i class="ti ti-map-2" style="color:#16A34A"></i>Alcance</div><div class="m-page-sub" style="margin:0">${scopeText}. Muestra la demanda nutricional y el avance acumulado de fertilización para el alcance seleccionado.</div><div class="m-scope-select"><select class="m-select" id="mBnZonaFiltro" onchange="mobileBnZonaFiltroChange()"><option value="">Todo el predio</option>${filterOpts}</select></div></div>
+    <div class="m-kpi-grid"><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Nitrógeno N</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${fmtKg(tN)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Fósforo P₂O₅</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${fmtKg(tP)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Potasio K₂O</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#7C3AED">${fmtKg(tK)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda total</span><span class="m-kpi-icon" style="background:#F0FDF4;color:#16A34A"><i class="ti ti-sum"></i></span></div><div class="m-kpi-value">${fmtKg(total)}</div><div class="m-kpi-sub">kg · ${available.length} zona(s)</div></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Barra oscura = kg aplicado · barra clara = kg de demanda · eje izquierdo = kg · eje derecho = % aplicado.</div><div class="m-chart-box"><canvas id="mBalanceMacroChart"></canvas></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes</div><div class="m-chart-box small"><canvas id="mBalanceMicroChart"></canvas></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-atom-2" style="color:#0891B2"></i>Secundarios y micros</div>${secondary.length?secondary.map(x=>`<div class="m-summary-row"><span><span class="m-zone-dot" style="display:inline-block;background:${x.n.c};margin-right:6px"></span>${x.n.k}</span><strong>${fmtKg(x.v)} kg</strong></div>`).join(''):'<div class="m-page-sub">Sin demanda registrada.</div>'}</div>
     <div class="m-section-title"><span>Detalle por zona</span><span>Toca para desplegar</span></div>
     ${available.map((z,i)=>{const id='mNut_'+mobileSafeId(z.id_zona),vals=NUT_ALL.map(n=>({n,v:demZona(z.id_zona,n)}));return `<div class="m-accordion" id="${id}"><button class="m-accordion-btn" onclick="toggleMobileZone('${id}')"><span><span class="m-zone-dot" style="display:inline-block;background:${ZC[i%ZC.length]};margin-right:7px"></span>${z.nombre||z.id_zona} · ${fmtKg(demZonaTot(z.id_zona))} kg</span><i class="ti ti-chevron-down"></i></button><div class="m-accordion-body"><div class="m-zone-nutrients">${vals.map(x=>`<div class="m-zone-nutrient"><b style="color:${x.n.c}">${x.n.k}</b><span>${x.v==null?'—':fmtKg(x.v)} kg</span></div>`).join('')}</div></div></div>`;}).join('')}`;
   if(MOBILE.module!=='balance'||!isMobileView())return;
-  mobileNutrientChart('mBalanceMacroChart',NUT_MACRO,'bnMacroChart');mobileNutrientChart('mBalanceMicroChart',NUT_MICRO,'bnMicroChart');
+  mobileBalanceMacroChart();mobileNutrientChart('mBalanceMicroChart',NUT_MICRO,'bnMicroChart');
 }
-
 function renderMobileAll(){
   if(!isMobileView())return;mobileSyncSelectors();
   if(MOBILE.module==='riego')renderMobileRiego();
