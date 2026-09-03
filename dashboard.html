@@ -2787,9 +2787,9 @@ function renderBnScope(){
   if(lbl){
     if(GB.zonaFiltro){
       const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
-      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO".`;
+      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}"
     } else {
-      lbl.textContent='Suma de TODAS las zonas del predio — demanda: Columna M de "DASHBOARD - BALANCE NUTRICIONAL"; suministrado: último acumulado de cada zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO", sumado entre zonas.';
+      lbl.textContent='Suma de TODAS las zonas del predio ;
     }
   }
 }
