@@ -2643,17 +2643,86 @@ function estChart(){
   if(GE.chart)GE.chart.destroy();
   const ctx=document.getElementById('estChart').getContext('2d');
   GE.chart=new Chart(ctx,{
-    data:{labels,datasets:[
-      {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
-      {type:'line',label:'Oferta base (m³)',data:ofertaBase,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
-      {type:'line',label:'Oferta planificada (m³)',data:ofertaPlanif,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
-      {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},
-      scales:{y:{beginAtZero:true,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v.toLocaleString('es-CL')}},
-        x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16}}}}
+    data:{
+      labels,
+      datasets:[
+        {
+          type:'bar',
+          label:'Demanda promedio (m³)',
+          data:demanda,
+          backgroundColor:'rgba(253, 186, 116, 0.75)',
+          borderColor:'#FB923C',
+          borderWidth:1,
+          borderRadius:4,
+          maxBarThickness:32,
+          order:3
+        },
+        {
+          type:'line',
+          label:'Oferta planificada (m³)',
+          data:ofertaPlanif,
+          borderColor:'#94A3B8',
+          borderDash:[5,4],
+          borderWidth:1.5,
+          pointRadius:0,
+          pointHoverRadius:4,
+          tension:0.3,
+          order:2
+        },
+        {
+          type:'line',
+          label:'Aporte lluvia (m³)',
+          data:aporte,
+          borderColor:'#16A34A',
+          backgroundColor:'rgba(22, 163, 74, 0.1)',
+          fill:true,
+          borderWidth:1.5,
+          pointRadius:0,
+          pointHoverRadius:5,
+          tension:0.1,
+          order:4
+        },
+        {
+          type:'line',
+          label:'Oferta base (m³)',
+          data:ofertaBase,
+          borderColor:'#2563EB',
+          backgroundColor:'#2563EB',
+          borderWidth:2.5,
+          pointRadius:0,
+          pointHoverRadius:6,
+          tension:0.4,
+          order:1
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
+        tooltip:{
+          backgroundColor:'rgba(15, 23, 42, 0.9)',
+          padding:10,
+          cornerRadius:8,
+          callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}
+        }
+      },
+      scales:{
+        y:{
+          beginAtZero:true,
+          grid:{color:'#E2E8F0',borderDash:[4,4]},
+          ticks:{font:{size:10},color:'#64748B',callback:v=>v.toLocaleString('es-CL')},
+          border:{display:false}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{font:{size:9},color:'#64748B',maxRotation:0,autoSkip:true,maxTicksLimit:16},
+          border:{display:false}
+        }
+      }
+    }
   });
 }
 
@@ -3389,7 +3458,15 @@ function renderMobileEstanque(){
   if(MOBILE.module!=='estanque'||!isMobileView()||!GE.temporada||!rowsTemp.length)return;
   const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
   const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
-  MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels,datasets:[{type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},{type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2,order:1},{type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',backgroundColor:'#94A3B8',borderDash:[5,4],tension:0,pointRadius:0,borderWidth:1.5,order:2},{type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
+  MOBILE.estChart=new Chart(canvas.getContext('2d'),{
+    data:{labels,datasets:[
+      {type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'rgba(253, 186, 116, 0.75)',borderColor:'#FB923C',borderWidth:1,borderRadius:4,maxBarThickness:26,order:3},
+      {type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',borderDash:[5,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:4,tension:.3,order:2},
+      {type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'rgba(22, 163, 74, 0.1)',fill:true,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,tension:.1,order:4},
+      {type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',borderWidth:2.5,pointRadius:0,pointHoverRadius:6,tension:.4,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}},tooltip:{backgroundColor:'rgba(15, 23, 42, 0.9)',padding:9,cornerRadius:8,callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},color:'#64748B',callback:v=>v.toLocaleString('es-CL')},grid:{color:'#E2E8F0',borderDash:[4,4]},border:{display:false}},x:{ticks:{font:{size:8},color:'#64748B',maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}}}}
+  });
 }
 function mobileNutrientChart(canvasId,nutrients,key){
   if(MOBILE[key]){MOBILE[key].destroy();MOBILE[key]=null;}const canvas=document.getElementById(canvasId);if(!canvas)return;
