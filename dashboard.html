@@ -1112,7 +1112,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div>
-          <div class="est-card-s">Azul océano = suministro · gris pizarra = demanda. Eje izquierdo = kg · eje derecho = % suministrado. Incluye referencia de 100% y porcentaje exacto.</div>
+          <div class="est-card-s">Barra oscura = kg aplicado · barra clara = kg de demanda. Eje izquierdo = kg · eje derecho = % aplicado. Incluye línea de referencia en 100% y etiqueta del porcentaje exacto sobre cada punto.</div>
           <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
         </div>
         <div class="est-card">
@@ -2643,79 +2643,17 @@ function estChart(){
   if(GE.chart)GE.chart.destroy();
   const ctx=document.getElementById('estChart').getContext('2d');
   GE.chart=new Chart(ctx,{
-    data:{
-      labels,
-      datasets:[
-        {
-          type:'bar',
-          label:'Demanda promedio (m³)',
-          data:demanda,
-          backgroundColor:'#F1F5F9',
-          borderColor:'#E2E8F0',
-          borderWidth:1,
-          borderRadius:4,
-          maxBarThickness:24,
-          order:3
-        },
-        {
-          type:'line',
-          label:'Oferta planificada (m³)',
-          data:ofertaPlanif,
-          borderColor:'#94A3B8',
-          borderDash:[4,4],
-          borderWidth:1.5,
-          pointRadius:0,
-          pointHoverRadius:4,
-          tension:0.3,
-          order:2
-        },
-        {
-          type:'line',
-          label:'Aporte lluvia (m³)',
-          data:aporte,
-          borderColor:'#10B981',
-          backgroundColor:'rgba(16, 185, 129, 0.1)',
-          fill:true,
-          borderWidth:1.5,
-          pointRadius:0,
-          pointHoverRadius:5,
-          tension:0.2,
-          order:4
-        },
-        {
-          type:'line',
-          label:'Oferta base (m³)',
-          data:ofertaBase,
-          borderColor:'#1E40AF',
-          backgroundColor:'#1E40AF',
-          borderWidth:2,
-          pointRadius:0,
-          pointHoverRadius:6,
-          tension:0.4,
-          order:1
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{position:'top',labels:{boxWidth:10,font:{size:12,family:"'Inter', sans-serif"},usePointStyle:true,color:'#334155'}},
-        tooltip:{
-          backgroundColor:'rgba(15, 23, 42, 0.95)',
-          titleFont:{size:13,family:"'Inter', sans-serif",weight:'normal'},
-          bodyFont:{size:12,family:"'Inter', sans-serif"},
-          padding:12,
-          cornerRadius:6,
-          callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('es-CL')} m³`}
-        }
-      },
-      scales:{
-        y:{beginAtZero:true,grid:{color:'#F8FAFC',borderDash:[3,3]},ticks:{font:{size:11},color:'#94A3B8',callback:v=>v.toLocaleString('es-CL')},border:{display:false}},
-        x:{grid:{display:false},ticks:{font:{size:10},color:'#94A3B8',maxRotation:0,autoSkip:true,maxTicksLimit:12},border:{display:false}}
-      }
-    }
+    data:{labels,datasets:[
+      {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
+      {type:'line',label:'Oferta base (m³)',data:ofertaBase,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
+      {type:'line',label:'Oferta planificada (m³)',data:ofertaPlanif,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
+      {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v.toLocaleString('es-CL')}},
+        x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16}}}}
   });
 }
 
@@ -2984,17 +2922,22 @@ function bnChartMacroPct(){
   const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
 
   const items=[
-    {k:'N',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
-    {k:'P₂O₅',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
-    {k:'K₂O',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
   ];
-  const labels=[],demandaKg=[],suministroKg=[],pctSuministro=[];
+  const labels=[],demandaKg=[],aplicadoKg=[],pctAplicado=[],darkColors=[],lightColors=[];
   items.forEach(it=>{
     if(!it.dem||it.dem<=0)return;
     const dem=Number(it.dem)||0;
-    const sum=Number(it.sum)||0;
-    const pct=dem>0?Math.round(sum/dem*1000)/10:0;
-    labels.push(it.k);demandaKg.push(dem);suministroKg.push(sum);pctSuministro.push(pct);
+    const apl=Number(it.sum)||0;
+    const pct=dem>0?Math.round(apl/dem*1000)/10:0;
+    labels.push(it.k);
+    demandaKg.push(dem);
+    aplicadoKg.push(apl);
+    pctAplicado.push(pct);
+    darkColors.push(it.dark);
+    lightColors.push(it.light);
   });
 
   if(!labels.length){
@@ -3002,17 +2945,27 @@ function bnChartMacroPct(){
     return;
   }
   bnChartHideEmptyState(canvas);
-  const maxKg=Math.max(1,...demandaKg,...suministroKg);
-  const maxPct=Math.max(110,...pctSuministro);
+
+  const maxKg=Math.max(1,...demandaKg,...aplicadoKg);
+  const maxPct=Math.max(110,...pctAplicado);
 
   const bnPctPointLabelsPlugin={
     id:'bnPctPointLabels',
-    afterDatasetsDraw(chart){
-      const dsIndex=chart.data.datasets.findIndex(ds=>ds.label==='Suministro (%)');
+    afterDatasetsDraw(chart,args,pluginOptions){
+      const dsIndex=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');
       if(dsIndex<0)return;
-      const meta=chart.getDatasetMeta(dsIndex),ctx2=chart.ctx;
-      ctx2.save();ctx2.font='700 11px Inter, system-ui, sans-serif';ctx2.fillStyle='#0F172A';ctx2.textAlign='center';ctx2.textBaseline='bottom';
-      meta.data.forEach((pt,i)=>{const label=(Math.round(pctSuministro[i]*10)/10).toFixed(1).replace('.0','')+'%';ctx2.fillText(label,pt.x,Math.max(pt.y-10,14));});
+      const meta=chart.getDatasetMeta(dsIndex);
+      const ctx2=chart.ctx;
+      ctx2.save();
+      ctx2.font='700 11px Inter, system-ui, sans-serif';
+      ctx2.fillStyle='#0F172A';
+      ctx2.textAlign='center';
+      ctx2.textBaseline='bottom';
+      meta.data.forEach((pt,i)=>{
+        const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';
+        const y=Math.max(pt.y-10,14);
+        ctx2.fillText(label, pt.x, y);
+      });
       ctx2.restore();
     }
   };
@@ -3020,22 +2973,57 @@ function bnChartMacroPct(){
   GB.chartMacro=new Chart(ctx,{
     plugins:[bnPctPointLabelsPlugin],
     data:{labels,datasets:[
-      {type:'bar',label:'Suministro (kg)',data:suministroKg,yAxisID:'yKg',backgroundColor:'#0369A1',borderColor:'#0369A1',borderWidth:0,borderRadius:4,maxBarThickness:20,categoryPercentage:.68,barPercentage:.78,order:2},
-      {type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',backgroundColor:'#475569',borderColor:'#475569',borderWidth:0,borderRadius:4,maxBarThickness:20,categoryPercentage:.68,barPercentage:.78,order:3},
-      {type:'line',label:'Suministro (%)',data:pctSuministro,yAxisID:'yPct',borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#FFFFFF',pointBorderWidth:2,pointRadius:4,pointHoverRadius:5,tension:.25,order:1},
-      {type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',borderColor:'#10B981',backgroundColor:'#10B981',pointRadius:0,pointHoverRadius:0,borderDash:[5,4],borderWidth:1.5,tension:0,order:0}
+      {
+        type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',
+        backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,
+        grouped:false,order:3,maxBarThickness:62,categoryPercentage:.62,barPercentage:.98,
+        borderRadius:6
+      },
+      {
+        type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',
+        backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,
+        grouped:false,order:2,maxBarThickness:36,categoryPercentage:.62,barPercentage:.82,
+        borderRadius:6
+      },
+      {
+        type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',
+        borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#FFFFFF',
+        pointBorderWidth:2,pointRadius:4,pointHoverRadius:5,tension:0.25,order:1
+      },
+      {
+        type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',
+        borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,pointHoverRadius:0,
+        borderDash:[6,5],borderWidth:2,tension:0,order:0
+      }
     ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:12},usePointStyle:true,color:'#334155'}},
-        tooltip:{backgroundColor:'rgba(15, 23, 42, 0.95)',padding:12,cornerRadius:6,filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:11,usePointStyle:true,font:{size:10.5}}},
+        tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{
           title:items2=>items2[0].label,
-          label:c=>{const i=c.dataIndex;if(c.dataset.label==='Suministro (kg)')return ` Suministro: ${fmtKg(suministroKg[i])} kg`;if(c.dataset.label==='Demanda (kg)')return ` Demanda: ${fmtKg(demandaKg[i])} kg`;return ` Suministro: ${pctSuministro[i]}%`;},
-          afterBody:items2=>{const i=items2[0].dataIndex,diff=suministroKg[i]-demandaKg[i];return diff>=0?[`Exceso sobre demanda: ${fmtKg(diff)} kg`]:[`Restante para cubrir demanda: ${fmtKg(Math.abs(diff))} kg`];}
+          label:c=>{
+            const i=c.dataIndex;
+            if(c.dataset.label==='Demanda (kg)')return `Demanda: ${fmtKg(demandaKg[i])} kg`;
+            if(c.dataset.label==='Aplicado (kg)')return `Aplicado: ${fmtKg(aplicadoKg[i])} kg`;
+            return `Aplicado: ${pctAplicado[i]}%`;
+          },
+          afterBody:items2=>{
+            const real=items2.find(it=>it.dataset.label==='Aplicado (kg)')||items2[0];
+            const i=real.dataIndex;
+            const diff=aplicadoKg[i]-demandaKg[i];
+            return diff>=0
+              ? [`Exceso sobre demanda: ${fmtKg(diff)} kg`]
+              : [`Restante para cubrir demanda: ${fmtKg(Math.abs(diff))} kg`];
+          }
         }}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{size:10},color:'#94A3B8'},border:{display:false}},
-        yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,title:{display:true,text:'kg'},ticks:{font:{size:11},color:'#94A3B8',callback:v=>v+' kg'},grid:{color:'#F1F5F9'},border:{display:false}},
-        yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,title:{display:true,text:'%'},ticks:{font:{size:11},color:'#94A3B8',callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}
+        x:{grid:{display:false}},
+        yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,
+          title:{display:true,text:'kg'},
+          ticks:{callback:v=>v+' kg'},grid:{color:'#EEF2F6',drawTicks:false},border:{display:false}},
+        yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,
+          title:{display:true,text:'%'},
+          ticks:{callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}
       }}
   });
 }
@@ -3401,15 +3389,7 @@ function renderMobileEstanque(){
   if(MOBILE.module!=='estanque'||!isMobileView()||!GE.temporada||!rowsTemp.length)return;
   const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
   const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
-  MOBILE.estChart=new Chart(canvas.getContext('2d'),{
-    data:{labels,datasets:[
-      {type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#F1F5F9',borderColor:'#E2E8F0',borderWidth:1,borderRadius:4,maxBarThickness:20,order:3},
-      {type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',borderDash:[4,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:4,tension:.3,order:2},
-      {type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#10B981',backgroundColor:'rgba(16, 185, 129, 0.1)',fill:true,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,tension:.2,order:4},
-      {type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#1E40AF',backgroundColor:'#1E40AF',borderWidth:2,pointRadius:0,pointHoverRadius:6,tension:.4,order:1}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,font:{size:9,family:"'Inter', sans-serif"},color:'#334155'}},tooltip:{backgroundColor:'rgba(15, 23, 42, 0.95)',padding:10,cornerRadius:6,callbacks:{label:c=>` ${c.dataset.label}: ${Math.round(c.parsed.y).toLocaleString('es-CL')} m³`}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},color:'#94A3B8',callback:v=>v.toLocaleString('es-CL')},grid:{color:'#F8FAFC',borderDash:[3,3]},border:{display:false}},x:{ticks:{font:{size:8},color:'#94A3B8',maxRotation:0,autoSkip:true,maxTicksLimit:9},grid:{display:false},border:{display:false}}}}
-  });
+  MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels,datasets:[{type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},{type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2,order:1},{type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',backgroundColor:'#94A3B8',borderDash:[5,4],tension:0,pointRadius:0,borderWidth:1.5,order:2},{type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
 }
 function mobileNutrientChart(canvasId,nutrients,key){
   if(MOBILE[key]){MOBILE[key].destroy();MOBILE[key]=null;}const canvas=document.getElementById(canvasId);if(!canvas)return;
@@ -3425,21 +3405,21 @@ function mobileBalanceMacroChart(){
   if(MOBILE.bnMacroChart){MOBILE.bnMacroChart.destroy();MOBILE.bnMacroChart=null;}
   const canvas=document.getElementById('mBalanceMacroChart');if(!canvas)return;
   const items=[
-    {k:'N',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
-    {k:'P₂O₅',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
-    {k:'K₂O',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
   ];
-  const labels=[],demandaKg=[],suministroKg=[],pctSuministro=[];
-  items.forEach(it=>{if(!it.dem||it.dem<=0)return;const dem=Number(it.dem)||0,sum=Number(it.sum)||0,pct=dem>0?Math.round(sum/dem*1000)/10:0;labels.push(it.k);demandaKg.push(dem);suministroKg.push(sum);pctSuministro.push(pct);});
+  const labels=[],demandaKg=[],aplicadoKg=[],pctAplicado=[],darkColors=[],lightColors=[];
+  items.forEach(it=>{if(!it.dem||it.dem<=0)return;const dem=Number(it.dem)||0,apl=Number(it.sum)||0,pct=dem>0?Math.round(apl/dem*1000)/10:0;labels.push(it.k);demandaKg.push(dem);aplicadoKg.push(apl);pctAplicado.push(pct);darkColors.push(it.dark);lightColors.push(it.light);});
   if(!labels.length)return;
-  const maxKg=Math.max(1,...demandaKg,...suministroKg),maxPct=Math.max(110,...pctSuministro);
-  const mBnPctPointLabels={id:'mBnPctPointLabels',afterDatasetsDraw(chart){const idx=chart.data.datasets.findIndex(ds=>ds.label==='Suministro (%)');if(idx<0)return;const meta=chart.getDatasetMeta(idx),c=chart.ctx;c.save();c.font='700 9px Inter, system-ui, sans-serif';c.fillStyle='#0F172A';c.textAlign='center';c.textBaseline='bottom';meta.data.forEach((pt,i)=>{const label=(Math.round(pctSuministro[i]*10)/10).toFixed(1).replace('.0','')+'%';c.fillText(label,pt.x,Math.max(pt.y-7,11));});c.restore();}};
+  const maxKg=Math.max(1,...demandaKg,...aplicadoKg),maxPct=Math.max(110,...pctAplicado);
+  const mBnPctPointLabels={id:'mBnPctPointLabels',afterDatasetsDraw(chart){const idx=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');if(idx<0)return;const meta=chart.getDatasetMeta(idx),c=chart.ctx;c.save();c.font='700 9px Inter, system-ui, sans-serif';c.fillStyle='#0F172A';c.textAlign='center';c.textBaseline='bottom';meta.data.forEach((pt,i)=>{const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';c.fillText(label,pt.x,Math.max(pt.y-7,11));});c.restore();}};
   MOBILE.bnMacroChart=new Chart(canvas.getContext('2d'),{plugins:[mBnPctPointLabels],data:{labels,datasets:[
-    {type:'bar',label:'Suministro (kg)',data:suministroKg,yAxisID:'yKg',backgroundColor:'#0369A1',borderRadius:4,maxBarThickness:16,categoryPercentage:.72,barPercentage:.78,order:2},
-    {type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',backgroundColor:'#475569',borderRadius:4,maxBarThickness:16,categoryPercentage:.72,barPercentage:.78,order:3},
-    {type:'line',label:'Suministro (%)',data:pctSuministro,yAxisID:'yPct',borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:3.5,tension:.25,order:1},
-    {type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',borderColor:'#10B981',backgroundColor:'#10B981',pointRadius:0,borderDash:[5,4],borderWidth:1.5,tension:0,order:0}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:8,usePointStyle:true,font:{size:8.5},color:'#334155'}},tooltip:{backgroundColor:'rgba(15, 23, 42, 0.95)',padding:10,cornerRadius:6,filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{label:c=>{const i=c.dataIndex;if(c.dataset.label==='Suministro (kg)')return ` Suministro: ${fmtKg(suministroKg[i])} kg`;if(c.dataset.label==='Demanda (kg)')return ` Demanda: ${fmtKg(demandaKg[i])} kg`;return ` Suministro: ${pctSuministro[i]}%`;}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10,weight:'700'},color:'#94A3B8'},border:{display:false}},yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,title:{display:true,text:'kg',font:{size:9}},ticks:{font:{size:8},color:'#94A3B8',callback:v=>v+' kg'},grid:{color:'#F1F5F9'},border:{display:false}},yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,title:{display:true,text:'%',font:{size:9}},ticks:{font:{size:8},color:'#94A3B8',callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}}}});
+    {type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,grouped:false,order:3,maxBarThickness:48,categoryPercentage:.7,barPercentage:.98,borderRadius:5},
+    {type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,grouped:false,order:2,maxBarThickness:28,categoryPercentage:.7,barPercentage:.82,borderRadius:5},
+    {type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:3.5,tension:.25,order:1},
+    {type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,borderDash:[5,4],borderWidth:1.5,tension:0,order:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,font:{size:8.5}}},tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{label:c=>{const i=c.dataIndex;if(c.dataset.label==='Demanda (kg)')return `Demanda: ${fmtKg(demandaKg[i])} kg`;if(c.dataset.label==='Aplicado (kg)')return `Aplicado: ${fmtKg(aplicadoKg[i])} kg`;return `Aplicado: ${pctAplicado[i]}%`;}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10,weight:'700'}}},yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,title:{display:true,text:'kg',font:{size:9}},ticks:{font:{size:8},callback:v=>v+' kg'},grid:{color:'#EEF2F6'},border:{display:false}},yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,title:{display:true,text:'%',font:{size:9}},ticks:{font:{size:8},callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}}}});
 }
 
 function renderMobileBalance(){
@@ -3455,7 +3435,7 @@ function renderMobileBalance(){
   const scopeText=GB.zonaFiltro?`Zona ${predioZones.find(z=>z.id_zona===GB.zonaFiltro)?.nombre||GB.zonaFiltro}`:`Todo el predio · ${predioZones.length} zonas`;
   content.innerHTML=`<div class="m-card"><div class="m-card-title"><i class="ti ti-map-2" style="color:#16A34A"></i>Alcance</div><div class="m-page-sub" style="margin:0">${scopeText}. Muestra la demanda nutricional y el avance acumulado de fertilización para el alcance seleccionado.</div><div class="m-scope-select"><select class="m-select" id="mBnZonaFiltro" onchange="mobileBnZonaFiltroChange()"><option value="">Todo el predio</option>${filterOpts}</select></div></div>
     <div class="m-kpi-grid"><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Nitrógeno N</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${fmtKg(tN)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Fósforo P₂O₅</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${fmtKg(tP)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Potasio K₂O</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#7C3AED">${fmtKg(tK)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda total</span><span class="m-kpi-icon" style="background:#F0FDF4;color:#16A34A"><i class="ti ti-sum"></i></span></div><div class="m-kpi-value">${fmtKg(total)}</div><div class="m-kpi-sub">kg · ${available.length} zona(s)</div></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Azul océano = suministro · gris pizarra = demanda · eje izquierdo = kg · eje derecho = % suministrado.</div><div class="m-chart-box"><canvas id="mBalanceMacroChart"></canvas></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Barra oscura = kg aplicado · barra clara = kg de demanda · eje izquierdo = kg · eje derecho = % aplicado.</div><div class="m-chart-box"><canvas id="mBalanceMacroChart"></canvas></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes</div><div class="m-chart-box small"><canvas id="mBalanceMicroChart"></canvas></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-atom-2" style="color:#0891B2"></i>Secundarios y micros</div>${secondary.length?secondary.map(x=>`<div class="m-summary-row"><span><span class="m-zone-dot" style="display:inline-block;background:${x.n.c};margin-right:6px"></span>${x.n.k}</span><strong>${fmtKg(x.v)} kg</strong></div>`).join(''):'<div class="m-page-sub">Sin demanda registrada.</div>'}</div>
     <div class="m-section-title"><span>Detalle por zona</span><span>Toca para desplegar</span></div>
