@@ -1095,7 +1095,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div>
-          <div class="est-card-s">Barra oscura = kg aplicado · barra clara = kg de demanda. Eje izquierdo = kg · eje derecho = % aplicado.</div>
+          <div class="est-card-s">Barra oscura = kg aplicado · barra clara = kg de demanda. Eje izquierdo = kg · eje derecho = % aplicado. Incluye línea de referencia en 100% y etiqueta del porcentaje exacto sobre cada punto.</div>
           <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
         </div>
         <div class="est-card">
@@ -2649,9 +2649,9 @@ function renderBnScope(){
   if(lbl){
     if(GB.zonaFiltro){
       const z=GB.zonasPredio.find(zz=>zz.id_zona===GB.zonaFiltro);
-      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona `;
+      lbl.textContent=`Zona "${z?.nombre||GB.zonaFiltro}" — demanda desde sc_balance_nutricional; suministrado = último registro de esta zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO".`;
     } else {
-      lbl.textContent='Gráfico de balance nutricional por Predio y Zona';
+      lbl.textContent='Suma de TODAS las zonas del predio — demanda: Columna M de "DASHBOARD - BALANCE NUTRICIONAL"; suministrado: último acumulado de cada zona en "DASHBOARD - RECOMENDACIONES FERTIRIEGO", sumado entre zonas.';
     }
   }
 }
@@ -2796,30 +2796,57 @@ function bnChartMacroPct(){
   const maxKg=Math.max(1,...demandaKg,...aplicadoKg);
   const maxPct=Math.max(110,...pctAplicado);
 
+  const bnPctPointLabelsPlugin={
+    id:'bnPctPointLabels',
+    afterDatasetsDraw(chart,args,pluginOptions){
+      const dsIndex=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');
+      if(dsIndex<0)return;
+      const meta=chart.getDatasetMeta(dsIndex);
+      const ctx2=chart.ctx;
+      ctx2.save();
+      ctx2.font='700 11px Inter, system-ui, sans-serif';
+      ctx2.fillStyle='#0F172A';
+      ctx2.textAlign='center';
+      ctx2.textBaseline='bottom';
+      meta.data.forEach((pt,i)=>{
+        const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';
+        const y=Math.max(pt.y-10,14);
+        ctx2.fillText(label, pt.x, y);
+      });
+      ctx2.restore();
+    }
+  };
+
   GB.chartMacro=new Chart(ctx,{
+    plugins:[bnPctPointLabelsPlugin],
     data:{labels,datasets:[
       {
         type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',
         backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,
-        grouped:false,order:2,maxBarThickness:62,categoryPercentage:.62,barPercentage:.98,
+        grouped:false,order:3,maxBarThickness:62,categoryPercentage:.62,barPercentage:.98,
         borderRadius:6
       },
       {
         type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',
         backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,
-        grouped:false,order:1,maxBarThickness:36,categoryPercentage:.62,barPercentage:.82,
+        grouped:false,order:2,maxBarThickness:36,categoryPercentage:.62,barPercentage:.82,
         borderRadius:6
       },
       {
         type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',
         borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#FFFFFF',
-        pointBorderWidth:2,pointRadius:4,pointHoverRadius:5,tension:0.25,order:0
+        pointBorderWidth:2,pointRadius:4,pointHoverRadius:5,tension:0.25,order:1
+      },
+      {
+        type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',
+        borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,pointHoverRadius:0,
+        borderDash:[6,5],borderWidth:2,tension:0,order:0
       }
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'bottom',labels:{boxWidth:11,usePointStyle:true,font:{size:10.5}}},
-        tooltip:{callbacks:{
+        tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{
           title:items2=>items2[0].label,
           label:c=>{
             const i=c.dataIndex;
@@ -2828,7 +2855,8 @@ function bnChartMacroPct(){
             return `Aplicado: ${pctAplicado[i]}%`;
           },
           afterBody:items2=>{
-            const i=items2[0].dataIndex;
+            const real=items2.find(it=>it.dataset.label==='Aplicado (kg)')||items2[0];
+            const i=real.dataIndex;
             const diff=aplicadoKg[i]-demandaKg[i];
             return diff>=0
               ? [`Exceso sobre demanda: ${fmtKg(diff)} kg`]
