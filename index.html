@@ -605,7 +605,7 @@
   .calc-warn { color: #a06a00; font-weight: 600; }
 
   /* Planes secundarios */
-  .plan-extra { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-top: 14px; }
+  .plan-extra { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
   .xp {
     background: #fff; border: 1px solid var(--line); border-radius: var(--radius-md);
     padding: 20px 22px; box-shadow: var(--shadow-sm);
@@ -775,7 +775,6 @@
       <a href="#problema">El problema</a>
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#plataforma">La plataforma</a>
-      <a href="#beneficios">Beneficios</a>
       <a href="#precios">Precios</a>
       <a href="#clientes">Clientes</a>
       <a href="#contacto">Contáctanos</a>
@@ -845,6 +844,69 @@
           <span class="hc-val">3.9 h <small>/riego</small></span>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLATAFORMA · DEMO INTERACTIVO ===== -->
+<section class="platform" id="plataforma">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">La plataforma</span>
+      <h2 class="section-title">Tu huerto completo, semana a semana, en una sola pantalla.</h2>
+      <p class="section-lead">Cada zona, cada día, desde la demanda hídrica hasta el balance nutricional: toda tu operación agrícola en una sola plataforma.</p>
+      <div class="demo-hint">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.5a1.5 1.5 0 0 1 3 0V13a7 7 0 0 1-7 7h-1a7 7 0 0 1-7-7v-1.5a1.5 1.5 0 0 1 3 0V13"/></svg>
+        Pruébala aquí mismo — cambia de semana, toca un riego
+      </div>
+    </div>
+
+    <div class="demo-frame reveal d2">
+      <div class="demo-chrome">
+        <div class="demo-dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <div class="demo-url">app.cronoriego.com</div>
+        <div class="demo-live"><i></i>DEMO</div>
+      </div>
+
+      <div class="demo-head">
+        <div class="demo-logo"><span class="a">CRONO</span><span class="b">RIEGO</span></div>
+        <div class="demo-chip"><span>PREDIO</span><b>Agrícola El Cruce</b></div>
+        <div class="demo-chip"><span>EQUIPO</span><b>Cabezal Norte</b></div>
+        <div class="demo-wk">
+          <button id="wPrev" aria-label="Semana anterior">‹</button>
+          <div class="demo-wk-lbl"><b id="wLbl">Semana 47</b><span id="wRange">18 – 24 nov</span></div>
+          <button id="wNext" aria-label="Semana siguiente">›</button>
+        </div>
+        <div class="demo-temp">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+          <b id="wTemp">24</b>°C
+        </div>
+      </div>
+
+      <div class="demo-tabs" role="tablist">
+        <button class="dt active" data-tab="riego" role="tab">Riego</button>
+        <button class="dt" data-tab="ferti" role="tab">Fertirriego</button>
+        <button class="dt" data-tab="balance" role="tab">Balance nutricional</button>
+      </div>
+
+      <div class="demo-body">
+        <div class="demo-kpis" id="dKpis"></div>
+        <div class="demo-split">
+          <div class="demo-card">
+            <div class="demo-card-t" id="dCardT">Programa semanal de riego</div>
+            <div class="demo-scroll"><div id="dMain"></div></div>
+          </div>
+          <div class="demo-side" id="dSide"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-foot reveal">
+      <p>Datos de demostración de un predio ficticio. Tu plataforma usa los datos reales de tu huerto.</p>
+      <a href="#contacto" class="btn-primary" style="padding:13px 22px;font-size:15px">
+        Quiero la mía
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
     </div>
   </div>
 </section>
@@ -931,117 +993,6 @@
   </div>
 </section>
 
-<!-- ===== PLATAFORMA · DEMO INTERACTIVO ===== -->
-<section class="platform" id="plataforma">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">La plataforma</span>
-      <h2 class="section-title">Tu huerto completo, semana a semana, en una sola pantalla.</h2>
-      <p class="section-lead">Cada zona, cada día, desde la demanda hídrica hasta el balance nutricional: toda tu operación agrícola en una sola plataforma.</p>
-      <div class="demo-hint">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 11V4.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.5a1.5 1.5 0 0 1 3 0V13a7 7 0 0 1-7 7h-1a7 7 0 0 1-7-7v-1.5a1.5 1.5 0 0 1 3 0V13"/></svg>
-        Pruébala aquí mismo — cambia de semana, toca un riego
-      </div>
-    </div>
-
-    <div class="demo-frame reveal d2">
-      <div class="demo-chrome">
-        <div class="demo-dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
-        <div class="demo-url">app.cronoriego.com</div>
-        <div class="demo-live"><i></i>DEMO</div>
-      </div>
-
-      <div class="demo-head">
-        <div class="demo-logo"><span class="a">CRONO</span><span class="b">RIEGO</span></div>
-        <div class="demo-chip"><span>PREDIO</span><b>Agrícola El Cruce</b></div>
-        <div class="demo-chip"><span>EQUIPO</span><b>Cabezal Norte</b></div>
-        <div class="demo-wk">
-          <button id="wPrev" aria-label="Semana anterior">‹</button>
-          <div class="demo-wk-lbl"><b id="wLbl">Semana 47</b><span id="wRange">18 – 24 nov</span></div>
-          <button id="wNext" aria-label="Semana siguiente">›</button>
-        </div>
-        <div class="demo-temp">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
-          <b id="wTemp">24</b>°C
-        </div>
-      </div>
-
-      <div class="demo-tabs" role="tablist">
-        <button class="dt active" data-tab="riego" role="tab">Riego</button>
-        <button class="dt" data-tab="ferti" role="tab">Fertirriego</button>
-        <button class="dt" data-tab="balance" role="tab">Balance nutricional</button>
-      </div>
-
-      <div class="demo-body">
-        <div class="demo-kpis" id="dKpis"></div>
-        <div class="demo-split">
-          <div class="demo-card">
-            <div class="demo-card-t" id="dCardT">Programa semanal de riego</div>
-            <div class="demo-scroll"><div id="dMain"></div></div>
-          </div>
-          <div class="demo-side" id="dSide"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="demo-foot reveal">
-      <p>Datos de demostración de un predio ficticio. Tu plataforma usa los datos reales de tu huerto.</p>
-      <a href="#contacto" class="btn-primary" style="padding:13px 22px;font-size:15px">
-        Quiero la mía
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ===== BENEFITS ===== -->
-<section class="benefits" id="beneficios">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Beneficios</span>
-      <h2 class="section-title">Lo que ganas con CRONORIEGO</h2>
-      <p class="section-lead">Menos desperdicio, más producción y un control real de cada recurso que entra a tu huerto.</p>
-    </div>
-    <div class="benefits-grid">
-      <div class="benefit reveal d1">
-        <div class="benefit-icon b-water">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
-        </div>
-        <h3>Agua</h3>
-        <p>Aumenta la productividad del agua.</p>
-      </div>
-      <div class="benefit reveal d2">
-        <div class="benefit-icon b-energy">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <h3>Energía</h3>
-        <p>Control del costo de bombeo — cada encendido de bomba tiene un propósito exacto.</p>
-      </div>
-      <div class="benefit reveal d3">
-        <div class="benefit-icon b-leaf">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20a8 8 0 0 1-8-8V4h8a8 8 0 0 1 8 8v8h-8z"/><path d="M3 4c6 4 10 10 8 16"/></svg>
-        </div>
-        <h3>Fertilizantes</h3>
-        <p>Reducción de la lixiviación — llega con agua y nutrientes exactamente donde quieres.</p>
-      </div>
-      <div class="benefit reveal d4">
-        <div class="benefit-icon b-drop">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/><path d="M8 14l8 0"/></svg>
-        </div>
-        <h3>Fertiriego</h3>
-        <p>Dosis de fertilizante para el fertiriego para lograr concentraciones óptimas en la zona de raíces.</p>
-      </div>
-      <div class="benefit reveal d4">
-        <div class="benefit-icon b-chart">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        </div>
-        <h3>Producción</h3>
-        <p>Aumento de la producción al eliminar el estrés hídrico.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ===== PRICING ===== -->
 <section id="precios">
   <div class="container">
@@ -1067,8 +1018,6 @@
       <div class="calc-note" id="cNote"></div>
     </div>
 
-    <div class="pricing-grid" id="planGrid"></div>
-
     <div class="cot reveal">
       <div class="cot-h">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="4" width="3" height="14"/></svg>
@@ -1082,15 +1031,13 @@
             <th>Tarifa base</th>
             <th id="thHa">Hectáreas</th>
             <th id="thZn">Zonas</th>
-            <th>Onboarding</th>
             <th class="hi">Total año 1</th>
-            <th>Pie al firmar</th>
-            <th>Saldo a liquidación</th>
+            <th>Onboarding <span style="display:block;font-weight:600;opacity:.7;text-transform:none;letter-spacing:0;font-size:9px;margin-top:2px">(solo 1er año)</span></th>
           </tr></thead>
           <tbody id="cotBody"></tbody>
         </table>
       </div>
-      <div class="cot-f">Pie al firmar = 50% del valor anual + onboarding · Saldo a liquidación = 50% restante. Valores en USD, sin IVA.</div>
+      <div class="cot-f">El fee de onboarding es un pago único que aplica solo el primer año. Valores en USD, sin IVA.</div>
     </div>
 
     <div class="onb-note reveal">
@@ -1104,11 +1051,6 @@
       <h3 style="font-size: 22px; color: var(--teal-900)">Otras modalidades</h3>
     </div>
     <div class="plan-extra">
-      <div class="xp reveal d1">
-        <div class="xp-n">PLAN INVIERNO</div>
-        <div class="xp-m">Clima y Balance · temporada de receso</div>
-        <div class="xp-p">$200<small>base anual + $15/ha + $15/zona</small></div>
-      </div>
       <a href="#contacto" class="xp xp-cta reveal d2">
         <div class="xp-n">GRANDES SUPERFICIES</div>
         <div class="xp-m">Dashboard holding · multi-predio</div>
@@ -1659,8 +1601,6 @@
     { id:'PL-03', n:'Premium',         mod:'Riego + Fertirriego + Estanque + Balance',
       base:900,   tha:50, tzn:15, onb:[300,450,600,1500], seg:'agri', pop:false, items:[
       'Todo lo del plan Pro','Balance nutricional por zona','Demanda de macro y micronutrientes','Reporte de temporada'] },
-    { id:'PL-04', n:'Plan Invierno',   mod:'Clima y Balance (receso)',
-      base:200,   tha:15, tzn:15, onb:[300,450,600,1500], seg:'agri', pop:false, items:[] },
     // Sobre 100 ha (Enterprise B2B / B2B+) se cotiza a medida — no se publican precios.
   ];
   const usd = (v) => '$' + Math.round(v).toLocaleString('es-CL');
@@ -1697,34 +1637,10 @@
     document.getElementById('thHa').innerHTML = `Hectáreas <b>(${ha})</b>`;
     document.getElementById('thZn').innerHTML = `Zonas <b>(${zn})</b>`;
 
-    // --- Tarjetas (los 3 planes agrícolas principales) ---
-    document.getElementById('planGrid').style.display = agri ? '' : 'none';
-    document.getElementById('planGrid').innerHTML = !agri ? '' : PLANES.filter(p => p.items.length).map((p, i) => {
-      const c = cotiza(p, ha, zn);
-      return `<div class="price ${p.pop ? 'popular' : ''} reveal visible d${i+1}">
-        ${p.pop ? '<span class="popular-tag">Más elegido</span>' : ''}
-        <div class="plan-name">${p.n}</div>
-        <div class="plan-mod">${p.mod}</div>
-        <div class="plan-base"><sup>$</sup>${p.base}<small>tarifa base anual (USD)</small></div>
-        <div class="plan-add">
-          <div class="plan-add-row"><span>${ha} ha × ${usd(p.tha)}/ha</span><b>${usd(c.cha)}</b></div>
-          <div class="plan-add-row"><span>${zn} zonas × ${usd(p.tzn)}/zona</span><b>${usd(c.czn)}</b></div>
-        </div>
-        <div class="plan-total">
-          <span>Tu año 1</span>
-          <b>${usd(c.total)}</b>
-          <i>${usd(c.anual)} anual + ${usd(c.onb || 0)} de onboarding</i>
-        </div>
-        <ul class="price-features">
-          ${p.items.map(t => `<li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${t}</li>`).join('')}
-        </ul>
-      </div>`;
-    }).join('');
-
-    // --- Tabla del cotizador (los 6 planes, como en el Sheet) ---
+    // --- Tabla del cotizador (los planes, como en el Sheet) ---
     const rec = recomendado(ha);
     if (!agri) {
-      document.getElementById('cotBody').innerHTML = `<tr><td colspan="8" class="cot-ent">
+      document.getElementById('cotBody').innerHTML = `<tr><td colspan="6" class="cot-ent">
         <b>Sobre 100 hectáreas, consultar aquí</b>
         <span>Los predios grandes y los holding multi-predio se cotizan a medida, según tu operación.</span>
         <a href="#contacto">Conversemos
@@ -1742,10 +1658,8 @@
         <td>${usd(p.base)}</td>
         <td>${p.tha ? `${usd(c.cha)}<span class="cot-calc">${ha} × ${usd(p.tha)}</span>` : '<span class="cot-na">—</span>'}</td>
         <td>${p.tzn ? `${usd(c.czn)}<span class="cot-calc">${zn} × ${usd(p.tzn)}</span>` : '<span class="cot-na">—</span>'}</td>
-        <td>${c.onb === null ? '<span class="cot-na">N/A</span>' : usd(c.onb)}</td>
         <td class="cot-tot">${usd(c.total)}</td>
-        <td>${usd(c.pie)}</td>
-        <td>${usd(c.saldo)}</td>
+        <td>${c.onb === null ? '<span class="cot-na">N/A</span>' : usd(c.onb)}</td>
       </tr>`;
     }).join('');
   }
