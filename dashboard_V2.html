@@ -1343,8 +1343,8 @@ function showConfirmToast(text){
   el._t=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='login.html';return null;}return session;}
-async function logout(){await db.auth.signOut();window.location.href='login.html';}
+async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='loginV2.html';return null;}return session;}
+async function logout(){await db.auth.signOut();window.location.href='loginV2.html';}
 
 function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
