@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CronoRiego · Plataforma B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --ink:#0F172A;--ink2:#334155;--muted:#64748B;--subtle:#94A3B8;
+  --line:#E2E8F0;--line2:#F1F5F9;--bg:#F8FAFC;--white:#FFFFFF;
+  --blue:#2563EB;--green:#16A34A;--red:#DC2626;--amber:#D97706;
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;display:grid;place-items:center;padding:20px;
+  font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  font-size:13px;-webkit-font-smoothing:antialiased;}
+.card{width:100%;max-width:400px;background:var(--white);border:1px solid var(--line);
+  border-radius:18px;padding:30px;box-shadow:var(--shadow-lg);}
+.logo{display:flex;align-items:baseline;justify-content:center;font-weight:800;
+  font-size:22px;letter-spacing:-.4px;margin-bottom:8px;}
+.badge{display:block;text-align:center;font-size:10px;font-weight:800;letter-spacing:.1em;
+  color:#B45309;background:#FFFBEB;border:1px solid #FDE68A;border-radius:999px;
+  padding:5px 10px;width:fit-content;margin:0 auto 6px;}
+.sub{text-align:center;font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:22px;}
+.fl{display:block;font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted);margin:14px 0 5px;}
+.fi-w{position:relative;}
+.fi{width:100%;padding:11px 38px 11px 12px;border:1.5px solid var(--line);
+  border-radius:10px;font-family:inherit;font-size:13.5px;outline:none;
+  transition:border-color .15s,box-shadow .15s;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;
+  background:none;cursor:pointer;color:var(--subtle);font-size:16px;display:grid;place-items:center;}
+.btn{width:100%;margin-top:20px;padding:12px;background:var(--blue);color:#fff;
+  border:none;border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:700;
+  cursor:pointer;transition:background .15s;display:flex;align-items:center;
+  justify-content:center;gap:8px;}
+.btn:not(:disabled):hover{background:#1d4ed8;}
+.btn:disabled{opacity:.55;cursor:not-allowed;}
+.msg{display:none;font-size:11.5px;padding:10px 12px;border-radius:9px;
+  margin-top:14px;border:1px solid transparent;line-height:1.45;}
+.msg.err{display:block;background:#FEF2F2;color:var(--red);border-color:#FECACA;}
+.msg.ok{display:block;background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
+.foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line2);
+  font-size:10.5px;color:var(--subtle);line-height:1.5;text-align:center;}
+.foot code{background:var(--line2);padding:1px 5px;border-radius:4px;font-size:10px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span></div>
+  <div class="badge">PLATAFORMA B · PRUEBAS</div>
+  <div class="sub">Entorno espejo con los datos del motor de cálculo.<br>No es producción.</div>
+
+  <label class="fl" for="em">Correo</label>
+  <div class="fi-w">
+    <input type="email" id="em" class="fi" placeholder="tu@correo.com" autocomplete="username">
+  </div>
+
+  <label class="fl" for="pw">Contraseña</label>
+  <div class="fi-w">
+    <input type="password" id="pw" class="fi" placeholder="Tu contraseña" autocomplete="current-password">
+    <button class="eye" onclick="tv()" type="button" aria-label="Mostrar contraseña"><i class="ti ti-eye" id="ico"></i></button>
+  </div>
+
+  <button class="btn" id="btn" onclick="entrar()"><i class="ti ti-login"></i>Entrar</button>
+  <div class="msg" id="msg"></div>
+
+  <div class="foot">
+    Proyecto <code>damlgofkxzryjmsnmagt</code><br>
+    Separado de producción — ninguna acción aquí afecta la plataforma real.
+  </div>
+</div>
+
+<script>
+// ── Plataforma B (espejo del motor de cálculo) ──────────────────────────
+// Proyecto DISTINTO al de producción. La sesión se guarda con un
+// storageKey propio para que no se pise con la sesión de la Plataforma A
+// si tienes ambas abiertas en el mismo navegador.
+const SU='https://damlgofkxzryjmsnmagt.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhbWxnb2ZreHpyeWptc25tYWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzkzMDUsImV4cCI6MjEwNTA1NTMwNX0.20dbwUvm7-hyIgzjWDYbOK-0PCZSV1cnpVrBgvsSQy4';
+const DESTINO='dashboard_v2.html';
+
+const {createClient}=supabase;
+const db=createClient(SU,SK,{auth:{storageKey:'sb-cronoriego-b',persistSession:true}});
+
+const msg=document.getElementById('msg');
+const btn=document.getElementById('btn');
+
+function show(texto,clase){msg.className='msg '+clase;msg.innerHTML=texto;}
+function limpiar(){msg.className='msg';msg.textContent='';}
+
+function tv(){
+  const i=document.getElementById('pw'),ic=document.getElementById('ico');
+  i.type=i.type==='password'?'text':'password';
+  ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';
+}
+
+// Si ya hay sesión activa en esta plataforma, pasa directo al dashboard.
+(async()=>{
+  const {data:{session}}=await db.auth.getSession();
+  if(session)window.location.replace(DESTINO);
+})();
+
+async function entrar(){
+  limpiar();
+  const email=document.getElementById('em').value.trim();
+  const password=document.getElementById('pw').value;
+  if(!email||!password){show('Ingresa tu correo y contraseña.','err');return;}
+
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Entrando...';
+  try{
+    const {error}=await db.auth.signInWithPassword({email,password});
+    if(error)throw error;
+
+    // El dashboard resuelve la Razón Social buscando el correo en v_usuarios.
+    // Si no calza, avisamos acá en vez de dejar el dashboard en blanco.
+    const {data:perfil}=await db.from('v_usuarios').select('id_rs').eq('email',email).limit(1);
+    if(!perfil||!perfil.length||!perfil[0].id_rs){
+      show('Entraste, pero este correo no está asociado a ninguna Razón Social '+
+           'en la Plataforma B. El dashboard se abrirá sin predios.','err');
+      setTimeout(()=>window.location.href=DESTINO,3200);
+      return;
+    }
+
+    show('✓ Listo, entrando...','ok');
+    window.location.href=DESTINO;
+  }catch(err){
+    const raw=String(err.message||err);
+    let texto='No pudimos iniciar sesión. Inténtalo de nuevo.';
+    if(/Invalid login credentials/i.test(raw))
+      texto='Correo o contraseña incorrectos. Recuerda que esta plataforma '+
+            'tiene su propio usuario, distinto al de producción.';
+    else if(/Email not confirmed/i.test(raw))
+      texto='El correo aún no está confirmado. Confírmalo en Supabase '+
+            '(Authentication → Users) o desactiva la confirmación por correo.';
+    else if(/Failed to fetch|NetworkError/i.test(raw))
+      texto='No hay conexión con el servidor. Revisa tu internet.';
+    show(texto,'err');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-login"></i>Entrar';
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+</script>
+</body>
+</html>
