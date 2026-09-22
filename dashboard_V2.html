@@ -1613,8 +1613,6 @@ function rCal(dias,sc){
       <td class="zona-td" style="padding:3px 6px 3px 0">
         <div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona">
           <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||'Zona'}</div>
-          <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div>
-          <div class="zona-ndvi">${z.superficie_ha||'—'} ha${nd?` · NDVI ${nd.ndvi.toFixed(2)}`:''}</div>
         </div>
       </td>
       ${dias.map(d=>{
@@ -2342,8 +2340,7 @@ function rCalF(){
   let th=`<thead><tr><th class="th-zona" style="padding-bottom:12px">Zona</th>${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px"><div class="th-num">${d.getDate()}</div><div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div></th>`;}).join('')}</tr></thead>`;
   let tb='<tbody>';
   G.zonas.forEach((z,i)=>{const c=ZC[i%ZC.length],cl=ZL[i%ZL.length];
-    tb+=`<tr style="height:116px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona" style="cursor:pointer"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div>
-      <div class="zona-esp">${z.especie||'—'} ${z.variedad||''}</div><div class="zona-esp">${z.superficie_ha||'—'} ha</div></div></td>`;
+    tb+=`<tr style="height:116px"><td class="zona-td" style="padding:3px 6px 3px 0"><div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona" style="cursor:pointer"><div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||z.id_zona}</div></div></td>`;
     dias.forEach(d=>{const dS=fs(d);const eh=dS===hS;const evs=map[z.id_zona]?.[dS];
       if(evs&&evs.length){const e=evs[0];
         const vsm=numF(e.volumen_sol_madre_l);const dpe=numF(e.dosis_producto_estanque_kg);
