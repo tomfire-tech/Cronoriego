@@ -3060,6 +3060,7 @@ function initCustomDropdowns(){
     };
     rebuild();
     wrap.addEventListener('click',ev=>{
+      ev.stopPropagation();
       if(ev.target.closest('.cd-menu'))return;
       const wasOpen=menu.classList.contains('open');
       document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open'));
