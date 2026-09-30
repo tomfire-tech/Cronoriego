@@ -4120,4 +4120,14 @@ function mobileSetup(){
   /* El drawer de fertirriego estaba dentro de la vista de escritorio. Se mueve al body para reutilizarlo en móvil. */
   const fscrim=document.getElementById('fscrim'),fdrawer=document.getElementById('fdrawer');if(fscrim)document.body.appendChild(fscrim);if(fdrawer)document.body.appendChild(fdrawer);
   mobileSetDefaultDay(true);mobileUpdateWeekLabel();renderMobileDaySelector();mobileUpdatePlanNav();
-  window.matchMedia('(max-width: 820px)').addEventListener?.('change',e=>{mountMaintenance();if(e.matches){mobileSyncSelectors();rende
+  window.matchMedia('(max-width: 820px)').addEventListener?.('change',e=>{mountMaintenance();if(e.matches){mobileSyncSelectors();renderMobileAll();}});
+}
+
+mobileSetup();
+
+initCustomDropdowns();
+
+init();
+</script>
+</body>
+</html>
