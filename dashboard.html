@@ -1648,9 +1648,10 @@ function rKpi(dias,sc,sem){
   const temp=eMed>0?Math.round(eMed*5+8):null;
   document.getElementById('ct').textContent=temp||'—';
 
-  const znR=new Set();sc.forEach(r=>{if((parseFloat(r.lamina_neta_riego_pronostico_mm)||0)>0)znR.add(r.id_zona);});
+  const _hoyK=fs(new Date());
+  const znR=new Set();sc.forEach(r=>{if(riegoDelDia(r,_hoyK).l>0)znR.add(r.id_zona);});
   const cob=G.zonas.length?Math.round(znR.size/G.zonas.length*100):0;
-  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;});vol+=l*ha*10;});
+  let vol=0;G.zonas.forEach(z=>{let l=0;const ha=parseFloat(z.superficie_ha)||0;sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{l+=riegoDelDia(r,_hoyK).l;});vol+=l*ha*10;});
   let energ=0;if(sem)energ=parseFloat(sem['energia_total_kwh']||sem['energia_kwh']||0)||0;
   const ok=cob>=75;
   const {total:confTotal,hechos:confHechos}=confirmacionesHoy();
@@ -1880,21 +1881,23 @@ function rPanel(dias,sc,ndvi){
     ${als.slice(0,3).map(alCard).join('')}
     ${als.length>3?`<details class="al-more"><summary><i class="ti ti-chevron-down"></i><span class="al-more-show">Ver ${als.length-3} alerta${als.length-3>1?'s':''} más</span><span class="al-more-hide">Ocultar</span></summary>${als.slice(3).map(alCard).join('')}</details>`:''}`;
 
+  const _hoyR=fs(new Date());
   const res=G.zonas.map((z,zi)=>{
-    let lP=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
+    let lP=0,tP=0,n=0,nEst=0;const ha=parseFloat(z.superficie_ha)||0;
     sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
-      lP+=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
-      tP+=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+      const d=riegoDelDia(r,_hoyR);if(d.l>0){lP+=d.l;tP+=d.t;n++;if(d.est)nEst++;}
     });
-    return{z,zi,lP,tP,vP:lP*ha*10};
-  });
+    return{z,zi,lP,tP,vP:lP*ha*10,n,nEst};
+  }).filter(r=>r.lP>0);
   const tot={lP:0,tP:0,vP:0};
   res.forEach(r=>{tot.lP+=r.lP;tot.tP+=r.tP;tot.vP+=r.vP;});
   const mm=v=>v>0?v.toFixed(0):'—';
   const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
   const hh=v=>hm(v)||'—';
-  document.getElementById('presum').innerHTML=`
-    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal · pronóstico</div>
+  const nSin=G.zonas.length-res.length;
+  document.getElementById('presum').innerHTML=res.length?`
+    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal de riego</div>
+    <div style="font-size:11px;color:var(--muted);margin:-6px 0 8px">Días pasados con dato real de estación; el resto, pronóstico. Mismo criterio que el calendario.</div>
     <table class="res-tbl">
       <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
       <tbody>
@@ -1911,10 +1914,20 @@ function rPanel(dias,sc,ndvi){
           <td>${m3(tot.vP)}</td>
         </tr>
       </tbody>
-    </table>`;
+    </table>
+    ${nSin>0?`<div style="font-size:11.5px;color:var(--muted);margin-top:8px">${nSin} zona${nSin>1?'s':''} sin riego esta semana.</div>`:''}`
+  :`<div class="p-title"><i class="ti ti-table"></i>Resumen semanal de riego</div>
+    <div style="font-size:12.5px;color:var(--muted);padding:2px 0">No se pronostican riegos esta semana para este equipo.</div>`;
 }
 
 
+function riegoDelDia(r,hoyS){
+  const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0,tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+  const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0,tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+  const est=r.fecha<hoyS&&(lE>0||tE>0);
+  const l=est?lE:lP,t=est?tE:tP;
+  return (l>0&&hm(t))?{l,t,est}:{l:0,t:0,est:false};
+}
 const alCard=a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`;
 function openDia(fecha,znId){
   const r=G.scDia.find(d=>d.fecha===fecha&&d.id_zona===znId);
