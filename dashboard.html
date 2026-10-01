@@ -1873,11 +1873,7 @@ function rPanel(dias,sc,ndvi){
   const _llDia={};sc.forEach(r=>{const v=parseFloat(r.lluvia_pronostico_mm_dia);if(!isNaN(v))(_llDia[r.fecha]=_llDia[r.fecha]||[]).push(v);});
   const totL=Object.values(_llDia).map(a=>a.reduce((x,y)=>x+y,0)/a.length).reduce((a,b)=>a+b,0);
   if(totL>15)als.push({cls:'info',i:'ti-cloud-rain',t:'Lluvia importante',s:`${totL.toFixed(1)} mm esta semana — considera suspender o reducir riego`});
-  G.zonas.forEach((z,zi)=>{
-    const nd=ndvi[z.id_zona];
-    if(nd&&nd.ndvi<0.3)als.push({cls:'danger',i:'ti-plant-off',t:`NDVI crítico — ${z.nombre||'Zona'}`,s:`NDVI ${nd.ndvi.toFixed(3)} — posible estrés hídrico severo`});
-    else if(nd&&nd.hist.length>=2){const diff=(nd.hist[0].ndvi-nd.hist[1].ndvi)/Math.max(nd.hist[1].ndvi,.001)*100;if(diff<-10)als.push({cls:'yellow',i:'ti-trending-down',t:`NDVI disminuyendo — ${z.nombre||'Zona'}`,s:`Bajó ${Math.abs(diff).toFixed(1)}% vs semana anterior`});}
-  });
+  // (01-10) Alertas de NDVI crítico / NDVI disminuyendo quitadas a pedido; se mantienen ETo alta y Lluvia importante
   if(als.length===0)als.push({cls:'ok',i:'ti-circle-check',t:'Sin alertas activas',s:'Todo dentro de parámetros normales'});
   document.getElementById('palertas').innerHTML=`
     <div class="p-title"><i class="ti ti-bell"></i>Alertas</div>
