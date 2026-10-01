@@ -1042,6 +1042,18 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .zona-td{width:190px;min-width:190px;}
   .zona-head{font-size:13px;}
 }
+/* Historial de confirmaciones (barra lateral del día) */
+.confirm-hist{margin-top:12px;}
+.confirm-hist:empty{display:none;}
+.ch-t{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.ch-t i{font-size:13px;}
+.ch-row{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--white);margin-bottom:6px;}
+.ch-row.cur{border-color:#86EFAC;background:#F0FDF4;}
+.ch-main{font-size:12px;font-weight:700;color:var(--ink);}
+.ch-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.ch-ok{color:#15803D;font-weight:700;}
+.ch-no{color:#B45309;font-weight:700;}
+.ch-empty{font-size:12px;color:var(--muted);padding:2px 0 4px;}
 </style>
 </head>
 <body><div class="app">
@@ -1573,7 +1585,7 @@ async function init(){
     const {data:rsRow}=await db.from('razones_sociales').select('modulos').eq('"ID Razón Social (PK)"',G.rsId).limit(1);
     const planStr=rsRow?.[0]?.modulos;
     if(planStr&&typeof planStr==='string')MODULOS=planStr.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-    if(!MODULOS.includes('mantenimiento'))MODULOS.push('mantenimiento');
+    // (01-10) Mantenimiento ya no se fuerza: se activa/desactiva desde el panel admin como los demás módulos
   }catch(e){}
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
@@ -2231,6 +2243,7 @@ const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
   const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
   const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
   const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
+  setTimeout(()=>cargarHistorialConfirm(tipo,znId,fechaRecom,uid),0);
   return `<div class="d-section">
     <div class="d-section-t">Confirmar ejecución</div>
     <div class="confirm-box${checked?' done':''}" id="${uid}_box">
@@ -2248,6 +2261,7 @@ const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('${tipo}','${znId}','${fechaRecom}','${uid}')">Guardar confirmación</button>
       <div class="confirm-msg" id="${uid}_msg"></div>
     </div>
+    <div class="confirm-hist" id="${uid}_hist"></div>
   </div>`;
 }
 function toggleConfirmFields(uid){
@@ -2274,6 +2288,7 @@ function confirmBoxHtmlFerti(znId,fecha,e){
   const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
   const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
   const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
+  setTimeout(()=>cargarHistorialConfirm('fertirriego',znId,fecha,uid),0);
   return `<div class="d-section">
     <div class="d-section-t">Confirmar ejecución</div>
     <div class="confirm-box${checked?' done':''}" id="${uid}_box">
@@ -2298,6 +2313,7 @@ function confirmBoxHtmlFerti(znId,fecha,e){
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('fertirriego','${znId}','${fecha}','${uid}')">Guardar confirmación</button>
       <div class="confirm-msg" id="${uid}_msg"></div>
     </div>
+    <div class="confirm-hist" id="${uid}_hist"></div>
   </div>`;
 }
 async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
@@ -2349,7 +2365,33 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   rKpi(semDias(G.off),G.scDia,G.sem);
   rCal(semDias(G.off),G.scDia);
   if(isMobileView())renderMobileRiego();
+  cargarHistorialConfirm(tipo,znId,fechaRecom,uid);
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
+}
+// Historial en la barra lateral del día: cada guardado de este día + últimas confirmaciones de la zona
+async function cargarHistorialConfirm(tipo,znId,fecha,uid){
+  const el=document.getElementById(uid+'_hist');if(!el)return;
+  el.innerHTML='<div class="ch-t"><i class="ti ti-history"></i>Historial</div><div class="ch-empty">Cargando…</div>';
+  let ch=[],ul=[];
+  try{
+    const [a,b]=await Promise.all([
+      db.from('sc_confirmacion_historial').select('*').eq('id_zona',znId).eq('tipo',tipo).eq('fecha_recomendada',fecha).order('registrado_en',{ascending:false}).limit(20),
+      db.from('sc_confirmacion_ejecucion').select('*').eq('id_zona',znId).eq('tipo',tipo).order('fecha_recomendada',{ascending:false}).limit(8)
+    ]);
+    ch=a.data||[];ul=b.data||[];
+  }catch(e){}
+  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const hrs=v=>{const x=parseFloat(v);return isNaN(x)?'—':(hm(x)||'0 h');};
+  const fD=d=>d?String(d).slice(0,10).split('-').reverse().join('-'):'—';
+  const quien=e=>e?String(e).split('@')[0]:'—';
+  const est=r=>r.confirmado?'<span class="ch-ok">✓ Ejecutado</span>':'<span class="ch-no">✗ No ejecutado</span>';
+  let html='<div class="ch-t"><i class="ti ti-history"></i>Cambios de este día</div>';
+  html+=ch.length?ch.map(r=>`<div class="ch-row"><div class="ch-main">${r.accion==='creado'?'Guardado':'Modificado'} · ${fmtTS(r.registrado_en)||'—'} · ${esc(quien(r.usuario_email))}</div><div class="ch-sub">${est(r)} · ${fD(r.fecha_ejecucion)} · ${hrs(r.tiempo_horas)}${r.operario?' · '+esc(r.operario):''}</div></div>`).join('')
+    :'<div class="ch-empty">Aún no se ha guardado ninguna confirmación para este día.</div>';
+  html+='<div class="ch-t" style="margin-top:14px"><i class="ti ti-list-check"></i>Últimas confirmaciones de la zona</div>';
+  html+=ul.length?ul.map(r=>`<div class="ch-row${String(r.fecha_recomendada).slice(0,10)===fecha?' cur':''}"><div class="ch-main">Riego del ${fD(r.fecha_recomendada)} · ${est(r)}</div><div class="ch-sub">Ejecutado el ${fD(r.fecha_ejecucion)} · ${hrs(r.tiempo_horas)}${r.operario?' · '+esc(r.operario):''}</div></div>`).join('')
+    :'<div class="ch-empty">Esta zona todavía no tiene confirmaciones.</div>';
+  el.innerHTML=html;
 }
 
 /* ===== FERTIRRIEGO ===== */
