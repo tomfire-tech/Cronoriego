@@ -1404,7 +1404,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <label class="maint-export-check"><input type="checkbox" id="mtExportZona" checked><span>Aforos y mediciones por zona</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportFF" checked><span>Facturas de fertilizante</span></label>
         <label class="maint-export-check"><input type="checkbox" id="mtExportFEB" checked><span>Facturas de energía</span></label>
-        <label class="maint-export-check"><input type="checkbox" id="mtExportConf" checked><span>Confirmaciones de riego y fertirriego <small style="display:block;font-weight:600;color:var(--subtle);font-size:9px;margin-top:2px">Solo del equipo activo, sin importar el alcance elegido abajo</small></span></label>
+        <label class="maint-export-check"><input type="checkbox" id="mtExportConf" checked><span>Riegos ejecutados (confirmaciones) <small style="display:block;font-weight:600;color:var(--subtle);font-size:9px;margin-top:2px">Hoja "RP" con el mismo formato de los datos dinámicos, más el historial de cambios</small></span></label>
       </div>
     </div>
     <div class="maint-export-section">
@@ -2261,6 +2261,7 @@ const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('${tipo}','${znId}','${fechaRecom}','${uid}')">Guardar confirmación</button>
       <div class="confirm-msg" id="${uid}_msg"></div>
     </div>
+    <div id="${uid}_delwrap"></div>
     <div class="confirm-hist" id="${uid}_hist"></div>
   </div>`;
 }
@@ -2313,6 +2314,7 @@ function confirmBoxHtmlFerti(znId,fecha,e){
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('fertirriego','${znId}','${fecha}','${uid}')">Guardar confirmación</button>
       <div class="confirm-msg" id="${uid}_msg"></div>
     </div>
+    <div id="${uid}_delwrap"></div>
     <div class="confirm-hist" id="${uid}_hist"></div>
   </div>`;
 }
@@ -2369,7 +2371,29 @@ async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
   setTimeout(()=>{btn.disabled=false;btn.textContent='Guardar confirmación';},1400);
 }
 // Historial en la barra lateral del día: cada guardado de este día + últimas confirmaciones de la zona
+function pintarBotonEliminarConf(tipo,znId,fecha,uid){
+  const w=document.getElementById(uid+'_delwrap');if(!w)return;
+  const ex=(tipo==='riego'?G.confirmR:G.confirmF)[znId+'|'+fecha];
+  w.innerHTML=ex&&ex.id?`<button type="button" id="${uid}_del" onclick="eliminarConfirmacion('${tipo}','${znId}','${fecha}','${uid}')" style="margin-top:8px;width:100%;padding:8px 12px;border-radius:9px;border:1px solid #FECACA;background:#FEF2F2;color:#B91C1C;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer"><i class="ti ti-trash"></i> Eliminar confirmación</button><div id="${uid}_delmsg" style="font-size:11.5px;color:#B91C1C;margin-top:5px"></div>`:'';
+}
+async function eliminarConfirmacion(tipo,znId,fecha,uid){
+  const map=tipo==='riego'?G.confirmR:G.confirmF;const key=znId+'|'+fecha;const ex=map[key];if(!ex||!ex.id)return;
+  const btn=document.getElementById(uid+'_del'),msg=document.getElementById(uid+'_delmsg');if(!btn)return;
+  const reset=m=>{btn.disabled=false;btn.dataset.confirm='';btn.style.background='#FEF2F2';btn.style.color='#B91C1C';btn.innerHTML='<i class="ti ti-trash"></i> Eliminar confirmación';if(msg)msg.textContent=m||'';};
+  if(btn.dataset.confirm!=='1'){btn.dataset.confirm='1';btn.style.background='#DC2626';btn.style.color='#fff';btn.innerHTML='<i class="ti ti-alert-triangle"></i> Confirmar: eliminar';if(msg)msg.textContent='Se borrará la confirmación de este día (queda anotado en el historial). Presiona de nuevo para confirmar.';clearTimeout(btn._t);btn._t=setTimeout(()=>{if(btn.dataset.confirm==='1')reset();},8000);return;}
+  clearTimeout(btn._t);btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Eliminando…';
+  const {data,error}=await db.from('sc_confirmacion_ejecucion').delete().eq('id',ex.id).select('id');
+  if(error){reset('Error: '+error.message);return;}
+  if(!data||!data.length){reset('No se pudo eliminar: solo quien la guardó (o un administrador) puede borrarla.');return;}
+  delete map[key];
+  const chk=document.getElementById(uid+'_chk');if(chk){chk.checked=false;toggleConfirmFields(uid);}
+  document.getElementById(uid+'_ts')?.remove();
+  const m2=document.getElementById(uid+'_msg');if(m2){m2.className='confirm-msg ok';m2.style.display='block';m2.textContent='Confirmación eliminada.';}
+  rKpi(semDias(G.off),G.scDia,G.sem);rCal(semDias(G.off),G.scDia);if(isMobileView())renderMobileRiego();
+  cargarHistorialConfirm(tipo,znId,fecha,uid);
+}
 async function cargarHistorialConfirm(tipo,znId,fecha,uid){
+  pintarBotonEliminarConf(tipo,znId,fecha,uid);
   const el=document.getElementById(uid+'_hist');if(!el)return;
   el.innerHTML='<div class="ch-t"><i class="ti ti-history"></i>Historial</div><div class="ch-empty">Cargando…</div>';
   let ch=[],ul=[];
@@ -2386,7 +2410,7 @@ async function cargarHistorialConfirm(tipo,znId,fecha,uid){
   const quien=e=>e?String(e).split('@')[0]:'—';
   const est=r=>r.confirmado?'<span class="ch-ok">✓ Ejecutado</span>':'<span class="ch-no">✗ No ejecutado</span>';
   let html='<div class="ch-t"><i class="ti ti-history"></i>Cambios de este día</div>';
-  html+=ch.length?ch.map(r=>`<div class="ch-row"><div class="ch-main">${r.accion==='creado'?'Guardado':'Modificado'} · ${fmtTS(r.registrado_en)||'—'} · ${esc(quien(r.usuario_email))}</div><div class="ch-sub">${est(r)} · ${fD(r.fecha_ejecucion)} · ${hrs(r.tiempo_horas)}${r.operario?' · '+esc(r.operario):''}</div></div>`).join('')
+  html+=ch.length?ch.map(r=>`<div class="ch-row"><div class="ch-main">${r.accion==='creado'?'Guardado':(r.accion==='eliminado'?'Eliminado':'Modificado')} · ${fmtTS(r.registrado_en)||'—'} · ${esc(quien(r.usuario_email))}</div><div class="ch-sub">${est(r)} · ${fD(r.fecha_ejecucion)} · ${hrs(r.tiempo_horas)}${r.operario?' · '+esc(r.operario):''}</div></div>`).join('')
     :'<div class="ch-empty">Aún no se ha guardado ninguna confirmación para este día.</div>';
   html+='<div class="ch-t" style="margin-top:14px"><i class="ti ti-list-check"></i>Últimas confirmaciones de la zona</div>';
   html+=ul.length?ul.map(r=>`<div class="ch-row${String(r.fecha_recomendada).slice(0,10)===fecha?' cur':''}"><div class="ch-main">Riego del ${fD(r.fecha_recomendada)} · ${est(r)}</div><div class="ch-sub">Ejecutado el ${fD(r.fecha_ejecucion)} · ${hrs(r.tiempo_horas)}${r.operario?' · '+esc(r.operario):''}</div></div>`).join('')
@@ -4139,7 +4163,18 @@ function mtExportRows(section,rows){
   if(section==='equipo')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Caudal instantáneo Equipo (l/s)':r.caudal_instantaneo_ls,'Caudalímetro salida bomba (m3)':r.caudalimetro_salida_bomba_m3,'Presión antes del filtro (bar)':r.presion_antes_filtro_bar,'Presión después del filtro (bar)':r.presion_despues_filtro_bar,'Diferencia de presión (bar)':r.diferencia_presion_bar,'Retrolavado':r.retrolavado,'Gatillante automático':r.gatillante_automatico,'Valor gatillante':r.valor_gatillante,'Duración ciclo retrolavado (min)':r.duracion_ciclo_retrolavado_min,'Última calibración inyectores':r.ultima_calibracion_inyectores,'Última calibración caudalímetros':r.ultima_calibracion_caudalimetros,'Profesional que recomienda':r.profesional,'Operario':r.operario,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='factura_ferti')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha Factura':mtExcelDate(r.fecha_factura),'ID Factura':r.id_factura,'Producto':r.producto,'Proveedor':r.proveedor,'Envase':r.envase,'Peso o Volumen Envase':r.peso_volumen_envase,'Unidad':r.unidad,'Envases Totales':r.envases_totales,'Peso o volumen Total':r.peso_volumen_total,'Stock Disponible Temporada Anterior':r.stock_disponible_temporada_anterior,'Stock Disponible Total Kg':r.stock_disponible_total_kg,'Precio Envase':r.precio_envase,'Moneda':r.moneda,'Valor Total':r.valor_total,'N input (%)':r.n_input_pct,'P2O5 input (%)':r.p2o5_input_pct,'K2O input (%)':r.k2o_input_pct,'Mg input (%)':r.mg_input_pct,'Ca input (%)':r.ca_input_pct,'S input (%)':r.s_input_pct,'Zn input (%)':r.zn_input_pct,'Mn input (%)':r.mn_input_pct,'Fe input (%)':r.fe_input_pct,'Cu input (%)':r.cu_input_pct,'B input (%)':r.b_input_pct,'Concetración ideal (gr/L)':r.concentracion_ideal_grl,'Disponible':r.disponible,'Concentración máxima en solución madre recomendada (gr/L)':r.concentracion_maxima_sol_madre_grl,'Orden de aplicacion':r.orden_aplicacion,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='factura_energia')return rows.map(r=>({'ID Predio':r.id_predio,'Fecha Factura':mtExcelDate(r.fecha_factura),'Numero de Factura':r.numero_factura,'Proveedor':r.proveedor,'Total a Pagar ($)':r.total_a_pagar,'Consumo Electrico (kWh)':r.consumo_electrico_kwh,'Demanda Suministrada (kW)':r.demanda_suministrada_kw,'Tipo de Combustible':r.tipo_combustible,'Combustible (Litros)':r.combustible_litros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
-  if(section==='confirmaciones')return rows.map(r=>({'ID Zona':r.id_zona,'ID Equipo':r.id_equipo,'Tipo':r.tipo==='riego'?'Riego':'Fertirriego','Fecha Recomendada':mtExcelDate(r.fecha_recomendada),'Fecha Ejecución':mtExcelDate(r.fecha_ejecucion),'Confirmado':r.confirmado?'Sí':'No','Tiempo (horas)':r.tiempo_horas,'Producto':r.producto_asignado,'Concentración Ideal (gr/L)':r.concentracion_ideal_grl,'Dosis a Aplicar (Kg)':r.dosis_aplicar_kg,'Vol. Sol. Madre a Preparar (L)':r.volumen_sol_madre_l,'Dosis Producto Estanque (Kg)':r.dosis_producto_estanque_kg,'Vol. Sol. Madre a Inyectar (L)':r.vol_sol_madre_inyectar_l,'% Inyección':r.pct_inyeccion,'Ratio Inyección':r.ratio_inyeccion,'Operario':r.operario,'Profesional':r.profesional,'Última actualización':mtExcelDate(r.actualizado_en)}));
+  if(section==='confirmaciones'){
+    const fecha=f=>{const [y,m,d]=f.split('-').map(Number);return new Date(y,m-1,d);};
+    return rows.map(r=>({'ID Razón Social':r.rs,'ID Predio':r.predio,'ID Equipo':r.equipo,'ID Estanque':r.estanque,'ID Zona':r.zona,'Número Semana':r.semana,'Fecha':fecha(r.fecha),
+      'Hora inicio Riego':'','Hora fin de riego':'','Tiempo de Riego (HH:mm)':mtHHMM(r.h),'Tiempo de Riego (H)':r.h,'Caudal Zona (m3/H)':r.caudal,'Volumen por evento (m3)':r.vol,
+      'CE del agua a la salida del gotero (dS/m)':'','Volumen de solución madre preparada (L)':r.solMadre??'','Producto':r.producto||'','Duración del evento de fertirriego (HH:mm)':r.hFerti!=null?mtHHMM(r.hFerti):'',
+      'Potencial Hídrico de cámara de Scholander (MPa)':'','Potencial hídrico de microtensiómetros de tronco (kPa)':'','Tipo de enmienda':'','Dosis por ha enmienda (kg/ha)':'','Dosis por zona enmienda (kg)':'',
+      '% Inyección':r.pct??'','Dosis del Producto en Estanque (Kg)':r.dosisEst??'','Ratio Inyección':r.ratio||'','Profesional que recomienda':r.profesional,'Operario':r.operario}));
+  }
+  if(section==='conf_historial')return rows.map(r=>({'Registrado el':mtExcelDate(r.registrado_en),'Acción':r.accion==='creado'?'Guardado':(r.accion==='eliminado'?'Eliminado':'Modificado'),'Usuario':r.usuario_email||'',
+    'Tipo':r.tipo==='riego'?'Riego':'Fertirriego','Equipo':mtNomEquipo(r.id_equipo),'ID Equipo':r.id_equipo,'Zona':mtNomZona(r.id_zona),'ID Zona':r.id_zona,'Fecha recomendada':r.fecha_recomendada?mtExcelDate(r.fecha_recomendada+'T12:00:00').split(',')[0]:'',
+    'Fecha ejecución':r.fecha_ejecucion?mtExcelDate(r.fecha_ejecucion+'T12:00:00').split(',')[0]:'','Ejecutado':r.confirmado?'Sí':'No','Tiempo (h)':r.tiempo_horas,'Operario':r.operario||'','Profesional':r.profesional||''}));
+  if(section==='confirmaciones__old')return rows.map(r=>({'ID Zona':r.id_zona,'ID Equipo':r.id_equipo,'Tipo':r.tipo==='riego'?'Riego':'Fertirriego','Fecha Recomendada':mtExcelDate(r.fecha_recomendada),'Fecha Ejecución':mtExcelDate(r.fecha_ejecucion),'Confirmado':r.confirmado?'Sí':'No','Tiempo (horas)':r.tiempo_horas,'Producto':r.producto_asignado,'Concentración Ideal (gr/L)':r.concentracion_ideal_grl,'Dosis a Aplicar (Kg)':r.dosis_aplicar_kg,'Vol. Sol. Madre a Preparar (L)':r.volumen_sol_madre_l,'Dosis Producto Estanque (Kg)':r.dosis_producto_estanque_kg,'Vol. Sol. Madre a Inyectar (L)':r.vol_sol_madre_inyectar_l,'% Inyección':r.pct_inyeccion,'Ratio Inyección':r.ratio_inyeccion,'Operario':r.operario,'Profesional':r.profesional,'Última actualización':mtExcelDate(r.actualizado_en)}));
   return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
 function openMaintenanceExport(){
@@ -4151,15 +4186,58 @@ function mtSelectedExportSections(){
   return [
     {section:'fuente',checked:document.getElementById('mtExportFuente')?.checked,sheet:'RP Estanque'},
     {section:'equipo',checked:document.getElementById('mtExportEquipo')?.checked,sheet:'RP Equipo'},
-    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'RP'},
+    {section:'zona',checked:document.getElementById('mtExportZona')?.checked,sheet:'Aforos Zona'},
     {section:'factura_ferti',checked:document.getElementById('mtExportFF')?.checked,sheet:'FF'},
     {section:'factura_energia',checked:document.getElementById('mtExportFEB')?.checked,sheet:'FEB'},
-    {section:'confirmaciones',checked:document.getElementById('mtExportConf')?.checked,sheet:'Confirmaciones'}
+    {section:'confirmaciones',checked:document.getElementById('mtExportConf')?.checked,sheet:'RP'},
+    {section:'conf_historial',checked:document.getElementById('mtExportConf')?.checked,sheet:'Historial confirmaciones'}
   ].filter(x=>x.checked);
+}
+// Equipos del alcance elegido (predio actual o toda la razón social)
+async function mtEquiposAlcance(scope){
+  const prIds=scope==='rs'?Array.from(document.getElementById('sp')?.options||[]).map(o=>o.value).filter(Boolean):[mtCurrentPredio()].filter(Boolean);
+  if(!prIds.length)return [];
+  const {data}=await db.from('v_equipos').select('id_equipo,id_predio,nombre').in('id_predio',prIds);
+  return data||[];
+}
+const mtSemanaISO=f=>{const d=new Date(f+'T12:00:00');return d.getFullYear()+'-W'+String(isoW(d)).padStart(2,'0');};
+const mtHHMM=h=>{const x=parseFloat(h);if(isNaN(x))return '';const hh=Math.floor(x),mm=Math.round((x-hh)*60);return String(hh+(mm===60?1:0)).padStart(2,'0')+':'+String(mm===60?0:mm).padStart(2,'0');};
+// Confirmaciones -> filas de la hoja RP (un evento por zona y fecha de ejecución; el fertirriego va en la misma fila del riego)
+async function mtFetchConfirmacionesRP(section,scope,from,to){
+  const eqs=await mtEquiposAlcance(scope);const eqIds=eqs.map(e=>e.id_equipo);if(!eqIds.length)return [];
+  if(section==='conf_historial'){
+    let q=db.from('sc_confirmacion_historial').select('*').in('id_equipo',eqIds).order('registrado_en',{ascending:true});
+    if(from)q=q.gte('fecha_recomendada',from);if(to)q=q.lte('fecha_recomendada',to);
+    const {data,error}=await q;if(error)throw error;return data||[];
+  }
+  let q=db.from('sc_confirmacion_ejecucion').select('*').in('id_equipo',eqIds).eq('confirmado',true).order('fecha_ejecucion',{ascending:true});
+  if(from)q=q.gte('fecha_ejecucion',from);if(to)q=q.lte('fecha_ejecucion',to);
+  const {data,error}=await q;if(error)throw error;const conf=data||[];if(!conf.length)return [];
+  const znIds=[...new Set(conf.map(c=>c.id_zona))];
+  const [calc,eqTab,reco]=await Promise.all([
+    db.from('sc_calculos_estaticos_zona').select('id_zona,caudal_zona_m3h').in('id_zona',znIds),
+    db.from('equipos').select('"ID Equipo (PK)","ID Predio (FK)","ID_ESTANQUE"').in('"ID Equipo (PK)"',eqIds),
+    db.from('sc_recomendacion_ferti').select('id_zona,fecha_evento,producto_asignado').in('id_zona',znIds)
+  ]);
+  const caudal={};(calc.data||[]).forEach(r=>caudal[r.id_zona]=parseFloat(r.caudal_zona_m3h)||null);
+  const eqInfo={};(eqTab.data||[]).forEach(r=>eqInfo[r['ID Equipo (PK)']]={predio:r['ID Predio (FK)'],estanque:r['ID_ESTANQUE']});
+  const prod={};(reco.data||[]).forEach(r=>{const k=r.id_zona+'|'+String(r.fecha_evento).slice(0,10);prod[k]=prod[k]?prod[k]+' + '+r.producto_asignado:r.producto_asignado;});
+  const grupos={};
+  conf.forEach(c=>{const f=String(c.fecha_ejecucion||c.fecha_recomendada).slice(0,10);const k=c.id_zona+'|'+f;(grupos[k]=grupos[k]||{zona:c.id_zona,equipo:c.id_equipo,fecha:f})[c.tipo]=c;});
+  return Object.values(grupos).map(g=>{
+    const r=g.riego,fe=g.fertirriego,base=r||fe;const h=parseFloat(r?r.tiempo_horas:fe.tiempo_horas);
+    const q=caudal[g.zona];const inf=eqInfo[g.equipo]||{};
+    return {_rp:true,rs:G.rsId,predio:inf.predio||mtCurrentPredio(),equipo:g.equipo,estanque:inf.estanque||'',zona:g.zona,semana:mtSemanaISO(g.fecha),fecha:g.fecha,
+      h:isNaN(h)?null:Math.round(h*100)/100,caudal:q,vol:(q&&!isNaN(h))?Math.round(q*h*100)/100:null,
+      solMadre:fe?fe.volumen_sol_madre_l:null,producto:fe?(fe.producto_asignado||prod[g.zona+'|'+String(fe.fecha_recomendada).slice(0,10)]||''):'',
+      hFerti:fe?fe.tiempo_horas:null,pct:fe?fe.pct_inyeccion:null,dosisEst:fe?fe.dosis_producto_estanque_kg:null,ratio:fe?fe.ratio_inyeccion:'',
+      profesional:(r&&r.profesional)||(fe&&fe.profesional)||'',operario:(r&&r.operario)||(fe&&fe.operario)||''};
+  }).sort((a,b)=>a.fecha<b.fecha?-1:a.fecha>b.fecha?1:(a.zona<b.zona?-1:1));
 }
 async function mtFetchExportSection(section,scope,from,to){
   const dateField=MT_DATE_FIELD[section]||'fecha_hora';
   let q;
+  if(section==='confirmaciones'||section==='conf_historial')return mtFetchConfirmacionesRP(section,scope,from,to);
   if(section==='confirmaciones'){
     // sc_confirmacion_ejecucion no tiene id_razon_social ni id_predio (solo
     // se relaciona por zona/equipo) — se acota siempre al equipo activo,
