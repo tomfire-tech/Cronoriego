@@ -245,8 +245,8 @@ const SUPABASE_URL = 'https://lmexinxdmkgexpthuosn.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZXhpbnhkbWtnZXhwdGh1b3NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjgzMTQsImV4cCI6MjA5NTQwNDMxNH0.NiC1H1gDEKNbjob6XGGMu8Zaf2b4uLZLOuKzwioBgS0';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-const MODULOS_DEF=['riego','ferti','estanque','balance'];
-const MODULOS_LBL={riego:'Riego',ferti:'Ferti',estanque:'Estanque',balance:'Balance'};
+const MODULOS_DEF=['riego','ferti','estanque','balance','mantenimiento'];
+const MODULOS_LBL={riego:'Riego',ferti:'Ferti',estanque:'Estanque',balance:'Balance',mantenimiento:'Mantención'};
 
 async function checkAuth() {
   const { data: { session } } = await db.auth.getSession();
@@ -380,7 +380,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModalU
 
 // ── PLAN: parsear y renderizar chips ──
 function parsePlan(str){
-  if(!str||typeof str!=='string')return ['riego','ferti','estanque','balance']; // default: todo, hasta configurar
+  if(!str||typeof str!=='string')return ['riego','ferti','estanque','balance','mantenimiento']; // default: todo, hasta configurar
   return str.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
 }
 function planChipsHTML(rsId, modulos){
