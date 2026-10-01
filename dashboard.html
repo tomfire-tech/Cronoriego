@@ -4061,7 +4061,25 @@ function openMaintenanceDetail(index){
   const r=GM.history[index];if(!r)return;const ignore=new Set(['id','id_razon_social','id_predio','creado_en','actualizado_en','creado_por']);
   const labels={id_estanque:'Estanque',tipo_fuente:'Tipo de fuente',id_fuente:'Pozo / Canal',fecha_hora:'Fecha y hora',latitud:'Latitud',longitud:'Longitud',ce_agua_ds_m:'CE agua fuente',caudal_instantaneo_ls:'Caudal instantáneo',totalizador_m3:'Totalizador',nivel_freatico_m:'Nivel freático',nivel_estanque_m:'Nivel estanque',altura_limnimetrica_cm:'Altura limnimétrica',ultima_calibracion_caudalimetro:'Calibración caudalímetro',id_equipo:'Equipo',caudalimetro_salida_bomba_m3:'Caudalímetro salida bomba',presion_antes_filtro_bar:'Presión antes filtro',presion_despues_filtro_bar:'Presión después filtro',diferencia_presion_bar:'Diferencia presión',retrolavado:'Retrolavado',gatillante_automatico:'Gatillante',valor_gatillante:'Valor gatillante',duracion_ciclo_retrolavado_min:'Duración retrolavado',ultima_calibracion_inyectores:'Calibración inyectores',ultima_calibracion_caudalimetros:'Calibración caudalímetros',id_zona:'Zona',aforo_goteros_ml_3min:'Aforo goteros',numero_mediciones:'Número mediciones',presion_valvula_bar:'Presión válvula',presion_final_lateral_bar:'Presión final lateral',ce_salida_gotero_ds_m:'CE salida gotero',observaciones:'Observaciones',creado_por_email:'Registrado por',creado_por:'ID usuario',operario:'Operario',profesional:'Profesional',fecha_factura:'Fecha factura',id_factura:'N° factura',producto:'Producto',proveedor:'Proveedor',envase:'Envase',peso_volumen_envase:'Peso/vol. por envase',unidad:'Unidad',envases_totales:'Envases totales',peso_volumen_total:'Peso/vol. total',stock_disponible_temporada_anterior:'Stock temporada anterior',stock_disponible_total_kg:'Stock disponible total',precio_envase:'Precio por envase',moneda:'Moneda',valor_total:'Valor total',n_input_pct:'N (%)',p2o5_input_pct:'P₂O₅ (%)',k2o_input_pct:'K₂O (%)',mg_input_pct:'Mg (%)',ca_input_pct:'Ca (%)',s_input_pct:'S (%)',zn_input_pct:'Zn (%)',mn_input_pct:'Mn (%)',fe_input_pct:'Fe (%)',cu_input_pct:'Cu (%)',b_input_pct:'B (%)',concentracion_ideal_grl:'Concentración ideal (gr/L)',disponible:'Disponible',concentracion_maxima_sol_madre_grl:'Conc. máxima sol. madre (gr/L)',orden_aplicacion:'Orden de aplicación',numero_factura:'N° factura',total_a_pagar:'Total a pagar',consumo_electrico_kwh:'Consumo eléctrico (kWh)',demanda_suministrada_kw:'Demanda suministrada (kW)',tipo_combustible:'Tipo de combustible',combustible_litros:'Combustible (L)'};
   const rows=Object.entries(r).filter(([k,v])=>!ignore.has(k)&&v!==null&&v!=='').map(([k,v])=>`<div class="est-rrow"><span class="est-rk">${mtEsc(labels[k]||k)}</span><span class="est-rv">${mtEsc(mtDetalleValor(k,v))}</span></div>`).join('');
-  openD('Detalle del registro',`<i class="ti ti-tool"></i> ${mtEsc(maintenanceSummary(r))}`,`<div class="d-section"><div class="d-section-t">Información registrada</div>${rows}</div>`);
+  const delHtml=`<div class="d-section"><button type="button" id="mtDelBtn" onclick="mtEliminarRegistro(${index})" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;border:1px solid #FECACA;background:#FEF2F2;color:#B91C1C;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer"><i class="ti ti-trash"></i> Eliminar registro</button><div id="mtDelMsg" style="font-size:12px;color:#B91C1C;margin-top:8px;min-height:16px"></div></div>`;
+  openD('Detalle del registro',`<i class="ti ti-tool"></i> ${mtEsc(maintenanceSummary(r))}`,`<div class="d-section"><div class="d-section-t">Información registrada</div>${rows}</div>${delHtml}`);
+}
+async function mtEliminarRegistro(index){
+  const r=GM.history[index];if(!r||!r.id)return;
+  const btn=document.getElementById('mtDelBtn'),msg=document.getElementById('mtDelMsg');if(!btn)return;
+  const reset=t=>{btn.disabled=false;btn.dataset.confirm='';btn.style.background='#FEF2F2';btn.style.color='#B91C1C';btn.innerHTML='<i class="ti ti-trash"></i> Eliminar registro';if(msg)msg.textContent=t||'';};
+  if(btn.dataset.confirm!=='1'){
+    btn.dataset.confirm='1';btn.style.background='#DC2626';btn.style.color='#fff';
+    btn.innerHTML='<i class="ti ti-alert-triangle"></i> Confirmar: eliminar definitivamente';
+    if(msg)msg.textContent='El registro se borrará y no se puede recuperar. Presiona de nuevo para confirmar.';
+    clearTimeout(btn._t);btn._t=setTimeout(()=>{if(btn.dataset.confirm==='1')reset();},8000);
+    return;
+  }
+  clearTimeout(btn._t);btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Eliminando…';
+  const {data,error}=await db.from(MT_TABLES[GM.section]).delete().eq('id',r.id).select('id');
+  if(error){reset('Error: '+error.message);return;}
+  if(!data||!data.length){reset('No se pudo eliminar: solo quien hizo el registro (o un administrador) puede borrarlo.');return;}
+  closeD();GM.history=GM.history.filter(x=>x.id!==r.id);renderMaintenanceHistory();showMaintenanceToast('Registro eliminado.');
 }
 
 function mtExcelDate(v){if(!v)return '';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('es-CL');}
