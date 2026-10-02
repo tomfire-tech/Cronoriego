@@ -1073,9 +1073,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .op-tbl td.op-week{background:#EFF6FF;}
 .op-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.45;}
 .op-badge{display:inline-block;font-size:9.5px;font-weight:800;color:#1D4ED8;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:5px;padding:0 5px;margin-left:4px;vertical-align:middle;}
-.dia-inner.with-clima{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;}
-.dia-inner.with-clima .dia-empty{height:auto;min-height:66px;flex:1;}
-.dia-inner.with-clima .riego-card{flex:1;}
+.dia-empty.has-clima{flex-direction:column;justify-content:space-between;padding:6px 6px 5px;}
+.dia-empty.has-clima>.de-dash{flex:1;display:flex;align-items:center;}
+.dia-empty .dia-clima{width:100%;}
+.riego-card .dia-clima{margin-top:6px;padding-top:4px;border-top:1px dashed rgba(15,23,42,.12);}
 .dia-clima{display:flex;justify-content:space-between;gap:4px;font-size:10px;color:var(--muted);padding:0 3px;white-space:nowrap;font-variant-numeric:tabular-nums;}
 .dia-clima i{font-size:11px;vertical-align:-1px;}
 .dia-clima .ll{color:#2563EB;}.dia-clima .et{color:#B45309;}
@@ -1872,9 +1873,10 @@ function rCal(dias,sc){
           const et=usaEst?etE:nz(r.etc_pronostico_mm_dia);
           if(ll!=null||et!=null)climaHtml=`<div class="dia-clima" title="Lluvia retenida y ETc del día (${usaEst?'estación':'pronóstico'})"><span class="ll"><i class="ti ti-cloud-rain"></i> ${ll!=null?ll.toFixed(1):'—'}</span><span class="et">ETc ${et!=null?et.toFixed(1):'—'}</span></div>`;
         }
-        const dIn=climaHtml?'dia-inner with-clima':'dia-inner';
         if(!hayRiego&&!hayFerti){
-          return`<td class="dia-td${eh?' hoy-col':''}"><div class="${dIn}"><div class="dia-empty">—</div>${climaHtml}</div></td>`;
+          return climaHtml
+            ?`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty has-clima"><span class="de-dash">—</span>${climaHtml}</div></div></td>`
+            :`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
         }
 
         const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
@@ -1894,7 +1896,7 @@ function rCal(dias,sc){
         }
 
         return`<td class="dia-td${eh?' hoy-col':''}">
-            <div class="${dIn}">
+            <div class="dia-inner">
               <div class="riego-card${ferRow?' has-ferti':''}" style="background:${cl};border-color:${cm};--zc:${c}" onclick="${clickMain}">
                 <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
@@ -1912,8 +1914,8 @@ function rCal(dias,sc){
                   <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
                 </div>`}
                 ${ferRow}
+                ${climaHtml}
               </div>
-              ${climaHtml}
             </div>
           </td>`;
       }).join('')}
