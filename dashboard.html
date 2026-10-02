@@ -1868,7 +1868,7 @@ function rCal(dias,sc){
         if(featOp()&&r){
           const nz=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
           const llE=nz(r.lluvia_retenida_estacion_mm_dia),etE=nz(r.etc_estacion_mm_dia);
-          const usaEst=pasado&&(llE!=null||etE!=null);
+          const etoE=nz(r.eto_estacion_mm_dia);const usaEst=pasado&&etoE!=null&&etoE>0; // estacion sin dato viene en 0 -> usar pronostico
           const ll=usaEst?llE:nz(r.lluvia_retenida_pronostico_mm_dia);
           const et=usaEst?etE:nz(r.etc_pronostico_mm_dia);
           if(ll!=null||et!=null)climaHtml=`<div class="dia-clima" title="Lluvia retenida y ETc del día (${usaEst?'estación':'pronóstico'})"><span class="ll"><i class="ti ti-cloud-rain"></i> ${ll!=null?ll.toFixed(1):'—'}</span><span class="et">ETc ${et!=null?et.toFixed(1):'—'}</span></div>`;
