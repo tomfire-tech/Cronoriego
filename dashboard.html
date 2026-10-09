@@ -2271,6 +2271,43 @@ function initNdviMap(mp){
 }
 
 
+// (09-10) Datos meteorológicos diarios de la estación del predio, último año.
+// La estación sale de sc_calculos_estaticos_zona.id_estacion de las zonas del equipo.
+const EST_METEO_COLS=[['fecha','Fecha'],['eto_mm','ETo (mm/día)'],['lluvia_mm_dia','Lluvia (mm/día)'],
+  ['temperatura_del_aire_c','Temperatura promedio (°C)'],['temperatura_del_aire_minima_c','Temperatura mínima (°C)'],['temperatura_del_aire_maxima_c','Temperatura máxima (°C)'],
+  ['humedad_relativa_porcentaje','Humedad relativa (%)'],['humedad_relativa_minima_porcentaje','Humedad relativa mínima (%)'],['humedad_relativa_maxima_porcentaje','Humedad relativa máxima (%)'],
+  ['presion_atmosferica_mbar','Presión (mbar)'],['radiacion_solar_mj_m2','Radiación solar (MJ/m²)'],['velocidad_de_viento_km_h','Viento (km/h)'],['rafaga_de_viento_km_h','Ráfaga (km/h)'],['horas_con_datos','Horas con datos']];
+async function estacionMeteoParaExcel(znIds){
+  const out={id:null,rows:[]};
+  try{
+    let idEst=null;
+    for(const c of Object.values(G.calc||{})){if(c&&c.id_estacion!=null&&c.id_estacion!==''){idEst=String(c.id_estacion);break;}}
+    if(!idEst){
+      const {data:cz}=await db.from('sc_calculos_estaticos_zona').select('id_estacion').in('id_zona',znIds).not('id_estacion','is',null).limit(1);
+      if(cz&&cz[0])idEst=String(cz[0].id_estacion);
+    }
+    if(!idEst)return out;
+    out.id=idEst;
+    const desde=new Date();desde.setFullYear(desde.getFullYear()-1);
+    let data=[];
+    for(let from=0;from<20000;from+=1000){
+      const {data:pg,error}=await db.from('sc_estacion_meteo_diaria').select('*').eq('id_estacion',idEst).gte('fecha',fs(desde)).order('fecha',{ascending:true}).range(from,from+999);
+      if(error)throw error;
+      data=data.concat(pg||[]);
+      if(!pg||pg.length<1000)break;
+    }
+    if(!data.length)return out;
+    const cols=EST_METEO_COLS.filter(([k])=>k==='fecha'||data.some(r=>r[k]!=null&&r[k]!==''));
+    const extras=[...new Set(data.flatMap(r=>Object.keys(r.extra||{})))];
+    out.rows=data.map(r=>{
+      const o={};
+      cols.forEach(([k,l])=>{o[l]=k==='fecha'?r.fecha:(r[k]==null?'':Number(r[k]));});
+      extras.forEach(k=>{const v=(r.extra||{})[k];o[k]=v==null?'':v;});
+      return o;
+    });
+  }catch(e){console.warn('[Estación] No se pudieron leer los datos meteorológicos.',e.message||e);}
+  return out;
+}
 async function downloadEstacion(){
   const btn=document.getElementById('dlEst');
   if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
@@ -2278,6 +2315,8 @@ async function downloadEstacion(){
   try{
     const znIds=G.zonas.map(z=>z.id_zona);
     const znName={};G.zonas.forEach(z=>znName[z.id_zona]=z.nombre||z.id_zona);
+    // (09-10) Datos meteorológicos diarios de la estación del predio (tabla sc_estacion_meteo_diaria)
+    const estSheet=await estacionMeteoParaExcel(znIds);
     const {data,error}=await db.from('sc_demanda_hidrica_diaria_zona')
       .select('fecha,id_zona,eto_estacion_mm_dia,etc_estacion_mm_dia,lamina_neta_riego_estacion_mm,tiempo_de_riego_estacion_horas,lluvia_estacion_mm_dia')
       .in('id_zona',znIds).order('id_zona',{ascending:true}).order('fecha',{ascending:true});
@@ -2294,11 +2333,18 @@ async function downloadEstacion(){
       'Tiempo riego estación (h)':parseFloat(r.tiempo_de_riego_estacion_horas)||0,
       'Lluvia estación (mm)':parseFloat(r.lluvia_estacion_mm_dia)||0
     }));
-    if(!rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
-    const ws=XLSX.utils.json_to_sheet(rows);
-    ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
+    if(!rows.length&&!estSheet.rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
     const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Estación');
+    if(estSheet.rows.length){
+      const ws0=XLSX.utils.json_to_sheet(estSheet.rows);
+      ws0['!cols']=Object.keys(estSheet.rows[0]).map((k,i)=>({wch:i===0?12:Math.max(12,Math.min(28,k.length+2))}));
+      XLSX.utils.book_append_sheet(wb,ws0,('Estación '+estSheet.id).slice(0,31));
+    }
+    if(rows.length){
+      const ws=XLSX.utils.json_to_sheet(rows);
+      ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
+      XLSX.utils.book_append_sheet(wb,ws,'Cálculo por zona');
+    }
     const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
     XLSX.writeFile(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
   }catch(err){
