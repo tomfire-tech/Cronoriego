@@ -1428,10 +1428,10 @@ button,input,select,textarea{font-family:inherit}button{cursor:pointer}button:fo
 </div>
 
 <script>
-const SU='https://damlgofkxzryjmsnmagt.supabase.co';
-const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhbWxnb2ZreHpyeWptc25tYWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzkzMDUsImV4cCI6MjEwNTA1NTMwNX0.20dbwUvm7-hyIgzjWDYbOK-0PCZSV1cnpVrBgvsSQy4';
+const SU='https://eaygmwjoesmibmbveikm.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVheWdtd2pvZXNtaWJtYnZlaWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjQ5MjUsImV4cCI6MjEwMjA0MDkyNX0.970NgCfMXrdEccatoKmB3iVNyORlUSjSCs9OO6hO6DE';
 const {createClient}=supabase;
-const db=createClient(SU,SK,{auth:{storageKey:'sb-cronoriego-b'}});
+const db=createClient(SU,SK,{auth:{storageKey:'sb-cronoriego-asgard'}});
 
 const ZC=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626'];
 const ZL=['#EFF6FF','#F0FDF4','#FFF7ED','#F5F3FF','#ECFEFF','#FEF2F2'];
@@ -1458,8 +1458,8 @@ function showConfirmToast(text){
   el._t=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='loginV2.html';return null;}return session;}
-async function logout(){await db.auth.signOut();window.location.href='loginV2.html';}
+async function chkAuth(){const {data:{session}}=await db.auth.getSession();if(!session){window.location.href='loginV2_asgard.html';return null;}return session;}
+async function logout(){await db.auth.signOut();window.location.href='loginV2_asgard.html';}
 
 function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
@@ -1580,7 +1580,7 @@ async function init(){
   });
   // Plan del agricultor: leer 'modulos' de razones_sociales (lo gestiona el panel admin). Si falla o no viene, queda el default.
   try{
-    const {data:rsRow}=await db.from('razones_sociales').select('modulos').eq('"ID Razón Social (PK)"',G.rsId).limit(1);
+    const {data:rsRow}=await db.from('razones_sociales').select('*').eq('id_razon_social',G.rsId).limit(1);
     const planStr=rsRow?.[0]?.modulos;
     if(planStr&&typeof planStr==='string')MODULOS=planStr.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
     if(!MODULOS.includes('mantenimiento'))MODULOS.push('mantenimiento');
