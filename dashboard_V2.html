@@ -1182,6 +1182,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <span class="sel-lbl">Equipo</span>
       <select id="se" onchange="onEquipo()"></select>
     </div>
+    <div class="sel-wrap" id="opWrap" style="display:none">
+      <span class="sel-lbl">Operación</span>
+      <select id="sop" onchange="onOperacion()"></select>
+    </div>
     <button class="eq-op-btn" onclick="openEq()" title="Operario y profesional por defecto de este equipo"><i class="ti ti-user-cog"></i></button>
     <div class="week-nav">
       <button onclick="chW(-1)"><i class="ti ti-chevron-left"></i></button>
@@ -1206,6 +1210,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
 </header>
 <div class="tabs">
+  <div class="tab" id="tab-operacion" onclick="switchTab('operacion')" style="display:none"><i class="ti ti-arrows-split-2"></i>Operación de riego</div>
   <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego y Fertirriego</div>
   <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet-filled"></i>Dinámica de Estanque</div>
   <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
@@ -1249,6 +1254,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </div>
 </div><!-- /view-riego -->
 
+<div id="view-operacion" class="view" style="display:none">
+  <div class="est-wrap">
+    <div class="kpi-bar" id="opkpi" style="grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;"></div>
+    <div class="est-card">
+      <div class="est-card-t"><i class="ti ti-arrows-split-2" style="color:var(--blue)"></i>Tiempo y volumen de riego por operación</div>
+      <div class="est-card-s" id="opSub">Cada operación riega sus zonas al mismo tiempo, con el tiempo de la zona que más requiere.</div>
+      <div class="op-tbl-scroll" id="opBody"><div class="loading">Cargando operaciones...</div></div>
+      <div class="op-note">Tiempo del día = el de la zona que más requiere dentro de la operación. Volumen del día = suma del caudal de las zonas de la operación (m³/h) × ese tiempo. Total semanal = suma de lunes a domingo. Días pasados con dato real de estación; el resto, pronóstico.</div>
+    </div>
+  </div>
+</div>
 <div id="view-estanque" class="view" style="display:none">
   <div class="est-wrap">
     <div class="kpi-bar" id="estkpi"></div>
@@ -1534,7 +1550,7 @@ async function logout(){await db.auth.signOut();window.location.href='loginV2.ht
 function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
 
-function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();}
+function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();if(TAB==='operacion')loadRenderOperacion();}
 function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl-sem').textContent=`Sem. ${nw}`;document.getElementById('wlbl-fec').textContent=`${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;}
 
 function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
@@ -1634,6 +1650,109 @@ async function qProductosFerti(){
 }
 
 
+// (01-10) Funciones solo para Drupa por ahora (operaciones, VOLUMENES en tarjetas, clima por casilla). Agregar RS aquí para extender.
+const FEAT_RS=['RS-10'];
+function featOp(){return FEAT_RS.includes(G.rsId);}
+function isoWeekKey(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=c.getUTCFullYear();const w=Math.ceil(((c-new Date(Date.UTC(y,0,1)))/86400000+1)/7);return y+'-W'+String(w).padStart(2,'0');}
+function opLabel(o){return o==null||o===''?'Sin operación':'Operación '+o;}
+function opSortKey(o){const s=String(o??'');const m=s.match(/^(\d+)(.*)$/);return m?[0,parseInt(m[1],10),m[2]]:[s?1:2,0,s];}
+function opCmp(a,b){const x=opSortKey(a),y=opSortKey(b);for(let i=0;i<3;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return 0;}
+async function qVolumenes(znIds,semana){
+  if(!znIds.length)return null;
+  try{
+    const {data,error}=await db.from('sc_dashboard_volumenes').select('id_zona,riego_aplicado_m3,riego_aplicado_prom_hist_m3,pronostico_demanda_m3,prom_hist_demanda_m3').in('id_zona',znIds).eq('numero_semana',semana);
+    if(error)throw error;
+    const t={n:(data||[]).length,real:0,hist:0,pron:0,pronHist:0};
+    (data||[]).forEach(r=>{t.real+=parseFloat(r.riego_aplicado_m3)||0;t.hist+=parseFloat(r.riego_aplicado_prom_hist_m3)||0;t.pron+=parseFloat(r.pronostico_demanda_m3)||0;t.pronHist+=parseFloat(r.prom_hist_demanda_m3)||0;});
+    return t;
+  }catch(e){console.warn('[Volumenes] No se pudo cargar sc_dashboard_volumenes.',e.message||e);return null;}
+}
+async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
+
+// Todas las zonas del PREDIO (no solo del equipo seleccionado): recorre
+// todos los equipos del predio y junta sus zonas.
+async function qZonasPredio(prId){
+  if(!prId)return [];
+  try{
+    const equipos=await qE(prId);
+    if(!equipos.length)return [];
+    const results=await Promise.all(equipos.map(e=>qZ(e.id_equipo)));
+    return results.flat();
+  }catch(e){
+    console.warn('[Balance] No se pudo cargar zonas del predio.',e.message||e);
+    return [];
+  }
+}
+
+// Último acumulado registrado de N/P2O5/K2O por zona.
+async function qAcumuladoUltimoPorZona(znIds){
+  if(!znIds.length)return {};
+  try{
+    const {data,error}=await db.from('sc_recomendacion_ferti')
+      .select('id_zona,fecha_evento,acumulado_n_kg,acumulado_p2o5_kg,acumulado_k2o_kg')
+      .in('id_zona',znIds).order('fecha_evento',{ascending:false});
+    if(error)throw error;
+    const m={};
+    (data||[]).forEach(r=>{
+      // Como viene ordenado desc por fecha, la primera fila que aparece
+      // por cada zona ES la más reciente — por eso solo guardamos si aún
+      // no existe esa zona en el mapa.
+      if(!m[r.id_zona])m[r.id_zona]={n:numF(r.acumulado_n_kg),p:numF(r.acumulado_p2o5_kg),k:numF(r.acumulado_k2o_kg),fecha:r.fecha_evento};
+    });
+    return m;
+  }catch(e){
+    console.warn('[Balance] No se pudo cargar el acumulado por zona.',e.message||e);
+    return {};
+  }
+}
+
+
+
+async function qEstanquesNombres(prId){
+  if(!prId)return [];
+  try{
+    const {data,error}=await db.from('v_estanques').select('id_estanque,nombre,tipo').eq('id_predio',prId);
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.warn('[Estanques] No se pudo cargar la lista de nombres — se usa texto libre como respaldo.',e.message||e);
+    return [];
+  }
+}
+
+async function qPozosNombres(prId){
+  if(!prId)return [];
+  try{
+    const {data,error}=await db.from('v_pozos').select('id_pozo,nombre,tipo').eq('id_predio',prId);
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.warn('[Pozos] No se pudo cargar la lista de nombres — se usa texto libre como respaldo.',e.message||e);
+    return [];
+  }
+}
+
+async function qProductosFerti(){
+  if(!G.rsId)return [];
+  try{
+    const {data,error}=await db.from('sc_registro_facturas_fertilizantes').select('producto').eq('id_razon_social',G.rsId);
+    if(error)throw error;
+    const set=new Set((data||[]).map(r=>r.producto).filter(Boolean));
+    return Array.from(set).sort((a,b)=>a.localeCompare(b,'es'));
+  }catch(e){
+    console.warn('[Productos] No se pudo cargar el catálogo de productos.',e.message||e);
+    return [];
+  }
+}
+
+
+function riegoDelDia(r,hoyS){
+  const lP=parseFloat(r.lamina_neta_riego_pronostico_mm)||0,tP=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;
+  const lE=parseFloat(r.lamina_neta_riego_estacion_mm)||0,tE=parseFloat(r.tiempo_de_riego_estacion_horas)||0;
+  const est=r.fecha<hoyS&&(lE>0||tE>0);
+  const l=est?lE:lP,t=est?tE:tP;
+  return (l>0&&hm(t))?{l,t,est}:{l:0,t:0,est:false};
+}
 async function init(){
   const ses=await chkAuth();if(!ses)return;
   updW();
@@ -1655,6 +1774,7 @@ async function init(){
     if(planStr&&typeof planStr==='string')MODULOS=planStr.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
     if(!MODULOS.includes('mantenimiento'))MODULOS.push('mantenimiento');
   }catch(e){}
+  const tOp=document.getElementById('tab-operacion');if(tOp)tOp.style.display=featOp()?'':'none';
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
   sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
@@ -1671,11 +1791,33 @@ async function onPredio(){
 }
 async function onEquipo(){
   const eqId=document.getElementById('se').value;
-  G.zonas=await qZ(eqId);
+  G.zonasAll=await qZ(eqId);
+  poblarOperaciones();
+  G.zonas=filtrarPorOperacion(G.zonasAll);
   await qEquipoOpDefaults(eqId);
   if(G.zonas.length)await loadRender();
+  if(TAB==='operacion')loadRenderOperacion();
   marcarTabsPlan();
   aplicarBloqueo(TAB);
+}
+// (01-10) Filtro por operación de riego (solo RS con featOp)
+function poblarOperaciones(){
+  const wrap=document.getElementById('opWrap'),sel=document.getElementById('sop');if(!wrap||!sel)return;
+  const ops=featOp()?[...new Set((G.zonasAll||[]).map(z=>z.operacion).filter(o=>o!=null&&o!==''))].sort(opCmp):[];
+  if(!ops.length){wrap.style.display='none';G.opFiltro='';sel.innerHTML='<option value="">Todas</option>';return;}
+  if(G.opFiltro&&!ops.includes(G.opFiltro))G.opFiltro='';
+  sel.innerHTML='<option value="">Todas</option>'+ops.map(o=>`<option value="${o}">${opLabel(o)}</option>`).join('');
+  sel.value=G.opFiltro||'';
+  wrap.style.display='';
+}
+function filtrarPorOperacion(zs){
+  if(!featOp()||!G.opFiltro)return zs||[];
+  return (zs||[]).filter(z=>String(z.operacion??'')===G.opFiltro);
+}
+async function onOperacion(){
+  G.opFiltro=document.getElementById('sop').value||'';
+  G.zonas=filtrarPorOperacion(G.zonasAll);
+  if(G.zonas.length)await loadRender();
 }
 async function loadRender(){
   const eqId=document.getElementById('se').value;
@@ -1797,7 +1939,7 @@ function rCal(dias,sc){
     tbody+=`<tr style="height:96px;">
       <td class="zona-td" style="padding:3px 6px 3px 0">
         <div class="zona-pill" onclick="openZona('${z.id_zona}')" title="Ver ficha de la zona">
-          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||'Zona'}</div><div class="cr-zone-meta">${mtEsc(z.especie||'')} · ${parseFloat(z.superficie_ha||0).toLocaleString('es-CL',{maximumFractionDigits:2})} ha</div>
+          <div class="zona-head"><div class="zona-dot" style="background:${c}"></div>${z.nombre||'Zona'}</div><div class="cr-zone-meta">${mtEsc(z.especie||'')} · ${parseFloat(z.superficie_ha||0).toLocaleString('es-CL',{maximumFractionDigits:2})} ha${featOp()&&z.operacion?`<span class="op-badge">Op. ${mtEsc(String(z.operacion))}</span>`:''}</div>
         </div>
       </td>
       ${dias.map(d=>{
@@ -2457,11 +2599,12 @@ function marcarTabsPlan(){
   });
 }
 function aplicarBloqueo(tab){
-  ['riego','estanque','balance','mantenimiento'].forEach(m=>document.getElementById('view-'+m)?.classList.remove('blurred'));
+  ['riego','estanque','balance','mantenimiento','operacion'].forEach(m=>document.getElementById('view-'+m)?.classList.remove('blurred'));
   const lock=document.getElementById('planLock');
-  if(!tieneModulo(tab)){
+  const mod=tab==='operacion'?'riego':tab;   // la pestaña de operaciones va con el módulo de riego
+  if(!tieneModulo(mod)){
     document.getElementById('view-'+tab)?.classList.add('blurred');
-    const info=MOD_INFO[tab];const plan=MOD_PLAN[tab];
+    const info=MOD_INFO[mod];const plan=MOD_PLAN[mod];
     document.getElementById('lockBadge').innerHTML='<i class="ti ti-crown"></i> PLAN '+plan.toUpperCase();
     document.getElementById('lockTitle').textContent='Módulo '+info.nombre;
     document.getElementById('lockDesc').textContent='El módulo de '+info.nombre+' está disponible en el plan '+plan+'. Actívalo para acceder a toda la información.';
@@ -2478,16 +2621,73 @@ function cambiarPlan(){
 
 function switchTab(t){
   if(t===TAB)return;TAB=t;
-  const TABS=['riego','estanque','balance','mantenimiento'];
+  const TABS=['operacion','riego','estanque','balance','mantenimiento'];
   TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
+  document.getElementById('view-operacion').style.display=t==='operacion'?'flex':'none';
   document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
   document.getElementById('view-estanque').style.display=t==='estanque'?'flex':'none';
   document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
   document.getElementById('view-mantenimiento').style.display=t==='mantenimiento'?'flex':'none';
+  if(t==='operacion')loadRenderOperacion();
   if(t==='estanque')loadRenderEstanque();
   if(t==='balance')loadRenderBalance();
   if(t==='mantenimiento')openMaintenanceModule();
   aplicarBloqueo(t);
+}
+
+// (01-10) Pestaña "Operación de riego": todas las operaciones del predio, lunes a domingo.
+let _opSeq=0;
+async function loadRenderOperacion(){
+  const body=document.getElementById('opBody'),kpi=document.getElementById('opkpi'),sub=document.getElementById('opSub');
+  if(!body)return;
+  if(!featOp()){body.innerHTML='<div class="loading">Esta vista aún no está habilitada para tu cuenta.</div>';if(kpi)kpi.innerHTML='';return;}
+  const seq=++_opSeq;
+  body.innerHTML='<div class="loading"><i class="ti ti-loader-2"></i>Cargando operaciones...</div>';
+  try{
+    const prId=document.getElementById('sp').value;
+    const equipos=await qE(prId);
+    const zsPorEq=await Promise.all(equipos.map(e=>qZ(e.id_equipo)));
+    const zs=zsPorEq.flat();
+    const dias=semDias(G.off),fi=fs(dias[0]),ff=fs(dias[6]),hS=fs(new Date());
+    const ids=zs.map(z=>z.id_zona);
+    const [sc,calc]=await Promise.all([qSC(ids,fi,ff),qCalc(ids)]);
+    if(seq!==_opSeq)return;
+    const dm={};sc.forEach(r=>{(dm[r.id_zona]=dm[r.id_zona]||{})[r.fecha]=r;});
+    const eqNom={};equipos.forEach(e=>eqNom[e.id_equipo]=e.nombre||e.id_equipo);
+    const grupos={};
+    zs.forEach(z=>{const k=z.id_equipo+'|'+(z.operacion??'');(grupos[k]=grupos[k]||{eq:z.id_equipo,op:z.operacion??'',zonas:[]}).zonas.push(z);});
+    const eqOrden=equipos.map(e=>e.id_equipo);
+    const lista=Object.values(grupos).sort((a,b)=>(eqOrden.indexOf(a.eq)-eqOrden.indexOf(b.eq))||opCmp(a.op,b.op));
+    let sinCaudal=0;
+    lista.forEach(g=>{
+      g.caudal=g.zonas.reduce((a,z)=>{const q=parseFloat(calc[z.id_zona]?.caudal_zona_m3h);if(!(q>0))sinCaudal++;return a+(q>0?q:0);},0);
+      g.dias=dias.map(d=>{const dS=fs(d);let T=0,real=false;g.zonas.forEach(z=>{const r=dm[z.id_zona]?.[dS];if(!r)return;const x=riegoDelDia(r,hS);if(x.t>T)T=x.t;if(x.est)real=true;});return{T,V:T*g.caudal,real};});
+      g.T=g.dias.reduce((a,x)=>a+x.T,0);g.V=g.dias.reduce((a,x)=>a+x.V,0);
+    });
+    const fV=v=>v>0?Math.round(v).toLocaleString('es-CL')+' m³':'';
+    const celda=x=>x.T>0?`<div class="op-t">${hm(x.T)}</div><div class="op-v">${fV(x.V)}</div>`:'<span class="op-nil">—</span>';
+    let html=`<table class="op-tbl"><thead><tr><th class="l">Operación</th><th class="l">Zonas</th><th>Caudal<br>m³/h</th>${dias.map(d=>`<th class="${fs(d)===hS?'hoy':''}">${DSS[d.getDay()]} ${d.getDate()}</th>`).join('')}<th>Total semana</th></tr></thead><tbody>`;
+    let eqAct=null;
+    lista.forEach(g=>{
+      if(equipos.length>1&&g.eq!==eqAct){eqAct=g.eq;html+=`<tr class="op-eq"><td colspan="${dias.length+4}">Equipo ${eqNom[g.eq]||g.eq}</td></tr>`;}
+      const zTxt=g.zonas.map(z=>z.nombre||z.id_zona).join(' · ');
+      html+=`<tr><td class="l"><div class="op-name">${opLabel(g.op)}</div></td><td class="l"><div class="op-zonas">${zTxt}</div></td><td>${g.caudal>0?g.caudal.toLocaleString('es-CL',{maximumFractionDigits:1}):'—'}</td>${g.dias.map((x,i)=>`<td class="${fs(dias[i])===hS?'hoy':''}">${celda(x)}</td>`).join('')}<td class="op-week">${celda({T:g.T,V:g.V})}</td></tr>`;
+    });
+    const tot=dias.map((d,i)=>({T:lista.reduce((a,g)=>a+g.dias[i].T,0),V:lista.reduce((a,g)=>a+g.dias[i].V,0)}));
+    const TT=tot.reduce((a,x)=>a+x.T,0),VV=tot.reduce((a,x)=>a+x.V,0);
+    html+=`<tr class="op-tot"><td class="l" colspan="3">Total predio</td>${tot.map((x,i)=>`<td class="${fs(dias[i])===hS?'hoy':''}">${celda(x)}</td>`).join('')}<td class="op-week">${celda({T:TT,V:VV})}</td></tr></tbody></table>`;
+    body.innerHTML=lista.length?html:'<div class="loading">Este predio no tiene zonas activas.</div>';
+    const l=dias[0],dom=dias[6];
+    if(sub)sub.textContent=`${lista.length} operaciones · Sem. ${isoW(l)} (${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]})${sinCaudal?` · ${sinCaudal} zona(s) sin caudal calculado`:''}`;
+    const conRiego=lista.filter(g=>g.T>0).length;
+    if(kpi)kpi.innerHTML=`
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Volumen semana (operaciones)</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div><div class="kpi-val blue">${VV>0?Math.round(VV).toLocaleString('es-CL'):'—'}</div><div class="kpi-sub">m³ lunes a domingo</div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Horas de riego semana</div><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-clock"></i></div></div><div class="kpi-val green">${TT>0?hm(TT):'—'}</div><div class="kpi-sub">suma de todas las operaciones</div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Operaciones con riego</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-arrows-split-2"></i></div></div><div class="kpi-val amber">${conRiego} <span style="font-size:15px;color:var(--muted)">/ ${lista.length}</span></div><div class="kpi-sub">esta semana</div></div>`;
+  }catch(e){
+    console.error('[Operaciones]',e);
+    if(seq===_opSeq)body.innerHTML='<div class="loading" style="color:var(--red)">No se pudieron cargar las operaciones.</div>';
+  }
 }
 
 async function loadRenderFerti(){
@@ -3249,6 +3449,7 @@ function initCustomDropdowns(){
     rebuild();
     wrap.addEventListener('click',ev=>{
       if(ev.target.closest('.cd-menu'))return;
+      ev.stopPropagation();   // si no, el click llega al document y cierra el menú al tiro
       const wasOpen=menu.classList.contains('open');
       document.querySelectorAll('.cd-menu.open').forEach(m=>m.classList.remove('open'));
       if(!wasOpen)menu.classList.add('open');
@@ -4238,9 +4439,10 @@ new MutationObserver(crMakeCalendarAccessible).observe(document.getElementById('
 document.querySelectorAll('.sel-wrap').forEach(w=>{const select=w.querySelector('select');if(select)select.setAttribute('aria-label',w.querySelector('.sel-lbl')?.textContent||'Seleccionar');});
 document.querySelectorAll('.dclose').forEach(b=>b.setAttribute('aria-label','Cerrar detalle'));
 document.querySelectorAll('.week-nav button').forEach((b,i)=>b.setAttribute('aria-label',i?'Semana siguiente':'Semana anterior'));
-if(typeof Chart!=='undefined'){Chart.defaults.font.family="'Inter',sans-serif";Chart.defaults.color='#6a7b73';Chart.defaults.plugins.legend.labels.padding=20;if(document.body.classList.contains('cr-demo'))Chart.defaults.animation=false;}
+if(typeof Chart!=='undefined'){Chart.defaults.font.family="'Inter',sans-serif";Chart.defaults.color='#64748B';Chart.defaults.plugins.legend.labels.padding=20;if(document.body.classList.contains('cr-demo'))Chart.defaults.animation=false;}
 crUpdateContext();
 
+initCustomDropdowns();
 
 init();
 </script>
