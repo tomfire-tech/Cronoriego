@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CronoRiego ·BD V2</title>
+<title>CronoRiego · Asgard BD V2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -54,7 +54,7 @@ body{min-height:100vh;display:grid;place-items:center;padding:20px;
 <body>
 <div class="card">
   <div class="logo"><span style="color:#1A5276">CRONO</span><span style="color:#1E8449">RIEGO</span></div>
-  <div class="badge">BD V2</div>
+  <div class="badge">ASGARD · BD V2 · PRUEBAS</div>
   <div class="sub">Entorno espejo con los datos del motor de cálculo.<br>No es producción.</div>
 
   <label class="fl" for="em">Correo</label>
@@ -101,10 +101,22 @@ function tv(){
   ic.className=i.type==='text'?'ti ti-eye-off':'ti ti-eye';
 }
 
-// Si ya hay sesión activa en esta plataforma, pasa directo al dashboard.
+// Administradores (admin / super_admin) van al panel de administrador.
+const DESTINO_ADMIN='adminV2.html';
+const ROLES_ADMIN=['admin','super_admin'];
+async function destinoSegunRol(email){
+  try{
+    const {data}=await db.from('v_usuarios').select('id_rs,rol').eq('email',(email||'').toLowerCase()).limit(1);
+    return data?.[0]||null;
+  }catch(e){return null;}
+}
+
+// Si ya hay sesión activa en esta plataforma, pasa directo al dashboard (o al panel admin).
 (async()=>{
   const {data:{session}}=await db.auth.getSession();
-  if(session)window.location.replace(DESTINO);
+  if(!session)return;
+  const perfil=await destinoSegunRol(session.user.email);
+  window.location.replace(ROLES_ADMIN.includes(perfil?.rol)?DESTINO_ADMIN:DESTINO);
 })();
 
 async function entrar(){
@@ -120,8 +132,13 @@ async function entrar(){
 
     // El dashboard resuelve la Razón Social buscando el correo en v_usuarios.
     // Si no calza, avisamos acá en vez de dejar el dashboard en blanco.
-    const {data:perfil}=await db.from('v_usuarios').select('id_rs').eq('email',email).limit(1);
-    if(!perfil||!perfil.length||!perfil[0].id_rs){
+    const p=await destinoSegunRol(email);
+    if(ROLES_ADMIN.includes(p?.rol)){
+      show('✓ Listo, entrando al panel de administrador...','ok');
+      window.location.href=DESTINO_ADMIN;
+      return;
+    }
+    if(!p||!p.id_rs){
       show('Entraste, pero este correo no está asociado a ninguna Razón Social '+
            'en Asgard. El dashboard se abrirá sin predios.','err');
       setTimeout(()=>window.location.href=DESTINO,3200);
