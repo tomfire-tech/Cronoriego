@@ -109,7 +109,7 @@ function tv(){
 
 async function entrar(){
   limpiar();
-  const email=document.getElementById('em').value.trim();
+  const email=document.getElementById('em').value.trim().toLowerCase();
   const password=document.getElementById('pw').value;
   if(!email||!password){show('Ingresa tu correo y contraseña.','err');return;}
 
