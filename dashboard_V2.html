@@ -351,6 +351,21 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .dia-empty.rc-sinalerta{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;padding:10px 11px 9px;color:var(--muted);font-size:12px;background:rgba(255,255,255,.55);cursor:pointer;height:auto;min-height:88px;}
 .rc-sinalerta .rc-t0{font-size:11px;font-weight:700;color:var(--subtle);}
 .rc-v2 .rc-noconfirm{white-space:normal;line-height:1.25;}
+
+/* ===== Casilla estilo tarjeta (AL / AK a la vista, AG como etiqueta) ===== */
+.rc-foto{position:relative;width:100%;min-height:96px;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:transform .15s,box-shadow .15s;text-align:left;}
+.rc-foto:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.rc-foto .rf-l1{font-size:14px;font-weight:800;line-height:1.25;}
+.rc-foto .rf-l1.aa-g{color:#15803D;background:none;}.rc-foto .rf-l1.aa-a{color:#B45309;background:none;}.rc-foto .rf-l1.aa-r{color:#DC2626;background:none;}.rc-foto .rf-l1.aa-n{color:var(--muted);}
+.rc-foto .rf-l2{font-size:13px;font-weight:700;color:#475569;line-height:1.25;}
+.rc-foto .rf-pill{margin-top:auto;border-radius:14px;padding:6px 10px;font-size:12px;font-weight:800;line-height:1.25;background:#F1F5F9;color:#475569;}
+.rc-foto .rf-pill.al-riego{background:#DBEAFE;color:#1D4ED8;}
+.rc-foto .rf-pill.al-parcial{background:#EDE9FE;color:#5B21B6;}
+.rc-foto .rf-pill.al-restr{background:#FEF3C7;color:#92400E;}
+.rc-foto .rf-pill.al-otro{background:#F1F5F9;color:#475569;}
+.rc-foto .rc-noconfirm{margin-top:4px;white-space:normal;line-height:1.25;}
+.rc-foto .rc-ferti{margin-top:6px;}
+.th-hoy-lbl{font-size:12px;font-weight:800;color:var(--blue);margin-top:2px;}
 .dash-kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .dash-kpi3 .d-kpi .s{font-size:10.5px;color:var(--muted);margin-top:2px;}
 
@@ -2108,6 +2123,7 @@ function rCal(dias,sc){
     ${dias.map(d=>{const eh=fs(d)===hS;return`<th class="${eh?'th-hoy':''}" style="padding-bottom:12px;min-width:108px">
       <div class="th-num">${d.getDate()}</div>
       <div style="font-size:10px;font-weight:500;margin-top:1px">${DSS[d.getDay()]} ${MSS[d.getMonth()]}</div>
+      ${eh?'<div class="th-hoy-lbl">Hoy</div>':''}
     </th>`;}).join('')}</tr></thead>`;
 
   let tbody='<tbody>';
@@ -2137,43 +2153,39 @@ function rCal(dias,sc){
         const hayFerti=fertiEvs.length>0;
         const confF=G.confirmF[z.id_zona+'|'+dS];
 
-        if(!hayRiego&&!hayFerti){
-          if(!r)return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
-          return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty rc-sinalerta" onclick="openDia('${dS}','${z.id_zona}')">
-            <div class="rc-t0">Sin alerta</div>
-            ${rcAplicado(rAp)}
-            ${rcBarraAA(aAp)}
-          </div></div></td>`;
+        if(!r&&!hayFerti){
+          return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
         }
 
         const tiempoFertTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
         const dosisEstanqueTot=fertiEvs.reduce((a,e)=>a+(parseFloat(e.dosis_producto_estanque_kg)||0),0);
         const fertiTxt=[hm(tiempoFertTot),dosisEstanqueTot>0?dosisEstanqueTot.toFixed(1)+' kg':null].filter(Boolean).join(' · ')||(fertiEvs[0]?prodShort(fertiEvs[0].producto_asignado):'');
-        const clickMain=(hayRiego||r)?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
+        const clickMain=r?`openDia('${dS}','${z.id_zona}')`:(puedeFerti?`openEvF('${z.id_zona}','${dS}',0)`:`cambiarPlan()`);
 
         let ferRow='';
         if(!puedeFerti){
-          ferRow=`<div class="rc-ferti locked" onclick="event.stopPropagation();cambiarPlan()">
+          ferRow=hayFerti?`<div class="rc-ferti locked" onclick="event.stopPropagation();cambiarPlan()">
             <i class="ti ti-lock"></i><span>Fertirriego</span>
-          </div>`;
+          </div>`:'';
         } else if(hayFerti){
           ferRow=`<div class="rc-ferti" onclick="event.stopPropagation();openEvF('${z.id_zona}','${dS}',0)">
             <i class="ti ti-flask-2"></i><span>${fertiTxt}</span>${confF?'<i class="ti ti-check rc-ferti-ok"></i>':''}
           </div>`;
         }
 
+        // Tarjeta: AL (agua aprovechable) destacada, AK (riego aplicado) y AG (alerta) como etiqueta.
+        const aaCls=aAp==null?'aa-n':(aAp>=0.6?'aa-g':(aAp>=0?'aa-a':'aa-r'));
+        const l1=aAp!=null?`Agua aprov. ${Math.round(aAp*100)} %`:'Agua aprov. —';
+        const l2=rAp!=null?`Riego aplicado ${rcNum(rAp)} mm`:'Riego aplicado —';
+        const pill=r?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación (AG)">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
-              <div class="riego-card rc-v2 ${hayRiego?est.cls:'al-ferti'}${ferRow?' has-ferti':''}" onclick="${clickMain}">
+              <div class="rc-foto" onclick="${clickMain}">
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
-                ${hayRiego?`<div class="rc-chiprow"><span class="rc-al" title="Alerta / recomendación (AG)"><i class="ti ${est.ico}"></i>${mtEsc(alerta)}</span></div>
-                ${rcAplicado(rAp)}
-                ${(esRiego&&!conf&&(pasado||eh))?`<div class="rc-noconfirm"><i class="ti ti-alert-triangle"></i>Riego sin confirmación</div>`:''}
-                ${rcBarraAA(aAp)}`:`<div class="rc-top">
-                  <div class="rc-tiempo" style="color:${puedeFerti?'#16A34A':'var(--subtle)'}">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>
-                  <i class="ti ti-flask-2 rc-ico" style="color:${puedeFerti?'#16A34A':'var(--subtle)'};opacity:.7"></i>
-                </div>
-                ${r?rcAplicado(rAp)+rcBarraAA(aAp):''}`}
+                ${r?`<div class="rf-l1 ${aaCls}" title="Agua aprovechable (AL)">${l1}</div>
+                <div class="rf-l2" title="Riego aplicado (AK)">${l2}</div>
+                ${pill}
+                ${(esRiego&&!conf&&(pasado||eh))?`<div class="rc-noconfirm"><i class="ti ti-alert-triangle"></i>Riego sin confirmación</div>`:''}`:`<div class="rf-l2" style="color:#16A34A">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>`}
                 ${ferRow}
               </div>
             </div>
