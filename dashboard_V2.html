@@ -553,6 +553,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   }
   .m-view{display:none;animation:mFade .16s ease;}
   .m-view.active{display:block;}
+  .m-view.m-blurred{filter:blur(4px) saturate(.85);pointer-events:none;user-select:none;transition:filter .25s;}
   @keyframes mFade{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
   .m-page-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;letter-spacing:-.4px;margin:2px 1px 10px;}
   .m-page-sub{font-size:11px;color:var(--muted);margin:-6px 1px 12px;line-height:1.4;}
@@ -1306,6 +1307,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <span class="usr-name" id="unm">—</span>
       <i class="ti ti-chevron-down" style="font-size:11px;color:var(--subtle)"></i>
       <div class="usr-dd" id="udd">
+        <button class="dd-btn" id="ddAdmin" hidden onclick="location.href='adminV2.html'"><i class="ti ti-shield-lock"></i>Panel administrador</button>
         <button class="dd-btn" onclick="openCl()"><i class="ti ti-lock"></i>Cambiar contraseña</button>
         <div class="dd-sep"></div>
         <button class="dd-btn danger" onclick="logout()"><i class="ti ti-logout"></i>Cerrar sesión</button>
@@ -1482,6 +1484,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <button class="m-icon-btn" onclick="downloadEstacion()" aria-label="Descargar estación"><i class="ti ti-download"></i></button>
         <button class="m-avatar-btn" onclick="toggleMobileUser(event)" aria-label="Menú de usuario"><span class="m-avatar" id="mUserInitial">—</span></button>
         <div class="m-user-menu" id="mUserMenu">
+          <button id="mAdmin" hidden onclick="location.href='adminV2.html'"><i class="ti ti-shield-lock"></i>Panel administrador</button>
           <button onclick="openCl();closeMobileUser()"><i class="ti ti-lock"></i>Cambiar contraseña</button>
           <button onclick="openEq();closeMobileUser()"><i class="ti ti-user-cog"></i>Datos del equipo</button>
           <button class="danger" onclick="logout()"><i class="ti ti-logout"></i>Cerrar sesión</button>
@@ -1570,7 +1573,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="m-plan-badge" id="mPlanBadge">PLAN PRO</div>
       <h3 id="mPlanTitle">Módulo no incluido</h3>
       <p id="mPlanDescription">Este módulo no está incluido en el plan actual.</p>
-      <div class="m-plan-actions"><button class="close" onclick="closeMobilePlanLock()">Volver</button><button class="upgrade" onclick="cambiarPlan()">Cambiar plan</button></div>
+      <div class="m-plan-actions"><button class="close" onclick="mobileVolverDesdeBloqueo()">Volver</button><button class="upgrade" onclick="cambiarPlan()">Cambiar plan</button></div>
     </div>
   </div>
 
@@ -1879,8 +1882,13 @@ async function init(){
   G.userId=ses.user.id;G.userEmail=em;
   document.getElementById('unm').textContent=em.split('@')[0];
   document.getElementById('uini').textContent=em[0].toUpperCase();
-  const {data:u}=await db.from('v_usuarios').select('*').eq('email',em).limit(1);
+  const {data:u}=await db.from('v_usuarios').select('*').eq('email',(em||'').toLowerCase()).limit(1);
   G.rsId=u?.[0]?.id_rs||null;
+  // Administradores: acceso al panel desde el menú de usuario; si no tienen cliente asignado, van directo al panel.
+  if(['admin','super_admin'].includes(u?.[0]?.rol)){
+    ['ddAdmin','mAdmin'].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=false;});
+    if(!G.rsId){window.location.replace('adminV2.html');return;}
+  }
   if(!G.rsId){document.getElementById('ctbl').innerHTML='<tbody><tr><td colspan="8" class="loading" style="color:var(--amber)">Cuenta sin predios asignados.</td></tr></tbody>';return;}
   qProductosFerti().then(list=>{
     G.productosFerti=list;
@@ -1918,6 +1926,7 @@ async function onEquipo(){
   if(TAB==='operacion')loadRenderOperacion();
   marcarTabsPlan();
   aplicarBloqueo(TAB);
+  if(typeof mobileAplicarBloqueo==='function'){mobileUpdatePlanNav();mobileAplicarBloqueo(MOBILE.module);}
 }
 // (01-10) Filtro por operación de riego (solo RS con featOp)
 function poblarOperaciones(){
@@ -2460,6 +2469,29 @@ function initNdviMap(mp){
 }
 
 
+async function qEstacionMeteo(prId){
+  if(!prId)return[];
+  const {data:pr}=await db.from('v_predios').select('id_estacion').eq('id_predio',prId).limit(1);
+  const est=pr?.[0]?.id_estacion;if(!est)return[];
+  const n=v=>v===null||v===undefined||v===''?null:parseFloat(v);
+  const out=[];
+  for(let desde=0;;desde+=1000){
+    const {data,error}=await db.from('sc_estacion_meteo_diaria')
+      .select('fecha,eto_mm,lluvia_mm_dia,temperatura_del_aire_c,temperatura_del_aire_minima_c,temperatura_del_aire_maxima_c,humedad_relativa_porcentaje,humedad_relativa_minima_porcentaje,humedad_relativa_maxima_porcentaje,presion_atmosferica_mbar,radiacion_solar_mj_m2,velocidad_de_viento_km_h,rafaga_de_viento_km_h,horas_con_datos')
+      .eq('id_estacion',est).order('fecha',{ascending:true}).range(desde,desde+999);
+    if(error)throw error;
+    (data||[]).forEach(r=>out.push({
+      'Fecha':r.fecha,'ETo (mm)':n(r.eto_mm),'Lluvia (mm/día)':n(r.lluvia_mm_dia),
+      'Temp. media (°C)':n(r.temperatura_del_aire_c),'Temp. mínima (°C)':n(r.temperatura_del_aire_minima_c),'Temp. máxima (°C)':n(r.temperatura_del_aire_maxima_c),
+      'HR media (%)':n(r.humedad_relativa_porcentaje),'HR mínima (%)':n(r.humedad_relativa_minima_porcentaje),'HR máxima (%)':n(r.humedad_relativa_maxima_porcentaje),
+      'Presión (mbar)':n(r.presion_atmosferica_mbar),'Radiación (MJ/m²)':n(r.radiacion_solar_mj_m2),
+      'Viento (km/h)':n(r.velocidad_de_viento_km_h),'Ráfaga (km/h)':n(r.rafaga_de_viento_km_h),'Horas con datos':n(r.horas_con_datos)
+    }));
+    if(!data||data.length<1000)break;
+  }
+  return out;
+}
+
 async function downloadEstacion(){
   const btn=document.getElementById('dlEst');
   if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
@@ -2483,11 +2515,20 @@ async function downloadEstacion(){
       'Tiempo riego estación (h)':parseFloat(r.tiempo_de_riego_estacion_horas)||0,
       'Lluvia estación (mm)':parseFloat(r.lluvia_estacion_mm_dia)||0
     }));
-    if(!rows.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
-    const ws=XLSX.utils.json_to_sheet(rows);
-    ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
+    // Registros diarios de la estación meteorológica del predio (sc_estacion_meteo_diaria)
+    const met=await qEstacionMeteo(document.getElementById('sp').value);
+    if(!rows.length&&!met.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
     const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Estación');
+    if(met.length){
+      const wm=XLSX.utils.json_to_sheet(met);
+      wm['!cols']=[{wch:12},{wch:9},{wch:10},{wch:11},{wch:11},{wch:11},{wch:9},{wch:9},{wch:9},{wch:11},{wch:12},{wch:11},{wch:11},{wch:10}];
+      XLSX.utils.book_append_sheet(wb,wm,'Estación meteorológica');
+    }
+    if(rows.length){
+      const ws=XLSX.utils.json_to_sheet(rows);
+      ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
+      XLSX.utils.book_append_sheet(wb,ws,'Estación por zona');
+    }
     const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
     XLSX.writeFile(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
   }catch(err){
@@ -3648,11 +3689,27 @@ function mobileChangeWeek(delta){
 function toggleMobileUser(e){e.stopPropagation();document.getElementById('mUserMenu')?.classList.toggle('open');}
 function closeMobileUser(){document.getElementById('mUserMenu')?.classList.remove('open');}
 function closeMobilePlanLock(){document.getElementById('mPlanLock')?.classList.remove('show');}
+// Bloqueo por plan en celular: la vista del módulo queda borrosa y aparece el aviso (igual que en escritorio).
+const esCelular=()=>window.matchMedia('(max-width:820px)').matches;
+function mobileAplicarBloqueo(module){
+  ['riego','operacion','estanque','balance','mantenimiento'].forEach(m=>document.getElementById('mView-'+m)?.classList.remove('m-blurred'));
+  const permiso=module==='operacion'?'riego':module;
+  if(!tieneModulo(permiso)){
+    document.getElementById('mView-'+module)?.classList.add('m-blurred');
+    if(esCelular())mobileShowPlanLock(permiso);
+  }else closeMobilePlanLock();
+}
+// "Volver" del aviso: si el módulo actual está bloqueado, vuelve a Riego (si Riego está en el plan).
+function mobileVolverDesdeBloqueo(){
+  closeMobilePlanLock();
+  const permiso=MOBILE.module==='operacion'?'riego':MOBILE.module;
+  if(!tieneModulo(permiso)&&MOBILE.module!=='riego'&&tieneModulo('riego'))mobileSwitchModule('riego');
+}
 
 document.addEventListener('click',e=>{if(!e.target.closest('.m-header-actions'))closeMobileUser();});
 
 function mobileUpdatePlanNav(){
-  ['estanque','balance'].forEach(m=>{
+  ['riego','estanque','balance'].forEach(m=>{
     const btn=document.getElementById('mNav-'+m);if(!btn)return;
     const tag=btn.querySelector('.m-plan-tag');const locked=!tieneModulo(m);
     if(tag){tag.hidden=!locked;tag.textContent=locked?MOD_PLAN[m].toUpperCase():'';}
@@ -3681,12 +3738,12 @@ async function mobileSwitchModule(module){
   if(!['riego','operacion','estanque','balance','mantenimiento'].includes(module))return;
   if(module==='operacion'&&!featOp())return;
   const permission=module==='operacion'?'riego':module;
-  if(module!=='riego'&&!tieneModulo(permission)){mobileShowPlanLock(permission);return;}
   closeMobilePlanLock();MOBILE.module=module;mobileMirrorDesktopTab(module);
   ['riego','operacion','estanque','balance','mantenimiento'].forEach(m=>{
     document.getElementById('mView-'+m)?.classList.toggle('active',m===module);
     document.getElementById('mNav-'+m)?.classList.toggle('active',m===module);
   });
+  mobileAplicarBloqueo(module);
   document.getElementById('mobileMain')?.scrollTo({top:0,behavior:'auto'});
   if(module==='riego'&&G.zonas.length&&!G.scDia.length)await loadRender();
   if(module==='estanque'&&(!GE.loaded||GE.prId!==document.getElementById('sp')?.value))await loadRenderEstanque();
