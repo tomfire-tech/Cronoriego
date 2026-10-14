@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CronoRiego V2 — Panel Administrador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --teal-900:#0f3a52;--teal-700:#1A5276;--teal-500:#2E86AB;--teal-50:#eaf3f8;
+    --green-700:#1E8449;--green-500:#2fa365;--green-50:#ecf7f0;
+    --amber:#d29922;--amber-bg:#fff8e6;
+    --ink:#0e1f26;--ink-2:#344e5c;--muted:#6a8391;--line:#e4ecef;
+    --bg:#f7faf9;--white:#ffffff;--danger:#c0392b;--danger-bg:#fdf2f2;
+    --purple:#6c3483;--purple-bg:#f5eef8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+  .topbar{background:var(--teal-900);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .brand{font-size:16px;font-weight:800;color:#fff;}
+  .brand span:last-child{color:#7EC8A0;}
+  .admin-badge{background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.08em;}
+  .v2-badge{background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;letter-spacing:.08em;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .top-user{font-size:12px;color:rgba(255,255,255,.75);}
+  .btn-logout{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn-logout:hover{background:rgba(255,255,255,.1);}
+  .main{padding:24px;max-width:1400px;margin:0 auto;}
+  .acciones{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .accion-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;}
+  .accion-title{font-size:13px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:8px;}
+  .accion-title i{font-size:18px;}
+  .accion-desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1;}
+  .accion-desc code{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;}
+  .btn-accion{padding:10px 16px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+  .btn-accion.verde{background:var(--green-700);color:#fff;}
+  .btn-accion.verde:hover{background:#155a33;}
+  .btn-accion.azul{background:var(--teal-700);color:#fff;}
+  .btn-accion.azul:hover{background:var(--teal-900);}
+  .btn-accion.naranja{background:#E67E22;color:#fff;}
+  .btn-accion.naranja:hover{background:#CA6F1E;}
+  .btn-accion.morado{background:var(--purple);color:#fff;}
+  .btn-accion.morado:hover{background:#5b2c6f;}
+  .btn-accion:disabled{opacity:.6;cursor:not-allowed;}
+  .log-box{background:#0e1f26;border-radius:8px;padding:12px 16px;font-size:11px;font-family:monospace;color:#7EC8A0;max-height:140px;overflow-y:auto;line-height:1.6;display:none;}
+  .log-box.show{display:block;}
+  .log-line.err{color:#F1948A;}
+  .log-line.ok{color:#7EC8A0;}
+  .log-line.info{color:#85C1E9;}
+  .log-line.warn{color:#F7DC6F;}
+  .kpis-admin{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px;}
+  .kpi-a{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:14px;}
+  .kpi-a-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .kpi-a-val{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--teal-700);}
+  .section-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--teal-900);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  .section-note{font-family:'Manrope',sans-serif;font-size:12px;font-weight:500;color:var(--muted);}
+  .table-wrap{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow-x:auto;margin-bottom:24px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--teal-900);color:#fff;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--line);transition:background .15s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--teal-50);}
+  tbody td{padding:10px 14px;color:var(--ink-2);}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+  .badge.ok{background:var(--green-50);color:var(--green-700);}
+  .badge.warn{background:var(--amber-bg);color:#7D6608;}
+  .badge.err{background:var(--danger-bg);color:var(--danger);}
+  .badge.gris{background:var(--bg);color:var(--muted);}
+  .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .dot.ok{background:var(--green-500);}
+  .dot.warn{background:var(--amber);}
+  .dot.err{background:var(--danger);}
+  .dot.gris{background:var(--muted);}
+  /* ==== PLAN / MÓDULOS ==== */
+  .plan-chips{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+  .plan-chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;cursor:pointer;border:1.5px solid var(--line);background:var(--white);color:var(--muted);transition:all .15s;user-select:none;letter-spacing:.02em;}
+  .plan-chip:hover{border-color:var(--teal-500);}
+  .plan-chip.on{background:var(--green-700);border-color:var(--green-700);color:#fff;}
+  .plan-chip.fijo{cursor:default;opacity:.85;}
+  .plan-chip.saving{opacity:.5;pointer-events:none;}
+  .plan-chips.solo-lectura .plan-chip{cursor:default;}
+  .plan-default{font-size:10px;color:var(--muted);font-style:italic;margin-left:2px;}
+  .cliente-detail{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px;display:none;}
+  .cliente-detail.show{display:block;}
+  .detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .detail-title{font-size:16px;font-weight:700;color:var(--teal-900);}
+  .btn-close-detail{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);}
+  .detail-users{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+  .user-pill{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--ink-2);}
+  .user-pill b{color:var(--teal-700);font-weight:700;}
+  .user-pill.sin-acceso{opacity:.6;}
+  .zonas-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:12px;}
+  .zona-mini{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+  .zona-mini-id{font-size:10px;font-weight:700;color:var(--teal-700);}
+  .zona-mini-nom{font-size:12px;font-weight:600;}
+  .zona-mini-esp{font-size:11px;color:var(--muted);}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(14,31,38,.5);z-index:300;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:var(--white);border-radius:16px;padding:28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(14,31,38,.2);max-height:90vh;overflow-y:auto;}
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+  .modal-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;}
+  .modal-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .btn-mclose{border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);display:grid;place-items:center;}
+  .btn-mclose:hover{background:var(--line);}
+  .form-field{margin-bottom:14px;}
+  .form-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;}
+  .form-input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s;background:var(--white);}
+  .form-input:focus{border-color:var(--teal-700);}
+  .form-select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;background:var(--white);cursor:pointer;transition:border-color .2s;}
+  .form-select:focus{border-color:var(--teal-700);}
+  .clave-row{display:flex;gap:8px;align-items:flex-end;}
+  .clave-row .form-input{font-family:monospace;font-size:15px;letter-spacing:.05em;}
+  .btn-generar{padding:10px 14px;background:var(--teal-50);border:1.5px solid var(--teal-500);color:var(--teal-700);border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .2s;}
+  .btn-generar:hover{background:var(--teal-500);color:#fff;}
+  .clave-requisitos{display:flex;flex-direction:column;gap:3px;margin-top:6px;}
+  .req{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .req.ok{color:var(--green-700);}
+  .resultado-cuenta{display:none;background:var(--green-50);border:1px solid rgba(30,132,73,.2);border-radius:10px;padding:14px;margin-top:14px;}
+  .resultado-clave{font-family:monospace;font-size:18px;font-weight:700;color:var(--teal-700);letter-spacing:.1em;background:var(--white);border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;}
+  .btn-copiar{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:4px;}
+  .btn-copiar:hover{color:var(--teal-700);}
+  .msg-box{font-size:12px;padding:8px 12px;border-radius:7px;margin-top:10px;display:none;}
+  .msg-box.ok{background:var(--green-50);color:var(--green-700);border:1px solid rgba(30,132,73,.2);}
+  .msg-box.err{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(192,57,43,.2);}
+  .loading{text-align:center;padding:40px;color:var(--muted);}
+  .aviso-lectura{display:none;background:var(--amber-bg);border:1px solid #F5D78E;color:#7D6608;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:16px;}
+  @media(max-width:1000px){.acciones{grid-template-columns:repeat(2,1fr);}.kpis-admin{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:600px){.main{padding:16px;}.acciones{grid-template-columns:1fr;}.kpis-admin{grid-template-columns:repeat(2,1fr);}.top-user{display:none;}}
+</style>
+</head>
+<body>
+<!-- MODAL CREAR USUARIO -->
+<div class="modal-overlay" id="modal-usuario" onclick="if(event.target===this)cerrarModalUsuario()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Crear cuenta de agricultor</div>
+        <div class="modal-sub">La cuenta se crea en Asgard (BD V2) y queda vinculada a una Razón Social</div>
+      </div>
+      <button class="btn-mclose" onclick="cerrarModalUsuario()">✕</button>
+    </div>
+    <div id="form-usuario">
+      <div class="form-field">
+        <label class="form-label">Email del agricultor</label>
+        <input type="email" id="inp-email" class="form-input" placeholder="agricultor@ejemplo.com" oninput="validarFormUsuario()">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Razón Social</label>
+        <select id="inp-rs" class="form-select" onchange="validarFormUsuario()">
+          <option value="">— Selecciona una razón social —</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Contraseña inicial</label>
+        <div class="clave-row">
+          <input type="text" id="inp-clave" class="form-input" placeholder="Clave genérica..." oninput="validarClave(); validarFormUsuario()" autocomplete="off">
+          <button class="btn-generar" onclick="generarClave()"><i class="ti ti-refresh"></i> Generar</button>
+        </div>
+        <div class="clave-requisitos">
+          <div class="req" id="req-len"><i class="ti ti-circle" style="font-size:10px"></i> Mínimo 8 caracteres</div>
+          <div class="req" id="req-num"><i class="ti ti-circle" style="font-size:10px"></i> Al menos un número</div>
+          <div class="req" id="req-may"><i class="ti ti-circle" style="font-size:10px"></i> Al menos una mayúscula</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Rol</label>
+        <select id="inp-rol" class="form-select" onchange="validarFormUsuario()">
+          <option value="agricultor">Agricultor (solo dashboard)</option>
+          <option value="gerencia">Gerencia (todos los datos)</option>
+          <option value="admin">Admin (panel completo)</option>
+        </select>
+      </div>
+      <div id="msg-usuario" class="msg-box"></div>
+      <button id="btn-crear-usuario" onclick="crearUsuario()" disabled style="width:100%;margin-top:6px;padding:12px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:not-allowed;opacity:.5;transition:all .2s;">
+        <i class="ti ti-user-plus"></i> Crear cuenta
+      </button>
+    </div>
+    <div class="resultado-cuenta" id="resultado-cuenta">
+      <div style="font-size:13px;font-weight:700;color:var(--green-700);margin-bottom:8px;">✓ Cuenta creada correctamente</div>
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">Email: <span id="res-email" style="font-weight:600"></span></div>
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px;">Razón Social: <span id="res-rs" style="font-weight:600"></span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Contraseña inicial (cópiala antes de cerrar):</div>
+      <div class="resultado-clave"><span id="res-clave">—</span><button class="btn-copiar" onclick="copiarClave()" title="Copiar"><i class="ti ti-copy"></i></button></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Entra por loginV2.html con este correo y clave.</div>
+      <button onclick="resetModalUsuario()" style="margin-top:14px;width:100%;padding:10px;background:var(--teal-50);border:1px solid var(--teal-500);color:var(--teal-700);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">Crear otra cuenta</button>
+    </div>
+  </div>
+</div>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand"><span>CRONO</span><span>RIEGO</span></div>
+    <span class="admin-badge">ADMINISTRADOR</span>
+    <span class="v2-badge">BD V2</span>
+  </div>
+  <div class="topbar-right">
+    <span class="top-user" id="top-user"></span>
+    <span style="font-size:12px;color:rgba(255,255,255,.6)" id="top-fecha"></span>
+    <a class="btn-logout" href="dashboard_V2.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+    <button class="btn-logout" onclick="logout()"><i class="ti ti-logout"></i> Salir</button>
+  </div>
+</div>
+<div class="main">
+  <div class="aviso-lectura" id="aviso-lectura"><i class="ti ti-eye"></i> Entraste con rol <b>gerencia</b>: puedes ver todo, pero solo un administrador puede cambiar planes o crear cuentas.</div>
+  <div class="acciones">
+    <div class="accion-card">
+      <div class="accion-title" style="color:var(--green-700)"><i class="ti ti-cloud-upload"></i> Carga del motor V2</div>
+      <div class="accion-desc">Sube el DASHBOARDv2 del motor a Asgard. Se corre en tu PC, desde la carpeta <code>BD_V2</code>.</div>
+      <button class="btn-accion verde" id="btn-motor" onclick="revisarMotor()"><i class="ti ti-player-play"></i> Ver estado y comando</button>
+      <div class="log-box" id="log-motor"></div>
+    </div>
+    <div class="accion-card">
+      <div class="accion-title" style="color:var(--teal-700)"><i class="ti ti-cloud-rain"></i> Estaciones meteorológicas</div>
+      <div class="accion-desc">Revisa hasta qué fecha tiene datos cada estación (lo que el cliente descarga con el botón "Estación").</div>
+      <button class="btn-accion azul" id="btn-est" onclick="revisarEstaciones()"><i class="ti ti-player-play"></i> Revisar estaciones</button>
+      <div class="log-box" id="log-est"></div>
+    </div>
+    <div class="accion-card">
+      <div class="accion-title" style="color:#E67E22"><i class="ti ti-link"></i> Onboarding</div>
+      <div class="accion-desc">Genera el link del formulario de onboarding para que un agricultor nuevo ingrese sus datos.</div>
+      <button class="btn-accion naranja" onclick="copiarLink()"><i class="ti ti-copy"></i> Copiar link de onboarding</button>
+      <div id="link-ok" style="display:none;font-size:12px;color:var(--green-700);margin-top:4px;">✓ Link copiado</div>
+    </div>
+    <div class="accion-card">
+      <div class="accion-title" style="color:var(--purple)"><i class="ti ti-user-plus"></i> Nuevo usuario</div>
+      <div class="accion-desc">Crea la cuenta de acceso al dashboard V2 para un agricultor, con email y clave genérica.</div>
+      <button class="btn-accion morado" id="btn-nuevo-usuario" onclick="abrirModalUsuario()"><i class="ti ti-user-plus"></i> Crear cuenta</button>
+    </div>
+  </div>
+  <div class="kpis-admin">
+    <div class="kpi-a"><div class="kpi-a-label">Clientes activos</div><div class="kpi-a-val" id="k-rs">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Predios</div><div class="kpi-a-val" id="k-pr">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Zonas activas</div><div class="kpi-a-val" id="k-zn">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Con NDVI reciente</div><div class="kpi-a-val" id="k-ndvi">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Con motor hoy</div><div class="kpi-a-val" id="k-motor">—</div></div>
+    <div class="kpi-a"><div class="kpi-a-label">Usuarios con acceso</div><div class="kpi-a-val" id="k-us">—</div></div>
+  </div>
+  <div class="section-title"><i class="ti ti-building" style="color:var(--teal-500)"></i> Clientes <span class="section-note">· haz clic en un módulo para activarlo o bloquearlo (el cliente lo ve borroso)</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Razón Social</th><th>País</th><th>Predios</th><th>Zonas activas</th><th>Usuarios</th>
+          <th>NDVI reciente</th><th>Motor hoy</th><th>Plan (módulos)</th><th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-clientes"><tr><td colspan="10" class="loading">Cargando clientes...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="cliente-detail" id="cliente-detail">
+    <div class="detail-header">
+      <div class="detail-title" id="detail-nombre">—</div>
+      <button class="btn-close-detail" onclick="cerrarDetalle()">×</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+<script>
+// ── Proyecto "Cronoriego - Pruebas Asgard" (BD V2). Misma sesión que loginV2 / dashboard_V2.
+const SUPABASE_URL='https://eaygmwjoesmibmbveikm.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVheWdtd2pvZXNtaWJtYnZlaWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NjQ5MjUsImV4cCI6MjEwMjA0MDkyNX0.970NgCfMXrdEccatoKmB3iVNyORlUSjSCs9OO6hO6DE';
+const LOGIN='loginV2.html', DASHBOARD='dashboard_V2.html';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{storageKey:'sb-cronoriego-asgard',persistSession:true}});
+const MODULOS_DEF=['riego','ferti','estanque','balance','mantenimiento'];
+const MODULOS_LBL={riego:'Riego',ferti:'Ferti',estanque:'Estanque',balance:'Balance',mantenimiento:'Mantención'};
+const MODULO_FIJO='mantenimiento';   // el dashboard V2 lo deja siempre abierto
+let ES_ADMIN=false;
+
+const hoyISO=()=>{const t=new Date();return new Date(t.getTime()-t.getTimezoneOffset()*60000).toISOString().slice(0,10);};
+const restaDias=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};
+const fmtFecha=iso=>iso?iso.split('-').reverse().join('-'):'—';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function checkAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { window.location.href = LOGIN; return null; }
+  const email=(session.user.email||'').toLowerCase();
+  const { data: u } = await db.from('v_usuarios').select('*').eq('email', email).limit(1);
+  const rol=u?.[0]?.rol;
+  if (!['super_admin','admin','gerencia'].includes(rol)) { window.location.href = DASHBOARD; return null; }
+  ES_ADMIN=['super_admin','admin'].includes(rol);
+  document.getElementById('top-user').textContent=email+' · '+rol;
+  if(!ES_ADMIN){
+    document.getElementById('aviso-lectura').style.display='block';
+    document.getElementById('btn-nuevo-usuario').disabled=true;
+  }
+  return session;
+}
+async function logout() { await db.auth.signOut(); window.location.href = LOGIN; }
+function initFecha() {
+  const t = new Date();
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('top-fecha').textContent = `${dias[t.getDay()]} ${t.getDate()} de ${meses[t.getMonth()]} de ${t.getFullYear()}`;
+}
+function log(boxId, msg, tipo='info') {
+  const box = document.getElementById(boxId); box.classList.add('show');
+  const line = document.createElement('div'); line.className = `log-line ${tipo}`;
+  line.textContent = `[${new Date().toLocaleTimeString('es-CL')}] ${msg}`;
+  box.appendChild(line); box.scrollTop = box.scrollHeight;
+}
+
+// ── ACCIONES ──
+async function revisarMotor() {
+  const btn=document.getElementById('btn-motor'); btn.disabled=true;
+  document.getElementById('log-motor').innerHTML='';
+  try{
+    const hoy=hoyISO();
+    const { data: ult } = await db.from('demanda_hidrica_diaria_zona').select('fecha').order('fecha',{ascending:false}).limit(1);
+    const { count: nHoy } = await db.from('demanda_hidrica_diaria_zona').select('id',{count:'exact',head:true}).eq('fecha',hoy);
+    log('log-motor',`Filas del motor para hoy (${fmtFecha(hoy)}): ${nHoy??0}`, (nHoy||0)>0?'ok':'warn');
+    log('log-motor',`El motor tiene datos hasta el ${fmtFecha(ult?.[0]?.fecha)}`,'info');
+  }catch(e){ log('log-motor','No se pudo leer el motor: '+(e.message||e),'err'); }
+  log('log-motor','Para actualizar: en la carpeta BD_V2 ejecuta  python subir_dashboard_v2.py','info');
+  log('log-motor','(primero  python subir_dashboard_v2.py --prueba  para revisar sin subir)','info');
+  btn.disabled=false;
+}
+async function revisarEstaciones() {
+  const btn=document.getElementById('btn-est'); btn.disabled=true;
+  document.getElementById('log-est').innerHTML='';
+  try{
+    const desde=restaDias(hoyISO(),90);
+    const { data, error } = await db.from('sc_estacion_meteo_diaria').select('id_estacion,fecha,horas_con_datos')
+      .gte('fecha',desde).order('fecha',{ascending:false}).limit(5000);
+    if(error) throw error;
+    const ult={};
+    for(const r of (data||[])) if(!ult[r.id_estacion]) ult[r.id_estacion]=r;
+    const { data: prs } = await db.from('v_predios').select('id_predio,nombre,id_estacion');
+    const predioDe={}; (prs||[]).forEach(p=>{ if(p.id_estacion) (predioDe[p.id_estacion]=predioDe[p.id_estacion]||[]).push(p.nombre||p.id_predio); });
+    const ids=[...new Set([...Object.keys(ult),...Object.keys(predioDe)])].sort((a,b)=>(+a||0)-(+b||0));
+    if(!ids.length){ log('log-est','No hay datos de estaciones en los últimos 90 días.','warn'); }
+    const hace3=restaDias(hoyISO(),3);
+    for(const id of ids){
+      const r=ult[id]; const pr=predioDe[id]?` (${predioDe[id].join(', ')})`:'';
+      if(!r){ log('log-est',`Estación ${id}${pr}: sin datos en los últimos 90 días`,'err'); continue; }
+      const inc=(+r.horas_con_datos||24)<20?` · último día incompleto (${r.horas_con_datos} h)`:'';
+      log('log-est',`Estación ${id}${pr}: hasta ${fmtFecha(r.fecha)}${inc}`, r.fecha>=hace3?'ok':'warn');
+    }
+    const sinVinculo=Object.keys(ult).filter(id=>!predioDe[id]);
+    if(sinVinculo.length) log('log-est',`Estaciones sin predio asignado (el cliente no las puede descargar): ${sinVinculo.join(', ')}`,'warn');
+  }catch(e){ log('log-est','No se pudo leer las estaciones: '+(e.message||e),'err'); }
+  btn.disabled=false;
+}
+function copiarLink() {
+  navigator.clipboard.writeText(`${window.location.origin}/formulario_onboarding.html`).then(() => {
+    const ok = document.getElementById('link-ok'); ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 3000);
+  });
+}
+
+// ── NUEVO USUARIO (función admin_crear_usuario en Asgard: crea la cuenta sin cerrar tu sesión) ──
+let _rsData = [];
+async function abrirModalUsuario() {
+  if(!ES_ADMIN) return;
+  resetModalUsuario();
+  document.getElementById('modal-usuario').classList.add('open');
+  if (_rsData.length === 0) {
+    const { data } = await db.from('razones_sociales').select('id_razon_social,nombre_razon_social').order('nombre_razon_social');
+    _rsData = data || [];
+  }
+  const sel = document.getElementById('inp-rs');
+  sel.innerHTML = '<option value="">— Selecciona una razón social —</option>' + _rsData.map(r => `<option value="${esc(r.id_razon_social)}">${esc(r.nombre_razon_social)} (${esc(r.id_razon_social)})</option>`).join('');
+  generarClave();
+}
+function cerrarModalUsuario() { document.getElementById('modal-usuario').classList.remove('open'); }
+function resetModalUsuario() {
+  document.getElementById('inp-email').value = '';
+  document.getElementById('inp-rs').value = '';
+  document.getElementById('inp-rol').value = 'agricultor';
+  document.getElementById('msg-usuario').style.display = 'none';
+  document.getElementById('resultado-cuenta').style.display = 'none';
+  document.getElementById('form-usuario').style.display = 'block';
+  const btn=document.getElementById('btn-crear-usuario'); btn.innerHTML='<i class="ti ti-user-plus"></i> Crear cuenta';
+  generarClave();
+}
+function generarClave() {
+  const mayus='ABCDEFGHJKLMNPQRSTUVWXYZ',minus='abcdefghjkmnpqrstuvwxyz',nums='23456789',esp='!@#$%';
+  const r=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;};
+  let c=[];
+  for (let i=0;i<2;i++) c.push(mayus[r(mayus.length)]);
+  for (let i=0;i<5;i++) c.push(minus[r(minus.length)]);
+  for (let i=0;i<2;i++) c.push(nums[r(nums.length)]);
+  c.push(esp[r(esp.length)]);
+  for (let i=c.length-1;i>0;i--){const j=r(i+1);[c[i],c[j]]=[c[j],c[i]];}
+  document.getElementById('inp-clave').value=c.join(''); validarClave(); validarFormUsuario();
+}
+function setReq(id, ok) {
+  const el = document.getElementById(id); if (!el) return;
+  el.className = 'req' + (ok ? ' ok' : '');
+  el.querySelector('i').className = ok ? 'ti ti-circle-check' : 'ti ti-circle';
+  el.querySelector('i').style.fontSize = '10px';
+}
+function validarClave() {
+  const v = document.getElementById('inp-clave').value;
+  setReq('req-len', v.length >= 8); setReq('req-num', /[0-9]/.test(v)); setReq('req-may', /[A-Z]/.test(v));
+}
+function validarFormUsuario() {
+  const email=document.getElementById('inp-email').value.trim();
+  const rs=document.getElementById('inp-rs').value;
+  const rol=document.getElementById('inp-rol').value;
+  const clave=document.getElementById('inp-clave').value;
+  const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const claveOk=clave.length>=8 && /[0-9]/.test(clave) && /[A-Z]/.test(clave);
+  const todo=ES_ADMIN && emailOk && (rs || rol==='admin') && claveOk;
+  const btn=document.getElementById('btn-crear-usuario');
+  btn.disabled=!todo; btn.style.opacity=todo?'1':'.5'; btn.style.cursor=todo?'pointer':'not-allowed';
+}
+async function crearUsuario() {
+  const email=document.getElementById('inp-email').value.trim().toLowerCase();
+  const rsId=document.getElementById('inp-rs').value;
+  const clave=document.getElementById('inp-clave').value;
+  const rol=document.getElementById('inp-rol').value;
+  const rsNombre=_rsData.find(r=>r.id_razon_social===rsId)?.nombre_razon_social||rsId||'— (administrador)';
+  const btn=document.getElementById('btn-crear-usuario'); const msg=document.getElementById('msg-usuario');
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Creando cuenta...'; msg.style.display='none';
+  const { error } = await db.rpc('admin_crear_usuario', { p_email: email, p_clave: clave, p_rs: rsId, p_rol: rol });
+  if (error) {
+    msg.className='msg-box err'; msg.style.display='block'; msg.textContent='Error al crear cuenta: '+error.message;
+    btn.innerHTML='<i class="ti ti-user-plus"></i> Crear cuenta'; validarFormUsuario(); return;
+  }
+  document.getElementById('form-usuario').style.display='none';
+  document.getElementById('res-email').textContent=email;
+  document.getElementById('res-rs').textContent=rsNombre;
+  document.getElementById('res-clave').textContent=clave;
+  document.getElementById('resultado-cuenta').style.display='block';
+  cargarDatos();
+}
+function copiarClave() {
+  const clave=document.getElementById('res-clave').textContent;
+  navigator.clipboard.writeText(clave).then(()=>{
+    const btn=document.querySelector('.btn-copiar'); btn.innerHTML='<i class="ti ti-check"></i>';
+    setTimeout(()=>btn.innerHTML='<i class="ti ti-copy"></i>',2000);
+  });
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModalUsuario(); });
+
+// ── PLAN: parsear y renderizar chips (mismo formato que lee el dashboard V2) ──
+function parsePlan(str){
+  if(!str||typeof str!=='string')return {mods:[...MODULOS_DEF],porDefecto:true}; // vacío = todo visible
+  return {mods:str.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean),porDefecto:false};
+}
+function planChipsHTML(rsId, plan){
+  const lect=ES_ADMIN?'':' solo-lectura';
+  return `<div class="plan-chips${lect}" data-rs="${esc(rsId)}">`+MODULOS_DEF.map(m=>{
+    const on=plan.mods.includes(m)||m===MODULO_FIJO;
+    const fijo=m===MODULO_FIJO;
+    const click=(ES_ADMIN&&!fijo)?` onclick="togglePlan('${esc(rsId)}','${m}',this)"`:'';
+    const tit=fijo?' title="Siempre visible en el dashboard V2"':'';
+    return `<span class="plan-chip ${on?'on':''} ${fijo?'fijo':''}" data-mod="${m}"${click}${tit}>${MODULOS_LBL[m]}</span>`;
+  }).join('')+(plan.porDefecto?'<span class="plan-default">todo (sin configurar)</span>':'')+`</div>`;
+}
+async function togglePlan(rsId, modulo, el){
+  if(!ES_ADMIN) return;
+  const cont=el.parentElement;
+  const chips=[...cont.querySelectorAll('.plan-chip')];
+  el.classList.toggle('on');
+  const activos=chips.filter(c=>c.classList.contains('on')).map(c=>c.dataset.mod);
+  if(!activos.includes(MODULO_FIJO)) activos.push(MODULO_FIJO);
+  const nuevoStr=MODULOS_DEF.filter(m=>activos.includes(m)).join(',');
+  cont.classList.add('saving');chips.forEach(c=>c.classList.add('saving'));
+  const { data, error } = await db.from('razones_sociales')
+    .update({ modulos: nuevoStr })
+    .eq('id_razon_social', rsId)
+    .select('id_razon_social,modulos');
+  cont.classList.remove('saving');chips.forEach(c=>c.classList.remove('saving'));
+  if(error){
+    el.classList.toggle('on');
+    alert('Error al guardar el plan:\n'+error.message+'\n\nCódigo: '+(error.code||'—')+'\nDetalle: '+(error.details||'—'));
+    return;
+  }
+  if(!data||!data.length){
+    el.classList.toggle('on');
+    alert('El guardado no afectó ninguna fila.\n\nCausa probable: tu usuario no tiene rol admin en la tabla usuarios de Asgard.');
+    return;
+  }
+  cont.querySelector('.plan-default')?.remove();
+  flashGuardado(cont);
+}
+function flashGuardado(cont){
+  let tag=cont.querySelector('.plan-saved');
+  if(!tag){tag=document.createElement('span');tag.className='plan-saved';tag.style.cssText='font-size:11px;color:var(--green-700);font-weight:700;margin-left:4px;';cont.appendChild(tag);}
+  tag.textContent='✓ guardado';
+  clearTimeout(tag._t);tag._t=setTimeout(()=>{tag.textContent='';},1800);
+}
+
+// ── DATOS ──
+async function cargarDatos() {
+  const hoy=hoyISO(), hace10=restaDias(hoy,10);
+  const [rsR, prR, eqR, znR, ndR, moR, usR] = await Promise.all([
+    db.from('razones_sociales').select('*').order('id_razon_social'),
+    db.from('v_predios').select('*'),
+    db.from('v_equipos').select('id_equipo,id_predio,nombre'),
+    db.from('v_zonas').select('*').eq('activa','Sí'),
+    db.from('ndvi').select('id_zona,fecha').gte('fecha',restaDias(hoy,60)).order('fecha',{ascending:false}).limit(10000),
+    db.from('demanda_hidrica_diaria_zona').select('id_zona,alerta_recomendacion_riego,tiempo_riego_acum_h').eq('fecha',hoy).limit(5000),
+    db.from('usuarios').select('id_usuario,id_razon_social,correo_del_usuario,rol_de_acceso'),
+  ]);
+  const rs=rsR.data||[], predios=prR.data||[], equipos=eqR.data||[], zonas=znR.data||[], ndvis=ndR.data||[], motor=moR.data||[], usuarios=usR.data||[];
+  const ultimoNdvi={}; for(const n of ndvis){ if(!ultimoNdvi[n.id_zona]) ultimoNdvi[n.id_zona]=String(n.fecha).slice(0,10); }
+  const motorHoy={}; for(const m of motor) motorHoy[m.id_zona]=m;
+  const predioDeEq={}; equipos.forEach(e=>predioDeEq[e.id_equipo]=e.id_predio);
+  const rsDePredio={}; predios.forEach(p=>rsDePredio[p.id_predio]=p.id_rs);
+
+  const rsMap={};
+  for (const r of rs) rsMap[r.id_razon_social]={ nombre:r.nombre_razon_social, pais:r.pais, plan:parsePlan(r.modulos), predios:[], zonas:[], usuarios:[] };
+  for (const p of predios) rsMap[p.id_rs]?.predios.push(p);
+  for (const z of zonas) { const rsId=rsDePredio[predioDeEq[z.id_equipo]]; rsMap[rsId]?.zonas.push(z); }
+  for (const u of usuarios) rsMap[u.id_razon_social]?.usuarios.push(u);
+
+  const conNdvi=zonas.filter(z=>ultimoNdvi[z.id_zona]&&ultimoNdvi[z.id_zona]>=hace10).length;
+  const conMotor=zonas.filter(z=>motorHoy[z.id_zona]).length;
+  document.getElementById('k-rs').textContent=Object.values(rsMap).filter(o=>o.predios.length).length;
+  document.getElementById('k-pr').textContent=predios.length;
+  document.getElementById('k-zn').textContent=zonas.length;
+  document.getElementById('k-ndvi').textContent=`${conNdvi}/${zonas.length}`;
+  document.getElementById('k-motor').textContent=`${conMotor}/${zonas.length}`;
+  document.getElementById('k-us').textContent=usR.error?'—':usuarios.filter(u=>u.id_razon_social).length;
+
+  const tbody=document.getElementById('tabla-clientes'); tbody.innerHTML=''; window._rsZonas={};
+  for (const [rsId, o] of Object.entries(rsMap)) {
+    if (!o.predios.length) continue;
+    const ids=o.zonas.map(z=>z.id_zona), total=ids.length;
+    const nNdvi=ids.filter(z=>ultimoNdvi[z]&&ultimoNdvi[z]>=hace10).length;
+    const nMot=ids.filter(z=>motorHoy[z]).length;
+    const st=(n)=>total===0?'gris':n===total?'ok':n>0?'warn':'err';
+    window._rsZonas[rsId]={ nombre:o.nombre, zonas:o.zonas, usuarios:o.usuarios, ultimoNdvi, motorHoy, hace10 };
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:700;color:var(--teal-700)">${esc(rsId)}</td>
+      <td style="font-weight:600">${esc(o.nombre)}</td>
+      <td>${esc(o.pais||'—')}</td>
+      <td>${o.predios.length}</td>
+      <td>${total}</td>
+      <td>${usR.error?'—':o.usuarios.length}</td>
+      <td><span class="badge ${st(nNdvi)}"><span class="dot ${st(nNdvi)}"></span>${nNdvi}/${total}</span></td>
+      <td><span class="badge ${st(nMot)}"><span class="dot ${st(nMot)}"></span>${nMot}/${total}</span></td>
+      <td>${planChipsHTML(rsId, o.plan)}</td>
+      <td><button onclick="verDetalle('${esc(rsId)}')" style="background:var(--teal-50);border:1px solid var(--teal-500);color:var(--teal-700);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Ver zonas</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+  if(!tbody.children.length) tbody.innerHTML='<tr><td colspan="10" class="loading">No hay clientes con predios.</td></tr>';
+}
+function verDetalle(rsId) {
+  const d=window._rsZonas?.[rsId]; if (!d) return;
+  document.getElementById('detail-nombre').textContent=`${d.nombre} (${rsId})`;
+  let html='';
+  html+=`<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">USUARIOS</div><div class="detail-users">`;
+  html+= d.usuarios.length ? d.usuarios.map(u=>`<span class="user-pill"><b>${esc(u.rol_de_acceso)}</b> · ${esc(u.correo_del_usuario)}</span>`).join('') : '<span class="user-pill sin-acceso">Sin usuarios</span>';
+  html+=`</div><div class="zonas-mini">`;
+  for (const z of d.zonas) {
+    const ndvi=d.ultimoNdvi[z.id_zona]; const ndviOk=ndvi&&ndvi>=d.hace10;
+    const m=d.motorHoy[z.id_zona];
+    const al=m?.alerta_recomendacion_riego; const h=parseFloat(m?.tiempo_riego_acum_h)||0;
+    const motorTxt=!m?'Sin motor hoy':al?`${al}${h?` · ${h.toLocaleString('es-CL',{maximumFractionDigits:1})} h`:''}`:'Motor hoy: sin alerta';
+    const motorCls=!m?'err':al==='Restricción de Bomba'?'warn':'ok';
+    html+=`<div class="zona-mini"><div class="zona-mini-id">${esc(z.id_zona)}</div><div class="zona-mini-nom">${esc(z.nombre)}</div>
+      <div class="zona-mini-esp">${esc(z.especie||'—')} ${esc(z.variedad||'')} · ${esc(z.superficie_ha??'—')} ha</div>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="badge ${ndviOk?'ok':'warn'}" style="font-size:10px"><span class="dot ${ndviOk?'ok':'warn'}"></span>NDVI ${ndvi?fmtFecha(ndvi):'sin datos'}</span>
+        <span class="badge ${motorCls}" style="font-size:10px"><span class="dot ${motorCls}"></span>${esc(motorTxt)}</span>
+      </div></div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('detail-content').innerHTML=html;
+  document.getElementById('cliente-detail').classList.add('show');
+  document.getElementById('cliente-detail').scrollIntoView({behavior:'smooth'});
+}
+function cerrarDetalle() { document.getElementById('cliente-detail').classList.remove('show'); }
+async function init() {
+  const session = await checkAuth(); if (!session) return;
+  initFecha(); await cargarDatos();
+}
+init();
+</script>
+</body>
+</html>
