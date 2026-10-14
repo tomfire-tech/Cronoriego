@@ -365,6 +365,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .rc-foto .rf-pill.al-otro{background:#F1F5F9;color:#475569;}
 .rc-foto .rc-noconfirm{margin-top:4px;white-space:normal;line-height:1.25;}
 .rc-foto .rc-ferti{margin-top:6px;}
+.rc-foto .rf-etc{font-size:14.5px;font-weight:800;color:#15803D;line-height:1.2;}
+.rc-foto .rf-etc.pron{font-style:italic;color:#16A34A;}
+.rc-foto .rf-l1{font-size:12.5px;font-weight:700;color:#475569 !important;}
+.rc-foto .rf-l1 b{white-space:nowrap;font-weight:800;font-size:13.5px;}
+.rc-foto .rf-l1 b.aa-g{color:#15803D;background:none;}.rc-foto .rf-l1 b.aa-a{color:#B45309;background:none;}.rc-foto .rf-l1 b.aa-r{color:#DC2626;background:none;}.rc-foto .rf-l1 b.aa-n{color:var(--muted);}
+.rc-foto .rf-umbral{font-size:11.5px;font-weight:500;color:var(--muted);line-height:1.25;}
+.rc-foto .rf-lluvia{display:inline-flex;align-items:center;gap:3px;align-self:flex-start;font-size:10.5px;font-weight:800;color:#0369A1;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:20px;padding:1px 7px;margin-top:2px;}
+.rc-foto .rf-lluvia i{font-size:11px;}
 .th-hoy-lbl{font-size:12px;font-weight:800;color:var(--blue);margin-top:2px;}
 .dash-kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .dash-kpi3 .d-kpi .s{font-size:10.5px;color:var(--muted);margin-top:2px;}
@@ -1735,7 +1743,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí').order('id_zona',{ascending:true});return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
 async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
@@ -2175,15 +2183,27 @@ function rCal(dias,sc){
 
         // Tarjeta: AL (agua aprovechable) destacada, AK (riego aplicado) y AG (alerta) como etiqueta.
         const aaCls=aAp==null?'aa-n':(aAp>=0.6?'aa-g':(aAp>=0?'aa-a':'aa-r'));
-        const l1=aAp!=null?`Agua aprov. ${Math.round(aAp*100)} %`:'Agua aprov. —';
+        const l1=`Agua aprov. <b class="${aaCls}">${aAp!=null?Math.round(aAp*100)+' %':'—'}</b>`;
         const l2=rAp!=null?`Riego aplicado ${rcNum(rAp)} mm`:'Riego aplicado —';
+        // Datos extra del DASHBOARD (tal cual): U etc_mm, V lluvia_mm, AF calculo_umbral_riego_mm.
+        // Días futuros = pronóstico → ETc en cursiva y con "≈".
+        const etc=r?rcVal(r.etc_pronostico_mm_dia):null;
+        const llu=r?rcVal(r.lluvia_pronostico_mm_dia):null;
+        const umb=r?rcVal(r.calculo_umbral_riego_mm):null;
+        const fut=dS>hS;
+        const etcHtml=etc!=null?`<div class="rf-etc${fut?' pron':''}" title="ETc del día (U)${fut?' · pronóstico':''}">${fut?'≈ ':''}ETc ${rcNum(etc)} mm</div>`:'';
+        const umbHtml=umb!=null?`<div class="rf-umbral" title="Umbral de riego (AF)">Umbral de riego ${rcNum(umb)} mm</div>`:'';
+        const lluHtml=(llu!=null&&llu>0)?`<span class="rf-lluvia" title="Lluvia del día (V)${fut?' · pronóstico':''}"><i class="ti ti-cloud-rain"></i>${rcNum(llu)} mm</span>`:'';
         const pill=r?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación (AG)">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="rc-foto" onclick="${clickMain}">
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
-                ${r?`<div class="rf-l1 ${aaCls}" title="Agua aprovechable (AL)">${l1}</div>
+                ${r?`${etcHtml}
+                <div class="rf-l1" title="Agua aprovechable (AL)">${l1}</div>
                 <div class="rf-l2" title="Riego aplicado (AK)">${l2}</div>
+                ${umbHtml}
+                ${lluHtml}
                 ${pill}
                 ${(esRiego&&!conf&&(pasado||eh))?`<div class="rc-noconfirm"><i class="ti ti-alert-triangle"></i>Riego sin confirmación</div>`:''}`:`<div class="rf-l2" style="color:#16A34A">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>`}
                 ${ferRow}
