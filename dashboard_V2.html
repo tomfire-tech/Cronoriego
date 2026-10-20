@@ -87,6 +87,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .kpi-val.blue{color:var(--blue);}
 .kpi-val.amber{color:var(--amber);}
 .kpi-val.red{color:var(--red);}
+.vol-seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex-shrink:0;}
+.vol-seg button{border:0;background:transparent;font-family:inherit;font-size:10px;font-weight:600;padding:4px 8px;color:var(--muted);cursor:pointer;line-height:1;}
+.vol-seg button.on{background:var(--blue);color:#fff;}
+.vol-u{font-family:inherit;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0;}
+.vol-ctx{font-size:10px;color:var(--subtle);margin-top:2px;}
 .kpi-sub{font-size:11px;color:var(--muted);}
 .body{display:flex;gap:0;flex:1;overflow:hidden;min-height:0;}
 .cal-zone{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
@@ -1079,6 +1084,79 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   .est-tbl td{padding:10px 12px;font-size:13px;}
 }
 @media(min-width:821px) and (max-width:1200px){.panel{width:300px;}#view-riego .body{padding:14px 16px 16px;gap:14px;}}
+
+/* ===== Graficos v23: estilo comun (leyendas, barras de avance, barras horizontales) ===== */
+.cr-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0 0 10px;font-size:11px;color:var(--muted);}
+.cr-legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.cr-legend .sw{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0;}
+.cr-legend .ln{width:16px;height:0;border-top:2px solid;display:inline-block;flex-shrink:0;}
+.cr-legend .ln.dash{border-top-style:dashed;border-top-width:1.5px;}
+.cr-legend .tk{width:2px;height:12px;background:var(--ink);border-radius:1px;display:inline-block;}
+.cr-bullets{display:flex;flex-direction:column;gap:20px;padding:6px 0 4px;}
+.cr-bl-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.cr-bl-k{font-weight:700;color:var(--ink);font-size:13px;display:inline-flex;align-items:center;gap:7px;}
+.cr-bl-k .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.cr-bl-v{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.cr-bl-v b{font-size:15px;font-weight:700;color:var(--ink);}
+.cr-bl-bar{position:relative;}
+.cr-bl-track{position:relative;height:12px;border-radius:6px;background:var(--line2);overflow:hidden;}
+.cr-bl-fill,.cr-bl-over{position:absolute;top:0;bottom:0;}
+.cr-bl-over{opacity:.35;}
+.cr-bl-over.cap::after{content:'';position:absolute;right:7px;top:-2px;bottom:-2px;width:3px;background:var(--white);transform:skewX(-22deg);}
+.cr-bl-tick{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px;}
+.cr-bl-sub{display:flex;justify-content:space-between;gap:12px;margin-top:7px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.cr-bl-sub b{color:var(--ink);font-weight:700;}
+.cr-hbars{display:flex;flex-direction:column;gap:11px;padding:4px 0;}
+.cr-hb{display:grid;grid-template-columns:40px 1fr 76px;align-items:center;gap:12px;font-size:12px;}
+.cr-hb-k{font-weight:700;color:var(--ink);}
+.cr-hb-t{height:10px;border-radius:5px;background:var(--line2);overflow:hidden;}
+.cr-hb-f{height:100%;border-radius:5px;}
+.cr-hb-v{text-align:right;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+.cr-hb.zero .cr-hb-k,.cr-hb.zero .cr-hb-v{color:var(--subtle);font-weight:500;}
+.cr-empty{padding:18px 2px;color:var(--muted);font-size:12px;line-height:1.5;}
+.vol-u{font-family:'Manrope','Inter',system-ui,sans-serif !important;}
+
+.cr-ndvi{margin-top:8px;}
+.cr-ndvi-plot{position:relative;display:flex;align-items:flex-end;gap:6px;height:76px;border-bottom:1px solid var(--line);}
+.cr-ndvi-c{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;}
+.cr-ndvi-b{display:block;width:100%;max-width:22px;background:var(--green);opacity:.45;border-radius:3px 3px 0 0;min-height:2px;}
+.cr-ndvi-c.last .cr-ndvi-b{opacity:1;}
+.cr-ndvi-v{font-size:9.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:2px;line-height:1;}
+.cr-ndvi-c.last .cr-ndvi-v{color:var(--ink);font-weight:700;}
+.cr-ndvi-x{display:flex;gap:6px;margin-top:4px;}
+.cr-ndvi-x span{flex:1;text-align:center;font-size:9.5px;color:var(--subtle);font-variant-numeric:tabular-nums;}
+.cr-ndvi-s{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-size:10px;color:var(--subtle);}
+
+/* ===== Volumen por capa (v23) ===== */
+.vol-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;}
+.vol-more{border:0;background:none;padding:0;color:var(--blue);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.vol-more:hover{text-decoration:underline;}
+.vol-more:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:3px;}
+.vc-ctrl{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.vc-ctrl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.vc-ctrl-l{font-size:11px;font-weight:600;color:var(--muted);}
+.vc-seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.vc-seg button{border:0;background:transparent;font-family:inherit;font-size:12px;font-weight:600;padding:7px 11px;color:var(--ink2);cursor:pointer;}
+.vc-seg button+button{border-left:1px solid var(--line);}
+.vc-seg button.on{background:var(--ink);color:#fff;}
+.vc-seg button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;}
+.vc-tot{background:var(--line2);border-radius:12px;padding:14px 16px;margin-bottom:18px;}
+.vc-tot-v{font-size:26px;font-weight:800;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums;}
+.vc-tot-v span{font-size:12px;font-weight:600;color:var(--muted);}
+.vc-tot-s{font-size:12px;color:var(--ink2);margin:4px 0 10px;font-variant-numeric:tabular-nums;}
+.vc-tot .cr-bl-track{background:var(--white);}
+.vc-ctx{font-size:11px;color:var(--muted);margin-top:8px;}
+.vc-tbl{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;}
+.vc-tbl th{font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.06em;text-align:right;padding:0 0 8px;border-bottom:1px solid var(--line);}
+.vc-tbl th:first-child,.vc-tbl td:first-child{text-align:left;}
+.vc-tbl td{padding:10px 0;border-bottom:1px solid var(--line2);text-align:right;color:var(--ink);vertical-align:middle;}
+.vc-tbl td small{display:block;color:var(--subtle);font-size:10.5px;margin-top:1px;}
+.vc-tbl tfoot td{font-weight:800;border-bottom:0;border-top:1px solid var(--line);}
+.vc-pct{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end;}
+.vc-mini{width:56px;height:6px;border-radius:3px;background:var(--line2);overflow:hidden;position:relative;display:inline-block;}
+.vc-mini i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:3px;}
+.vc-mini.over i{background:var(--amber);}
+.vc-note{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;}
 </style>
 <style id="v2-elementos-con-estilo-v1">
 /* Estilos de la V1 (lineas finales de su hoja de estilos) */
@@ -1377,7 +1455,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 <div class="tabs">
   <div class="tab" id="tab-operacion" onclick="switchTab('operacion')" style="display:none"><i class="ti ti-arrows-split-2"></i>Operación de riego</div>
   <div class="tab active" id="tab-riego" onclick="switchTab('riego')"><i class="ti ti-droplet"></i>Riego y Fertirriego</div>
-  <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet-filled"></i>Dinámica de Estanque</div>
+  <div class="tab" id="tab-estanque" onclick="switchTab('estanque')"><i class="ti ti-droplet"></i>Dinámica de Estanque</div>
   <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
   <div class="tab" id="tab-mantenimiento" onclick="switchTab('mantenimiento')"><i class="ti ti-tool"></i>Mantenimiento y Aforos</div>
 </div>
@@ -1437,7 +1515,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-line" style="color:var(--blue)"></i>Oferta y demanda de agua</div>
-          <div class="est-card-s" id="estChartSub">Configura tu temporada de riego (panel derecho) para comparar con el año anterior</div>
+          <div class="est-card-s" id="estChartSub">Configura tu temporada de riego (panel derecho) para comparar con la temporada anterior</div>
+          <div class="cr-legend" id="estChartLegend"></div>
           <div class="est-chart-box"><canvas id="estChart"></canvas></div>
         </div>
         <div class="est-card">
@@ -1478,8 +1557,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <div class="est-col">
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div>
-          <div class="est-card-s">Compara lo aplicado con la demanda. La línea muestra el porcentaje cubierto y la referencia marca el objetivo del 100%.</div>
-          <div class="est-chart-box"><canvas id="bnChartMacro"></canvas></div>
+          <div class="est-card-s">Lo aplicado frente a la demanda de cada nutriente, acumulado en el alcance seleccionado.</div>
+          <div class="cr-legend"><span><span class="tk"></span>Demanda (100 %)</span><span><span class="sw" style="background:var(--ink2);opacity:.35"></span>Aplicado sobre la demanda</span></div>
+          <div class="cr-bullets" id="bnMacroBullets"></div>
         </div>
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Demanda de macronutrientes por zona</div>
@@ -1488,7 +1568,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Demanda de micronutrientes</div>
           <div class="est-card-s">Demanda neta total del predio por nutriente — Zn, Mn, Fe, Cu, B (Kg)</div>
-          <div class="est-chart-box"><canvas id="bnChartMicro"></canvas></div>
+          <div class="cr-hbars" id="bnMicroBars"></div>
         </div>
         <div class="est-card">
           <div class="est-card-t"><i class="ti ti-table" style="color:var(--ink2)"></i>Demanda de micronutrientes por zona</div>
@@ -1621,7 +1701,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <nav class="m-bottom-nav" aria-label="Navegación principal">
     <button class="m-bottom-btn" id="mNav-operacion" hidden onclick="mobileSwitchModule('operacion')"><i class="ti ti-arrows-split-2"></i><span>Operación</span></button>
     <button class="m-bottom-btn active" id="mNav-riego" onclick="mobileSwitchModule('riego')"><i class="ti ti-droplet"></i><span>Riego y Ferti</span><span class="m-plan-tag" hidden></span></button>
-    <button class="m-bottom-btn" id="mNav-estanque" onclick="mobileSwitchModule('estanque')"><i class="ti ti-droplet-filled"></i><span>Estanque</span><span class="m-plan-tag" hidden></span></button>
+    <button class="m-bottom-btn" id="mNav-estanque" onclick="mobileSwitchModule('estanque')"><i class="ti ti-droplet"></i><span>Estanque</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-balance" onclick="mobileSwitchModule('balance')"><i class="ti ti-chart-donut-3"></i><span>Balance</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-mantenimiento" onclick="mobileSwitchModule('mantenimiento')"><i class="ti ti-tool"></i><span>Mantención</span><span class="m-plan-tag" hidden></span></button>
   </nav>
@@ -1731,7 +1811,7 @@ async function logout(){await db.auth.signOut();window.location.href='loginV2.ht
 function tgM(e){e.stopPropagation();document.getElementById('udd').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('udd')?.classList.remove('open'));
 
-function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();if(TAB==='operacion')loadRenderOperacion();}
+function chW(d){G.off+=d;updW();if(G.zonas.length)loadRender();if(document.getElementById('dt')?.textContent==='Volumen de riego')renderVolCapas();if(TAB==='operacion')loadRenderOperacion();}
 function updW(){const dias=semDias(G.off);const l=dias[0],dom=dias[6];const nw=isoW(l);document.getElementById('wlbl-sem').textContent=`Sem. ${nw}`;document.getElementById('wlbl-fec').textContent=`${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]}`;}
 
 function openCl(){document.getElementById('udd').classList.remove('open');['pwa','pwb'].forEach(id=>document.getElementById(id).value='');document.getElementById('cmsg').style.display='none';document.getElementById('bcl').disabled=true;vCl();document.getElementById('mcl').classList.add('open');}
@@ -1838,16 +1918,108 @@ function isoWeekKey(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.
 function opLabel(o){return o==null||o===''?'Sin operación':'Operación '+o;}
 function opSortKey(o){const s=String(o??'');const m=s.match(/^(\d+)(.*)$/);return m?[0,parseInt(m[1],10),m[2]]:[s?1:2,0,s];}
 function opCmp(a,b){const x=opSortKey(a),y=opSortKey(b);for(let i=0;i<3;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return 0;}
-async function qVolumenes(znIds,semana){
+async function qVolResumen(znIds,semana){
   if(!znIds.length)return null;
   try{
-    const {data,error}=await db.from('sc_dashboard_volumenes').select('id_zona,riego_aplicado_m3,riego_aplicado_prom_hist_m3,pronostico_demanda_m3,prom_hist_demanda_m3').in('id_zona',znIds).eq('numero_semana',semana);
+    const {data,error}=await db.rpc('volumenes_resumen',{p_zonas:znIds,p_semana:semana});
     if(error)throw error;
-    const t={n:(data||[]).length,real:0,hist:0,pron:0,pronHist:0};
-    (data||[]).forEach(r=>{t.real+=parseFloat(r.riego_aplicado_m3)||0;t.hist+=parseFloat(r.riego_aplicado_prom_hist_m3)||0;t.pron+=parseFloat(r.pronostico_demanda_m3)||0;t.pronHist+=parseFloat(r.prom_hist_demanda_m3)||0;});
-    return t;
-  }catch(e){console.warn('[Volumenes] No se pudo cargar sc_dashboard_volumenes.',e.message||e);return null;}
+    return data||null;
+  }catch(e){console.warn('[Volumenes] No se pudo cargar el resumen de volúmenes.',e.message||e);return null;}
 }
+// Tarjeta de volumen: riego aplicado vs demanda (tabla dashboard_volumenes), semana / mes acum. / temporada acum.
+const VOL_PER=[['semana','Sem','semana'],['mes_acum','Mes','mes'],['temporada_acum','Temp.','temporada']];
+function volFmt(v){return Math.round(v).toLocaleString('es-CL');}
+function volMes(m){return m?m.charAt(0).toUpperCase()+m.slice(1):'';}
+function volDatos(){
+  const R=G.vol||{},per=G.volPer||'semana',d=R[per]||{};
+  const riego=parseFloat(d.riego_m3)||0,dem=parseFloat(d.demanda_m3)||0;
+  return{R,per,d,riego,dem,hay:(d.semanas||0)>0,pct:dem>0?Math.round(riego/dem*100):null};
+}
+function volCtx(){
+  const {R,per,d}=volDatos();
+  const wk=w=>w?('sem. '+String(w).split('-W')[1]):'';
+  const hasta=R.semana_ref&&R.semana_ref!==R.semana_pedida?' · hasta '+wk(R.semana_ref):'';
+  if(per==='semana')return 'Semana '+(String(R.semana_pedida||'').split('-W')[1]||'');
+  if(per==='mes_acum')return R.mes?`Acum. ${volMes(R.mes)} · temp. ${R.temporada}${hasta}`:'Sin datos en la temporada';
+  return R.temporada?`Acum. temporada ${R.temporada} · ${d.semanas||0} sem.${hasta}`:'Sin datos en la temporada';
+}
+function volCardHTML(){
+  const {per,d,riego,dem,hay,pct}=volDatos();
+  const seg=VOL_PER.map(([k,l])=>`<button type="button" class="${k===per?'on':''}" onclick="setVolPer('${k}')">${l}</button>`).join('');
+  const tip=hay?`Promedio histórico: riego ${volFmt(parseFloat(d.riego_hist_m3)||0)} m³ · demanda ${volFmt(parseFloat(d.demanda_hist_m3)||0)} m³`:'';
+  return `<div class="kpi-top"><div class="kpi-lbl">Volumen riego</div><div class="vol-seg">${seg}</div></div>
+    <div title="${tip}"><div class="kpi-val blue">${hay?volFmt(riego):'—'}<span class="vol-u"> m³ aplicados</span></div>
+    <div class="kpi-sub">${hay?`de ${volFmt(dem)} m³ de demanda${pct!=null?` · <b>${pct}%</b>`:''}`:'sin datos de volumen'}</div>
+    <div class="vol-foot"><span class="vol-ctx">${volCtx()}</span><button type="button" class="vol-more" onclick="openVolCapas()">Ver por capa ›</button></div></div>`;
+}
+function setVolPer(k){
+  G.volPer=k;
+  const el=document.getElementById('kVol');if(el)el.innerHTML=volCardHTML();
+  if(typeof renderMobileRiego==='function'&&document.getElementById('mRiegoKpis'))renderMobileRiego();
+}
+/* ===== Volumen de riego por capa: predio, estanque, equipo, operacion, zona (drawer) ===== */
+const VOL_CAPAS=[['predio','Predio'],['estanque','Estanque'],['equipo','Equipo'],['operacion','Operación'],['zona','Zona']];
+const GVC={capa:'equipo',cache:{}};
+function crEsc(t){return String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function qVolCapa(prId,capa,semana){
+  const k=prId+'|'+capa+'|'+semana;if(GVC.cache[k])return GVC.cache[k];
+  try{
+    const {data,error}=await db.rpc('volumenes_por_capa',{p_predio:prId,p_capa:capa,p_semana:semana});
+    if(error)throw error;GVC.cache[k]=data;return data;
+  }catch(e){console.warn('[Volumenes] No se pudo cargar el volumen por capa.',e.message||e);return null;}
+}
+function vcCtx(R,per,sem){
+  const wk=w=>w?String(w).split('-W')[1]:'';
+  const hasta=R.semana_ref&&R.semana_ref!==R.semana_pedida?` · hasta semana ${wk(R.semana_ref)}`:'';
+  if(per==='semana')return `Semana ${wk(R.semana_pedida)}`;
+  if(per==='mes_acum')return `Acumulado de ${volMes(R.mes)} · temporada ${R.temporada}${hasta}`;
+  return `Acumulado de la temporada ${R.temporada} · ${sem} semana${sem===1?'':'s'}${hasta}`;
+}
+async function openVolCapas(){
+  openD('Volumen de riego','Riego aplicado frente a la demanda, sumado por la capa que elijas.','<div class="loading">Cargando volúmenes…</div>');
+  await renderVolCapas();
+}
+async function setVolCapa(c){GVC.capa=c;await renderVolCapas();}
+async function setVolCapaPer(k){G.volPer=k;const el=document.getElementById('kVol');if(el)el.innerHTML=volCardHTML();await renderVolCapas();}
+async function renderVolCapas(){
+  const prId=document.getElementById('sp')?.value;
+  const semana=isoWeekKey(semDias(G.off)[0]);
+  const capa=GVC.capa,per=G.volPer||'semana';
+  const R=await qVolCapa(prId,capa,semana);
+  const body=document.getElementById('db');
+  if(!body||!document.getElementById('drawer')?.classList.contains('open'))return;
+  if(GVC.capa!==capa||(G.volPer||'semana')!==per)return;               // el usuario cambio el filtro mientras cargaba
+  const segCapa=VOL_CAPAS.map(([k,l])=>`<button type="button" class="${k===capa?'on':''}" aria-pressed="${k===capa}" onclick="setVolCapa('${k}')">${l}</button>`).join('');
+  const segPer=VOL_PER.map(([k,,full])=>`<button type="button" class="${k===per?'on':''}" aria-pressed="${k===per}" onclick="setVolCapaPer('${k}')">${full.charAt(0).toUpperCase()+full.slice(1)}</button>`).join('');
+  const ctrl=`<div class="vc-ctrl"><div class="vc-ctrl-row"><span class="vc-ctrl-l">Ver por</span><div class="vc-seg" role="group" aria-label="Capa">${segCapa}</div></div>
+    <div class="vc-ctrl-row"><span class="vc-ctrl-l">Período</span><div class="vc-seg" role="group" aria-label="Período">${segPer}</div></div></div>`;
+  if(!R||!(R.grupos||[]).length){
+    body.innerHTML=ctrl+'<div class="cr-empty">No hay volúmenes cargados para este predio. Se llenan al subir la hoja DASHBOARD - VOLUMENES.</div>';return;
+  }
+  const rows=R.grupos.map(g=>{const d=g[per]||{};return{nombre:g.nombre||g.id,zonas:g.zonas||0,riego:+d.riego_m3||0,dem:+d.demanda_m3||0,sem:d.semanas||0};})
+    .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre),'es',{numeric:true}));
+  const tot=rows.reduce((a,r)=>({riego:a.riego+r.riego,dem:a.dem+r.dem,sem:Math.max(a.sem,r.sem)}),{riego:0,dem:0,sem:0});
+  const pct=v=>v.dem>0?Math.round(v.riego/v.dem*100):null;
+  const pT=pct(tot);
+  const D=Math.max(tot.dem,tot.riego)||1;
+  const fill=Math.min(tot.riego,tot.dem)/D*100,over=tot.riego>tot.dem?(tot.riego-tot.dem)/D*100:0,tick=tot.dem/D*100;
+  const total=`<div class="vc-tot">
+      <div class="vc-tot-v">${volFmt(tot.riego)} <span>m³ aplicados</span></div>
+      <div class="vc-tot-s">de ${volFmt(tot.dem)} m³ de demanda${pT!=null?` · <b>${pT} %</b>`:''}</div>
+      <div class="cr-bl-bar"><div class="cr-bl-track">
+        <div class="cr-bl-fill" style="left:0;width:${fill}%;background:var(--blue)"></div>
+        ${over?`<div class="cr-bl-over" style="left:${tick}%;width:${over}%;background:var(--blue)"></div>`:''}
+      </div>${tot.dem>0?`<div class="cr-bl-tick" style="left:${tick}%"></div>`:''}</div>
+      <div class="vc-ctx">${crEsc(vcCtx(R,per,tot.sem))}</div></div>`;
+  const capaTxt=(VOL_CAPAS.find(c=>c[0]===capa)||[,''])[1];
+  const tabla=rows.length>1||capa!=='predio'?`<table class="vc-tbl"><thead><tr><th>${capaTxt}</th><th>Aplicado m³</th><th>Demanda m³</th><th>% cubierto</th></tr></thead><tbody>
+      ${rows.map(r=>{const p=pct(r);return`<tr><td>${crEsc(r.nombre)}${capa!=='zona'?`<small>${r.zonas} zona${r.zonas===1?'':'s'}</small>`:''}</td>
+        <td>${volFmt(r.riego)}</td><td>${volFmt(r.dem)}</td>
+        <td><span class="vc-pct">${p!=null?`${p} %`:'—'}<span class="vc-mini${p!=null&&p>100?' over':''}"><i style="width:${p!=null?Math.min(p,100):0}%"></i></span></span></td></tr>`;}).join('')}
+      </tbody>${rows.length>1?`<tfoot><tr><td>Total</td><td>${volFmt(tot.riego)}</td><td>${volFmt(tot.dem)}</td><td><span class="vc-pct">${pT!=null?`${pT} %`:'—'}<span class="vc-mini" style="visibility:hidden"></span></span></td></tr></tfoot>`:''}</table>`:'';
+  body.innerHTML=ctrl+total+tabla+`<div class="vc-note">Fuente: hoja DASHBOARD - VOLUMENES. La barra naranja indica más agua aplicada que la demanda.</div>`;
+}
+function cycleVolPer(){const i=VOL_PER.findIndex(p=>p[0]===(G.volPer||'semana'));setVolPer(VOL_PER[(i+1)%VOL_PER.length][0]);}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 
 // Todas las zonas del PREDIO (no solo del equipo seleccionado): recorre
@@ -2011,8 +2183,8 @@ async function loadRender(){
   const dias=semDias(G.off);
   const fi=fs(dias[0]),ff=fs(dias[6]);
   const znIds=G.zonas.map(z=>z.id_zona);
-  const [sc,ndvi,sem,mapas,calc]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds)]);
-  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;G.sem=sem;
+  const [sc,ndvi,sem,mapas,calc,vol]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds),qVolResumen(znIds,isoWeekKey(dias[0]))]);
+  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;G.sem=sem;G.vol=vol;
   await Promise.all([
     qConfirmaciones(znIds,'riego',fi,ff),
     qConfirmaciones(znIds,'fertirriego',fi,ff),
@@ -2030,10 +2202,10 @@ function confirmacionesHoy(){
     const rHoy=(G.scDia||[]).find(r=>r.id_zona===z.id_zona&&r.fecha===hS);
     const lP=rHoy?parseFloat(rHoy.lamina_neta_riego_pronostico_mm)||0:0;
     const tP=rHoy?parseFloat(rHoy.tiempo_de_riego_pronostico_horas)||0:0;
-    if(lP>0||tP>0){total++;if(G.confirmR[z.id_zona+'|'+hS])hechos++;}
+    if(lP>0||tP>0){total++;if(estaConf(G.confirmR[z.id_zona+'|'+hS]))hechos++;}
     if(tieneModulo('ferti')){
       const fHoy=(GF.ferti||[]).filter(e=>e.id_zona===z.id_zona&&e.fecha_evento===hS);
-      if(fHoy.length){total++;if(G.confirmF[z.id_zona+'|'+hS])hechos++;}
+      if(fHoy.length){total++;if(estaConf(G.confirmF[z.id_zona+'|'+hS]))hechos++;}
     }
   });
   return{total,hechos};
@@ -2079,11 +2251,7 @@ function rKpi(dias,sc,sem){
       <div class="kpi-sub">zonas con riego programado</div>
     </div>
   </div>
-  <div class="kpi-card">
-    <div class="kpi-top"><div class="kpi-lbl">Volumen semana</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-ripple"></i></div></div>
-    <div class="kpi-val blue">${vol>0?Math.round(vol).toLocaleString('es-CL'):'—'}</div>
-    <div class="kpi-sub">m³ estimados</div>
-  </div>
+  <div class="kpi-card" id="kVol">${volCardHTML()}</div>
   <div class="kpi-card">
     <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
     <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
@@ -2110,6 +2278,9 @@ function rcAlerta(a){
   return{cls:'al-otro',ico:'ti-info-circle',col:'#64748B',corto:a?String(a).slice(0,8):''};
 }
 function rcNum(v){return (Math.round(v*100)/100).toLocaleString('es-CL',{maximumFractionDigits:2});}
+// Un registro existe aunque el agricultor lo haya DESMARCADO (queda confirmado=false).
+// Antes se usaba solo la existencia, y una ejecucion deshecha seguia figurando como hecha.
+function estaConf(x){return !!(x&&x.confirmado);}
 function rcVal(v){return v!=null&&v!==''&&!isNaN(parseFloat(v))?parseFloat(v):null;}
 function rcAplicado(v){return v==null?'':`<span class="rc-ap${v>0?'':' cero'}" title="Riego aplicado (AK)"><i class="ti ti-check"></i>${rcNum(v)} mm aplicado</span>`;}
 function rcBarraAA(f){
@@ -2157,14 +2328,14 @@ function rCal(dias,sc){
         const alerta=r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
         const rAp=r?rcVal(r.riego_aplicado_mm):null;
         const aAp=r?rcVal(r.agua_aprovechable):null;
-        const conf=G.confirmR[z.id_zona+'|'+dS];
+        const conf=estaConf(G.confirmR[z.id_zona+'|'+dS]);
         const hayRiego=!!alerta;
         const est=rcAlerta(alerta);
         const esRiego=alerta==='Riego'||alerta==='Riego Parcial';
 
         const fertiEvs=(ferMap[z.id_zona]&&ferMap[z.id_zona][dS])||[];
         const hayFerti=fertiEvs.length>0;
-        const confF=G.confirmF[z.id_zona+'|'+dS];
+        const confF=estaConf(G.confirmF[z.id_zona+'|'+dS]);
 
         if(!r&&!hayFerti){
           return`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="dia-empty">—</div></div></td>`;
@@ -2461,6 +2632,22 @@ function openDia(fecha,znId){
   openD(tit,subD,html);
 }
 
+/* Historial NDVI: columnas en escala fija 0-1, la ultima resaltada, fechas dd/mm. */
+function crNdviHist(hist){
+  const h=(hist||[]).filter(v=>v&&v.ndvi!=null&&!isNaN(v.ndvi)).slice(0,8).reverse();
+  if(!h.length)return '';
+  const f=d=>d?`${String(d).slice(8,10)}/${String(d).slice(5,7)}`:'';
+  const dif=h.length>1?h[h.length-1].ndvi-h[0].ndvi:null;
+  return `<div class="cr-ndvi" role="img" aria-label="Historial NDVI: ${h.map(v=>f(v.fecha)+' '+v.ndvi.toFixed(2)).join(', ')}">
+    <div class="cr-ndvi-plot">
+    ${h.map((v,i)=>{const last=i===h.length-1,p=Math.max(0,Math.min(1,v.ndvi))*100;
+      return `<div class="cr-ndvi-c${last?' last':''}" title="${f(v.fecha)}: NDVI ${v.ndvi.toFixed(3)}"><span class="cr-ndvi-v">${v.ndvi.toFixed(2)}</span><span class="cr-ndvi-b" style="height:${p}%"></span></div>`;}).join('')}
+    </div>
+    <div class="cr-ndvi-x">${h.map(v=>`<span>${f(v.fecha)}</span>`).join('')}</div>
+    <div class="cr-ndvi-s"><span>Escala 0 a 1</span><span>${dif!=null?`${dif>=0?'+':''}${dif.toFixed(2)} desde ${f(h[0].fecha)}`:''}</span></div>
+  </div>`;
+}
+
 function openZona(znId){
   const z=G.zonas.find(zz=>zz.id_zona===znId);
   if(!z)return;
@@ -2504,7 +2691,7 @@ function openZona(znId){
         ${kcVal!=null?`<div class="d-kpi"><div class="l">Kc</div><div class="v b">${kcVal.toFixed(2)}</div></div>`:''}
       </div>
       ${tieneHist?`<div class="d-section-t" style="margin-top:12px">Historial NDVI</div>
-      <div class="ndvi-bars">${nd.hist.slice().reverse().map(v=>{const pct=nd.hist[0].ndvi>0?v.ndvi/nd.hist[0].ndvi*100:0;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div class="nb" style="height:${pct}%"></div><div class="nd">${v.fecha?.slice(5)||''}</div></div>`;}).join('')}</div>`:''}
+      ${crNdviHist(nd.hist)}`:''}
     </div>`:`<div class="d-section"><div class="d-section-t">Estado del cultivo</div><div class="note">Sin datos NDVI para esta zona.</div></div>`;
 
   const hayMapa=mp&&(mp.url_ndvi||mp.url_rgb)&&mp.lat!=null&&mp.lon!=null;
@@ -2532,6 +2719,8 @@ function openZona(znId){
     ['Ancho de banda',cz.ancho_banda_m!=null?`${Number(cz.ancho_banda_m).toLocaleString('es-CL',{maximumFractionDigits:2})} m`:null],
     ['Suelo mojado',cz.porcentaje_suelo_mojado!=null?`${Math.round(Number(cz.porcentaje_suelo_mojado)*(Number(cz.porcentaje_suelo_mojado)<=1?100:1))} %`:null],
     ['Cap. estanque de suelo',cz.capacidad_estanque_suelo_mm!=null?`${Number(cz.capacidad_estanque_suelo_mm).toLocaleString('es-CL',{maximumFractionDigits:1})} mm`:null],
+    ['CUD (uniformidad distribución)',cz.cud!=null?`${Number(cz.cud).toLocaleString('es-CL',{maximumFractionDigits:1})} %`:null],
+    ['CUC (uniformidad Christiansen)',cz.cuc!=null?`${Number(cz.cuc).toLocaleString('es-CL',{maximumFractionDigits:1})} %`:null],
   ].filter(([_,v])=>v!==undefined&&v!==null&&v!==''):[];
   const calcHtml=calcRows.length?`<div class="d-section">
       <div class="d-section-t">Parámetros de riego de la zona</div>
@@ -2699,7 +2888,7 @@ function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
   const target=tipo==='riego'?G.confirmR:G.confirmF;
   const existente=target[znId+'|'+fechaRecom];
   const uid='cf_'+tipo+'_'+znId.replace(/[^a-zA-Z0-9]/g,'')+'_'+fechaRecom.replace(/-/g,'');
-  const checked=!!existente;
+  const checked=estaConf(existente);
   const fechaEjec=existente?existente.fecha_ejecucion:fechaRecom;
   const tiempoValRaw=existente?(existente.tiempo_horas??tiempoRecom??''):(tiempoRecom??'');
 const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
@@ -2733,7 +2922,7 @@ function toggleConfirmFields(uid){
 function confirmBoxHtmlFerti(znId,fecha,e){
   const existente=G.confirmF[znId+'|'+fecha];
   const uid='cf_fert_'+znId.replace(/[^a-zA-Z0-9]/g,'')+'_'+fecha.replace(/-/g,'');
-  const checked=!!existente;
+  const checked=estaConf(existente);
   const round2=v=>(v===''||v==null||isNaN(v))?'':Math.round(Number(v)*100)/100;
   const val=(field,fallback)=>existente&&existente[field]!=null?existente[field]:fallback;
   const fechaEjec=existente?existente.fecha_ejecucion:fecha;
@@ -2945,7 +3134,7 @@ async function loadRenderOperacion(){
     if(sub)sub.textContent=`${lista.length} operaciones · Sem. ${isoW(l)} (${l.getDate()} ${MSS[l.getMonth()]} — ${dom.getDate()} ${MSS[dom.getMonth()]})${sinCaudal?` · ${sinCaudal} zona(s) sin caudal calculado`:''}`;
     const conRiego=lista.filter(g=>g.T>0).length;
     if(kpi)kpi.innerHTML=`
-      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Volumen semana (operaciones)</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-waves"></i></div></div><div class="kpi-val blue">${VV>0?Math.round(VV).toLocaleString('es-CL'):'—'}</div><div class="kpi-sub">m³ lunes a domingo</div></div>
+      <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Volumen semana (operaciones)</div><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-ripple"></i></div></div><div class="kpi-val blue">${VV>0?Math.round(VV).toLocaleString('es-CL'):'—'}</div><div class="kpi-sub">m³ lunes a domingo</div></div>
       <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Horas de riego semana</div><div class="kpi-ico" style="background:#F0FDF4;color:var(--green)"><i class="ti ti-clock"></i></div></div><div class="kpi-val green">${TT>0?hm(TT):'—'}</div><div class="kpi-sub">suma de todas las operaciones</div></div>
       <div class="kpi-card"><div class="kpi-top"><div class="kpi-lbl">Operaciones con riego</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-arrows-split-2"></i></div></div><div class="kpi-val amber">${conRiego} <span style="font-size:15px;color:var(--muted)">/ ${lista.length}</span></div><div class="kpi-sub">esta semana</div></div>`;
   }catch(e){
@@ -2997,7 +3186,7 @@ function rCalF(){
       if(evs&&evs.length){const e=evs[0];
         const vsm=numF(e.volumen_sol_madre_l);const dpe=numF(e.dosis_producto_estanque_kg);
         const fmtN=v=>v>=100?Math.round(v).toLocaleString('es-CL'):v.toFixed(1);
-        const conf=G.confirmF[z.id_zona+'|'+dS];
+        const conf=estaConf(G.confirmF[z.id_zona+'|'+dS]);
         tb+=`<td class="dia-td${eh?' hoy-col':''}"><div class="dia-inner"><div class="ferti-card" style="background:${cl};border-color:${c}33" onclick="openEvF('${z.id_zona}','${dS}',0)">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${c};border-radius:12px 12px 0 0"></div>
           ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
@@ -3228,18 +3417,100 @@ async function guardarTemporadaRiego(){
 }
 // Filtra las filas del ESTANQUE ACTIVO correspondientes al año anterior, acotadas
 // al rango de semanas ISO que cae dentro de la temporada de riego configurada.
-function estRangoTemporadaAnioAnterior(rows){
-  if(!GE.temporada)return [];
-  const anioAnterior=new Date().getFullYear()-1;
+/* ===== Graficos v23: utilidades comunes ===== */
+function crCss(v,fb){try{const x=getComputedStyle(document.documentElement).getPropertyValue(v).trim();return x||fb;}catch(e){return fb;}}
+function crFont(){try{return getComputedStyle(document.body).fontFamily||'Inter, system-ui, sans-serif';}catch(e){return 'Inter, system-ui, sans-serif';}}
+function crTooltip(){
+  return{backgroundColor:'#FFFFFF',titleColor:crCss('--ink','#0F172A'),bodyColor:crCss('--ink2','#334155'),footerColor:crCss('--muted','#64748B'),
+    borderColor:crCss('--line','#E2E8F0'),borderWidth:1,padding:10,cornerRadius:8,caretSize:0,boxWidth:8,boxHeight:8,boxPadding:4,
+    usePointStyle:true,titleFont:{weight:'700',size:12},bodyFont:{size:12},footerFont:{size:11,weight:'500'},footerMarginTop:6};
+}
+function crFmtM3(v){return Math.round(v).toLocaleString('es-CL');}
+function crPct(v){return (Math.round(v)).toLocaleString('es-CL')+' %';}
+/* Lunes de una semana ISO "2026-W42" */
+function wkLunes(w){const y=wkYear(w),n=wkNum(w);if(!y||!n)return null;const d=new Date(Date.UTC(y,0,4));const dw=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()-dw+1+(n-1)*7);return d;}
+/* Ultima temporada completa (ya terminada) segun el rango configurado. Cruza el fin de año si el termino es antes que el inicio. */
+function estTemporadaAnterior(){
+  if(!GE.temporada)return null;
   const {mesInicio,diaInicio,mesTermino,diaTermino}=GE.temporada;
-  const dIni=new Date(anioAnterior,mesInicio-1,diaInicio);
-  const dTer=new Date(anioAnterior,mesTermino-1,diaTermino);
-  const wIni=isoW(dIni),wTer=isoW(dTer);
-  let candidatos=rows.filter(r=>r.id_estanque===GE.estanqueId&&wkYear(r.numero_semana)===anioAnterior);
-  candidatos=dTer>=dIni
-    ?candidatos.filter(r=>{const w=wkNum(r.numero_semana);return w>=wIni&&w<=wTer;})
-    :candidatos.filter(r=>{const w=wkNum(r.numero_semana);return w>=wIni||w<=wTer;}); // temporada que cruza fin de año
-  return candidatos.sort((a,b)=>wkNum(a.numero_semana)-wkNum(b.numero_semana));
+  const cruza=(mesTermino<mesInicio)||(mesTermino===mesInicio&&diaTermino<diaInicio);
+  const hoy=new Date();const hoyUTC=Date.UTC(hoy.getFullYear(),hoy.getMonth(),hoy.getDate());
+  let yFin=hoy.getFullYear();
+  if(Date.UTC(yFin,mesTermino-1,diaTermino)>=hoyUTC)yFin--;          // la de este año aun no termina
+  const yIni=cruza?yFin-1:yFin;
+  return{ini:Date.UTC(yIni,mesInicio-1,diaInicio),fin:Date.UTC(yFin,mesTermino-1,diaTermino),label:cruza?`${yIni}–${yFin}`:`${yFin}`};
+}
+function estTemporadaLabel(){const t=estTemporadaAnterior();return t?t.label:'';}
+function crEstLegend(hayDeficit){
+  return `<span><span class="sw" style="background:#FB923C"></span>Demanda (prom. 3 años)</span>`
+   +`<span><span class="ln" style="border-color:${crCss('--blue','#2563EB')}"></span>Oferta planificada (base + lluvia)</span>`
+   +`<span><span class="ln dash" style="border-color:${crCss('--muted','#64748B')}"></span>Oferta base</span>`
+   +(hayDeficit?`<span><span class="sw" style="background:${crCss('--red','#DC2626')}"></span>Demanda sobre la oferta</span>`:'');
+}
+function crEstConfig(rowsTemp,mobile){
+  const dem=rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),plan=rowsTemp.map(r=>numE(r.oferta_planificada_m3)),
+        base=rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),lluv=rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3));
+  const RED=crCss('--red','#DC2626'),BLUE=crCss('--blue','#2563EB'),MUTED=crCss('--muted','#64748B');
+  const fs=mobile?9:11;
+  return{data:{labels:rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0')),datasets:[
+      {type:'bar',label:'Demanda (prom. 3 años)',data:dem,backgroundColor:dem.map((d,i)=>d>plan[i]?RED:'#FB923C'),
+        borderRadius:{topLeft:3,topRight:3},borderSkipped:'bottom',categoryPercentage:.82,barPercentage:.86,maxBarThickness:26,pointStyle:'rect',order:3},
+      {type:'line',label:'Oferta planificada',data:plan,borderColor:BLUE,backgroundColor:BLUE,borderWidth:2,pointRadius:0,pointHoverRadius:4,
+        pointHoverBorderWidth:2,pointHoverBorderColor:'#FFFFFF',tension:0,pointStyle:'line',order:1},
+      {type:'line',label:'Oferta base',data:base,borderColor:MUTED,backgroundColor:MUTED,borderDash:[5,4],borderWidth:1.5,pointRadius:0,pointHoverRadius:0,
+        tension:0,pointStyle:'line',order:2}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      font:{family:crFont()},
+      plugins:{legend:{display:false},tooltip:Object.assign(crTooltip(),{itemSort:(a,b)=>a.datasetIndex-b.datasetIndex,callbacks:{
+        title:it=>'Semana '+rowsTemp[it[0].dataIndex].numero_semana,
+        label:c=>` ${c.dataset.label}: ${crFmtM3(c.parsed.y)} m³`,
+        footer:it=>{const i=it[0].dataIndex,b=plan[i]-dem[i];return[`Aporte lluvia: ${crFmtM3(lluv[i])} m³`,`Balance: ${b>=0?'+':''}${crFmtM3(b)} m³`];}}})},
+      scales:{
+        y:{beginAtZero:true,border:{display:false},grid:{color:crCss('--line2','#EEF2F6'),drawTicks:false},
+          ticks:{maxTicksLimit:5,padding:8,color:MUTED,font:{size:fs,family:crFont()},callback:v=>Number(v).toLocaleString('es-CL')}},
+        x:{grid:{display:false},border:{color:crCss('--line','#E2E8F0')},
+          ticks:{maxRotation:0,autoSkip:true,autoSkipPadding:10,maxTicksLimit:mobile?6:12,color:MUTED,font:{size:fs,family:crFont()}}}}}};
+}
+/* Barras de avance aplicado vs. demanda (N, P2O5, K2O). items:[{k,nombre,c,dem,sum}] */
+function crNutrientBullets(el,items){
+  if(!el)return;
+  const rows=items.filter(it=>Number(it.dem)>0).map(it=>{const dem=Number(it.dem)||0,apl=Number(it.sum)||0;return{...it,dem,apl,pct:dem>0?apl/dem*100:0};});
+  if(!rows.length){el.innerHTML='<div class="cr-empty">Sin demanda registrada para N, P₂O₅ o K₂O en este alcance.</div>';return;}
+  const D=Math.min(200,Math.max(120,Math.max(...rows.map(r=>r.pct))*1.04));   // escala comun en % de la demanda
+  const x=p=>Math.max(0,Math.min(p,D))/D*100;
+  el.innerHTML=rows.map(r=>{
+    const over=r.pct>100,cap=r.pct>D,dif=r.apl-r.dem;
+    return `<div class="cr-bl" title="${r.k}: aplicado ${fmtKg(r.apl)} kg de ${fmtKg(r.dem)} kg de demanda">
+      <div class="cr-bl-top"><span class="cr-bl-k"><span class="dot" style="background:${r.c}"></span>${r.k}${r.nombre?` <span style="font-weight:500;color:var(--muted);font-size:12px">${r.nombre}</span>`:''}</span>
+        <span class="cr-bl-v"><b>${fmtKg(r.apl)} kg</b> aplicados de ${fmtKg(r.dem)} kg</span></div>
+      <div class="cr-bl-bar"><div class="cr-bl-track">
+          <div class="cr-bl-fill" style="left:0;width:${x(Math.min(r.pct,100))}%;background:${r.c}"></div>
+          ${over?`<div class="cr-bl-over${cap?' cap':''}" style="left:${x(100)}%;width:${x(r.pct)-x(100)}%;background:${r.c}"></div>`:''}
+        </div><div class="cr-bl-tick" style="left:${x(100)}%"></div></div>
+      <div class="cr-bl-sub"><span><b>${crPct(r.pct)}</b> de la demanda${cap?' · fuera de escala':''}</span>
+        <span>${dif>=0?`excede en ${fmtKg(dif)} kg`:`faltan ${fmtKg(-dif)} kg`}</span></div>
+    </div>`;}).join('');
+}
+/* Lista de barras horizontales ordenada (demanda por micronutriente). */
+function crNutrientHBars(el,nutrientes){
+  if(!el)return;
+  const rows=nutrientes.map(n=>({k:n.k,c:n.c,v:Number(demTotal(n))||0})).sort((a,b)=>b.v-a.v);
+  const max=Math.max(0,...rows.map(r=>r.v));
+  if(max<=0){el.innerHTML='<div class="cr-empty">Sin demanda de micronutrientes en este alcance.</div>';return;}
+  el.innerHTML=rows.map(r=>`<div class="cr-hb${r.v>0?'':' zero'}" title="${r.k}: ${fmtKg(r.v)} kg">
+      <span class="cr-hb-k">${r.k}</span>
+      <span class="cr-hb-t">${r.v>0?`<span class="cr-hb-f" style="display:block;width:${Math.max(2,r.v/max*100)}%;background:${r.c}"></span>`:''}</span>
+      <span class="cr-hb-v">${fmtKg(r.v)} kg</span></div>`).join('');
+}
+
+function estRangoTemporadaAnioAnterior(rows){
+  const t=estTemporadaAnterior();if(!t)return [];
+  const DIA=86400000;
+  return (rows||[]).filter(r=>{
+    if(r.id_estanque!==GE.estanqueId)return false;
+    const l=wkLunes(r.numero_semana);if(!l)return false;
+    const lu=l.getTime();return lu<=t.fin&&lu+6*DIA>=t.ini;          // la semana toca el rango
+  }).sort((a,b)=>String(a.numero_semana).localeCompare(String(b.numero_semana)));
 }
 function estChartMsg(text){
   const box=document.getElementById('estChart')?.closest('.est-chart-box');
@@ -3271,39 +3542,24 @@ function estChart(){
   const sub=document.getElementById('estChartSub');
   if(!GE.temporada){
     if(GE.chart){GE.chart.destroy();GE.chart=null;}
-    if(sub)sub.textContent='Configura tu temporada de riego (panel derecho) para comparar con el año anterior';
-    estChartMsg('Configura tu temporada de riego (panel derecho) para ver la comparación con el año anterior.');
+    {const lg=document.getElementById('estChartLegend');if(lg)lg.innerHTML='';}
+    if(sub)sub.textContent='Configura tu temporada de riego (panel derecho) para comparar con la temporada anterior';
+    estChartMsg('Configura tu temporada de riego (panel derecho) para ver la comparación con la temporada anterior.');
     return;
   }
   const rowsTemp=estRangoTemporadaAnioAnterior(GE.rows);
   GE.rowsTemporada=rowsTemp;
-  if(sub)sub.textContent=`Temporada ${anioAnterior} (año anterior) — demanda promedio 3 años, oferta y aporte de lluvia por semana`;
+  if(sub)sub.textContent=`Temporada ${estTemporadaLabel()} (anterior) · m³ por semana`;
   if(!rowsTemp.length){
     if(GE.chart){GE.chart.destroy();GE.chart=null;}
-    estChartMsg(`No hay datos registrados para la temporada ${anioAnterior} en el rango de fechas configurado.`);
+    estChartMsg(`No hay datos registrados para la temporada ${estTemporadaLabel()} en el rango de fechas configurado.`);
     return;
   }
   estChartMsgHide();
-  const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
-  const ofertaBase=rowsTemp.map(r=>numE(r.oferta_extraible_base_m3));
-  const ofertaPlanif=rowsTemp.map(r=>numE(r.oferta_planificada_m3));
-  const aporte=rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3));
-  const demanda=rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3));
   if(GE.chart)GE.chart.destroy();
-  const ctx=document.getElementById('estChart').getContext('2d');
-  GE.chart=new Chart(ctx,{
-    data:{labels,datasets:[
-      {type:'bar',label:'Demanda promedio (m³)',data:demanda,backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},
-      {type:'line',label:'Oferta base (m³)',data:ofertaBase,borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:2,borderWidth:2.5,order:1},
-      {type:'line',label:'Oferta planificada (m³)',data:ofertaPlanif,borderColor:'#94A3B8',borderDash:[6,4],pointRadius:0,borderWidth:1.5,tension:0,order:2},
-      {type:'line',label:'Aporte lluvia (m³)',data:aporte,borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:2,borderWidth:2,order:1},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11},usePointStyle:true}},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},
-      scales:{y:{beginAtZero:true,grid:{color:'#F1F5F9'},ticks:{font:{size:10},callback:v=>v.toLocaleString('es-CL')}},
-        x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16}}}}
-  });
+  const lg=document.getElementById('estChartLegend');
+  if(lg)lg.innerHTML=crEstLegend(rowsTemp.some(r=>numE(r.demanda_promedio_3a_m3)>numE(r.oferta_planificada_m3)));
+  GE.chart=new Chart(document.getElementById('estChart').getContext('2d'),crEstConfig(rowsTemp,false));
 }
 
 function estResumen(rows){
@@ -3325,7 +3581,7 @@ function estResumen(rows){
     const sumOfertaPlanif=rowsTemp.reduce((a,r)=>a+numE(r.oferta_planificada_m3),0);
     temporadaHtml=`
     <div class="est-rrow"><span class="est-rk">Suma de demanda temporada</span><span class="est-rv">${fmt(sumDemanda)} m³</span></div>
-    <div class="est-rrow"><span class="est-rk">Oferta planificada (temporada ${anioAnterior})</span><span class="est-rv">${fmt(sumOfertaPlanif)} m³</span></div>
+    <div class="est-rrow"><span class="est-rk">Oferta planificada ${estTemporadaLabel()}</span><span class="est-rv">${fmt(sumOfertaPlanif)} m³</span></div>
     <div class="note" style="margin-top:8px">La oferta planificada es la oferta base + el aporte de lluvia.</div>`;
   } else {
     temporadaHtml=`<div class="note" style="margin-top:8px">Configura la temporada de riego (panel derecho) para ver la proyección de la temporada.</div>`;
@@ -3476,28 +3732,10 @@ function bnKpis(){
     <div><div class="kpi-lbl">Zonas evaluadas</div><div class="kpi-val" style="color:var(--green)">${bnZonasScope().length}</div><div class="kpi-sub">con demanda calculada</div></div></div>`;
 }
 
-function bnChartGrupo(nutrientes,canvasId,chartKey){
-  const labels=nutrientes.map(n=>n.k);
-  const data=nutrientes.map(n=>demTotal(n));
-  const colors=nutrientes.map(n=>n.c);
-  if(GB[chartKey])GB[chartKey].destroy();
-  const ctx=document.getElementById(canvasId).getContext('2d');
-  GB[chartKey]=new Chart(ctx,{type:'bar',
-    data:{labels,datasets:[{label:'Demanda total (kg)',data,backgroundColor:colors,
-      borderRadius:{topLeft:5,topRight:5},borderSkipped:'bottom',maxBarThickness:46,categoryPercentage:.7,barPercentage:.85}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
-      plugins:{legend:{display:false},
-        tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,displayColors:false,titleFont:{size:12,weight:'700'},bodyFont:{size:12},
-          callbacks:{title:items=>nutrientes[items[0].dataIndex].k,label:c=>`Demanda neta: ${c.parsed.y.toFixed(2)} kg`}}},
-      scales:{
-        y:{beginAtZero:true,border:{display:false},grid:{color:'#EEF2F6',drawTicks:false},
-          ticks:{font:{size:10},color:'#94A3B8',padding:6,callback:v=>v+' kg',maxTicksLimit:6}},
-        x:{border:{display:false},grid:{display:false},ticks:{font:{size:12,weight:'700'},color:'#334155'}}}}
-  });
-}
+function bnChartGrupo(nutrientes,elId){crNutrientHBars(document.getElementById(elId),nutrientes);}
 function bnChart(){
   bnChartMacroPct();
-  bnChartGrupo(NUT_MICRO,'bnChartMicro','chartMicro');
+  bnChartGrupo(NUT_MICRO,'bnMicroBars');
 }
 
 function bnTablaGrupo(nutrientes,tablaId){
@@ -3564,118 +3802,14 @@ function bnChartHideEmptyState(canvas){
   if(msg)msg.style.display='none';
 }
 
-function bnChartMacroPct(){
-  const canvas=document.getElementById('bnChartMacro');
-  if(!canvas)return;
-  if(GB.chartMacro){GB.chartMacro.destroy();GB.chartMacro=null;}
-  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  const items=[
-    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
-    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
-    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
+function bnMacroItems(){
+  return[
+    {k:'N',nombre:'nitrógeno',c:'#2563EB',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
+    {k:'P₂O₅',nombre:'fósforo',c:'#EA580C',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
+    {k:'K₂O',nombre:'potasio',c:'#7C3AED',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
   ];
-  const labels=[],demandaKg=[],aplicadoKg=[],pctAplicado=[],darkColors=[],lightColors=[];
-  items.forEach(it=>{
-    if(!it.dem||it.dem<=0)return;
-    const dem=Number(it.dem)||0;
-    const apl=Number(it.sum)||0;
-    const pct=dem>0?Math.round(apl/dem*1000)/10:0;
-    labels.push(it.k);
-    demandaKg.push(dem);
-    aplicadoKg.push(apl);
-    pctAplicado.push(pct);
-    darkColors.push(it.dark);
-    lightColors.push(it.light);
-  });
-
-  if(!labels.length){
-    bnChartEmptyState(canvas,'Sin demanda registrada para N, P₂O₅ o K₂O en este alcance.');
-    return;
-  }
-  bnChartHideEmptyState(canvas);
-
-  const maxKg=Math.max(1,...demandaKg,...aplicadoKg);
-  const maxPct=Math.max(110,...pctAplicado);
-
-  const bnPctPointLabelsPlugin={
-    id:'bnPctPointLabels',
-    afterDatasetsDraw(chart,args,pluginOptions){
-      const dsIndex=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');
-      if(dsIndex<0)return;
-      const meta=chart.getDatasetMeta(dsIndex);
-      const ctx2=chart.ctx;
-      ctx2.save();
-      ctx2.font='700 11px Inter, system-ui, sans-serif';
-      ctx2.fillStyle='#0F172A';
-      ctx2.textAlign='center';
-      ctx2.textBaseline='bottom';
-      meta.data.forEach((pt,i)=>{
-        const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';
-        const y=Math.max(pt.y-10,14);
-        ctx2.fillText(label, pt.x, y);
-      });
-      ctx2.restore();
-    }
-  };
-
-  GB.chartMacro=new Chart(ctx,{
-    plugins:[bnPctPointLabelsPlugin],
-    data:{labels,datasets:[
-      {
-        type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',
-        backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,
-        grouped:false,order:3,maxBarThickness:62,categoryPercentage:.62,barPercentage:.98,
-        borderRadius:6
-      },
-      {
-        type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',
-        backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,
-        grouped:false,order:2,maxBarThickness:36,categoryPercentage:.62,barPercentage:.82,
-        borderRadius:6
-      },
-      {
-        type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',
-        borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#FFFFFF',
-        pointBorderWidth:2,pointRadius:4,pointHoverRadius:5,tension:0.25,order:1
-      },
-      {
-        type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',
-        borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,pointHoverRadius:0,
-        borderDash:[6,5],borderWidth:2,tension:0,order:0
-      }
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'bottom',labels:{boxWidth:11,usePointStyle:true,font:{size:10.5}}},
-        tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{
-          title:items2=>items2[0].label,
-          label:c=>{
-            const i=c.dataIndex;
-            if(c.dataset.label==='Demanda (kg)')return `Demanda: ${fmtKg(demandaKg[i])} kg`;
-            if(c.dataset.label==='Aplicado (kg)')return `Aplicado: ${fmtKg(aplicadoKg[i])} kg`;
-            return `Aplicado: ${pctAplicado[i]}%`;
-          },
-          afterBody:items2=>{
-            const real=items2.find(it=>it.dataset.label==='Aplicado (kg)')||items2[0];
-            const i=real.dataIndex;
-            const diff=aplicadoKg[i]-demandaKg[i];
-            return diff>=0
-              ? [`Exceso sobre demanda: ${fmtKg(diff)} kg`]
-              : [`Restante para cubrir demanda: ${fmtKg(Math.abs(diff))} kg`];
-          }
-        }}},
-      scales:{
-        x:{grid:{display:false}},
-        yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,
-          title:{display:true,text:'kg'},
-          ticks:{callback:v=>v+' kg'},grid:{color:'#EEF2F6',drawTicks:false},border:{display:false}},
-        yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,
-          title:{display:true,text:'%'},
-          ticks:{callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}
-      }}
-  });
 }
+function bnChartMacroPct(){crNutrientBullets(document.getElementById('bnMacroBullets'),bnMacroItems());}
 
 /* recargar balance al cambiar equipo o predio */
 const _onEquipoBal=onEquipo;
@@ -3939,7 +4073,7 @@ function mobileOpenCalendarCell(znId,date){
   const alerta=r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
   const lAc=r?rcVal(r.lamina_neta_acum_mm):null,tAc=r?rcVal(r.tiempo_riego_acum_h):null,xRet=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;
   const rAp=r?rcVal(r.riego_aplicado_mm):null,aAp=r?rcVal(r.agua_aprovechable):null;
-  const hasR=!!r,hasF=tieneModulo('ferti')&&events.length>0,confR=G.confirmR?.[znId+'|'+date],confF=G.confirmF?.[znId+'|'+date];
+  const hasR=!!r,hasF=tieneModulo('ferti')&&events.length>0,confR=estaConf(G.confirmR?.[znId+'|'+date]),confF=estaConf(G.confirmF?.[znId+'|'+date]);
   const title=document.getElementById('mCellSheetTitle'),subtitle=document.getElementById('mCellSheetSubtitle'),body=document.getElementById('mCellSheetBody');
   if(title)title.textContent=z.nombre||znId;
   if(subtitle)subtitle.textContent=`${DS[d.getDay()]} ${d.getDate()} de ${MS[d.getMonth()]} · ${z.especie||'—'} ${z.variedad||''}`;
@@ -3972,7 +4106,7 @@ function renderMobileCalendarGrid(){
       const estA=rcAlerta(alerta),rAp=r?rcVal(r.riego_aplicado_mm):null,aAp=r?rcVal(r.agua_aprovechable):null;
       const esRiego=alerta==='Riego'||alerta==='Riego Parcial';
       const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!alerta,hasF=tieneModulo('ferti')&&ferti.length>0;
-      const confR=!hasR||!!G.confirmR?.[z.id_zona+'|'+date],confF=!hasF||!!G.confirmF?.[z.id_zona+'|'+date];
+      const confR=!hasR||estaConf(G.confirmR?.[z.id_zona+'|'+date]),confF=!hasF||estaConf(G.confirmF?.[z.id_zona+'|'+date]);
       const done=(hasR||hasF)&&confR&&confF,pendingR=hasR&&esRiego&&date<=today&&!confR;
       const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
       const tiempoFertTot=ferti.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
@@ -3993,7 +4127,7 @@ function renderMobileRiego(){
   const confColor=confTotal===0?'#64748B':(confAllDone?'#15803D':'#D97706');
   kpi.innerHTML=`
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Zonas</span></div><div class="m-kpi-value sm" style="color:${ok?'#15803D':'#D97706'}">${Math.round(s.coverage*G.zonas.length/100)}/${G.zonas.length}</div><div class="m-kpi-sub">programadas</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Vol. previsto</span></div><div class="m-kpi-value" style="color:#2563EB">${s.vol>0?mobileFmtInt(s.vol):'—'}</div><div class="m-kpi-sub">m³</div></div>
+    ${(()=>{const v=volDatos(),lbl=(VOL_PER.find(p=>p[0]===v.per)||VOL_PER[0])[2];return `<div class="m-kpi" onclick="openVolCapas()" style="cursor:pointer" title="Ver volumen por predio, estanque, equipo, operación o zona"><div class="m-kpi-head"><span class="m-kpi-label">Vol. ${lbl} ›</span></div><div class="m-kpi-value" style="color:#2563EB">${v.hay?mobileFmtInt(v.riego):'—'}</div><div class="m-kpi-sub">${v.hay?`de ${mobileFmtInt(v.dem)} m³`:'m³'}</div></div>`;})()}
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">ETo</span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>
     <div class="m-kpi" title="Confirmaciones de riego y fertirriego para hoy"><div class="m-kpi-head"><span class="m-kpi-label">Conf. hoy</span></div><div class="m-kpi-value" style="color:${confColor}">${confTotal>0?`${confHechos}/${confTotal}`:'—'}</div><div class="m-kpi-sub">${confTotal===0?'Sin tareas':(confAllDone?'Todo listo':'Pendientes')}</div></div>`;
@@ -4050,8 +4184,8 @@ function renderMobileEstanque(){
   const rowsTemp=GE.temporada?estRangoTemporadaAnioAnterior(GE.rows):[];
   GE.rowsTemporada=rowsTemp;
   const sumDemanda=rowsTemp.reduce((a,r)=>a+numE(r.demanda_promedio_3a_m3),0),sumOfertaPlanif=rowsTemp.reduce((a,r)=>a+numE(r.oferta_planificada_m3),0);
-  const temporadaProjection=GE.temporada?`<div class="m-summary-row"><span>Suma de demanda temporada</span><strong>${mobileFmtInt(sumDemanda)} m³</strong></div><div class="m-summary-row"><span>Oferta planificada (temporada ${anioAnterior})</span><strong>${mobileFmtInt(sumOfertaPlanif)} m³</strong></div><div class="m-mobile-note">La oferta planificada es la oferta base + el aporte de lluvia.</div>`:`<div class="m-mobile-note">Configura la temporada de riego para ver la proyección de la temporada.</div>`;
-  const chartHtml=!GE.temporada?mobileEmpty('ti-calendar-time','Configura tu temporada','Define las fechas de inicio y término para comparar con el año anterior.'):rowsTemp.length?`<div class="m-chart-box"><canvas id="mEstanqueChart"></canvas></div>`:mobileEmpty('ti-chart-line','Sin datos en el rango',`No hay datos registrados para la temporada ${anioAnterior} en las fechas configuradas.`);
+  const temporadaProjection=GE.temporada?`<div class="m-summary-row"><span>Suma de demanda temporada</span><strong>${mobileFmtInt(sumDemanda)} m³</strong></div><div class="m-summary-row"><span>Oferta planificada ${estTemporadaLabel()}</span><strong>${mobileFmtInt(sumOfertaPlanif)} m³</strong></div><div class="m-mobile-note">La oferta planificada es la oferta base + el aporte de lluvia.</div>`:`<div class="m-mobile-note">Configura la temporada de riego para ver la proyección de la temporada.</div>`;
+  const chartHtml=!GE.temporada?mobileEmpty('ti-calendar-time','Configura tu temporada','Define las fechas de inicio y término para comparar con la temporada anterior.'):rowsTemp.length?`<div class="cr-legend">${crEstLegend(rowsTemp.some(r=>numE(r.demanda_promedio_3a_m3)>numE(r.oferta_planificada_m3)))}</div><div class="m-chart-box"><canvas id="mEstanqueChart"></canvas></div>`:mobileEmpty('ti-chart-line','Sin datos en el rango',`No hay datos registrados para la temporada ${estTemporadaLabel()} en las fechas configuradas.`);
   content.innerHTML=`<div class="m-kpi-grid">
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-droplet"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${mobileFmtInt(d)}</div><div class="m-kpi-sub">m³ · semana ${act.numero_semana}</div></div>
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Oferta base</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-ripple"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${mobileFmtInt(base)}</div><div class="m-kpi-sub">m³ disponibles</div></div>
@@ -4059,45 +4193,22 @@ function renderMobileEstanque(){
     <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Balance</span><span class="m-kpi-icon" style="background:${balance>=0?'#F0FDF4':'#FEF2F2'};color:${balance>=0?'#16A34A':'#DC2626'}"><i class="ti ti-scale"></i></span></div><div class="m-kpi-value" style="color:${balance>=0?'#16A34A':'#DC2626'}">${balance>=0?'+':''}${mobileFmtInt(balance)}</div><div class="m-kpi-sub">m³ semanales</div></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-calendar-time" style="color:#16A34A"></i>Temporada de riego</div><div class="m-page-sub" style="margin:0">Define el rango de tu temporada. Se guarda por estanque y se reutiliza cada año.</div><div class="m-mobile-form-grid">${mobileEstanqueSelectorHtml()}<div class="m-mobile-form-field"><label for="mEstTempMesIni">Mes inicio</label><select class="m-mobile-select" id="mEstTempMesIni">${monthOpts(t.mesInicio)}</select></div><div class="m-mobile-form-field"><label for="mEstTempDiaIni">Día inicio</label><input class="m-mobile-input" type="number" min="1" max="31" id="mEstTempDiaIni" value="${t.diaInicio||''}"></div><div class="m-mobile-form-field"><label for="mEstTempMesTer">Mes término</label><select class="m-mobile-select" id="mEstTempMesTer">${monthOpts(t.mesTermino)}</select></div><div class="m-mobile-form-field"><label for="mEstTempDiaTer">Día término</label><input class="m-mobile-input" type="number" min="1" max="31" id="mEstTempDiaTer" value="${t.diaTermino||''}"></div></div><button class="m-mobile-save" id="mEstTempSave" onclick="guardarTemporadaRiegoMobile()">Guardar temporada</button><div class="m-mobile-msg" id="mEstTempMsg"></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-clipboard-data" style="color:#16A34A"></i>Proyección temporada actual</div><div class="m-summary-row"><span>Semana actual</span><strong>${act.numero_semana}</strong></div><div class="m-summary-row"><span>Oferta planificada</span><strong>${mobileFmtInt(plan)} m³</strong></div><div class="m-summary-row"><span>Oferta base</span><strong>${mobileFmtInt(base)} m³</strong></div><div class="m-summary-row"><span>Aporte de lluvia</span><strong style="color:#16A34A">${mobileFmtInt(rain)} m³</strong></div><div class="m-summary-row"><span>Demanda (3 años)</span><strong>${mobileFmtInt(d)} m³</strong></div><div class="m-summary-row"><span>Balance</span><strong style="color:${balance>=0?'#16A34A':'#DC2626'}">${balance>=0?'+':''}${mobileFmtInt(balance)} m³</strong></div><div class="m-summary-row"><span>Cobertura</span><strong style="color:${cat.c}">${cat.t} · ${cov.toFixed(0)}%</strong></div>${temporadaProjection}</div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-line" style="color:#2563EB"></i>Dinámica de estanque de acumulación (Reservorio de agua del predio)</div><div class="m-page-sub" style="margin:0 0 8px">${GE.temporada?`Temporada ${anioAnterior} (año anterior) — semanas del rango configurado`:'Configura tu temporada para comparar con el año anterior'}</div>${chartHtml}</div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-line" style="color:#2563EB"></i>Dinámica de estanque de acumulación (Reservorio de agua del predio)</div><div class="m-page-sub" style="margin:0 0 8px">${GE.temporada?`Temporada ${estTemporadaLabel()} (anterior) · m³ por semana`:'Configura tu temporada para comparar con la temporada anterior'}</div>${chartHtml}</div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-histogram" style="color:#7C3AED"></i>Estadísticas de la temporada</div><div class="m-summary-row"><span>Semanas registradas</span><strong>${n}</strong></div><div class="m-summary-row"><span>Semanas en déficit</span><strong style="color:${deficit?'#DC2626':'#16A34A'}">${deficit}</strong></div><div class="m-summary-row"><span>Aporte lluvia acumulado</span><strong>${mobileFmtInt(totalRain)} m³</strong></div><div class="m-summary-row"><span>Balance acumulado</span><strong style="color:${balAccum>=0?'#16A34A':'#DC2626'}">${balAccum>=0?'+':''}${mobileFmtInt(balAccum)} m³</strong></div></div>
     <div class="m-section-title"><span>Detalle semanal</span><span>${rows.length} semanas</span></div>
     ${rows.slice().reverse().map((r,i)=>{const rcov=numE(r.cobertura_pct)*100,rcat=covCat(rcov),rbal=numE(r.balance_m3),id='mEstWeek_'+i;return `<div class="m-accordion" id="${id}"><button class="m-accordion-btn" onclick="toggleMobileSection('${id}')"><span>${r.numero_semana} · <span style="color:${rcat.c}">${rcat.t} ${rcov.toFixed(0)}%</span></span><i class="ti ti-chevron-down"></i></button><div class="m-accordion-body"><div class="m-summary-row"><span>Oferta base</span><strong>${mobileFmtInt(r.oferta_extraible_base_m3)} m³</strong></div><div class="m-summary-row"><span>Oferta planificada</span><strong>${mobileFmtInt(r.oferta_planificada_m3)} m³</strong></div><div class="m-summary-row"><span>Lluvia</span><strong>${mobileFmtInt(r.aporte_lluvia_semanal_m3)} m³</strong></div><div class="m-summary-row"><span>Demanda</span><strong>${mobileFmtInt(r.demanda_promedio_3a_m3)} m³</strong></div><div class="m-summary-row"><span>Balance</span><strong style="color:${rbal>=0?'#16A34A':'#DC2626'}">${rbal>=0?'+':''}${mobileFmtInt(rbal)} m³</strong></div></div></div>`;}).join('')}`;
   if(MOBILE.module!=='estanque'||!isMobileView()||!GE.temporada||!rowsTemp.length)return;
   const canvas=document.getElementById('mEstanqueChart');if(!canvas)return;
-  const labels=rowsTemp.map(r=>'W'+String(wkNum(r.numero_semana)).padStart(2,'0'));
-  MOBILE.estChart=new Chart(canvas.getContext('2d'),{data:{labels,datasets:[{type:'bar',label:'Demanda',data:rowsTemp.map(r=>numE(r.demanda_promedio_3a_m3)),backgroundColor:'#FDBA74',borderColor:'#FB923C',borderWidth:1,borderRadius:3,order:3},{type:'line',label:'Oferta base',data:rowsTemp.map(r=>numE(r.oferta_extraible_base_m3)),borderColor:'#2563EB',backgroundColor:'#2563EB',tension:.3,pointRadius:1.5,borderWidth:2.2,order:1},{type:'line',label:'Oferta planificada',data:rowsTemp.map(r=>numE(r.oferta_planificada_m3)),borderColor:'#94A3B8',backgroundColor:'#94A3B8',borderDash:[5,4],tension:0,pointRadius:0,borderWidth:1.5,order:2},{type:'line',label:'Lluvia',data:rowsTemp.map(r=>numE(r.aporte_lluvia_semanal_m3)),borderColor:'#16A34A',backgroundColor:'#16A34A',tension:.3,pointRadius:1.5,borderWidth:2,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true,font:{size:9}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('es-CL')+' m³'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v.toLocaleString('es-CL')},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:8},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
+  MOBILE.estChart=new Chart(canvas.getContext('2d'),crEstConfig(rowsTemp,true));
 }
-function mobileNutrientChart(canvasId,nutrients,key){
-  if(MOBILE[key]){MOBILE[key].destroy();MOBILE[key]=null;}const canvas=document.getElementById(canvasId);if(!canvas)return;
-  MOBILE[key]=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:nutrients.map(n=>n.k),datasets:[{data:nutrients.map(n=>demTotal(n)),backgroundColor:nutrients.map(n=>n.c),borderRadius:4,maxBarThickness:35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>v+' kg'},grid:{color:'#EEF2F6'}},x:{ticks:{font:{size:10,weight:'700'}},grid:{display:false}}}}});
-}
+function mobileNutrientChart(elId,nutrients){crNutrientHBars(document.getElementById(elId),nutrients);}
 
 function mobileBnZonaFiltroChange(){
   GB.zonaFiltro=document.getElementById('mBnZonaFiltro')?.value||null;
   renderMobileBalance();
 }
 
-function mobileBalanceMacroChart(){
-  if(MOBILE.bnMacroChart){MOBILE.bnMacroChart.destroy();MOBILE.bnMacroChart=null;}
-  const canvas=document.getElementById('mBalanceMacroChart');if(!canvas)return;
-  const items=[
-    {k:'N',dark:'#2563EB',light:'#BFDBFE',dem:demTotal(NUT_MACRO[0]),sum:sumAcumulado('n')},
-    {k:'P₂O₅',dark:'#EA580C',light:'#FED7AA',dem:demTotal(NUT_MACRO[1]),sum:sumAcumulado('p')},
-    {k:'K₂O',dark:'#7C3AED',light:'#DDD6FE',dem:demTotal(NUT_MACRO[2]),sum:sumAcumulado('k')},
-  ];
-  const labels=[],demandaKg=[],aplicadoKg=[],pctAplicado=[],darkColors=[],lightColors=[];
-  items.forEach(it=>{if(!it.dem||it.dem<=0)return;const dem=Number(it.dem)||0,apl=Number(it.sum)||0,pct=dem>0?Math.round(apl/dem*1000)/10:0;labels.push(it.k);demandaKg.push(dem);aplicadoKg.push(apl);pctAplicado.push(pct);darkColors.push(it.dark);lightColors.push(it.light);});
-  if(!labels.length)return;
-  const maxKg=Math.max(1,...demandaKg,...aplicadoKg),maxPct=Math.max(110,...pctAplicado);
-  const mBnPctPointLabels={id:'mBnPctPointLabels',afterDatasetsDraw(chart){const idx=chart.data.datasets.findIndex(ds=>ds.label==='Aplicado (%)');if(idx<0)return;const meta=chart.getDatasetMeta(idx),c=chart.ctx;c.save();c.font='700 9px Inter, system-ui, sans-serif';c.fillStyle='#0F172A';c.textAlign='center';c.textBaseline='bottom';meta.data.forEach((pt,i)=>{const label=(Math.round(pctAplicado[i]*10)/10).toFixed(1).replace('.0','')+'%';c.fillText(label,pt.x,Math.max(pt.y-7,11));});c.restore();}};
-  MOBILE.bnMacroChart=new Chart(canvas.getContext('2d'),{plugins:[mBnPctPointLabels],data:{labels,datasets:[
-    {type:'bar',label:'Demanda (kg)',data:demandaKg,yAxisID:'yKg',backgroundColor:lightColors,borderColor:lightColors,borderWidth:1,grouped:false,order:3,maxBarThickness:48,categoryPercentage:.7,barPercentage:.98,borderRadius:5},
-    {type:'bar',label:'Aplicado (kg)',data:aplicadoKg,yAxisID:'yKg',backgroundColor:darkColors,borderColor:darkColors,borderWidth:1,grouped:false,order:2,maxBarThickness:28,categoryPercentage:.7,barPercentage:.82,borderRadius:5},
-    {type:'line',label:'Aplicado (%)',data:pctAplicado,yAxisID:'yPct',borderColor:'#0F172A',backgroundColor:'#0F172A',pointBackgroundColor:'#0F172A',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:3.5,tension:.25,order:1},
-    {type:'line',label:'Referencia 100%',data:labels.map(()=>100),yAxisID:'yPct',borderColor:'#16A34A',backgroundColor:'#16A34A',pointRadius:0,borderDash:[5,4],borderWidth:1.5,tension:0,order:0}
-  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:9,usePointStyle:true,font:{size:8.5}}},tooltip:{filter:item=>item.dataset.label!=='Referencia 100%',callbacks:{label:c=>{const i=c.dataIndex;if(c.dataset.label==='Demanda (kg)')return `Demanda: ${fmtKg(demandaKg[i])} kg`;if(c.dataset.label==='Aplicado (kg)')return `Aplicado: ${fmtKg(aplicadoKg[i])} kg`;return `Aplicado: ${pctAplicado[i]}%`;}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10,weight:'700'}}},yKg:{type:'linear',position:'left',beginAtZero:true,suggestedMax:maxKg*1.12,title:{display:true,text:'kg',font:{size:9}},ticks:{font:{size:8},callback:v=>v+' kg'},grid:{color:'#EEF2F6'},border:{display:false}},yPct:{type:'linear',position:'right',beginAtZero:true,suggestedMax:maxPct*1.08,title:{display:true,text:'%',font:{size:9}},ticks:{font:{size:8},callback:v=>v+'%'},grid:{drawOnChartArea:false},border:{display:false}}}}});
-}
+function mobileBalanceMacroChart(){crNutrientBullets(document.getElementById('mBalanceMacroBullets'),bnMacroItems());}
 
 function renderMobileBalance(){
   const content=document.getElementById('mBalanceContent');if(!content)return;
@@ -4112,13 +4223,13 @@ function renderMobileBalance(){
   const scopeText=GB.zonaFiltro?`Zona ${predioZones.find(z=>z.id_zona===GB.zonaFiltro)?.nombre||GB.zonaFiltro}`:`Todo el predio · ${predioZones.length} zonas`;
   content.innerHTML=`<div class="m-card"><div class="m-card-title"><i class="ti ti-map-2" style="color:#16A34A"></i>Alcance</div><div class="m-page-sub" style="margin:0">${scopeText}. Muestra la demanda nutricional y el avance acumulado de fertilización para el alcance seleccionado.</div><div class="m-scope-select"><select class="m-select" id="mBnZonaFiltro" onchange="mobileBnZonaFiltroChange()"><option value="">Todo el predio</option>${filterOpts}</select></div></div>
     <div class="m-kpi-grid"><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Nitrógeno N</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${fmtKg(tN)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Fósforo P₂O₅</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${fmtKg(tP)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Potasio K₂O</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#7C3AED">${fmtKg(tK)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda total</span><span class="m-kpi-icon" style="background:#F0FDF4;color:#16A34A"><i class="ti ti-sum"></i></span></div><div class="m-kpi-value">${fmtKg(total)}</div><div class="m-kpi-sub">kg · ${available.length} zona(s)</div></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Barra oscura = kg aplicado · barra clara = kg de demanda · eje izquierdo = kg · eje derecho = % aplicado.</div><div class="m-chart-box"><canvas id="mBalanceMacroChart"></canvas></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes</div><div class="m-chart-box small"><canvas id="mBalanceMicroChart"></canvas></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Lo aplicado frente a la demanda de cada nutriente.</div><div class="cr-legend"><span><span class="tk"></span>Demanda (100 %)</span><span><span class="sw" style="background:var(--ink2);opacity:.35"></span>Sobre la demanda</span></div><div class="cr-bullets" id="mBalanceMacroBullets"></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes</div><div class="cr-hbars" id="mBalanceMicroBars"></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-atom-2" style="color:#0891B2"></i>Secundarios y micros</div>${secondary.length?secondary.map(x=>`<div class="m-summary-row"><span><span class="m-zone-dot" style="display:inline-block;background:${x.n.c};margin-right:6px"></span>${x.n.k}</span><strong>${fmtKg(x.v)} kg</strong></div>`).join(''):'<div class="m-page-sub">Sin demanda registrada.</div>'}</div>
     <div class="m-section-title"><span>Detalle por zona</span><span>Toca para desplegar</span></div>
     ${available.map((z,i)=>{const id='mNut_'+mobileSafeId(z.id_zona),vals=NUT_ALL.map(n=>({n,v:demZona(z.id_zona,n)}));return `<div class="m-accordion" id="${id}"><button class="m-accordion-btn" onclick="toggleMobileZone('${id}')"><span><span class="m-zone-dot" style="display:inline-block;background:${ZC[i%ZC.length]};margin-right:7px"></span>${z.nombre||z.id_zona} · ${fmtKg(demZonaTot(z.id_zona))} kg</span><i class="ti ti-chevron-down"></i></button><div class="m-accordion-body"><div class="m-zone-nutrients">${vals.map(x=>`<div class="m-zone-nutrient"><b style="color:${x.n.c}">${x.n.k}</b><span>${x.v==null?'—':fmtKg(x.v)} kg</span></div>`).join('')}</div></div></div>`;}).join('')}`;
   if(MOBILE.module!=='balance'||!isMobileView())return;
-  mobileBalanceMacroChart();mobileNutrientChart('mBalanceMicroChart',NUT_MICRO,'bnMicroChart');
+  mobileBalanceMacroChart();mobileNutrientChart('mBalanceMicroBars',NUT_MICRO);
 }
 function renderMobileAll(){
   if(!isMobileView())return;mobileSyncSelectors();
@@ -4151,8 +4262,8 @@ chW=function(){MOBILE.dayIndex=null;const result=_mobileChW.apply(this,arguments
 
 /* ===== REGISTRO DE MANTENIMIENTO Y AFOROS ===== */
 let GM={section:'fuente',sourceType:'Pozo',estanqueId:null,history:[],loading:false,backendReady:null,lastError:null};
-const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia',confirmaciones:'sc_confirmacion_ejecucion'};
-const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',factura_ferti:'fecha_factura',factura_energia:'fecha_factura',confirmaciones:'fecha_ejecucion'};
+const MT_TABLES={fuente:'sc_registro_fuentes_agua',equipo:'sc_registro_equipos_riego',zona:'sc_registro_aforos_zona',goteros:'sc_aforo_goteros',factura_ferti:'sc_registro_facturas_fertilizantes',factura_energia:'sc_registro_facturas_energia',confirmaciones:'sc_confirmacion_ejecucion'};
+const MT_DATE_FIELD={fuente:'fecha_hora',equipo:'fecha_hora',zona:'fecha_hora',goteros:'fecha',factura_ferti:'fecha_factura',factura_energia:'fecha_factura',confirmaciones:'fecha_ejecucion'};
 const mtEsc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const mtVal=id=>document.getElementById(id)?.value?.trim()??'';
 const mtNum=id=>{const v=mtVal(id);if(v==='')return null;const n=Number(v.replace(',','.'));return Number.isFinite(n)?n:null;};
@@ -4215,6 +4326,7 @@ function maintenanceHeader(){
     <button class="maint-segment ${GM.section==='fuente'?'active':''}" onclick="setMaintenanceSection('fuente')"><i class="ti ti-ripple"></i><span>Fuente de agua</span></button>
     <button class="maint-segment ${GM.section==='equipo'?'active':''}" onclick="setMaintenanceSection('equipo')"><i class="ti ti-adjustments"></i><span>Equipo de riego</span></button>
     <button class="maint-segment ${GM.section==='zona'?'active':''}" onclick="setMaintenanceSection('zona')"><i class="ti ti-droplet-search"></i><span>Aforo de zona</span></button>
+    <button class="maint-segment ${GM.section==='goteros'?'active':''}" onclick="setMaintenanceSection('goteros')"><i class="ti ti-droplets"></i><span>Aforo de goteros</span></button>
     <button class="maint-segment ${GM.section==='factura_ferti'?'active':''}" onclick="setMaintenanceSection('factura_ferti')"><i class="ti ti-receipt"></i><span>Factura fertilizante</span></button>
     <button class="maint-segment ${GM.section==='factura_energia'?'active':''}" onclick="setMaintenanceSection('factura_energia')"><i class="ti ti-bolt"></i><span>Factura energía</span></button>
   </div><div class="maint-context"><strong>${mtEsc(mtCurrentPredioName())}</strong>${mtEsc(mtCurrentEquipoName())}</div></div>`;
@@ -4386,8 +4498,260 @@ function maintenanceZoneForm(){
     ${mtField('Presión válvula zona (bar)','mtPresionValvula','number','step="0.01" min="0"')}
     ${mtField('Presión final lateral (bar)','mtPresionFinal','number','step="0.01" min="0"')}
     ${mtField('CE salida gotero (dS/m)','mtCeGotero','number','step="0.001" min="0"')}
+    <div class="maint-subhead"><i class="ti ti-map-pin"></i>Ubicación</div>
+    <div class="maint-field full" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button type="button" class="maint-geo-btn" id="mtGeoBtn" onclick="mtUseLocation()"><i class="ti ti-current-location"></i>Usar mi ubicación</button>
+      <span class="maint-geo-status" id="mtGeoStatus"></span>
+    </div>
+    ${mtField('Latitud','mtLatitud','number','step="0.0000001" placeholder="-33.1234567" oninput="mtSyncMapFromInputs()"')}
+    ${mtField('Longitud','mtLongitud','number','step="0.0000001" placeholder="-70.1234567" oninput="mtSyncMapFromInputs()"')}
+    <div class="maint-field full">
+      <div class="maint-map" id="mtMap"></div>
+      <div class="maint-map-ctrl"><i class="ti ti-hand-move"></i>Arrastra el pin para ajustar el punto exacto sobre la foto satelital.</div>
+    </div>
     ${mtTextArea()}
   </div>${maintenanceActions()}</form></div>`;
+}
+// ============ Aforo de goteros (captura por gotero, campaña/lateral/emisor) ============
+let GAF={activa:false,campanaId:null,zonaId:null,operario:'',responsable:'',caudalNominal:null,
+  unidadPresV:'kg/cm2',presionValvula:null,tiempoSeg:30,
+  lateral:null,laterales:[],posicionManguera:'Unica',
+  unidadPresL:'kg/cm2',presionFinLateral:null,
+  medirPresionEmisor:false,unidadPresE:'kg/cm2',estadoEmisor:'OK',
+  emisorSeq:1,totalGuardados:0,porLateral:{},
+  posActual:null,watchId:null,guardando:false,msg:null,msgTipo:'ok',
+  campanas:[],historyLoading:false};
+
+const GAF_UNIDADES=[['kg/cm2','kg/cm²',1],['bar','bar',1.019716],['psi','psi',0.070307],['mca','mca',0.100000],['kPa','kPa',0.010197]];
+function gafConvertir(valor,unidad){if(valor===null||valor===undefined||valor==='')return null;const u=GAF_UNIDADES.find(x=>x[0]===unidad);if(!u)return null;const n=Number(String(valor).replace(',','.'));return Number.isFinite(n)?Math.round(n*u[2]*100)/100:null;}
+function gafCampoPresion(prefix,label,unidadActual){
+  return `<div class="maint-field"><label for="${prefix}Val">${label}</label><input class="maint-input" id="${prefix}Val" type="number" step="0.01" min="0" inputmode="decimal" oninput="gafActualizarPreview('${prefix}')"></div>
+  <div class="maint-field"><label for="${prefix}Unidad">Unidad</label><select class="maint-select" id="${prefix}Unidad" onchange="gafActualizarPreview('${prefix}')">${GAF_UNIDADES.map(([v,l])=>`<option value="${v}" ${v===unidadActual?'selected':''}>${l}</option>`).join('')}</select></div>
+  <div class="maint-field full"><span class="maint-geo-status" id="${prefix}Prev" style="color:var(--ink2)"></span></div>`;
+}
+function gafValorKgCm2(prefix){return gafConvertir(mtVal(prefix+'Val'),document.getElementById(prefix+'Unidad')?.value||'kg/cm2');}
+function gafActualizarPreview(prefix){
+  const kg=gafValorKgCm2(prefix);const el=document.getElementById(prefix+'Prev');
+  if(el)el.textContent=kg==null?'':`Valor a registrar: ${kg.toLocaleString('es-CL',{maximumFractionDigits:2})} kg/cm²`;
+}
+function gafMsgHtml(){return GAF.msg?`<div class="maint-message ${GAF.msgTipo==='err'?'err':'ok'}">${mtEsc(GAF.msg)}</div>`:'';}
+function gafSetMsg(txt,tipo){GAF.msg=txt;GAF.msgTipo=tipo||'ok';renderMaintenance();}
+function gafSetCaudalNominal(v){GAF.caudalNominal=v;renderMaintenance();}
+
+function gafIniciarGPS(){
+  if(!('geolocation' in navigator))return;
+  if(GAF.watchId!=null){try{navigator.geolocation.clearWatch(GAF.watchId);}catch(e){}}
+  GAF.watchId=navigator.geolocation.watchPosition(
+    pos=>{GAF.posActual={lat:pos.coords.latitude,lon:pos.coords.longitude,elev:pos.coords.altitude,acc:pos.coords.accuracy,t:Date.now()};},
+    ()=>{},
+    {enableHighAccuracy:true,maximumAge:5000,timeout:15000}
+  );
+}
+function gafDetenerGPS(){if(GAF.watchId!=null){try{navigator.geolocation.clearWatch(GAF.watchId);}catch(e){}GAF.watchId=null;}}
+
+function maintenanceGoteroForm(){
+  if(!GAF.activa)return gafNivel1();
+  if(!GAF.lateral)return gafNivel2();
+  return gafNivel3();
+}
+
+function gafZonaOpts(){return (G.zonas||[]).map(z=>`<option value="${mtEsc(z.id_zona)}" ${z.id_zona===GAF.zonaId?'selected':''}>${mtEsc(z.nombre||z.id_zona)}</option>`).join('');}
+
+function gafNivel1(){
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-droplet" style="color:#0891B2"></i>Nueva campaña de aforo por gotero</div>
+  <div class="maint-card-sub">Mide el caudal de cada gotero para calcular qué tan parejo riega el sistema (CUD y CUC). Esto se completa una sola vez por zona; después solo mides gotero por gotero.</div>
+  <div class="maint-form-grid">
+    <div class="maint-field"><label for="gafZona">Zona</label><select class="maint-select" id="gafZona" required><option value="">Seleccionar zona</option>${gafZonaOpts()}</select></div>
+    ${mtField('Operario','gafOperario','text','placeholder="Nombre de quien mide" required')}
+    ${mtField('Responsable técnico','gafResponsable','text','placeholder="Nombre (opcional)"')}
+    <div class="maint-field full"><label>Caudal nominal del gotero (L/h)</label>
+      <div class="maint-type-switch" style="flex-wrap:wrap">${[1.6,2.0,2.1,2.2,3.1,3.4,4.0].map(v=>`<button type="button" class="maint-type-btn ${GAF.caudalNominal===v?'active':''}" onclick="gafSetCaudalNominal(${v})">${v}</button>`).join('')}</div>
+    </div>
+    ${mtField('Otro valor (L/h)','gafCaudalNominal','number','step="0.1" min="0"')}
+    ${gafCampoPresion('gafPresV','Presión en válvula / cabezal',GAF.unidadPresV)}
+    ${mtField('Tiempo de aforo (segundos)','gafTiempo','number',`step="1" min="1" value="${GAF.tiempoSeg}"`)}
+  </div>
+  <div class="maint-actions"><button class="maint-save" type="button" onclick="gafIniciarCampana()"><i class="ti ti-player-play"></i>Iniciar campaña</button></div>
+  ${gafMsgHtml()}</div>`;
+}
+
+function gafIniciarCampana(){
+  const zonaId=mtVal('gafZona');
+  if(!zonaId){gafSetMsg('Selecciona una zona.','err');return;}
+  const operario=mtVal('gafOperario');
+  if(!operario){gafSetMsg('Ingresa el nombre del operario.','err');return;}
+  const tiempo=mtInt('gafTiempo')||30;
+  const presionValvula=gafValorKgCm2('gafPresV');
+  const manual=mtNum('gafCaudalNominal');
+  const caudalNom=manual!=null?manual:GAF.caudalNominal;
+  const responsable=mtVal('gafResponsable')||null;
+  GAF={...GAF,activa:true,campanaId:'AF-'+fs(new Date())+'-'+String(Math.floor(Math.random()*900+100)),
+    zonaId,operario,responsable,caudalNominal:caudalNom,presionValvula,tiempoSeg:tiempo,
+    lateral:null,laterales:[],posicionManguera:'Unica',presionFinLateral:null,
+    medirPresionEmisor:false,estadoEmisor:'OK',emisorSeq:1,totalGuardados:0,porLateral:{},
+    msg:null};
+  gafIniciarGPS();
+  renderMaintenance();
+}
+
+function gafNivel2(){
+  const z=(G.zonas||[]).find(zz=>zz.id_zona===GAF.zonaId);
+  const nombreZona=z?.nombre||GAF.zonaId;
+  const usados=GAF.laterales;
+  const siguiente='L-'+String(usados.length+1).padStart(2,'0');
+  const opciones=usados.length?usados:['L-01'];
+  const botones=[...opciones,siguiente].filter((v,i,arr)=>arr.indexOf(v)===i);
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-droplet" style="color:#0891B2"></i>${mtEsc(nombreZona)}</div>
+  <div class="maint-card-sub">Campaña ${mtEsc(GAF.campanaId)} · ${GAF.totalGuardados} gotero${GAF.totalGuardados===1?'':'s'} guardados en total</div>
+  <div class="maint-form-grid">
+    <div class="maint-field full"><label>Elige la lateral a medir</label>
+      <div class="maint-type-switch" style="flex-wrap:wrap">${botones.map(l=>`<button type="button" class="maint-type-btn" onclick="gafElegirLateral('${l}')"><i class="ti ${usados.includes(l)?'ti-reload':'ti-plus'}"></i> ${l}${GAF.porLateral[l]?' ('+GAF.porLateral[l]+')':''}</button>`).join('')}</div>
+    </div>
+  </div>
+  <div class="maint-actions">${GAF.totalGuardados>0?`<button class="maint-clear" type="button" onclick="gafTerminarCampana()">Terminar campaña</button>`:''}</div>
+  ${gafMsgHtml()}</div>`;
+}
+function gafElegirLateral(l){
+  if(!GAF.laterales.includes(l))GAF.laterales.push(l);
+  GAF.lateral=l;GAF.emisorSeq=(GAF.porLateral[l]||0)+1;
+  GAF.posicionManguera='Unica';GAF.presionFinLateral=null;GAF.estadoEmisor='OK';GAF.msg=null;
+  renderMaintenance();
+}
+
+function gafNivel3(){
+  const z=(G.zonas||[]).find(zz=>zz.id_zona===GAF.zonaId);
+  const nombreZona=z?.nombre||GAF.zonaId;
+  const emisorCod='E-'+String(GAF.emisorSeq).padStart(2,'0');
+  return `<div class="maint-card"><div class="maint-card-title"><i class="ti ti-droplet" style="color:#0891B2"></i>${mtEsc(nombreZona)} · ${mtEsc(GAF.lateral)}</div>
+  <div class="maint-card-sub">Gotero <b>${emisorCod}</b> · ${GAF.totalGuardados} guardados en la campaña${GAF.posActual?' · GPS activo':' · esperando GPS…'}</div>
+  <div class="maint-form-grid">
+    <div class="maint-field full"><label>Posición de la manguera</label>
+      <div class="maint-type-switch">${['Unica','Lado_A_Izq','Lado_B_Der'].map(p=>`<button type="button" class="maint-type-btn ${GAF.posicionManguera===p?'active':''}" onclick="GAF.posicionManguera='${p}';renderMaintenance()">${p.replace('_',' ')}</button>`).join('')}</div>
+    </div>
+    ${gafCampoPresion('gafPresL','Presión al final de esta lateral (opcional)',GAF.unidadPresL)}
+    <div class="maint-field full"><button class="maint-geo-btn" type="button" onclick="gafGuardarPresionLateral()"><i class="ti ti-device-floppy"></i>Guardar presión de lateral</button></div>
+  </div>
+  <div class="maint-subhead" style="margin-top:14px"><i class="ti ti-droplet"></i>Medición del gotero ${emisorCod}</div>
+  <div class="maint-form-grid">
+    <div class="maint-field full"><label for="gafVol">Volumen recolectado (mL)</label><input class="maint-input" id="gafVol" type="number" step="0.1" min="0" inputmode="decimal" style="font-size:22px;padding:14px"></div>
+    <div class="maint-field full"><label>Estado del emisor</label>
+      <div class="maint-type-switch" style="flex-wrap:wrap">${['OK','Obturado Parcial','Obturado Total','Fuga/Rotura','Faltante'].map(e=>`<button type="button" class="maint-type-btn ${GAF.estadoEmisor===e?'active':''}" onclick="GAF.estadoEmisor='${e}';renderMaintenance()">${e}</button>`).join('')}</div>
+    </div>
+    <div class="maint-field full"><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" id="gafMedirPresE" ${GAF.medirPresionEmisor?'checked':''} onchange="GAF.medirPresionEmisor=this.checked;renderMaintenance()"> Medir presión en este gotero</label></div>
+    ${GAF.medirPresionEmisor?gafCampoPresion('gafPresE','Presión en el emisor',GAF.unidadPresE):''}
+  </div>
+  <div class="maint-actions">
+    <button class="maint-save" id="gafSaveBtn" type="button" onclick="gafGuardarEmisor()" ${GAF.guardando?'disabled':''}>${GAF.guardando?'<i class="ti ti-loader-2"></i>Guardando…':'<i class="ti ti-device-floppy"></i>Guardar gotero y capturar GPS'}</button>
+    <button class="maint-clear" type="button" onclick="GAF.lateral=null;renderMaintenance()">Cambiar de lateral</button>
+    <button class="maint-clear" type="button" onclick="gafTerminarCampana()">Terminar campaña</button>
+  </div>
+  ${gafMsgHtml()}</div>`;
+}
+
+async function gafGuardarPresionLateral(){
+  const kg=gafValorKgCm2('gafPresL');
+  if(kg==null){gafSetMsg('Ingresa un valor de presión.','err');return;}
+  GAF.presionFinLateral=kg;
+  try{
+    const {error}=await db.from('sc_aforo_goteros').update({presion_fin_lateral_kg_cm2:kg,posicion_manguera_hilera:GAF.posicionManguera})
+      .eq('id_campana_aforo',GAF.campanaId).eq('pos_lateral',GAF.lateral);
+    if(error)throw error;
+    gafSetMsg('Presión de lateral guardada y aplicada a los goteros ya medidos de '+GAF.lateral+'.','ok');
+  }catch(err){maintenanceLogError('guardar presion lateral',err);gafSetMsg(maintenanceFriendlyError(err),'err');}
+}
+
+async function gafGuardarEmisor(){
+  const vol=mtNum('gafVol');
+  const estado=GAF.estadoEmisor||'OK';
+  if(vol==null){gafSetMsg('Ingresa el volumen recolectado.','err');return;}
+  if(vol===0&&estado==='OK'){gafSetMsg('Volumen en 0: cambia el estado a "Obturado Total" o "Faltante" antes de guardar.','err');return;}
+  GAF.guardando=true;renderMaintenance();
+  const pos=GAF.posActual;const fresco=!!(pos&&(Date.now()-pos.t)<30000);
+  const payload={
+    id_razon_social:G.rsId,id_predio:mtCurrentPredio()||null,id_equipo:mtCurrentEquipo()||null,id_zona:GAF.zonaId,
+    id_campana_aforo:GAF.campanaId,pos_lateral:GAF.lateral,pos_emisor:'E-'+String(GAF.emisorSeq).padStart(2,'0'),
+    posicion_manguera_hilera:GAF.posicionManguera,
+    caudal_nominal_l_h:GAF.caudalNominal,presion_valvula_kg_cm2:GAF.presionValvula,
+    presion_fin_lateral_kg_cm2:GAF.presionFinLateral,
+    presion_emisor_kg_cm2:GAF.medirPresionEmisor?gafValorKgCm2('gafPresE'):null,
+    vol_recolec_ml:vol,tiempo_seg:GAF.tiempoSeg,estado_emisor:estado,
+    operario:GAF.operario,responsable:GAF.responsable,
+    latitud:fresco?pos.lat:null,longitud:fresco?pos.lon:null,elevacion_m:fresco?pos.elev:null,precision_gps_m:fresco?pos.acc:null,
+    fecha:new Date().toISOString().slice(0,10),timestamp_captura:new Date().toISOString(),
+    creado_por:G.userId,creado_por_email:G.userEmail
+  };
+  const emisorGuardado=payload.pos_emisor;
+  try{
+    const {error}=await db.from('sc_aforo_goteros').insert(payload);
+    if(error)throw error;
+    GAF.porLateral[GAF.lateral]=(GAF.porLateral[GAF.lateral]||0)+1;
+    GAF.totalGuardados++;GAF.emisorSeq++;GAF.estadoEmisor='OK';GAF.guardando=false;
+    gafSetMsg('✓ '+emisorGuardado+' guardado ('+vol+' mL'+(fresco?', con GPS':', sin GPS')+').','ok');
+    document.getElementById('gafVol')?.focus();
+  }catch(err){
+    GAF.guardando=false;
+    maintenanceLogError('guardar gotero',err);
+    gafSetMsg(maintenanceFriendlyError(err),'err');
+  }
+}
+
+function gafTerminarCampana(){
+  const resumen=`Campaña ${GAF.campanaId} terminada: ${GAF.totalGuardados} gotero${GAF.totalGuardados===1?'':'s'} medido${GAF.totalGuardados===1?'':'s'} en ${GAF.laterales.length} lateral${GAF.laterales.length===1?'':'es'}.`;
+  gafDetenerGPS();
+  const campanasPrevias=GAF.campanas;
+  GAF={activa:false,campanaId:null,zonaId:null,operario:'',responsable:'',caudalNominal:null,
+    unidadPresV:'kg/cm2',presionValvula:null,tiempoSeg:30,
+    lateral:null,laterales:[],posicionManguera:'Unica',
+    unidadPresL:'kg/cm2',presionFinLateral:null,
+    medirPresionEmisor:false,unidadPresE:'kg/cm2',estadoEmisor:'OK',
+    emisorSeq:1,totalGuardados:0,porLateral:{},
+    posActual:null,watchId:null,guardando:false,msg:resumen,msgTipo:'ok',
+    campanas:campanasPrevias,historyLoading:false};
+  renderMaintenance();
+  loadGoteroHistory();
+}
+
+async function loadGoteroHistory(preserveOnError){
+  if(!G.rsId||!mtCurrentPredio())return;
+  GAF.historyLoading=true;renderGoteroHistory();
+  let q=db.from('sc_aforo_goteros').select('id_campana_aforo,id_zona,fecha,operario,timestamp_captura')
+    .eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order('timestamp_captura',{ascending:false}).limit(1000);
+  if(mtCurrentEquipo())q=q.eq('id_equipo',mtCurrentEquipo());
+  const {data,error}=await q;GAF.historyLoading=false;
+  if(error){
+    maintenanceLogError('cargar historial de goteros',error);
+    if(!preserveOnError)GAF.campanas=[];
+    renderGoteroHistory();return;
+  }
+  const porCampana={};
+  (data||[]).forEach(r=>{
+    const k=r.id_campana_aforo;
+    if(!porCampana[k])porCampana[k]={id:k,zona:r.id_zona,fecha:r.fecha,operario:r.operario,n:0,ultima:r.timestamp_captura};
+    porCampana[k].n++;
+    if((r.timestamp_captura||'')>(porCampana[k].ultima||''))porCampana[k].ultima=r.timestamp_captura;
+  });
+  GAF.campanas=Object.values(porCampana).sort((a,b)=>(b.ultima||'').localeCompare(a.ultima||''));
+  renderGoteroHistory();
+}
+function renderGoteroHistory(){
+  const el=document.getElementById('mtHistory'),count=document.getElementById('mtHistoryCount');if(!el)return;
+  if(GAF.historyLoading){el.innerHTML='<div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div>';if(count)count.textContent='—';return;}
+  if(count)count.textContent=`${GAF.campanas.length} campaña${GAF.campanas.length===1?'':'s'}`;
+  if(!GAF.campanas.length){el.innerHTML=maintenanceEmptyHistoryMarkup();return;}
+  el.innerHTML=GAF.campanas.map(c=>{
+    const z=(G.zonas||[]).find(zz=>zz.id_zona===c.zona);
+    return `<div class="maint-record" onclick="gafVerCampana('${mtEsc(c.id)}')"><div class="maint-record-top"><div><div class="maint-record-title">${mtEsc(z?.nombre||c.zona)}</div><div class="maint-record-summary">${c.n} gotero${c.n===1?'':'s'} · ${mtEsc(c.operario||'—')}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="maint-record-saved"><i class="ti ti-check"></i>Guardado</span><span class="maint-record-kind">Aforo goteros</span></div></div><div class="maint-record-meta">${mtEsc(mtDateOnly(c.fecha))}</div></div>`;
+  }).join('');
+}
+async function gafVerCampana(campanaId){
+  const {data,error}=await db.from('sc_aforo_goteros').select('*').eq('id_campana_aforo',campanaId).order('pos_lateral',{ascending:true}).order('pos_emisor',{ascending:true});
+  if(error){showMaintenanceToast(maintenanceFriendlyError(error));return;}
+  const c=GAF.campanas.find(x=>x.id===campanaId);
+  const z=(G.zonas||[]).find(zz=>zz.id_zona===c?.zona);
+  const cz=G.calc?G.calc[c?.zona]:null;
+  const resumen=(cz&&cz.cud!=null)?`<div class="d-section"><div class="d-section-t">Resultado calculado (última campaña de la zona)</div><div class="d-grid2"><div class="d-kpi"><div class="l">Caudal promedio</div><div class="v b">${Number(cz.caudal_promedio_lh||0).toLocaleString('es-CL',{maximumFractionDigits:2})} L/h</div></div><div class="d-kpi"><div class="l">CUD</div><div class="v b">${Number(cz.cud).toFixed(1)} %</div></div><div class="d-kpi"><div class="l">CUC</div><div class="v b">${Number(cz.cuc).toFixed(1)} %</div></div></div></div>`:'';
+  const filas=(data||[]).map(r=>`<div class="est-rrow"><span class="est-rk">${mtEsc(r.pos_lateral||'')} ${mtEsc(r.pos_emisor||'')}</span><span class="est-rv">${r.vol_recolec_ml} mL / ${r.tiempo_seg} s${r.estado_emisor&&r.estado_emisor!=='OK'?' · '+mtEsc(r.estado_emisor):''}</span></div>`).join('');
+  openD(z?.nombre||c?.zona||'Campaña',`<i class="ti ti-droplet"></i> ${mtEsc(campanaId)} · ${(data||[]).length} goteros`,`${resumen}<div class="d-section"><div class="d-section-t">Mediciones</div>${filas}</div>`);
 }
 function maintenanceActions(){return `<div class="maint-actions"><button class="maint-save" id="mtSaveBtn" type="submit"><i class="ti ti-device-floppy"></i>Guardar registro</button><button class="maint-clear" type="button" onclick="renderMaintenance()">Limpiar</button></div><div class="maint-message" id="mtMessage"></div>`;}
 function todayISODate(){return new Date().toISOString().slice(0,10);}
@@ -4490,16 +4854,16 @@ window.addEventListener('offline',mtConnBannerUpdate);
 
 function renderMaintenance(){
   mountMaintenance();const app=document.getElementById('maintenanceApp');if(!app)return;
-  const formBuilders={fuente:maintenanceSourceForm,equipo:maintenanceEquipmentForm,zona:maintenanceZoneForm,factura_ferti:maintenanceFacturaFertiForm,factura_energia:maintenanceFacturaEnergiaForm};
+  const formBuilders={fuente:maintenanceSourceForm,equipo:maintenanceEquipmentForm,zona:maintenanceZoneForm,goteros:maintenanceGoteroForm,factura_ferti:maintenanceFacturaFertiForm,factura_energia:maintenanceFacturaEnergiaForm};
   const form=(formBuilders[GM.section]||maintenanceSourceForm)();
   app.innerHTML=maintenanceHeader()+`<div id="mtConnBanner" class="maint-conn-banner"><i class="ti ti-wifi-off"></i>Sin conexión — sigue completando el formulario, tu borrador se guarda en el teléfono y podrás enviarlo cuando vuelva la señal.</div><div class="maint-grid"><div>${form}</div><div class="maint-card"><div class="maint-history-head"><div class="maint-card-title" style="margin:0"><i class="ti ti-history" style="color:#0891B2"></i>Historial</div><span id="mtHistoryCount">—</span></div><div class="maint-history" id="mtHistory"><div class="maint-empty"><i class="ti ti-loader-2"></i>Cargando registros…</div></div></div></div>`;
   if(GM.section==='equipo')updateMaintenanceDelta();
   if(GM.section==='factura_ferti')updateFFTotales();
-  if(GM.section==='fuente')initMtMap();
-  renderMaintenanceHistory();
+  if(GM.section==='fuente'||GM.section==='zona')initMtMap();
+  if(GM.section==='goteros'){renderGoteroHistory();document.getElementById('gafVol')?.focus();}
+  else renderMaintenanceHistory();
   mtConnBannerUpdate();
-  mtRestoreDraftIfAny();
-  mtAttachDraftAutosave();
+  if(GM.section!=='goteros'){mtRestoreDraftIfAny();mtAttachDraftAutosave();}
 }
 function updateMaintenanceDelta(){const a=mtNum('mtPresionAntes'),b=mtNum('mtPresionDespues'),el=document.getElementById('mtDeltaPresion');if(el)el.textContent=a==null||b==null?'— bar':`${(a-b).toFixed(2)} bar`;}
 
@@ -4537,7 +4901,7 @@ function maintenancePayload(){
   const common={id_razon_social:G.rsId,id_predio:mtCurrentPredio(),fecha_hora:mtIso('mtFechaHora'),observaciones:mtVal('mtObservaciones')||null,creado_por:G.userId,creado_por_email:G.userEmail};
   if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:GM.sourceType==='Lluvia'?null:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:GM.sourceType==='Lluvia'?null:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
   if(GM.section==='equipo')return {...common,id_equipo:mtCurrentEquipo(),caudal_instantaneo_ls:mtNum('mtCaudalInstantaneo'),caudalimetro_salida_bomba_m3:mtNum('mtCaudalBomba'),presion_antes_filtro_bar:mtNum('mtPresionAntes'),presion_despues_filtro_bar:mtNum('mtPresionDespues'),retrolavado:mtVal('mtRetrolavado')||null,gatillante_automatico:mtVal('mtGatillante')||null,valor_gatillante:mtNum('mtValorGatillante'),duracion_ciclo_retrolavado_min:mtNum('mtDuracionRetro'),ultima_calibracion_inyectores:mtVal('mtCalibracionInyectores')||null,ultima_calibracion_caudalimetros:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
-  return {...common,id_equipo:mtCurrentEquipo(),id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero')};
+  return {...common,id_equipo:mtCurrentEquipo(),id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud')};
 }
 function maintenanceValidate(p){
   if(!G.rsId||!p.id_predio||!G.userId)return 'No fue posible identificar la Razón Social, el predio o el usuario.';
@@ -4573,13 +4937,14 @@ async function saveMaintenanceRecord(event){
     if((GM.section==='equipo'||GM.section==='factura_ferti')){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=mtCurrentEquipo();}
     if(GM.section==='equipo')updateMaintenanceDelta();
     if(GM.section==='factura_ferti')updateFFTotales();
-    if(GM.section==='fuente')initMtMap();
+    if(GM.section==='fuente'||GM.section==='zona')initMtMap();
     await loadMaintenanceHistory(true);
   }catch(err){maintenanceLogError('guardar registro',err);GM.lastError=err;GM.backendReady=maintenanceIsMissingTableError(err)?false:GM.backendReady;msg.className='maint-message err';msg.textContent=maintenanceFriendlyError(err);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i>Guardar registro';}
 }
 
 async function loadMaintenanceHistory(preserveOnError=false){
+  if(GM.section==='goteros')return loadGoteroHistory(preserveOnError);
   if(!G.rsId||!mtCurrentPredio())return;GM.loading=true;renderMaintenanceHistory();
   const table=MT_TABLES[GM.section];const dateField=MT_DATE_FIELD[GM.section]||'fecha_hora';
   let q=db.from(table).select('*').eq('id_razon_social',G.rsId).eq('id_predio',mtCurrentPredio()).order(dateField,{ascending:false}).limit(100);
@@ -4623,7 +4988,7 @@ function mtExportRows(section,rows){
   if(section==='factura_ferti')return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'Fecha Factura':mtExcelDate(r.fecha_factura),'ID Factura':r.id_factura,'Producto':r.producto,'Proveedor':r.proveedor,'Envase':r.envase,'Peso o Volumen Envase':r.peso_volumen_envase,'Unidad':r.unidad,'Envases Totales':r.envases_totales,'Peso o volumen Total':r.peso_volumen_total,'Stock Disponible Temporada Anterior':r.stock_disponible_temporada_anterior,'Stock Disponible Total Kg':r.stock_disponible_total_kg,'Precio Envase':r.precio_envase,'Moneda':r.moneda,'Valor Total':r.valor_total,'N input (%)':r.n_input_pct,'P2O5 input (%)':r.p2o5_input_pct,'K2O input (%)':r.k2o_input_pct,'Mg input (%)':r.mg_input_pct,'Ca input (%)':r.ca_input_pct,'S input (%)':r.s_input_pct,'Zn input (%)':r.zn_input_pct,'Mn input (%)':r.mn_input_pct,'Fe input (%)':r.fe_input_pct,'Cu input (%)':r.cu_input_pct,'B input (%)':r.b_input_pct,'Concetración ideal (gr/L)':r.concentracion_ideal_grl,'Disponible':r.disponible,'Concentración máxima en solución madre recomendada (gr/L)':r.concentracion_maxima_sol_madre_grl,'Orden de aplicacion':r.orden_aplicacion,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='factura_energia')return rows.map(r=>({'ID Predio':r.id_predio,'Fecha Factura':mtExcelDate(r.fecha_factura),'Numero de Factura':r.numero_factura,'Proveedor':r.proveedor,'Total a Pagar ($)':r.total_a_pagar,'Consumo Electrico (kWh)':r.consumo_electrico_kwh,'Demanda Suministrada (kW)':r.demanda_suministrada_kw,'Tipo de Combustible':r.tipo_combustible,'Combustible (Litros)':r.combustible_litros,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
   if(section==='confirmaciones')return rows.map(r=>({'ID Zona':r.id_zona,'ID Equipo':r.id_equipo,'Tipo':r.tipo==='riego'?'Riego':'Fertirriego','Fecha Recomendada':mtExcelDate(r.fecha_recomendada),'Fecha Ejecución':mtExcelDate(r.fecha_ejecucion),'Confirmado':r.confirmado?'Sí':'No','Tiempo (horas)':r.tiempo_horas,'Producto':r.producto_asignado,'Concentración Ideal (gr/L)':r.concentracion_ideal_grl,'Dosis a Aplicar (Kg)':r.dosis_aplicar_kg,'Vol. Sol. Madre a Preparar (L)':r.volumen_sol_madre_l,'Dosis Producto Estanque (Kg)':r.dosis_producto_estanque_kg,'Vol. Sol. Madre a Inyectar (L)':r.vol_sol_madre_inyectar_l,'% Inyección':r.pct_inyeccion,'Ratio Inyección':r.ratio_inyeccion,'Operario':r.operario,'Profesional':r.profesional,'Última actualización':mtExcelDate(r.actualizado_en)}));
-  return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
+  return rows.map(r=>({'ID Razon Social':r.id_razon_social,'ID Predio':r.id_predio,'ID Equipo':r.id_equipo,'ID Zona':r.id_zona,'Fecha / Hora':mtExcelDate(r.fecha_hora),'Aforo goteros (volumen promedio en 3 minutos) (mL)':r.aforo_goteros_ml_3min,'Numero de mediciones':r.numero_mediciones,'Presion en la válvula de la zona (bar)':r.presion_valvula_bar,'Presión al final de la lateral (bar)':r.presion_final_lateral_bar,'CE del agua a la salida del gotero (dS/m)':r.ce_salida_gotero_ds_m,'Latitud':r.latitud,'Longitud':r.longitud,'Observaciones':r.observaciones,'Registrado por':r.creado_por_email}));
 }
 function openMaintenanceExport(){
   if(!G.rsId){showMaintenanceToast('No se pudo identificar la Razón Social.');return;}
@@ -4821,7 +5186,7 @@ function renderMobileDailyCards(){
     const row=(G.scDia||[]).find(r=>r.id_zona===z.id_zona&&r.fecha===date);
     const selected=row?riegoDelDia(row,today):{l:0,t:0,est:false};
     const hasR=!!row&&(selected.l>0||selected.t>0),volume=selected.l*(parseFloat(z.superficie_ha)||0)*10;
-    const done=hasR&&!!G.confirmR?.[z.id_zona+'|'+date];
+    const done=hasR&&estaConf(G.confirmR?.[z.id_zona+'|'+date]);
     const ferti=tieneModulo('ferti')?(GF.ferti||[]).filter(e=>e.id_zona===z.id_zona&&e.fecha_evento===date):[];
     if(hasR){irrigations++;totalVolume+=volume;if(done)confirmed++;}
     const card=mobileUiNode('article','m-day-card'+(!hasR&&!ferti.length?' quiet':''));
@@ -4838,7 +5203,7 @@ function renderMobileDailyCards(){
       const box=mobileUiNode('div','m-day-ferti');box.append(mobileUiNode('span','m-day-ferti-label','Fertirriego'),mobileUiNode('strong','',ferti[0].producto_asignado||'Producto sin nombre'));
       const dose=ferti.reduce((s,e)=>s+numF(e.dosis_producto_estanque_kg),0),mother=ferti.reduce((s,e)=>s+numF(e.volumen_sol_madre_l),0);
       box.append(mobileUiNode('p','',mobileFmt1(dose)+' kg · Solución madre '+mobileFmtInt(mother)+' L'+(ferti.length>1?' · '+ferti.length+' productos':'')));
-      const action=mobileUiNode('button','m-day-ferti-action',G.confirmF?.[z.id_zona+'|'+date]?'Ver aplicación confirmada':'Revisar fertirriego');action.type='button';action.addEventListener('click',()=>mobileOpenFertiDetail(z.id_zona,date));box.append(action);card.append(box);
+      const action=mobileUiNode('button','m-day-ferti-action',estaConf(G.confirmF?.[z.id_zona+'|'+date])?'Ver aplicación confirmada':'Revisar fertirriego');action.type='button';action.addEventListener('click',()=>mobileOpenFertiDetail(z.id_zona,date));box.append(action);card.append(box);
     }
     if(hasR){
       const eto=parseFloat(row[selected.est?'eto_estacion_mm_dia':'eto_pronostico_mm_dia']),rain=parseFloat(row[selected.est?'lluvia_estacion_mm_dia':'lluvia_pronostico_mm_dia']);
