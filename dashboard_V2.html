@@ -381,6 +381,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .rc-foto .rf-tiempo i{font-size:12.5px;}
 .rc-foto .rf-lluvia{display:inline-flex;align-items:center;gap:3px;align-self:flex-start;font-size:10.5px;font-weight:800;color:#0369A1;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:20px;padding:1px 7px;margin-top:2px;}
 .rc-foto .rf-lluvia i{font-size:11px;}
+.rc-foto .rf-lluvia-ret{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#0891B2;line-height:1.25;}
+.rc-foto .rf-lluvia-ret i{font-size:11.5px;}
+.m-cal-lluvia{display:inline-flex;align-items:center;gap:3px;margin-top:2px;color:#0891B2;font-size:10.5px;font-weight:700;line-height:1.3}
+.m-cal-lluvia i{font-size:11px}
 .th-hoy-lbl{font-size:12px;font-weight:800;color:var(--blue);margin-top:2px;}
 .dash-kpi3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .dash-kpi3 .d-kpi .s{font-size:10.5px;color:var(--muted);margin-top:2px;}
@@ -2372,16 +2376,18 @@ function rCal(dias,sc){
         const umbHtml=umb!=null?`<div class="rf-umbral" title="Umbral de riego (AF)">Umbral de riego ${rcNum(umb)} mm</div>`:'';
         const tmpHtml=tAcC!=null?`<div class="rf-tiempo${tAcC>0?'':' cero'}" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${hm(tAcC)||'0h 00min'}</div>`:'';
         const lluHtml=(llu!=null&&llu>0)?`<span class="rf-lluvia" title="Lluvia del día (V)${fut?' · pronóstico':''}"><i class="ti ti-cloud-rain"></i>${rcNum(llu)} mm</span>`:'';
+        const xRetC=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;   // X lluvia retenida
+        const retHtml=(xRetC!=null&&xRetC>0)?`<div class="rf-lluvia-ret" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ret. ${rcNum(xRetC)} mm</div>`:'';
         const pill=r?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación (AG)">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="rc-foto" onclick="${clickMain}">
                 ${conf?'<div class="card-check" title="Ejecución confirmada"><i class="ti ti-check"></i></div>':''}
-                ${r?`${etcHtml}
+                ${r?`
                 <div class="rf-l1" title="Agua aprovechable (AL)">${l1}</div>
                 <div class="rf-l2" title="Riego aplicado (AK)">${l2}</div>
                 ${tmpHtml}
-                ${umbHtml}
+                ${retHtml}
                 ${lluHtml}
                 ${pill}
                 ${(esRiego&&!conf&&(pasado||eh))?`<div class="rc-noconfirm"><i class="ti ti-alert-triangle"></i>Riego sin confirmación</div>`:''}`:`<div class="rf-l2" style="color:#16A34A">${puedeFerti&&hm(tiempoFertTot)?hm(tiempoFertTot):'Fertirriego'}</div>`}
@@ -2599,14 +2605,13 @@ function openDia(fecha,znId){
   // La meteorología (ETo/ETc/lluvia) se muestra en cuanto la estación tiene
   // dato para el día, SIN depender de si hubo riego — el ETo real de la
   // estación es independiente de si esta zona en particular regó o no.
-  const meteo=hayDatoEstacion?`<div class="d-section">
-      <div class="d-section-t">Meteorología — real vs pronóstico</div>
-      <div class="cmp-hd"><span class="cmp-h est">ESTACIÓN</span><span class="cmp-h pron">PRONÓSTICO</span></div>
-      <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="ce">${num(cE)}</span><span class="cp">${num(cP)}</span></div></div>
-    </div>`:`<div class="d-section">
-      <div class="d-section-t">Meteorología pronosticada</div>
-      <div class="cmp-row"><span class="cmp-k">ETc (mm/día)</span><div class="cmp-vs"><span class="cp">${num(cP)}</span></div></div>
-      <div class="cmp-row"><span class="cmp-k">Lluvia retenida (mm)</span><div class="cmp-vs"><span class="cp" style="color:#0891B2;font-weight:700">${num(llR)}</span></div></div>
+  // Meteorología: solo ETo. Hoy en adelante = pronóstico; hasta ayer = estación.
+  const etoTag=pasado?'<span class="cmp-h est" style="margin-left:6px">ESTACIÓN</span>':'<span class="cmp-h pron" style="margin-left:6px">PRONÓSTICO</span>';
+  const etoVal=pasado?(eE>0?`<span class="ce">${eE.toFixed(2)}</span>`:'<span class="ce" style="font-size:12px;font-weight:600;color:var(--muted)">Sin dato de estación</span>')
+                     :(eP>0?`<span class="cp">${eP.toFixed(2)}</span>`:'<span class="cp">—</span>');
+  const meteo=`<div class="d-section">
+      <div class="d-section-t">Meteorología</div>
+      <div class="cmp-row"><span class="cmp-k">ETo (mm/día) ${etoTag}</span><div class="cmp-vs">${etoVal}</div></div>
     </div>`;
 
   // Columnas del DASHBOARD tal cual: AC lamina_neta_acum_mm, AD tiempo_riego_acum_h, X lluvia retenida
@@ -4113,8 +4118,9 @@ function renderMobileCalendarGrid(){
       const dosisEstanqueTot=ferti.reduce((a,e)=>a+(parseFloat(e.dosis_producto_estanque_kg)||0),0);
       const fertiTxt=[hm(tiempoFertTot),dosisEstanqueTot>0?dosisEstanqueTot.toFixed(1)+' kg':null].filter(Boolean).join(' · ')||(ferti[0]?prodShort(ferti[0].producto_asignado):'');
       const main=hasR?estA.corto:hasF?'Ferti':(r?'—':''),sub=aAp!=null?`AA ${Math.round(aAp*100)}%`:'',apTxt=rAp!=null?`${rcNum(rAp)} mm ap.`:'';
-      const tAcM=r?rcVal(r.tiempo_riego_acum_h):null,tmpTxt=(tAcM!=null&&tAcM>0)?hm(tAcM):'';   // AD tiempo_riego_acum_h
-      html+=`<button class="${classes}" style="--cell-color:${hasR?estA.col:c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${alerta?', '+alerta:''}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub" title="Agua aprovechable (AL)">${sub}</span>`:''}${apTxt?`<span class="m-cal-volume" title="Riego aplicado (AK)">${apTxt}</span>`:''}${tmpTxt?`<span class="m-cal-tiempo" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${tmpTxt}</span>`:''}${hasF&&fertiTxt?`<span class="m-cal-ferti-pill">${fertiTxt}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
+      const tAcM=r?rcVal(r.tiempo_riego_acum_h):null,tmpTxt=(tAcM!=null&&tAcM>0)?hm(tAcM):'';
+      const xRetM=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null,retTxt=(xRetM!=null&&xRetM>0)?`${rcNum(xRetM)} mm`:'';   // X lluvia retenida   // AD tiempo_riego_acum_h
+      html+=`<button class="${classes}" style="--cell-color:${hasR?estA.col:c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${alerta?', '+alerta:''}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub" title="Agua aprovechable (AL)">${sub}</span>`:''}${apTxt?`<span class="m-cal-volume" title="Riego aplicado (AK)">${apTxt}</span>`:''}${tmpTxt?`<span class="m-cal-tiempo" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${tmpTxt}</span>`:''}${retTxt?`<span class="m-cal-lluvia" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ${retTxt}</span>`:''}${hasF&&fertiTxt?`<span class="m-cal-ferti-pill">${fertiTxt}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
     });
   });
   grid.innerHTML=html;
