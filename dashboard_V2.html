@@ -1832,7 +1832,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí').order('id_zona',{ascending:true});return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return data||[];}
 async function qNDVI(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_registros').select('"ID Zona Relacional (PK)","Fecha","NDVI","Kc"').in('ID Zona Relacional (PK)',znIds).order('Fecha',{ascending:false});const m={};(data||[]).forEach(r=>{const z=r['ID Zona Relacional (PK)'];if(!m[z])m[z]={ndvi:parseFloat(r['NDVI']),kc:parseFloat(r['Kc']),fecha:r['Fecha'],hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r['NDVI']),fecha:r['Fecha']?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
@@ -1918,6 +1918,11 @@ async function qProductosFerti(){
 // (01-10) Funciones solo para Drupa por ahora (operaciones, VOLUMENES en tarjetas, clima por casilla). Agregar RS aquí para extender.
 const FEAT_RS=['RS-10'];
 function featOp(){return FEAT_RS.includes(G.rsId);}
+// Clientes que riegan todos los días: la casilla muestra la lámina neta del día (AB),
+// sin tiempo acumulado (AD) ni alerta (AG), en color neutro.
+const RIEGO_DIARIO_RS=['RS-12'];
+function riegoDiario(){return RIEGO_DIARIO_RS.includes(G.rsId);}
+function fmtLavado(v){return v==null?'—':Math.round(v*100)+' %';}
 function isoWeekKey(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=c.getUTCFullYear();const w=Math.ceil(((c-new Date(Date.UTC(y,0,1)))/86400000+1)/7);return y+'-W'+String(w).padStart(2,'0');}
 function opLabel(o){return o==null||o===''?'Sin operación':'Operación '+o;}
 function opSortKey(o){const s=String(o??'');const m=s.match(/^(\d+)(.*)$/);return m?[0,parseInt(m[1],10),m[2]]:[s?1:2,0,s];}
@@ -2329,7 +2334,8 @@ function rCal(dias,sc){
         const r=dm[z.id_zona]?.[dS];
         // A la vista: AG alerta_recomendacion_riego, AL agua_aprovechable, AK riego_aplicado_mm.
         // Al pinchar (openDia): AC lamina_neta_acum_mm, AD tiempo_riego_acum_h, X lluvia retenida.
-        const alerta=r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
+        const rDiario=riegoDiario();
+        const alerta=!rDiario&&r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
         const rAp=r?rcVal(r.riego_aplicado_mm):null;
         const aAp=r?rcVal(r.agua_aprovechable):null;
         const conf=estaConf(G.confirmR[z.id_zona+'|'+dS]);
@@ -2374,11 +2380,13 @@ function rCal(dias,sc){
         const fut=dS>hS;
         const etcHtml=etc!=null?`<div class="rf-etc${fut?' pron':''}" title="ETc del día (U)${fut?' · pronóstico':''}">${fut?'≈ ':''}ETc ${rcNum(etc)} mm</div>`:'';
         const umbHtml=umb!=null?`<div class="rf-umbral" title="Umbral de riego (AF)">Umbral de riego ${rcNum(umb)} mm</div>`:'';
-        const tmpHtml=tAcC!=null?`<div class="rf-tiempo${tAcC>0?'':' cero'}" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${hm(tAcC)||'0h 00min'}</div>`:'';
+        const lamD=r?rcVal(r.lamina_neta_pronostico_mm_dia):null;   // AB lamina_neta_mm
+        const lamHtml=(rDiario&&lamD!=null)?`<div class="rf-tiempo${lamD>0?'':' cero'}" title="Lámina neta del día (AB)"><i class="ti ti-droplet"></i>${rcNum(lamD)} mm</div>`:'';
+        const tmpHtml=rDiario?lamHtml:tAcC!=null?`<div class="rf-tiempo${tAcC>0?'':' cero'}" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${hm(tAcC)||'0h 00min'}</div>`:'';
         const lluHtml=(llu!=null&&llu>0)?`<span class="rf-lluvia" title="Lluvia del día (V)${fut?' · pronóstico':''}"><i class="ti ti-cloud-rain"></i>${rcNum(llu)} mm</span>`:'';
         const xRetC=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;   // X lluvia retenida
         const retHtml=(xRetC!=null&&xRetC>0)?`<div class="rf-lluvia-ret" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ret. ${rcNum(xRetC)} mm</div>`:'';
-        const pill=r?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación (AG)">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
+        const pill=(r&&!rDiario)?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación (AG)">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="rc-foto" onclick="${clickMain}">
@@ -2619,16 +2627,18 @@ function openDia(fecha,znId){
   const estD=rcAlerta(alertaD);
   const lAc=rcVal(r.lamina_neta_acum_mm), tAc=rcVal(r.tiempo_riego_acum_h), xRet=rcVal(r.lluvia_retenida_pronostico_mm_dia);
   const rApD=rcVal(r.riego_aplicado_mm), aApD=rcVal(r.agua_aprovechable);
+  const lDia=rcVal(r.lamina_neta_pronostico_mm_dia), fLav=rcVal(r.fraccion_de_lavado_lr_decimal);   // AB lámina del día, Y fracción de lavado
   const datosDash=`<div class="d-section">
       <div class="riego-card rc-v2 ${alertaD?estD.cls:'al-otro'}" style="min-height:0;cursor:default;margin-bottom:12px;box-shadow:none">
         <div class="rc-chiprow"><span class="rc-al"><i class="ti ${alertaD?estD.ico:'ti-info-circle'}"></i>${alertaD?mtEsc(alertaD):'Sin alerta'}</span>${rcAplicado(rApD)}</div>
         ${rcBarraAA(aApD)}
       </div>
       <div class="dash-kpi3">
-        <div class="d-kpi"><div class="l">Lámina neta acumulada</div><div class="v b">${lAc!=null?rcNum(lAc)+' mm':'—'}</div></div>
+        ${riegoDiario()?`<div class="d-kpi"><div class="l">Lámina neta del día</div><div class="v b">${lDia!=null?rcNum(lDia)+' mm':'—'}</div></div>`:`<div class="d-kpi"><div class="l">Lámina neta acumulada</div><div class="v b">${lAc!=null?rcNum(lAc)+' mm':'—'}</div></div>`}
         <div class="d-kpi"><div class="l">Tiempo de riego acumulado</div><div class="v b">${tAc!=null?(hm(tAc)||'0h 00min'):'—'}</div>${tAc!=null?`<div class="s">${rcNum(tAc)} h</div>`:''}</div>
         <div class="d-kpi"><div class="l">Lluvia retenida</div><div class="v" style="color:#0891B2">${xRet!=null?rcNum(xRet)+' mm':'—'}</div></div>
-      </div></div>`;
+      </div>
+      <div class="dash-kpi3" style="margin-top:8px"><div class="d-kpi"><div class="l">Fracción de lavado</div><div class="v">${fmtLavado(fLav)}</div></div></div></div>`;
   const subD=`<div class="zona-dot" style="background:${c};display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px"></div>${z.nombre||'Zona'} · ${z.especie||''} ${z.variedad||''}`;
 
   const confirmHtml=confirmBoxHtml('riego',znId,fecha,tAc!=null?tAc:(hayRiegoEstacion?tE:tP));
@@ -4078,12 +4088,13 @@ function mobileOpenCalendarCell(znId,date){
   const alerta=r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
   const lAc=r?rcVal(r.lamina_neta_acum_mm):null,tAc=r?rcVal(r.tiempo_riego_acum_h):null,xRet=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;
   const rAp=r?rcVal(r.riego_aplicado_mm):null,aAp=r?rcVal(r.agua_aprovechable):null;
+  const lDiaM=r?rcVal(r.lamina_neta_pronostico_mm_dia):null,fLavM=r?rcVal(r.fraccion_de_lavado_lr_decimal):null;
   const hasR=!!r,hasF=tieneModulo('ferti')&&events.length>0,confR=estaConf(G.confirmR?.[znId+'|'+date]),confF=estaConf(G.confirmF?.[znId+'|'+date]);
   const title=document.getElementById('mCellSheetTitle'),subtitle=document.getElementById('mCellSheetSubtitle'),body=document.getElementById('mCellSheetBody');
   if(title)title.textContent=z.nombre||znId;
   if(subtitle)subtitle.textContent=`${DS[d.getDay()]} ${d.getDate()} de ${MS[d.getMonth()]} · ${z.especie||'—'} ${z.variedad||''}`;
   let html='';
-  if(hasR)html+=`<div class="m-sheet-block riego"><div class="m-sheet-block-title"><span><i class="ti ${rcAlerta(alerta).ico}"></i> ${alerta?mtEsc(alerta):'Sin alerta'}</span><span>${alerta==='Riego'||alerta==='Riego Parcial'?(confR?'✓ Confirmado':'Pendiente'):''}</span></div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Lámina acum.</small><strong>${lAc!=null?rcNum(lAc)+' mm':'—'}</strong></div><div class="m-sheet-metric"><small>Tiempo acum.</small><strong>${tAc!=null?(hm(tAc)||'0h 00min'):'—'}</strong></div><div class="m-sheet-metric"><small>Lluvia retenida</small><strong>${xRet!=null?rcNum(xRet)+' mm':'—'}</strong></div></div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Riego aplicado</small><strong>${rAp!=null?rcNum(rAp)+' mm':'—'}</strong></div><div class="m-sheet-metric"><small>Agua aprov.</small><strong>${aAp!=null?Math.round(aAp*100)+'%':'—'}</strong></div></div></div>`;
+  if(hasR)html+=`<div class="m-sheet-block riego"><div class="m-sheet-block-title"><span><i class="ti ${rcAlerta(alerta).ico}"></i> ${alerta?mtEsc(alerta):'Sin alerta'}</span><span>${alerta==='Riego'||alerta==='Riego Parcial'?(confR?'✓ Confirmado':'Pendiente'):''}</span></div><div class="m-sheet-metrics">${riegoDiario()?`<div class="m-sheet-metric"><small>Lámina del día</small><strong>${lDiaM!=null?rcNum(lDiaM)+' mm':'—'}</strong></div>`:`<div class="m-sheet-metric"><small>Lámina acum.</small><strong>${lAc!=null?rcNum(lAc)+' mm':'—'}</strong></div>`}<div class="m-sheet-metric"><small>Tiempo acum.</small><strong>${tAc!=null?(hm(tAc)||'0h 00min'):'—'}</strong></div><div class="m-sheet-metric"><small>Lluvia retenida</small><strong>${xRet!=null?rcNum(xRet)+' mm':'—'}</strong></div></div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Riego aplicado</small><strong>${rAp!=null?rcNum(rAp)+' mm':'—'}</strong></div><div class="m-sheet-metric"><small>Agua aprov.</small><strong>${aAp!=null?Math.round(aAp*100)+'%':'—'}</strong></div><div class="m-sheet-metric"><small>Fracción lavado</small><strong>${fmtLavado(fLavM)}</strong></div></div></div>`;
   if(hasF){
     const dosisEstanque=events.reduce((a,e)=>a+numF(e.dosis_producto_estanque_kg),0),tiempo=events.reduce((a,e)=>a+numF(e.tiempo_fertirriego_hrs),0),madre=events.reduce((a,e)=>a+numF(e.volumen_sol_madre_l),0);
     html+=`<div class="m-sheet-block ferti"><div class="m-sheet-block-title"><span><i class="ti ti-flask-2"></i> Fertirriego</span><span>${confF?'✓ Confirmado':'Programado'}</span></div><div class="m-sheet-product">${events[0].producto_asignado||'Producto sin nombre'}${events.length>1?` · +${events.length-1} producto(s)`:''}</div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Dosis estanque</small><strong>${dosisEstanque>0?dosisEstanque.toFixed(1)+' kg':'—'}</strong></div><div class="m-sheet-metric"><small>Inyección</small><strong>${tiempo>0?(hm(tiempo)||'—'):'—'}</strong></div><div class="m-sheet-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div></div>`;
@@ -4107,7 +4118,8 @@ function renderMobileCalendarGrid(){
     indexes.forEach(i=>{
       const date=fs(days[i]),r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date);
       // A la vista: AG alerta, AL agua aprovechable, AK riego aplicado (columnas del DASHBOARD, sin cálculos)
-      const alerta=r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
+      const rDiario=riegoDiario();
+      const alerta=!rDiario&&r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
       const estA=rcAlerta(alerta),rAp=r?rcVal(r.riego_aplicado_mm):null,aAp=r?rcVal(r.agua_aprovechable):null;
       const esRiego=alerta==='Riego'||alerta==='Riego Parcial';
       const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!alerta,hasF=tieneModulo('ferti')&&ferti.length>0;
@@ -4117,8 +4129,9 @@ function renderMobileCalendarGrid(){
       const tiempoFertTot=ferti.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
       const dosisEstanqueTot=ferti.reduce((a,e)=>a+(parseFloat(e.dosis_producto_estanque_kg)||0),0);
       const fertiTxt=[hm(tiempoFertTot),dosisEstanqueTot>0?dosisEstanqueTot.toFixed(1)+' kg':null].filter(Boolean).join(' · ')||(ferti[0]?prodShort(ferti[0].producto_asignado):'');
-      const main=hasR?estA.corto:hasF?'Ferti':(r?'—':''),sub=aAp!=null?`AA ${Math.round(aAp*100)}%`:'',apTxt=rAp!=null?`${rcNum(rAp)} mm ap.`:'';
-      const tAcM=r?rcVal(r.tiempo_riego_acum_h):null,tmpTxt=(tAcM!=null&&tAcM>0)?hm(tAcM):'';
+      const main=hasR?estA.corto:hasF?'Ferti':(lamTxt||(r?'—':'')),sub=aAp!=null?`AA ${Math.round(aAp*100)}%`:'',apTxt=rAp!=null?`${rcNum(rAp)} mm ap.`:'';
+      const tAcM=r?rcVal(r.tiempo_riego_acum_h):null,tmpTxt=rDiario?'':((tAcM!=null&&tAcM>0)?hm(tAcM):'');
+      const lamM=r?rcVal(r.lamina_neta_pronostico_mm_dia):null,lamTxt=(rDiario&&lamM!=null)?`${rcNum(lamM)} mm`:'';   // AB lamina_neta_mm
       const xRetM=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null,retTxt=(xRetM!=null&&xRetM>0)?`${rcNum(xRetM)} mm`:'';   // X lluvia retenida   // AD tiempo_riego_acum_h
       html+=`<button class="${classes}" style="--cell-color:${hasR?estA.col:c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${alerta?', '+alerta:''}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub" title="Agua aprovechable (AL)">${sub}</span>`:''}${apTxt?`<span class="m-cal-volume" title="Riego aplicado (AK)">${apTxt}</span>`:''}${tmpTxt?`<span class="m-cal-tiempo" title="Tiempo de riego acumulado (AD)"><i class="ti ti-clock-hour-4"></i>${tmpTxt}</span>`:''}${retTxt?`<span class="m-cal-lluvia" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ${retTxt}</span>`:''}${hasF&&fertiTxt?`<span class="m-cal-ferti-pill">${fertiTxt}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
     });
