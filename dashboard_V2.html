@@ -498,6 +498,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .est-card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);}
 .est-card.chart{display:flex;flex-direction:column;}
 .est-card-t{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.bn-nut-sel{height:28px;padding:0 6px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--white);font:inherit;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;}
 .est-card-s{font-size:11px;color:var(--muted);margin-bottom:12px;}
 .est-chart-box{position:relative;height:340px;width:100%;}
 .est-side{display:flex;flex-direction:column;gap:14px;}
@@ -1122,12 +1123,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .cr-bl-k .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
 .cr-bl-v{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
 .cr-bl-v b{font-size:15px;font-weight:700;color:var(--ink);}
-.cr-bl-bar{position:relative;}
+.cr-bl-bar{position:relative;padding-top:16px;}
+.cr-bl-meta{position:absolute;top:0;transform:translateX(-50%);font-size:10px;line-height:12px;font-weight:700;color:var(--ink);white-space:nowrap;}
 .cr-bl-track{position:relative;height:12px;border-radius:6px;background:var(--line2);overflow:hidden;}
 .cr-bl-fill,.cr-bl-over{position:absolute;top:0;bottom:0;}
 .cr-bl-over{opacity:.35;}
 .cr-bl-over.cap::after{content:'';position:absolute;right:7px;top:-2px;bottom:-2px;width:3px;background:var(--white);transform:skewX(-22deg);}
-.cr-bl-tick{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px;}
+.cr-bl-tick{position:absolute;top:13px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px;}
 .cr-bl-sub{display:flex;justify-content:space-between;gap:12px;margin-top:7px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
 .cr-bl-sub b{color:var(--ink);font-weight:700;}
 .cr-hbars{display:flex;flex-direction:column;gap:11px;padding:4px 0;}
@@ -1590,7 +1592,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
         <div class="est-card chart">
           <div class="est-card-t"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div>
           <div class="est-card-s">Lo aplicado frente a la demanda de cada nutriente, acumulado en el alcance seleccionado.</div>
-          <div class="cr-legend"><span><span class="tk"></span>Demanda (100 %)</span><span><span class="sw" style="background:var(--ink2);opacity:.35"></span>Aplicado sobre la demanda</span></div>
+          <div class="cr-legend"><span><span class="tk"></span>Meta: 100 % de la demanda</span><span><span class="sw" style="background:var(--green)"></span>En la meta (95–105 %)</span><span><span class="sw" style="background:var(--amber)"></span>Sobre la meta</span></div>
           <div class="cr-bullets" id="bnMacroBullets"></div>
         </div>
         <div class="est-card">
@@ -1617,7 +1619,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
           <div id="bnAlertas"></div>
         </div>
         <div class="est-card">
-          <div class="est-card-t"><i class="ti ti-trending-up" style="color:var(--z2)"></i>Zonas con mayor demanda</div>
+          <div class="est-card-t" style="flex-wrap:wrap"><i class="ti ti-trending-up" style="color:var(--z2)"></i>Zonas con mayor demanda de:<select id="bnZonasNut" class="bn-nut-sel" onchange="GB.nutTop=this.value;bnZonas()"></select></div>
           <div id="bnZonas"></div>
         </div>
       </div>
@@ -1886,22 +1888,24 @@ async function qZonasPredio(prId){
 
 // Último acumulado registrado de N/P2O5/K2O por zona.
 async function qAcumuladoUltimoPorZona(znIds){
+  // Aplicado de la TEMPORADA ACTUAL (desde el 1 de julio) hasta hoy: suma de lo aplicado
+  // por evento. No usa el acumulado de la hoja porque arrastra temporadas anteriores
+  // y los eventos proyectados (futuros) todavía no están aplicados.
   if(!znIds.length)return {};
   try{
     const {data,error}=await db.from('sc_recomendacion_ferti')
-      .select('id_zona,fecha_evento,acumulado_n_kg,acumulado_p2o5_kg,acumulado_k2o_kg')
-      .in('id_zona',znIds).order('fecha_evento',{ascending:false});
+      .select('id_zona,fecha_evento,n_aplicado_kg,p2o5_aplicado_kg,k2o_aplicado_kg')
+      .in('id_zona',znIds).gte('fecha_evento',iniTemporadaFerti()).lte('fecha_evento',fs(new Date()));
     if(error)throw error;
     const m={};
     (data||[]).forEach(r=>{
-      // Como viene ordenado desc por fecha, la primera fila que aparece
-      // por cada zona ES la más reciente — por eso solo guardamos si aún
-      // no existe esa zona en el mapa.
-      if(!m[r.id_zona])m[r.id_zona]={n:numF(r.acumulado_n_kg),p:numF(r.acumulado_p2o5_kg),k:numF(r.acumulado_k2o_kg),fecha:r.fecha_evento};
+      const z=m[r.id_zona]||(m[r.id_zona]={n:0,p:0,k:0,fecha:null});
+      z.n+=numF(r.n_aplicado_kg)||0;z.p+=numF(r.p2o5_aplicado_kg)||0;z.k+=numF(r.k2o_aplicado_kg)||0;
+      if(!z.fecha||r.fecha_evento>z.fecha)z.fecha=r.fecha_evento;
     });
     return m;
   }catch(e){
-    console.warn('[Balance] No se pudo cargar el acumulado por zona.',e.message||e);
+    console.warn('[Balance] No se pudo cargar lo aplicado por zona.',e.message||e);
     return {};
   }
 }
@@ -2129,26 +2133,7 @@ async function qZonasPredio(prId){
 }
 
 // Último acumulado registrado de N/P2O5/K2O por zona.
-async function qAcumuladoUltimoPorZona(znIds){
-  if(!znIds.length)return {};
-  try{
-    const {data,error}=await db.from('sc_recomendacion_ferti')
-      .select('id_zona,fecha_evento,acumulado_n_kg,acumulado_p2o5_kg,acumulado_k2o_kg')
-      .in('id_zona',znIds).order('fecha_evento',{ascending:false});
-    if(error)throw error;
-    const m={};
-    (data||[]).forEach(r=>{
-      // Como viene ordenado desc por fecha, la primera fila que aparece
-      // por cada zona ES la más reciente — por eso solo guardamos si aún
-      // no existe esa zona en el mapa.
-      if(!m[r.id_zona])m[r.id_zona]={n:numF(r.acumulado_n_kg),p:numF(r.acumulado_p2o5_kg),k:numF(r.acumulado_k2o_kg),fecha:r.fecha_evento};
-    });
-    return m;
-  }catch(e){
-    console.warn('[Balance] No se pudo cargar el acumulado por zona.',e.message||e);
-    return {};
-  }
-}
+
 
 
 
@@ -3371,8 +3356,12 @@ async function loadRenderFerti(){
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
   rPanelF();
 }
-function accZona(znId,col){const ev=GF.ferti.filter(e=>e.id_zona===znId);return ev.length?Math.max(...ev.map(e=>numF(e[col]))):0;}
-function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.acc)/dem*100;}
+/* Temporada de fertilización: parte el 1 de julio. */
+function iniTemporadaFerti(){const d=new Date();const y=d.getMonth()>=6?d.getFullYear():d.getFullYear()-1;return y+'-07-01';}
+function fertiTemporada(){const ini=iniTemporadaFerti();return GF.ferti.filter(e=>e.fecha_evento>=ini);}
+// Aplicado en la temporada hasta hoy (suma por evento; lo proyectado no cuenta).
+function accZona(znId,col){const ini=iniTemporadaFerti(),hoy=fs(new Date());return GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento>=ini&&e.fecha_evento<=hoy).reduce((a,e)=>a+(numF(e[col])||0),0);}
+function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.ap)/dem*100;}
 function covMicro(znId,mi){const b=GF.bal[znId];if(!b)return null;const obj=numF(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return numF(b[mi.p+'_actual_ppm'])/obj*100;}
 
 function rKpiF(){
@@ -3389,7 +3378,7 @@ function rKpiF(){
   <div class="kpi-card"><div class="kpi-ico" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-chart-donut-3"></i></div>
     <div class="kpi-body"><div class="kpi-lbl">Cobertura nutricional</div><div class="kpi-val">${cov!=null?cov+'%':'—'}</div><div class="kpi-sub">promedio del equipo</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#EFF6FF;color:var(--blue)"><i class="ti ti-letter-n"></i></div>
-    <div class="kpi-body"><div class="kpi-lbl">Aplicaciones temporada</div><div class="kpi-val">${GF.ferti.length}</div><div class="kpi-sub">eventos en ${G.zonas.length} zonas</div></div></div>
+    <div class="kpi-body"><div class="kpi-lbl">Aplicaciones temporada</div><div class="kpi-val">${fertiTemporada().length}</div><div class="kpi-sub">eventos en ${G.zonas.length} zonas</div></div></div>
   <div class="kpi-card"><div class="kpi-ico" style="background:#FFF7ED;color:var(--z2)"><i class="ti ti-calendar-due"></i></div>
     <div class="kpi-body"><div class="kpi-lbl">Próxima aplicación</div><div class="kpi-val sm">${pxZ?(pxZ.nombre||px.id_zona):'—'}</div><div class="kpi-sub">${pxd?DSS[pxd.getDay()]+' '+pxd.getDate()+' '+MSS[pxd.getMonth()]:'sin programar'}</div></div></div>`;
 }
@@ -3425,7 +3414,7 @@ function rCalF(){
 
 function rFranjaF(){
   const demT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+numF(GF.bal[z.id_zona]?.[m.dem]),0));
-  const apoT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+accZona(z.id_zona,m.acc),0));
+  const apoT=MACRO.map(m=>G.zonas.reduce((a,z)=>a+accZona(z.id_zona,m.ap),0));
   const restT=demT.map((d,i)=>Math.max(0,d-apoT[i]));
   const ng=(arr)=>`<div class="nut-grid">${MACRO.map((n,i)=>`<div class="nut-c"><div class="nut-k" style="color:${n.c}">${n.k}</div><div class="nut-v">${arr[i].toFixed(1)} <small>kg</small></div></div>`).join('')}<div class="nut-more">+micros</div></div>`;
   const sd=demT.reduce((a,b)=>a+b,0),sa=apoT.reduce((a,b)=>a+b,0);const ef=sd>0?Math.round(Math.min(sa/sd,1)*100):null;
@@ -3699,14 +3688,15 @@ function crNutrientBullets(el,items){
   const x=p=>Math.max(0,Math.min(p,D))/D*100;
   el.innerHTML=rows.map(r=>{
     const over=r.pct>100,cap=r.pct>D,dif=r.apl-r.dem;
+    const est=r.pct>105?'sobre':(r.pct>=95?'meta':''),col=est==='sobre'?'var(--amber)':(est==='meta'?'var(--green)':r.c);
     return `<div class="cr-bl" title="${r.k}: aplicado ${fmtKg(r.apl)} kg de ${fmtKg(r.dem)} kg de demanda">
       <div class="cr-bl-top"><span class="cr-bl-k"><span class="dot" style="background:${r.c}"></span>${r.k}${r.nombre?` <span style="font-weight:500;color:var(--muted);font-size:12px">${r.nombre}</span>`:''}</span>
         <span class="cr-bl-v"><b>${fmtKg(r.apl)} kg</b> aplicados de ${fmtKg(r.dem)} kg</span></div>
       <div class="cr-bl-bar"><div class="cr-bl-track">
-          <div class="cr-bl-fill" style="left:0;width:${x(Math.min(r.pct,100))}%;background:${r.c}"></div>
-          ${over?`<div class="cr-bl-over${cap?' cap':''}" style="left:${x(100)}%;width:${x(r.pct)-x(100)}%;background:${r.c}"></div>`:''}
-        </div><div class="cr-bl-tick" style="left:${x(100)}%"></div></div>
-      <div class="cr-bl-sub"><span><b>${crPct(r.pct)}</b> de la demanda${cap?' · fuera de escala':''}</span>
+          <div class="cr-bl-fill" style="left:0;width:${x(Math.min(r.pct,100))}%;background:${col}"></div>
+          ${over?`<div class="cr-bl-over${cap?' cap':''}" style="left:${x(100)}%;width:${x(r.pct)-x(100)}%;background:${col}"></div>`:''}
+        </div><div class="cr-bl-meta" style="left:${x(100)}%">Meta 100 %</div><div class="cr-bl-tick" style="left:${x(100)}%"></div></div>
+      <div class="cr-bl-sub"><span><b>${crPct(r.pct)}</b> de la demanda${est==='meta'?' · <b style="color:var(--green)">en la meta</b>':(est==='sobre'?' · <b style="color:var(--amber)">sobre la meta</b>':'')}${cap?' · fuera de escala':''}</span>
         <span>${dif>=0?`excede en ${fmtKg(dif)} kg`:`faltan ${fmtKg(-dif)} kg`}</span></div>
     </div>`;}).join('');
 }
@@ -3998,8 +3988,12 @@ function bnSecundarios(){
 
 function bnZonas(){
   // Ranking siempre sobre TODO el predio, tenga o no filtro de zona puesto.
-  const ranked=GB.zonasPredio.map((z,zi)=>({z,zi,tot:demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
-  document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv">${fmtKg(x.tot)} kg</span></div>`).join(''):'<div style="font-size:11px;color:var(--muted)">Sin datos.</div>';
+  // Se elige el nutriente a comparar (por defecto N); "todos" suma los kg de todos.
+  const sel=document.getElementById('bnZonasNut'),nk=GB.nutTop||'N';
+  if(sel){sel.innerHTML=NUT_ALL.map(n=>`<option value="${n.k}" ${n.k===nk?'selected':''}>${n.k}</option>`).join('')+`<option value="todos" ${nk==='todos'?'selected':''}>Todos (suma)</option>`;}
+  const nut=NUT_ALL.find(n=>n.k===nk);
+  const ranked=GB.zonasPredio.map((z,zi)=>({z,zi,tot:nut?(demZona(z.id_zona,nut)||0):demZonaTot(z.id_zona)})).filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot).slice(0,6);
+  document.getElementById('bnZonas').innerHTML=ranked.length?ranked.map(x=>`<div class="est-rrow"><span class="est-rk"><div class="zona-dot" style="background:${ZC[x.zi%ZC.length]};display:inline-block;margin-right:6px"></div>${x.z.nombre||'Zona'}</span><span class="est-rv">${fmtKg(x.tot)} kg</span></div>`).join(''):`<div style="font-size:11px;color:var(--muted)">${nut?'Ninguna zona con demanda de '+nut.k+'.':'Sin datos.'}</div>`;
 }
 
 function bnChartEmptyState(canvas,texto){
@@ -4447,7 +4441,7 @@ function renderMobileBalance(){
   const scopeText=GB.zonaFiltro?`Zona ${predioZones.find(z=>z.id_zona===GB.zonaFiltro)?.nombre||GB.zonaFiltro}`:`Todo el predio · ${predioZones.length} zonas`;
   content.innerHTML=`<div class="m-card"><div class="m-card-title"><i class="ti ti-map-2" style="color:#16A34A"></i>Alcance</div><div class="m-page-sub" style="margin:0">${scopeText}. Muestra la demanda nutricional y el avance acumulado de fertilización para el alcance seleccionado.</div><div class="m-scope-select"><select class="m-select" id="mBnZonaFiltro" onchange="mobileBnZonaFiltroChange()"><option value="">Todo el predio</option>${filterOpts}</select></div></div>
     <div class="m-kpi-grid"><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Nitrógeno N</span><span class="m-kpi-icon" style="background:#EFF6FF;color:#2563EB"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#2563EB">${fmtKg(tN)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Fósforo P₂O₅</span><span class="m-kpi-icon" style="background:#FFF7ED;color:#EA580C"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#EA580C">${fmtKg(tP)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Potasio K₂O</span><span class="m-kpi-icon" style="background:#F5F3FF;color:#7C3AED"><i class="ti ti-leaf"></i></span></div><div class="m-kpi-value" style="color:#7C3AED">${fmtKg(tK)}</div><div class="m-kpi-sub">kg · ${GB.zonaFiltro?'zona':'predio'}</div></div><div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Demanda total</span><span class="m-kpi-icon" style="background:#F0FDF4;color:#16A34A"><i class="ti ti-sum"></i></span></div><div class="m-kpi-value">${fmtKg(total)}</div><div class="m-kpi-sub">kg · ${available.length} zona(s)</div></div></div>
-    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Lo aplicado frente a la demanda de cada nutriente.</div><div class="cr-legend"><span><span class="tk"></span>Demanda (100 %)</span><span><span class="sw" style="background:var(--ink2);opacity:.35"></span>Sobre la demanda</span></div><div class="cr-bullets" id="mBalanceMacroBullets"></div></div>
+    <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#2563EB"></i>Suministro vs. demanda — N, P₂O₅, K₂O</div><div class="m-page-sub" style="margin:0 0 8px">Lo aplicado frente a la demanda de cada nutriente.</div><div class="cr-legend"><span><span class="tk"></span>Meta: 100 % de la demanda</span><span><span class="sw" style="background:var(--green)"></span>En la meta</span><span><span class="sw" style="background:var(--amber)"></span>Sobre la meta</span></div><div class="cr-bullets" id="mBalanceMacroBullets"></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-chart-bar" style="color:#0D9488"></i>Micronutrientes</div><div class="cr-hbars" id="mBalanceMicroBars"></div></div>
     <div class="m-card"><div class="m-card-title"><i class="ti ti-atom-2" style="color:#0891B2"></i>Secundarios y micros</div>${secondary.length?secondary.map(x=>`<div class="m-summary-row"><span><span class="m-zone-dot" style="display:inline-block;background:${x.n.c};margin-right:6px"></span>${x.n.k}</span><strong>${fmtKg(x.v)} kg</strong></div>`).join(''):'<div class="m-page-sub">Sin demanda registrada.</div>'}</div>
     <div class="m-section-title"><span>Detalle por zona</span><span>Toca para desplegar</span></div>
