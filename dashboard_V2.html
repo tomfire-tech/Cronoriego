@@ -1831,7 +1831,8 @@ function hm(h){const f=parseFloat(h);if(!f||f<=0)return null;const hh=Math.floor
 function isoW(d){const c=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));c.setUTCDate(c.getUTCDate()+4-(c.getUTCDay()||7));const y=new Date(Date.UTC(c.getUTCFullYear(),0,1));return Math.ceil(((c-y)/86400000+1)/7);}
 function lunes(o=0){const h=new Date();const dw=h.getDay()||7;const l=new Date(h);l.setDate(h.getDate()-(dw-1)+(o*7));l.setHours(0,0,0,0);return l;}
 function semDias(o=0){const l=lunes(o);return Array.from({length:7},(_,i)=>{const d=new Date(l);d.setDate(l.getDate()+i);return d;});}
-function fs(d){return d.toISOString().slice(0,10);}
+// Fecha local AAAA-MM-DD (no UTC: en Chile, desde las 21:00 el UTC ya es el día siguiente).
+function fs(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 function showConfirmToast(text){
   let el=document.getElementById('confirmToast');
@@ -1894,11 +1895,15 @@ async function qAcumuladoUltimoPorZona(znIds){
   if(!znIds.length)return {};
   try{
     const {data,error}=await db.from('sc_recomendacion_ferti')
-      .select('id_zona,fecha_evento,n_aplicado_kg,p2o5_aplicado_kg,k2o_aplicado_kg')
+      .select('id_zona,fecha_evento,tipo_de_evento,n_aplicado_kg,p2o5_aplicado_kg,k2o_aplicado_kg')
       .in('id_zona',znIds).gte('fecha_evento',iniTemporadaFerti()).lte('fecha_evento',fs(new Date()));
     if(error)throw error;
+    // Lo proyectado solo cuenta si el agricultor confirmó el fertirriego.
+    const {data:cf}=await db.from('sc_confirmacion_ejecucion').select('id_zona,fecha_recomendada,confirmado')
+      .in('id_zona',znIds).eq('tipo','fertirriego').gte('fecha_recomendada',iniTemporadaFerti());
+    const conf=new Set((cf||[]).filter(r=>r.confirmado).map(r=>r.id_zona+'|'+r.fecha_recomendada));
     const m={};
-    (data||[]).forEach(r=>{
+    (data||[]).filter(r=>String(r.tipo_de_evento||'').toLowerCase().indexOf('proyect')<0||conf.has(r.id_zona+'|'+r.fecha_evento)).forEach(r=>{
       const z=m[r.id_zona]||(m[r.id_zona]={n:0,p:0,k:0,fecha:null});
       z.n+=numF(r.n_aplicado_kg)||0;z.p+=numF(r.p2o5_aplicado_kg)||0;z.k+=numF(r.k2o_aplicado_kg)||0;
       if(!z.fecha||r.fecha_evento>z.fecha)z.fecha=r.fecha_evento;
@@ -2358,6 +2363,8 @@ function rcNum(v){return (Math.round(v*100)/100).toLocaleString('es-CL',{maximum
 // Un registro existe aunque el agricultor lo haya DESMARCADO (queda confirmado=false).
 // Antes se usaba solo la existencia, y una ejecucion deshecha seguia figurando como hecha.
 function estaConf(x){return !!(x&&x.confirmado);}
+// Fila del dashboard sin cálculo (más allá del horizonte del pronóstico): sin agua aprovechable ni lámina acumulada.
+function sinCalculo(r){return !!r&&(r.agua_aprovechable==null||r.agua_aprovechable==='')&&(r.lamina_neta_acum_mm==null||r.lamina_neta_acum_mm==='');}
 function rcVal(v){return v!=null&&v!==''&&!isNaN(parseFloat(v))?parseFloat(v):null;}
 function rcAplicado(v){return v==null?'':`<span class="rc-ap${v>0?'':' cero'}" title="Riego aplicado"><i class="ti ti-check"></i>${rcNum(v)} mm aplicado</span>`;}
 function rcBarraAA(f){
@@ -2456,7 +2463,7 @@ function rCal(dias,sc){
         const lluHtml=(llu!=null&&llu>0)?`<span class="rf-lluvia" title="Lluvia del día${fut?' · pronóstico':''}"><i class="ti ti-cloud-rain"></i>${rcNum(llu)} mm</span>`:'';
         const xRetC=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;   // X lluvia retenida
         const retHtml=(xRetC!=null&&xRetC>0)?`<div class="rf-lluvia-ret" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ret. ${rcNum(xRetC)} mm</div>`:'';
-        const pill=(r&&!rDiario)?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación">${hayRiego?mtEsc(alerta):'Sin riego recomendado'}</div>`:'';
+        const pill=(r&&!rDiario)?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación">${hayRiego?mtEsc(alerta):(sinCalculo(r)?'Sin pronóstico aún':'Sin riego recomendado')}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="rc-foto" onclick="${clickMain}">
@@ -3349,10 +3356,12 @@ async function guardarConfOp(gi){
 
 async function loadRenderFerti(){
   const znIds=G.zonas.map(z=>z.id_zona);if(!znIds.length)return;
-  const [{data:fe},{data:ba}]=await Promise.all([
+  const [{data:fe},{data:ba},{data:cf}]=await Promise.all([
     db.from('sc_recomendacion_ferti').select('*').in('id_zona',znIds).order('fecha_evento',{ascending:true}),
-    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds)
+    db.from('sc_balance_nutricional').select('*').in('id_zona',znIds),
+    db.from('sc_confirmacion_ejecucion').select('id_zona,fecha_recomendada,confirmado').in('id_zona',znIds).eq('tipo','fertirriego').gte('fecha_recomendada',iniTemporadaFerti())
   ]);
+  GF.confSet=new Set((cf||[]).filter(r=>r.confirmado).map(r=>r.id_zona+'|'+r.fecha_recomendada));
   GF.ferti=fe||[];GF.bal={};(ba||[]).forEach(r=>GF.bal[r.id_zona]=r);GF.loaded=true;
   rPanelF();
 }
@@ -3360,7 +3369,9 @@ async function loadRenderFerti(){
 function iniTemporadaFerti(){const d=new Date();const y=d.getMonth()>=6?d.getFullYear():d.getFullYear()-1;return y+'-07-01';}
 function fertiTemporada(){const ini=iniTemporadaFerti();return GF.ferti.filter(e=>e.fecha_evento>=ini);}
 // Aplicado en la temporada hasta hoy (suma por evento; lo proyectado no cuenta).
-function accZona(znId,col){const ini=iniTemporadaFerti(),hoy=fs(new Date());return GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento>=ini&&e.fecha_evento<=hoy).reduce((a,e)=>a+(numF(e[col])||0),0);}
+// Un evento cuenta como aplicado si es histórico (viene de RP) o si el agricultor lo confirmó.
+function fertiAplicado(e){return String(e.tipo_de_evento||'').toLowerCase().indexOf('proyect')<0||!!(GF.confSet&&GF.confSet.has(e.id_zona+'|'+e.fecha_evento));}
+function accZona(znId,col){const ini=iniTemporadaFerti(),hoy=fs(new Date());return GF.ferti.filter(e=>e.id_zona===znId&&e.fecha_evento>=ini&&e.fecha_evento<=hoy&&fertiAplicado(e)).reduce((a,e)=>a+(numF(e[col])||0),0);}
 function covMacro(znId,m){const b=GF.bal[znId];if(!b)return null;const dem=numF(b[m.dem]);if(dem<=0)return null;return accZona(znId,m.ap)/dem*100;}
 function covMicro(znId,mi){const b=GF.bal[znId];if(!b)return null;const obj=numF(b[mi.p+'_objetivo_ppm']);if(obj<=0)return null;return numF(b[mi.p+'_actual_ppm'])/obj*100;}
 
@@ -4923,7 +4934,7 @@ async function gafGuardarEmisor(){
     vol_recolec_ml:vol,tiempo_seg:GAF.tiempoSeg,estado_emisor:estado,
     operario:GAF.operario,responsable:GAF.responsable,
     latitud:fresco?pos.lat:null,longitud:fresco?pos.lon:null,elevacion_m:fresco?pos.elev:null,precision_gps_m:fresco?pos.acc:null,
-    fecha:new Date().toISOString().slice(0,10),timestamp_captura:new Date().toISOString(),
+    fecha:fs(new Date()),timestamp_captura:new Date().toISOString(),
     creado_por:G.userId,creado_por_email:G.userEmail
   };
   const emisorGuardado=payload.pos_emisor;
@@ -5006,7 +5017,7 @@ async function gafVerCampana(campanaId){
   openD(z?.nombre||c?.zona||'Campaña',`<i class="ti ti-droplet"></i> ${mtEsc(campanaId)} · ${(data||[]).length} goteros`,`${resumen}<div class="d-section"><div class="d-section-t">Mediciones</div>${filas}</div>`);
 }
 function maintenanceActions(){return `<div class="maint-actions"><button class="maint-save" id="mtSaveBtn" type="submit"><i class="ti ti-device-floppy"></i>Guardar registro</button><button class="maint-clear" type="button" onclick="renderMaintenance()">Limpiar</button></div><div class="maint-message" id="mtMessage"></div>`;}
-function todayISODate(){return new Date().toISOString().slice(0,10);}
+function todayISODate(){return fs(new Date());}
 const MT_NUTRIENTES_FF=[['N','mtN'],['P₂O₅','mtP2O5'],['K₂O','mtK2O'],['Mg','mtMg'],['Ca','mtCa'],['S','mtS'],['Zn','mtZn'],['Mn','mtMn'],['Fe','mtFe'],['Cu','mtCu'],['B','mtB']];
 
 function maintenanceFacturaFertiForm(){
@@ -5463,7 +5474,7 @@ function renderMobileDailyCards(){
       const metrics=mobileUiNode('div','m-day-metrics');
       [['Tiempo de riego',hm(selected.t)||'—'],['Lámina',mobileFmt1(selected.l)+' mm'],['Volumen',mobileFmtInt(volume)+' m³']].forEach(([label,value])=>{const metric=mobileUiNode('div','');metric.append(mobileUiNode('span','',label),mobileUiNode('strong','',value));metrics.append(metric);});card.append(metrics);
       const action=mobileUiNode('button','m-day-action',done?'Ver riego confirmado':date<=today?'Revisar y confirmar':'Ver detalle del riego');action.type='button';action.addEventListener('click',()=>mobileOpenRiegoDetail(z.id_zona,date));card.append(action);
-    }else card.append(mobileUiNode('p','m-day-no-riego',row?'Sin riego recomendado para este día.':'Sin datos de riego para este día.'));
+    }else card.append(mobileUiNode('p','m-day-no-riego',row?(sinCalculo(row)?'Aún no hay pronóstico de riego para este día.':'Sin riego recomendado para este día.'):'Sin datos de riego para este día.'));
     if(ferti.length){
       const box=mobileUiNode('div','m-day-ferti');box.append(mobileUiNode('span','m-day-ferti-label','Fertirriego'),mobileUiNode('strong','',ferti[0].producto_asignado||'Producto sin nombre'));
       const dose=ferti.reduce((s,e)=>s+numF(e.dosis_producto_estanque_kg),0),mother=ferti.reduce((s,e)=>s+numF(e.volumen_sol_madre_l),0);
