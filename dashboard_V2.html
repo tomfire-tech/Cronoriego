@@ -2105,19 +2105,19 @@ async function renderVolCapas(){
   const fill=Math.min(tot.riego,tot.dem)/D*100,over=tot.riego>tot.dem?(tot.riego-tot.dem)/D*100:0,tick=tot.dem/D*100;
   const total=`<div class="vc-tot">
       <div class="vc-tot-v">${volFmt(tot.riego)} <span>m³ aplicados</span></div>
-      <div class="vc-tot-s">de ${volFmt(tot.dem)} m³ de demanda${pT!=null?` · <b>${pT} %</b>`:''}</div>
+      <div class="vc-tot-s">de ${volFmt(tot.dem)} m³ de consumo del cultivo${pT!=null?` · <b>${pT} %</b>`:''}</div>
       <div class="cr-bl-bar"><div class="cr-bl-track">
         <div class="cr-bl-fill" style="left:0;width:${fill}%;background:var(--blue)"></div>
         ${over?`<div class="cr-bl-over" style="left:${tick}%;width:${over}%;background:var(--blue)"></div>`:''}
       </div>${tot.dem>0?`<div class="cr-bl-tick" style="left:${tick}%"></div>`:''}</div>
       <div class="vc-ctx">${crEsc(vcCtx(R,per,tot.sem))}</div></div>`;
   const capaTxt=(VOL_CAPAS.find(c=>c[0]===capa)||[,''])[1];
-  const tabla=rows.length>1||capa!=='predio'?`<table class="vc-tbl"><thead><tr><th>${capaTxt}</th><th>Aplicado m³</th><th>Demanda m³</th><th>% cubierto</th></tr></thead><tbody>
+  const tabla=rows.length>1||capa!=='predio'?`<table class="vc-tbl"><thead><tr><th>${capaTxt}</th><th>Aplicado m³</th><th>Consumo m³</th><th>% cubierto</th></tr></thead><tbody>
       ${rows.map(r=>{const p=pct(r);return`<tr><td>${crEsc(r.nombre)}${capa!=='zona'?`<small>${r.zonas} zona${r.zonas===1?'':'s'}</small>`:''}</td>
         <td>${volFmt(r.riego)}</td><td>${volFmt(r.dem)}</td>
         <td><span class="vc-pct">${p!=null?`${p} %`:'—'}<span class="vc-mini${p!=null&&p>100?' over':''}"><i style="width:${p!=null?Math.min(p,100):0}%"></i></span></span></td></tr>`;}).join('')}
       </tbody>${rows.length>1?`<tfoot><tr><td>Total</td><td>${volFmt(tot.riego)}</td><td>${volFmt(tot.dem)}</td><td><span class="vc-pct">${pT!=null?`${pT} %`:'—'}<span class="vc-mini" style="visibility:hidden"></span></span></td></tr></tfoot>`:''}</table>`:'';
-  body.innerHTML=ctrl+total+tabla+`<div class="vc-note">La barra naranja indica más agua aplicada que la demanda.</div>`;
+  body.innerHTML=ctrl+total+tabla+`<div class="vc-note">Consumo = agua que el cultivo usó en el período (ETc). Es distinto del «Riego recomendado» de la tarjeta, que además repone lo que se acumuló sin regar. La barra naranja indica más agua aplicada que el consumo.</div>`;
 }
 function cycleVolPer(){const i=VOL_PER.findIndex(p=>p[0]===(G.volPer||'semana'));setVolPer(VOL_PER[(i+1)%VOL_PER.length][0]);}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
@@ -2328,8 +2328,8 @@ function rKpi(dias,sc,sem){
       <div class="kpi-ico" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'var(--green)':'var(--amber)'}"><i class="ti ti-calendar-check"></i></div>
     </div>
     <div>
-      <div class="kpi-val green">${OR.m3>0?volFmt(OR.m3):'0'}<span class="vol-u"> m³ a regar</span></div>
-      <div class="kpi-sub">Semana ${isoW(dias[0])} · ${OR.nRec} de ${OR.nOps} operaciones con riego recomendado</div>
+      <div class="kpi-val green" title="Volumen bruto que entrega el equipo (tiempo × caudal) para reponer el agua acumulada sin regar">${OR.m3>0?volFmt(OR.m3):'0'}<span class="vol-u"> m³ a regar</span></div>
+      <div class="kpi-sub">Semana ${isoW(dias[0])} · ${OR.nRec} de ${OR.nOps} operaciones con riego recomendado · volumen bruto, incluye lo acumulado sin regar</div>
     </div>
   </div>
   <div class="kpi-card" id="kVol">${volCardHTML()}</div>
@@ -2590,7 +2590,7 @@ function rPanel(dias,sc,ndvi){
   document.getElementById('presum').innerHTML=`
     <div class="p-title"><i class="ti ti-table"></i>Resumen semanal · riego recomendado</div>
     <table class="res-tbl">
-      <thead><tr><th>Zona</th><th>mm</th><th>h</th><th>m³</th></tr></thead>
+      <thead><tr><th>Zona</th><th>mm netos</th><th>h</th><th>m³ netos</th></tr></thead>
       <tbody>
         ${res.map(r=>`<tr>
           <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||'Zona'}</td>
@@ -2605,7 +2605,8 @@ function rPanel(dias,sc,ndvi){
           <td>${m3(tot.vP)}</td>
         </tr>
       </tbody>
-    </table>`;
+    </table>
+    <div class="vc-note" style="margin-top:8px;font-size:11px;color:var(--muted)">Lámina neta que necesita el cultivo, acumulada hasta el riego. La tarjeta «Riego recomendado» muestra el volumen bruto que sale del equipo.</div>`;
 }
 
 const alCard=a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`;
