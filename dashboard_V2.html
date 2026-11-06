@@ -195,6 +195,49 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .scrim.open{opacity:1;pointer-events:auto;}
 .drawer{position:fixed;right:0;top:0;height:100%;width:min(520px,92vw);background:var(--white);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.12);}
 .drawer.open{transform:translateX(0);}
+/* Explicación de la alerta de riego: tooltip + panel izquierdo */
+.al-tip{position:fixed;z-index:700;max-width:300px;background:#0F172A;color:#E2E8F0;font-size:12px;line-height:1.5;padding:10px 12px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;opacity:0;transition:opacity .12s;}
+.al-tip.show{opacity:1;}
+.al-tip b{color:#fff;font-size:12.5px;}
+.al-tip small{display:block;color:#94A3B8;margin-top:6px;font-size:11px;}
+[data-alzn]{cursor:help;}
+.al-scrim{z-index:600;}
+.al-panel{position:fixed;left:0;top:0;height:100%;height:100dvh;width:min(460px,94vw);background:var(--white);z-index:601;transform:translateX(-102%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:8px 0 32px rgba(0,0,0,.14);}
+.al-panel.open{transform:translateX(0);}
+.al-ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 14px;padding-top:max(18px,env(safe-area-inset-top));border-bottom:1px solid var(--line);}
+.al-ph h3{font-size:16px;font-weight:800;margin:0;color:var(--ink);}
+.al-ph p{margin:4px 0 0;color:var(--muted);font-size:12px;}
+.al-close{border:none;background:var(--line2);min-width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:20px;color:var(--ink2);}
+.al-pb{padding:16px 20px 28px;padding-bottom:calc(28px + env(safe-area-inset-bottom));overflow-y:auto;flex:1;overscroll-behavior:contain;}
+.al-sec{margin-bottom:20px;}
+.al-sec h4{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:700;}
+.al-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:800;}
+.al-chip.al-crit{background:#FEE2E2;color:#B91C1C;}.al-chip.al-riego{background:#DBEAFE;color:#1D4ED8;}.al-chip.al-otro{background:#F1F5F9;color:#475569;}.al-chip.al-ok{background:#DCFCE7;color:#166534;}
+.al-txt{font-size:13px;line-height:1.6;color:var(--ink2);margin:10px 0 0;}
+.al-calc{font-size:12.5px;color:var(--ink2);background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:9px 12px;margin-top:10px;font-variant-numeric:tabular-nums;}
+.al-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.al-kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0;}
+.al-kpi.w2{grid-column:1/-1;}
+.al-kpi small{display:block;color:var(--muted);font-size:11px;margin-bottom:2px;}
+.al-kpi strong{font-size:16px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+.al-kpi.w2 strong{font-size:13.5px;font-weight:700;}
+.al-bar{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,#FCA5A5 0 45%,#93C5FD 45% var(--umb,60%),#86EFAC var(--umb,60%) 100%);margin:30px 0 10px;}
+.al-mk{position:absolute;top:-7px;width:3px;height:28px;background:var(--ink);border-radius:2px;transform:translateX(-50%);}
+.al-mk span{position:absolute;bottom:31px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;font-weight:800;color:var(--ink);}
+.al-leg{font-size:11.5px;color:var(--muted);line-height:1.6;}
+.al-tab{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;}
+.al-tab th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;text-align:right;padding:5px 4px;border-bottom:1px solid var(--line);}
+.al-tab th:first-child,.al-tab td:first-child{text-align:left;}
+.al-tab td{text-align:right;padding:5px 4px;border-bottom:1px solid var(--line2);color:var(--ink2);}
+.al-tab tr.hoy td{font-weight:800;color:var(--ink);background:#F8FAFC;}
+.al-tab tfoot td{font-weight:800;color:var(--ink);border-top:1px solid var(--line);border-bottom:none;}
+.al-mut{color:var(--subtle);}
+.al-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.al-warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.55;margin-bottom:8px;}
+.al-note{font-size:11.5px;color:var(--muted);line-height:1.55;}
+.m-day-alert{margin:12px 0 0;border:0;border-radius:999px;padding:7px 13px;font:700 12px/1.2 'Inter',sans-serif;cursor:pointer;}
+.m-day-alert.al-crit{background:#FEE2E2;color:#B91C1C;}.m-day-alert.al-riego{background:#DBEAFE;color:#1D4ED8;}.m-day-alert.al-otro,.m-day-alert.al-parcial,.m-day-alert.al-restr{background:#F1F5F9;color:#475569;}
+@media(max-width:760px){.al-panel{width:100%;}}
 .dh{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
 .dh-left .dt{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px;text-transform:capitalize;}
 .dh-left .ds{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px;}
@@ -1391,6 +1434,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 </head>
 <body><div class="app">
 
+<div class="scrim al-scrim" id="alScrim" onclick="closeAlPanel()"></div>
+<aside class="al-panel" id="alPanel" aria-label="Explicación de la alerta de riego"><div class="al-ph"><div><h3 id="alTit">Alerta de riego</h3><p id="alSub"></p></div><button class="al-close" onclick="closeAlPanel()" aria-label="Cerrar">×</button></div><div class="al-pb" id="alBody"></div></aside>
 <div class="scrim" id="scrim" onclick="closeD()"></div>
 <aside class="drawer" id="drawer">
   <div class="dh">
@@ -1861,7 +1906,7 @@ async function saveCl(){const pw=document.getElementById('pwa').value;const btn=
 
 function openD(t,s,h){document.getElementById('dt').textContent=t;document.getElementById('ds').innerHTML=s;document.getElementById('db').innerHTML=h;document.getElementById('scrim').classList.add('open');document.getElementById('drawer').classList.add('open');}
 function closeD(){document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeD();closeCl();closeMaintenanceExport?.();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAlPanel();closeD();closeCl();closeMaintenanceExport?.();}});
 
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
@@ -2360,6 +2405,105 @@ function rcAlerta(a){
   return{cls:'al-otro',ico:'ti-info-circle',col:'#64748B',corto:a?String(a).slice(0,8):''};
 }
 function rcNum(v){return (Math.round(v*100)/100).toLocaleString('es-CL',{maximumFractionDigits:2});}
+// ===== Explicación de la alerta de riego (tooltip al pasar el mouse + panel izquierdo al hacer clic) =====
+// Umbrales del motor: "Riego Recomendado" cuando lo consumido sin reponer llega al umbral de riego de la zona;
+// "Riego crítico" cuando el agua aprovechable baja del 45 %.
+function alTipo(a){a=String(a||'').trim().toLowerCase();if(a==='riego crítico'||a==='riego critico')return'crit';if(a==='riego recomendado'||a==='riego')return'rec';if(a==='riego parcial')return'parcial';if(a==='restricción de bomba')return'restr';return a?'otro':'ok';}
+function alAAtot(r){const aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm);if(aa==null||ac==null||ac<=0||aa>=0.98)return null;return ac/(1-aa);}
+function alPct(x){return x==null?'—':Math.round(x*100)+' %';}
+function alTexto(a,r){
+  const t=alTipo(a),aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm),um=rcVal(r&&r.calculo_umbral_riego_mm);
+  if(t==='crit')return{tit:'Riego crítico',txt:`Al suelo le queda menos del 45 % del agua que la planta puede aprovechar (hoy ${alPct(aa)}). Desde ahí el árbol empieza a sufrir estrés y pierde crecimiento: conviene regar lo antes posible.`};
+  if(t==='rec')return{tit:'Riego recomendado',txt:`El agua consumida desde el último riego o lluvia (${ac!=null?rcNum(ac)+' mm':'—'}) llegó al umbral de riego de la zona (${um!=null?rcNum(um)+' mm':'—'}). Toca regar, todavía sin urgencia. Agua aprovechable hoy: ${alPct(aa)}.`};
+  if(t==='parcial')return{tit:'Riego parcial',txt:`Se recomienda reponer solo una parte de lo consumido. Agua aprovechable hoy: ${alPct(aa)}.`};
+  if(t==='restr')return{tit:'Restricción de bomba',txt:'El riego necesario no alcanza a darse en el día con el caudal de la bomba; hay que repartirlo en más de un riego.'};
+  if(t==='otro')return{tit:String(a),txt:`Agua aprovechable hoy: ${alPct(aa)}.`};
+  return{tit:'Sin riego recomendado',txt:`El suelo todavía tiene agua suficiente (agua aprovechable ${alPct(aa)}). No hace falta regar.`};
+}
+(function(){
+  let tip=null;
+  function hide(){if(tip)tip.classList.remove('show');}
+  function show(el){
+    const r=(G.scDia||[]).find(x=>x.id_zona===el.dataset.alzn&&x.fecha===el.dataset.ald);
+    if(!r){hide();return;}
+    const t=alTexto(r.alerta_recomendacion_riego,r);
+    if(!tip){tip=document.createElement('div');tip.className='al-tip';document.body.appendChild(tip);}
+    tip.innerHTML=`<b>${mtEsc(t.tit)}</b><br>${mtEsc(t.txt)}<small>Haz clic para ver los números del cálculo.</small>`;
+    tip.classList.add('show');
+    const b=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+    let x=Math.max(8,Math.min(b.left+b.width/2-w/2,innerWidth-w-8)),y=b.top-h-8;if(y<8)y=b.bottom+8;
+    tip.style.left=x+'px';tip.style.top=y+'px';
+  }
+  document.addEventListener('mouseover',e=>{const el=e.target&&e.target.closest?e.target.closest('[data-alzn]'):null;if(el)show(el);else hide();});
+  document.addEventListener('scroll',hide,true);
+})();
+function closeAlPanel(){document.getElementById('alScrim')?.classList.remove('open');document.getElementById('alPanel')?.classList.remove('open');}
+async function openAlPanel(znId,fecha){
+  document.querySelector('.al-tip')?.classList.remove('show');
+  const z=(G.zonas||[]).find(x=>x.id_zona===znId)||{};
+  const d=new Date(fecha+'T00:00:00');
+  document.getElementById('alTit').textContent=z.nombre||znId;
+  document.getElementById('alSub').textContent=`${DS[d.getDay()]} ${d.getDate()} de ${MS[d.getMonth()]} · ${[z.especie,z.variedad].filter(Boolean).join(' ')}`;
+  const body=document.getElementById('alBody');body.innerHTML='<p class="al-txt">Cargando el cálculo…</p>';
+  document.getElementById('alScrim').classList.add('open');document.getElementById('alPanel').classList.add('open');
+  let hist=[];
+  try{
+    const desde=fs(new Date(d.getTime()-60*864e5));
+    const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_efectiva_estacion_mm_dia,lluvia_efectiva_pronostico_mm_dia,riego_aplicado_mm,agua_aprovechable,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,alerta_recomendacion_riego,kc,etapa_fisiologica').eq('id_zona',znId).gte('fecha',desde).lte('fecha',fecha).order('fecha',{ascending:true});
+    hist=data||[];
+  }catch(e){hist=[];}
+  const r=hist.find(x=>x.fecha===fecha)||(G.scDia||[]).find(x=>x.id_zona===znId&&x.fecha===fecha);
+  body.innerHTML=alPanelHtml(fecha,r,hist);
+}
+function alPanelHtml(fecha,r,hist){
+  if(!r)return'<p class="al-txt">No hay cálculo de riego para este día.</p>';
+  const hoy=fs(new Date()),dm=f=>f.slice(8,10)+'-'+f.slice(5,7);
+  const val=(x,k)=>{const e=x.fecha<=hoy?rcVal(x[k+'_estacion_mm_dia']):null;return e!=null?e:rcVal(x[k+'_pronostico_mm_dia']);};
+  const a=r.alerta_recomendacion_riego||'',tp=alTipo(a),t=alTexto(a,r);
+  const cls={crit:'al-crit',rec:'al-riego',ok:'al-ok'}[tp]||'al-otro';
+  const aa=rcVal(r.agua_aprovechable),ac=rcVal(r.lamina_neta_acum_mm),um=rcVal(r.calculo_umbral_riego_mm),th=rcVal(r.tiempo_riego_acum_h),tot=alAAtot(r),kc=rcVal(r.kc),etc=val(r,'etc');
+  const r1=x=>rcNum(Math.round(x*10)/10),n=(x,u)=>x==null?'—':r1(x)+(u?' '+u:'');
+  let h=`<div class="al-sec"><span class="al-chip ${cls}">${mtEsc(t.tit)}</span><p class="al-txt">${mtEsc(t.txt)}</p></div>`;
+  if(aa!=null){
+    const umb=(tot&&um!=null)?Math.max(0.45,Math.min(1,1-um/tot)):0.6;
+    h+=`<div class="al-sec"><h4>Agua aprovechable del suelo</h4>
+      <div class="al-bar" style="--umb:${(umb*100).toFixed(0)}%"><div class="al-mk" style="left:${(Math.max(0,Math.min(1,aa))*100).toFixed(1)}%"><span style="${aa<0.1?'left:0;transform:none':aa>0.9?'left:auto;right:0;transform:none':''}">Hoy ${alPct(aa)}</span></div></div>
+      <div class="al-leg">Rojo: bajo 45 % → riego crítico · Azul: entre 45 % y ${Math.round(umb*100)} % (umbral de riego) → riego recomendado · Verde: sobre ${Math.round(umb*100)} % → sin riego.</div>
+      ${tot?`<div class="al-calc">Agua aprovechable = 1 − consumido ÷ total = 1 − ${r1(ac)} ÷ ${r1(tot)} mm = <b>${alPct(aa)}</b></div>`:''}</div>`;
+  }
+  const kp=(l,v,w)=>`<div class="al-kpi${w?' w2':''}"><small>${l}</small><strong>${v}</strong></div>`;
+  h+=`<div class="al-sec"><h4>Números del día</h4><div class="al-kpis">
+    ${kp('Agua aprovechable',alPct(aa))}${kp('Capacidad del suelo',tot?'≈ '+r1(tot)+' mm':'—')}
+    ${kp('Consumido sin reponer',n(ac,'mm'))}${kp('Umbral de riego',n(um,'mm'))}
+    ${kp('Tiempo para reponer',th>0?hm(th):'—')}${kp('Consumo del día (ETc)',n(etc,'mm'))}
+    ${kp('Kc del cultivo',kc!=null?rcNum(kc):'—')}${kp('ETo del día',n(val(r,'eto'),'mm'))}
+    ${r.etapa_fisiologica?kp('Etapa',mtEsc(r.etapa_fisiologica),true):''}</div></div>`;
+  const last=hist.slice(-14);
+  if(last.length){
+    const dot=x=>{const k=alTipo(x.alerta_recomendacion_riego);return`<span class="al-dot" style="background:${k==='crit'?'#DC2626':k==='rec'?'#2563EB':k==='ok'?'#16A34A':'#94A3B8'}"></span>`;};
+    let sE=0,sL=0,sR=0,rows='';
+    last.forEach(x=>{const e=val(x,'etc'),l=val(x,'lluvia'),le=val(x,'lluvia_efectiva'),ri=rcVal(x.riego_aplicado_mm);sE+=e||0;sL+=le!=null?le:(l||0);sR+=ri||0;
+      rows+=`<tr class="${x.fecha===fecha?'hoy':''}"><td>${dot(x)}${dm(x.fecha)}</td><td>${n(e)}</td><td>${l!=null?rcNum(l):'—'}${le!=null&&l!=null&&le<l?` <span class="al-mut">(${rcNum(le)})</span>`:''}</td><td>${ri>0?rcNum(ri):'—'}</td><td>${alPct(rcVal(x.agua_aprovechable))}</td></tr>`;});
+    h+=`<div class="al-sec"><h4>Cómo llegó aquí · últimos ${last.length} días</h4>
+      <table class="al-tab"><thead><tr><th>Día</th><th>ETc mm</th><th>Lluvia mm</th><th>Riego mm</th><th>Agua aprov.</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td>Total</td><td>${r1(sE)}</td><td>${r1(sL)}</td><td>${r1(sR)}</td><td></td></tr></tfoot></table>
+      <p class="al-note">El suelo pierde agua con el consumo del cultivo (ETc) y la recupera con la lluvia efectiva y los riegos registrados. Entre paréntesis, la parte de la lluvia que se considera efectiva.</p></div>`;
+  }
+  let warn='';
+  if(tp==='crit'||tp==='rec'){
+    let i=hist.length-1;while(i>0&&alTipo(hist[i-1].alerta_recomendacion_riego)===tp)i--;
+    if(hist[i]&&hist[i].fecha<fecha)warn+=`<div class="al-warn">La zona está en «${mtEsc(t.tit)}» desde el ${dm(hist[i].fecha)}.</div>`;
+    const ult=[...hist].reverse().find(x=>rcVal(x.riego_aplicado_mm)>0);
+    const dias=ult?Math.round((new Date(fecha+'T00:00:00')-new Date(ult.fecha+'T00:00:00'))/864e5):null;
+    if(!ult)warn+=`<div class="al-warn">No hay riegos registrados en los últimos 60 días. Si regaste, confirma el riego en «Revisar y confirmar»: el cálculo lo descuenta y la alerta baja.</div>`;
+    else if(dias>=7)warn+=`<div class="al-warn">El último riego registrado fue el ${dm(ult.fecha)} (hace ${dias} días). Si regaste después, confírmalo: el cálculo lo descuenta y la alerta baja.</div>`;
+  }
+  if(aa!=null&&aa<0)warn+=`<div class="al-warn">El agua aprovechable sale negativa (${alPct(aa)}). En el campo no puede bajar del punto de marchitez: casi siempre significa que faltan riegos o lluvias por registrar.</div>`;
+  for(let i=1;i<last.length;i++){const k0=rcVal(last[i-1].kc),k1=rcVal(last[i].kc);if(k0>0&&k1>0&&k1/k0>=1.3){warn+=`<div class="al-warn">El Kc subió de ${rcNum(k0)} a ${rcNum(k1)} el ${dm(last[i].fecha)}${last[i].etapa_fisiologica&&last[i].etapa_fisiologica!==last[i-1].etapa_fisiologica?' al cambiar de etapa ('+mtEsc(last[i].etapa_fisiologica)+')':''}: el consumo diario aumentó ${Math.round((k1/k0-1)*100)} % de un día a otro.</div>`;break;}}
+  if(warn)h+=`<div class="al-sec"><h4>Para tener en cuenta</h4>${warn}</div>`;
+  h+=`<p class="al-note">Cifras del cálculo diario de CronoRiego para esta zona. El umbral del 45 % es el mismo para todos los cultivos.</p>`;
+  return h;
+}
 // Un registro existe aunque el agricultor lo haya DESMARCADO (queda confirmado=false).
 // Antes se usaba solo la existencia, y una ejecucion deshecha seguia figurando como hecha.
 function estaConf(x){return !!(x&&x.confirmado);}
@@ -2463,7 +2607,7 @@ function rCal(dias,sc){
         const lluHtml=(llu!=null&&llu>0)?`<span class="rf-lluvia" title="Lluvia del día${fut?' · pronóstico':''}"><i class="ti ti-cloud-rain"></i>${rcNum(llu)} mm</span>`:'';
         const xRetC=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null;   // X lluvia retenida
         const retHtml=(xRetC!=null&&xRetC>0)?`<div class="rf-lluvia-ret" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ret. ${rcNum(xRetC)} mm</div>`:'';
-        const pill=(r&&!rDiario)?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" title="Alerta / recomendación">${hayRiego?mtEsc(alerta):(sinCalculo(r)?'Sin pronóstico aún':'Sin riego recomendado')}</div>`:'';
+        const pill=(r&&!rDiario)?`<div class="rf-pill ${hayRiego?est.cls:'al-otro'}" data-alzn="${z.id_zona}" data-ald="${dS}" onclick="event.stopPropagation();openAlPanel('${z.id_zona}','${dS}')">${hayRiego?mtEsc(alerta):(sinCalculo(r)?'Sin pronóstico aún':'Sin riego recomendado')}</div>`:'';
         return`<td class="dia-td${eh?' hoy-col':''}">
             <div class="dia-inner">
               <div class="rc-foto" onclick="${clickMain}">
@@ -4311,7 +4455,7 @@ function mobileOpenCalendarCell(znId,date){
     html+=`<div class="m-sheet-block ferti"><div class="m-sheet-block-title"><span><i class="ti ti-flask-2"></i> Fertirriego</span><span>${confF?'✓ Confirmado':'Programado'}</span></div><div class="m-sheet-product">${events[0].producto_asignado||'Producto sin nombre'}${events.length>1?` · +${events.length-1} producto(s)`:''}</div><div class="m-sheet-metrics"><div class="m-sheet-metric"><small>Dosis estanque</small><strong>${dosisEstanque>0?dosisEstanque.toFixed(1)+' kg':'—'}</strong></div><div class="m-sheet-metric"><small>Inyección</small><strong>${tiempo>0?(hm(tiempo)||'—'):'—'}</strong></div><div class="m-sheet-metric"><small>Sol. madre</small><strong>${madre>0?mobileFmtInt(madre)+' L':'—'}</strong></div></div></div>`;
   }
   if(!hasR&&!hasF)html+=mobileEmpty('ti-calendar-off','Sin programación','No hay riego ni fertirriego para esta zona en el día seleccionado.');
-  html+=`<div class="m-sheet-actions">${hasR?`<button class="m-sheet-action riego" onclick="mobileOpenRiegoDetail('${znId}','${date}')"><i class="ti ti-droplet"></i>Ver detalle del riego</button>`:''}${hasF?`<button class="m-sheet-action ferti" onclick="mobileOpenFertiDetail('${znId}','${date}')"><i class="ti ti-flask-2"></i>Ver detalle del fertirriego</button>`:''}<button class="m-sheet-action zone" onclick="mobileOpenZoneDetail('${znId}')"><i class="ti ti-map-pin"></i>Ver ficha de la zona</button></div>`;
+  html+=`<div class="m-sheet-actions">${hasR?`<button class="m-sheet-action riego" onclick="mobileOpenRiegoDetail('${znId}','${date}')"><i class="ti ti-droplet"></i>Ver detalle del riego</button>`:''}${hasF?`<button class="m-sheet-action ferti" onclick="mobileOpenFertiDetail('${znId}','${date}')"><i class="ti ti-flask-2"></i>Ver detalle del fertirriego</button>`:''}${hasR&&!riegoDiario()?`<button class="m-sheet-action" onclick="closeMobileCellSheet();openAlPanel('${znId}','${date}')"><i class="ti ti-info-circle"></i>¿Por qué «${alerta?mtEsc(alerta):'Sin riego recomendado'}»?</button>`:''}<button class="m-sheet-action zone" onclick="mobileOpenZoneDetail('${znId}')"><i class="ti ti-map-pin"></i>Ver ficha de la zona</button></div>`;
   if(body)body.innerHTML=html;
   document.getElementById('mCellSheetScrim')?.classList.add('show');document.getElementById('mCellSheet')?.classList.add('show');
 }
@@ -5467,6 +5611,7 @@ function renderMobileDailyCards(){
     name.type='button';name.setAttribute('aria-label','Ver ficha de '+(z.nombre||z.id_zona));name.addEventListener('click',()=>mobileOpenZoneDetail(z.id_zona));
     const zone=mobileUiNode('div','m-day-zone-info');zone.append(name,mobileUiNode('p','',[z.especie,z.variedad].filter(Boolean).join(' · ')));
     header.append(zone,mobileUiNode('span','m-day-badge'+(done?' done':hasR?' planned':''),done?'Confirmado':hasR?(date<=today?'Por confirmar':'Programado'):ferti.length?'Fertirriego':'Sin riego'));card.append(header);
+    if(row&&row.alerta_recomendacion_riego&&!riegoDiario()){const ea=rcAlerta(String(row.alerta_recomendacion_riego)),ch=mobileUiNode('button','m-day-alert '+ea.cls,String(row.alerta_recomendacion_riego)+' · ¿por qué?');ch.type='button';ch.addEventListener('click',()=>openAlPanel(z.id_zona,date));card.append(ch);}
     // Valor del interruptor (Acumulado/Diario · Tiempo/mm), lluvia retenida y días sin dato de estación
     const sdD=!!row&&date<today&&!(parseFloat(row.eto_estacion_mm_dia)>0),vx=(!sdD&&row)?vistaValor(row,z.id_zona):null,retD=row?rcVal(row.lluvia_retenida_pronostico_mm_dia):null;
     if(sdD)card.append(mobileUiNode('p','m-day-no-riego','Sin dato de estación para este día.'));
