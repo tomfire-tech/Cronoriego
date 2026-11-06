@@ -1911,7 +1911,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAlPanel();clos
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí').order('id_zona',{ascending:true});return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return completarRiegoRec(data||[]);}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal,etapa_fisiologica').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return completarRiegoRec(data||[]);}
 async function qNDVI(znIds){if(!znIds.length)return{};const desde=fs(new Date(Date.now()-400*864e5));const {data}=await db.from('ndvi_historial').select('id_zona,fecha,ndvi,kc').in('id_zona',znIds).gte('fecha',desde).order('fecha',{ascending:false}).limit(5000);const m={};(data||[]).forEach(r=>{const z=r.id_zona;if(!m[z])m[z]={ndvi:parseFloat(r.ndvi),kc:parseFloat(r.kc),fecha:r.fecha,hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r.ndvi),fecha:r.fecha?.toString().slice(0,10)});});return m;}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
@@ -2411,14 +2411,48 @@ function rcNum(v){return (Math.round(v*100)/100).toLocaleString('es-CL',{maximum
 function alTipo(a){a=String(a||'').trim().toLowerCase();if(a==='riego crítico'||a==='riego critico')return'crit';if(a==='riego recomendado'||a==='riego')return'rec';if(a==='riego parcial')return'parcial';if(a==='restricción de bomba')return'restr';return a?'otro':'ok';}
 function alAAtot(r){const aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm);if(aa==null||ac==null||ac<=0||aa>=0.98)return null;return ac/(1-aa);}
 function alPct(x){return x==null?'—':Math.round(x*100)+' %';}
-function alTexto(a,r){
+// Plantación de la zona (ESTATICOS → tabla zonas): tipo, especie y variedad. Se lee una vez por zona.
+const AL_ZT={};
+async function alZonasInfo(ids){
+  const faltan=(ids||[]).filter(id=>id&&!(id in AL_ZT));if(!faltan.length)return;
+  faltan.forEach(id=>{AL_ZT[id]=null;});
+  try{const {data}=await db.from('zonas').select('id_zona,tipo,especie,variedad').in('id_zona',faltan);(data||[]).forEach(z=>{AL_ZT[z.id_zona]=z;});}catch(e){}
+}
+function alCultivo(znId){
+  const z=(G.zonas||[]).find(x=>x.id_zona===znId)||{},zt=AL_ZT[znId]||{};
+  let esp=String(zt.especie||z.especie||'').trim();esp=esp?esp.charAt(0).toUpperCase()+esp.slice(1):'';
+  let vr=String(zt.variedad||z.variedad||'').trim();if(!vr||/^[\d.,]+$/.test(vr)||/^(n\/a|variedad comercial)$/i.test(vr))vr='';
+  const nom=[esp,vr].filter(Boolean).join(' ');
+  const tipo=String(zt.tipo||'').toLowerCase();
+  if(!nom)return{txt:'el cultivo',form:false,anual:false};
+  if(tipo.startsWith('cultivos anuales'))return{txt:'el cultivo de '+nom,form:false,anual:true};
+  if(tipo.includes('formaci'))return{txt:'la plantación en formación de '+nom,form:true,anual:false};
+  return{txt:'la plantación de '+nom,form:false,anual:false};
+}
+// Qué significa el estrés hídrico según la etapa del día (columna etapa_fisiologica del cálculo).
+function alEfecto(etapa,c){
+  const e=String(etapa||'').toLowerCase();let t='';
+  if(/flor/.test(e))t='; en floración puede provocar caída de flores y mala cuaja';
+  else if(/cuaja/.test(e))t='; en cuaja puede provocar caída de frutos y menor calibre';
+  else if(/nuez/.test(e))t='; en llenado de nuez reduce el llenado y el calibre';
+  else if(/llenado|crecimiento de fruto|brotes y frutos/.test(e))t='; en crecimiento de fruto reduce el calibre';
+  else if(/madur|cosecha/.test(e)&&!/post/.test(e))t='; cerca de cosecha afecta el calibre y la calidad';
+  else if(/post/.test(e))t='; en postcosecha reduce las reservas para la próxima temporada';
+  else if(/siembra|establec/.test(e))t='; puede comprometer el establecimiento de las plantas';
+  else if(/brota|hinchaz|vegetativo|crecimiento activo|crecimiento rápido/.test(e))t='; frena el crecimiento de brotes y hojas';
+  else if(/receso|caída de hojas|senescencia|suelo desnudo/.test(e))t=', aunque en esta etapa el consumo es bajo: revisa que la alerta corresponda';
+  if(c&&c.form)t+=(t?'. Al':'; al')+' ser plantas jóvenes, con raíces más superficiales, se estresan antes';
+  return t;
+}
+function alTexto(a,r,znId){
   const t=alTipo(a),aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm),um=rcVal(r&&r.calculo_umbral_riego_mm);
-  if(t==='crit')return{tit:'Riego crítico',txt:`Al suelo le queda menos del 45 % del agua que la planta puede aprovechar (hoy ${alPct(aa)}). Desde ahí el árbol empieza a sufrir estrés y pierde crecimiento: conviene regar lo antes posible.`};
-  if(t==='rec')return{tit:'Riego recomendado',txt:`El agua consumida desde el último riego o lluvia (${ac!=null?rcNum(ac)+' mm':'—'}) llegó al umbral de riego de la zona (${um!=null?rcNum(um)+' mm':'—'}). Toca regar, todavía sin urgencia. Agua aprovechable hoy: ${alPct(aa)}.`};
-  if(t==='parcial')return{tit:'Riego parcial',txt:`Se recomienda reponer solo una parte de lo consumido. Agua aprovechable hoy: ${alPct(aa)}.`};
-  if(t==='restr')return{tit:'Restricción de bomba',txt:'El riego necesario no alcanza a darse en el día con el caudal de la bomba; hay que repartirlo en más de un riego.'};
+  const c=alCultivo(znId),C=c.txt.charAt(0).toUpperCase()+c.txt.slice(1);
+  if(t==='crit')return{tit:'Riego crítico',txt:`Al suelo le queda menos del 45 % de su agua aprovechable (hoy ${alPct(aa)}). Desde ahí ${c.txt} empieza a sufrir estrés hídrico${alEfecto(r&&r.etapa_fisiologica,c)}. Conviene regar lo antes posible.`};
+  if(t==='rec')return{tit:'Riego recomendado',txt:`${C} ya consumió ${ac!=null?rcNum(Math.round(ac*10)/10)+' mm':'—'} desde el último riego o lluvia y llegó al umbral de riego de la zona (${um!=null?rcNum(Math.round(um*10)/10)+' mm':'—'}). Toca regar, todavía sin urgencia. Agua aprovechable hoy: ${alPct(aa)}.`};
+  if(t==='parcial')return{tit:'Riego parcial',txt:`Se recomienda reponer solo una parte de lo que consumió ${c.txt}. Agua aprovechable hoy: ${alPct(aa)}.`};
+  if(t==='restr')return{tit:'Restricción de bomba',txt:`El riego que necesita ${c.txt} no alcanza a darse en el día con el caudal de la bomba; hay que repartirlo en más de un riego.`};
   if(t==='otro')return{tit:String(a),txt:`Agua aprovechable hoy: ${alPct(aa)}.`};
-  return{tit:'Sin riego recomendado',txt:`El suelo todavía tiene agua suficiente (agua aprovechable ${alPct(aa)}). No hace falta regar.`};
+  return{tit:'Sin riego recomendado',txt:`El suelo todavía tiene agua suficiente para ${c.txt} (agua aprovechable ${alPct(aa)}). No hace falta regar.`};
 }
 (function(){
   let tip=null;
@@ -2426,8 +2460,10 @@ function alTexto(a,r){
   function show(el){
     const r=(G.scDia||[]).find(x=>x.id_zona===el.dataset.alzn&&x.fecha===el.dataset.ald);
     if(!r){hide();return;}
-    const t=alTexto(r.alerta_recomendacion_riego,r);
-    if(!tip){tip=document.createElement('div');tip.className='al-tip';document.body.appendChild(tip);}
+    const zn=el.dataset.alzn;
+    if(!(zn in AL_ZT))alZonasInfo((G.zonas||[]).map(z=>z.id_zona)).then(()=>{if(tip&&tip.classList.contains('show')&&tip.dataset.zn===zn)show(el);});
+    const t=alTexto(r.alerta_recomendacion_riego,r,zn);
+    if(!tip){tip=document.createElement('div');tip.className='al-tip';document.body.appendChild(tip);}tip.dataset.zn=el.dataset.alzn;
     tip.innerHTML=`<b>${mtEsc(t.tit)}</b><br>${mtEsc(t.txt)}<small>Haz clic para ver los números del cálculo.</small>`;
     tip.classList.add('show');
     const b=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
@@ -2447,19 +2483,20 @@ async function openAlPanel(znId,fecha){
   const body=document.getElementById('alBody');body.innerHTML='<p class="al-txt">Cargando el cálculo…</p>';
   document.getElementById('alScrim').classList.add('open');document.getElementById('alPanel').classList.add('open');
   let hist=[];
+  await alZonasInfo([znId]);
   try{
     const desde=fs(new Date(d.getTime()-60*864e5));
     const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_efectiva_estacion_mm_dia,lluvia_efectiva_pronostico_mm_dia,riego_aplicado_mm,agua_aprovechable,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,alerta_recomendacion_riego,kc,etapa_fisiologica').eq('id_zona',znId).gte('fecha',desde).lte('fecha',fecha).order('fecha',{ascending:true});
     hist=data||[];
   }catch(e){hist=[];}
   const r=hist.find(x=>x.fecha===fecha)||(G.scDia||[]).find(x=>x.id_zona===znId&&x.fecha===fecha);
-  body.innerHTML=alPanelHtml(fecha,r,hist);
+  body.innerHTML=alPanelHtml(znId,fecha,r,hist);
 }
-function alPanelHtml(fecha,r,hist){
+function alPanelHtml(znId,fecha,r,hist){
   if(!r)return'<p class="al-txt">No hay cálculo de riego para este día.</p>';
   const hoy=fs(new Date()),dm=f=>f.slice(8,10)+'-'+f.slice(5,7);
   const val=(x,k)=>{const e=x.fecha<=hoy?rcVal(x[k+'_estacion_mm_dia']):null;return e!=null?e:rcVal(x[k+'_pronostico_mm_dia']);};
-  const a=r.alerta_recomendacion_riego||'',tp=alTipo(a),t=alTexto(a,r);
+  const a=r.alerta_recomendacion_riego||'',tp=alTipo(a),t=alTexto(a,r,znId);
   const cls={crit:'al-crit',rec:'al-riego',ok:'al-ok'}[tp]||'al-otro';
   const aa=rcVal(r.agua_aprovechable),ac=rcVal(r.lamina_neta_acum_mm),um=rcVal(r.calculo_umbral_riego_mm),th=rcVal(r.tiempo_riego_acum_h),tot=alAAtot(r),kc=rcVal(r.kc),etc=val(r,'etc');
   const r1=x=>rcNum(Math.round(x*10)/10),n=(x,u)=>x==null?'—':r1(x)+(u?' '+u:'');
