@@ -200,6 +200,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 .al-tip.show{opacity:1;}
 .al-tip b{color:#fff;font-size:12.5px;}
 .al-tip small{display:block;color:#94A3B8;margin-top:6px;font-size:11px;}
+.al-tip.wide{max-width:360px;}
+[data-kpitip]{cursor:help;}
 [data-alzn]{cursor:help;}
 .al-scrim{z-index:600;}
 .al-panel{position:fixed;left:0;top:0;height:100%;height:100dvh;width:min(460px,94vw);background:var(--white);z-index:601;transform:translateX(-102%);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;box-shadow:8px 0 32px rgba(0,0,0,.14);}
@@ -2092,7 +2094,7 @@ function volCardHTML(){
   const seg=VOL_PER.map(([k,l])=>`<button type="button" class="${k===per?'on':''}" onclick="setVolPer('${k}')">${l}</button>`).join('');
   const tip=hay?`Promedio histórico: riego ${volFmt(parseFloat(d.riego_hist_m3)||0)} m³ · demanda ${volFmt(parseFloat(d.demanda_hist_m3)||0)} m³`:'';
   return `<div class="kpi-top"><div class="kpi-lbl">Riego realizado</div><div class="vol-seg">${seg}</div></div>
-    <div title="${tip}"><div class="kpi-val blue">${hay?volFmt(riego):'—'}<span class="vol-u"> m³ aplicados</span></div>
+    <div><div class="kpi-val blue">${hay?volFmt(riego):'—'}<span class="vol-u"> m³ aplicados</span></div>
     <div class="kpi-sub">${hay?`${pct!=null?`<b>${pct}%</b> de ${per==='semana'?'lo recomendado':'la demanda'} (${volFmt(dem)} m³)`:(per==='semana'?'sin riego recomendado esta semana':`de ${volFmt(dem)} m³ de demanda`)}`:'sin datos de volumen'}</div>
     <div class="vol-foot"><span class="vol-ctx">${volCtx()}</span><button type="button" class="vol-more" onclick="openVolCapas()">Ver por capa ›</button></div></div>`;
 }
@@ -2365,30 +2367,34 @@ function rKpi(dias,sc,sem){
   const confColor=confTotal===0?'':(confAllDone?'green':'amber');
   const confIco=confTotal===0?'ti-clipboard-list':(confAllDone?'ti-circle-check':'ti-clipboard-list');
   const confSub=confTotal===0?'Sin tareas para hoy':(confAllDone?'¡Todo confirmado!':'Riegos y fertirriegos pendientes');
+  const hoyS=fs(hoy),fE=Object.keys(etoPorDia);
+  const etcZ={};sc.forEach(r=>{const v=parseFloat(r.etc_pronostico_mm_dia);if(v>0)etcZ[r.id_zona]=(etcZ[r.id_zona]||0)+v;});
+  const etcV=Object.values(etcZ),etcSum=etcV.length?etcV.reduce((a,b)=>a+b,0)/etcV.length:0;
+  G.kpiInfo={semana:isoW(dias[0]),OR,etoSum,eMed,lluv,etcSum,nMed:fE.filter(f=>f<hoyS).length,nPron:fE.filter(f=>f>=hoyS).length,energ,confTotal,confHechos};
 
   document.getElementById('kpib').innerHTML=`
-  <div class="kpi-card">
+  <div class="kpi-card" data-kpitip="rec">
     <div class="kpi-top">
       <div class="kpi-lbl">Riego recomendado</div>
       <div class="kpi-ico" style="background:${ok?'#F0FDF4':'#FFFBEB'};color:${ok?'var(--green)':'var(--amber)'}"><i class="ti ti-calendar-check"></i></div>
     </div>
     <div>
-      <div class="kpi-val green" title="Volumen bruto que entrega el equipo (tiempo × caudal) para reponer el agua acumulada sin regar">${OR.m3>0?volFmt(OR.m3):'0'}<span class="vol-u"> m³ a regar</span></div>
+      <div class="kpi-val green">${OR.m3>0?volFmt(OR.m3):'0'}<span class="vol-u"> m³ a regar</span></div>
       <div class="kpi-sub">Semana ${isoW(dias[0])} · ${OR.nRec} de ${OR.nOps} operaciones con riego recomendado · volumen bruto, incluye lo acumulado sin regar</div>
     </div>
   </div>
-  <div class="kpi-card" id="kVol">${volCardHTML()}</div>
-  <div class="kpi-card">
+  <div class="kpi-card" id="kVol" data-kpitip="vol">${volCardHTML()}</div>
+  <div class="kpi-card" data-kpitip="eto">
     <div class="kpi-top"><div class="kpi-lbl">ETo semana</div><div class="kpi-ico" style="background:#FFFBEB;color:var(--amber)"><i class="ti ti-sun"></i></div></div>
     <div class="kpi-val">${etoSum>0?etoSum.toFixed(1):'—'}</div>
     <div class="kpi-sub">mm evapotranspiración</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card" data-kpitip="ene">
     <div class="kpi-top"><div class="kpi-lbl">Energía estimada</div><div class="kpi-ico" style="background:#F5F3FF;color:var(--purple,#7C3AED)"><i class="ti ti-bolt"></i></div></div>
     <div class="kpi-val">${energ>0?Math.round(energ):'—'}</div>
     <div class="kpi-sub">kWh esta semana</div>
   </div>
-  <div class="kpi-card">
+  <div class="kpi-card" data-kpitip="conf">
     <div class="kpi-top"><div class="kpi-lbl">Confirmaciones hoy</div><div class="kpi-ico" style="background:${confAllDone?'#F0FDF4':'#FFFBEB'};color:${confAllDone?'var(--green)':'var(--amber)'}"><i class="ti ${confIco}"></i></div></div>
     <div class="kpi-val ${confColor}">${confTotal>0?confHechos:'—'}${confTotal>0?`<span style="font-size:15px;color:var(--muted)"> / ${confTotal}</span>`:''}</div>
     <div class="kpi-sub">${confSub}</div>
@@ -2454,23 +2460,50 @@ function alTexto(a,r,znId){
   if(t==='otro')return{tit:String(a),txt:`Agua aprovechable hoy: ${alPct(aa)}.`};
   return{tit:'Sin riego recomendado',txt:`El suelo todavía tiene agua suficiente para ${c.txt} (agua aprovechable ${alPct(aa)}). No hace falta regar.`};
 }
+// Explicación de las tarjetas KPI (Riego recomendado, Riego realizado, ETo, Energía, Confirmaciones). Se arma al momento con los números en pantalla.
+function kpiCultivos(){
+  const vistos={},lst=[];(G.zonas||[]).forEach(z=>{const c=alCultivo(z.id_zona);const k=c.txt.replace(/^(el cultivo de |la plantación en formación de |la plantación de )/,'');if(!vistos[k]){vistos[k]=1;lst.push({k,c});}});
+  if(!lst.length)return'el cultivo';if(lst.length===1)return lst[0].c.txt;
+  if(lst.length<=3)return'las plantaciones de este equipo ('+lst.map(x=>x.k).join(', ')+')';
+  return'las '+lst.length+' plantaciones de este equipo';
+}
+function kpiTipHtml(key){
+  const K=G.kpiInfo||{},cult=kpiCultivos(),f1=x=>rcNum(Math.round((x||0)*10)/10);
+  if(key==='rec'){const OR=K.OR||{nOps:0,nRec:0,m3:0,horas:0};
+    if(!(OR.m3>0))return{t:'Riego recomendado',b:`Esta semana ninguna operación tiene alerta de riego: ${cult} tiene agua suficiente en el suelo.`};
+    return{t:'Riego recomendado',b:`Volumen que tiene que entregar el equipo esta semana (semana ${K.semana}) para reponer el agua que consumió ${cult} y que todavía no se ha repuesto. Se calcula por operación: tiempo de la zona que más necesita × caudal de la operación, en las ${OR.nRec} de ${OR.nOps} operaciones con alerta${OR.horas>0?` (≈ ${hm(OR.horas)} de riego)`:''}. Es volumen bruto: incluye las pérdidas del sistema y lo acumulado de los días sin riego registrado, por eso sube si los riegos no se confirman.`};}
+  if(key==='vol'){const v=volDatos(),per=v.per,pl=per==='semana'?'esta semana':per==='mes_acum'?'en lo que va del mes':'en lo que va de la temporada';
+    let b=`Agua de riego registrada ${pl} (riegos confirmados en la plataforma o cargados en la planilla), comparada con ${per==='semana'?'el riego recomendado de la semana':'la demanda de agua de '+cult+' en el período'}.`;
+    if(v.hay&&!(v.riego>0))b+=' 0 m³ significa que no hay riegos registrados, no necesariamente que no se haya regado: confirma los riegos para que se cuenten.';
+    if(v.hay&&v.d)b+=` Promedio histórico del período: riego ${volFmt(parseFloat(v.d.riego_hist_m3)||0)} m³ · demanda ${volFmt(parseFloat(v.d.demanda_hist_m3)||0)} m³.`;
+    if(!v.hay)b+=' Todavía no hay datos de volumen para este período.';
+    return{t:'Riego realizado',b:b+' «Ver por capa» lo muestra por predio, estanque, equipo, operación o zona.'};}
+  if(key==='eto'){if(!(K.etoSum>0))return{t:'ETo semana',b:'No hay ETo para esta semana: falta el dato de la estación y del pronóstico.'};
+    const kc=K.etcSum>0?K.etcSum/K.etoSum:null;
+    return{t:'ETo semana',b:`Suma de la evapotranspiración de referencia (ETo) de lunes a domingo de la semana ${K.semana}: ${K.nMed} día(s) medidos por la estación y ${K.nPron} de pronóstico (promedio ${f1(K.eMed)} mm/día). Es lo que «pide» la atmósfera según el clima. Lo que consume ${cult} es ETo × Kc${kc?`: con un Kc promedio de ${rcNum(Math.round(kc*100)/100)} en la semana son ≈ ${f1(K.etcSum)} mm`:''}. Lluvia de la semana: ${f1(K.lluv)} mm.`};}
+  if(key==='ene'){if(K.energ>0)return{t:'Energía estimada',b:`Energía que gastaría la bomba de riego en la semana para entregar el riego de ${cult}, según la potencia (HP) de la bomba y las horas de riego.`};
+    return{t:'Energía estimada',b:'Todavía no hay una estimación de energía para esta semana: el cálculo semanal del equipo no la entrega o falta la potencia (HP) de la bomba en los datos del equipo.'};}
+  if(key==='conf'){const T=K.confTotal||0,H=K.confHechos||0;
+    if(!T)return{t:'Confirmaciones hoy',b:'Hoy no hay riegos ni fertirriegos programados para este equipo.'};
+    return{t:'Confirmaciones hoy',b:`Riegos y fertirriegos programados para hoy en este equipo: ${T}; confirmados: ${H}. Confirmar es lo que registra la aplicación: el riego se suma a «Riego realizado» y el cálculo descuenta esa agua del suelo. Si no se confirma, el déficit sigue sumando y las alertas suben.`};}
+  return null;
+}
 (function(){
-  let tip=null;
-  function hide(){if(tip)tip.classList.remove('show');}
+  let tip=null,cur=null,tHide=null;
+  function hide(){if(tip)tip.classList.remove('show');cur=null;}
+  function pos(el){const b=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.max(8,Math.min(b.left+b.width/2-w/2,innerWidth-w-8)),y=b.top-h-8;if(y<8)y=b.bottom+8;tip.style.left=x+'px';tip.style.top=y+'px';}
+  function cargarZonas(el){if((G.zonas||[]).some(z=>!(z.id_zona in AL_ZT)))alZonasInfo((G.zonas||[]).map(z=>z.id_zona)).then(()=>{if(cur===el)show(el);});}
   function show(el){
-    const r=(G.scDia||[]).find(x=>x.id_zona===el.dataset.alzn&&x.fecha===el.dataset.ald);
-    if(!r){hide();return;}
-    const zn=el.dataset.alzn;
-    if(!(zn in AL_ZT))alZonasInfo((G.zonas||[]).map(z=>z.id_zona)).then(()=>{if(tip&&tip.classList.contains('show')&&tip.dataset.zn===zn)show(el);});
-    const t=alTexto(r.alerta_recomendacion_riego,r,zn);
-    if(!tip){tip=document.createElement('div');tip.className='al-tip';document.body.appendChild(tip);}tip.dataset.zn=el.dataset.alzn;
-    tip.innerHTML=`<b>${mtEsc(t.tit)}</b><br>${mtEsc(t.txt)}<small>Haz clic para ver los números del cálculo.</small>`;
-    tip.classList.add('show');
-    const b=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
-    let x=Math.max(8,Math.min(b.left+b.width/2-w/2,innerWidth-w-8)),y=b.top-h-8;if(y<8)y=b.bottom+8;
-    tip.style.left=x+'px';tip.style.top=y+'px';
+    let t,b,foot='';
+    if(el.dataset.kpitip){const x=kpiTipHtml(el.dataset.kpitip);if(!x){hide();return;}t=x.t;b=x.b;}
+    else{const r=(G.scDia||[]).find(x=>x.id_zona===el.dataset.alzn&&x.fecha===el.dataset.ald);if(!r){hide();return;}const x=alTexto(r.alerta_recomendacion_riego,r,el.dataset.alzn);t=x.tit;b=x.txt;foot='<small>Haz clic para ver los números del cálculo.</small>';}
+    if(!tip){tip=document.createElement('div');tip.className='al-tip';document.body.appendChild(tip);}
+    cur=el;tip.classList.toggle('wide',!!el.dataset.kpitip);tip.innerHTML=`<b>${mtEsc(t)}</b><br>${mtEsc(b)}${foot}`;tip.classList.add('show');pos(el);cargarZonas(el);
   }
-  document.addEventListener('mouseover',e=>{const el=e.target&&e.target.closest?e.target.closest('[data-alzn]'):null;if(el)show(el);else hide();});
+  const SEL='[data-alzn],[data-kpitip]';
+  document.addEventListener('mouseover',e=>{const el=e.target&&e.target.closest?e.target.closest(SEL):null;if(el){if(el!==cur)show(el);}else if(cur)hide();});
+  // Pantallas táctiles: tocar la tarjeta muestra la explicación unos segundos.
+  document.addEventListener('click',e=>{const el=e.target&&e.target.closest?e.target.closest('[data-kpitip]'):null;if(!el||!matchMedia('(hover: none)').matches)return;show(el);clearTimeout(tHide);tHide=setTimeout(hide,7000);});
   document.addEventListener('scroll',hide,true);
 })();
 function closeAlPanel(){document.getElementById('alScrim')?.classList.remove('open');document.getElementById('alPanel')?.classList.remove('open');}
@@ -4537,11 +4570,11 @@ function renderMobileRiego(){
   const confAllDone=confTotal>0&&confHechos===confTotal;
   const confColor=confTotal===0?'#64748B':(confAllDone?'#15803D':'#D97706');
   kpi.innerHTML=`
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Operaciones</span></div><div class="m-kpi-value sm" style="color:${s.nRec?'#D97706':'#15803D'}">${s.nRec}/${s.nOps}</div><div class="m-kpi-sub">con riego</div></div>
+    <div class="m-kpi" data-kpitip="rec"><div class="m-kpi-head"><span class="m-kpi-label">Operaciones</span></div><div class="m-kpi-value sm" style="color:${s.nRec?'#D97706':'#15803D'}">${s.nRec}/${s.nOps}</div><div class="m-kpi-sub">con riego</div></div>
     ${(()=>{const v=volDatos(),lbl=(VOL_PER.find(p=>p[0]===v.per)||VOL_PER[0])[2];return `<div class="m-kpi" onclick="openVolCapas()" style="cursor:pointer" title="Ver volumen por predio, estanque, equipo, operación o zona"><div class="m-kpi-head"><span class="m-kpi-label">Vol. ${lbl} ›</span></div><div class="m-kpi-value" style="color:#2563EB">${v.hay?mobileFmtInt(v.riego):'—'}</div><div class="m-kpi-sub">${v.hay?`de ${mobileFmtInt(v.dem)} m³`:'m³'}</div></div>`;})()}
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">ETo</span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm</div></div>
-    <div class="m-kpi"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>
-    <div class="m-kpi" title="Confirmaciones de riego y fertirriego para hoy"><div class="m-kpi-head"><span class="m-kpi-label">Conf. hoy</span></div><div class="m-kpi-value" style="color:${confColor}">${confTotal>0?`${confHechos}/${confTotal}`:'—'}</div><div class="m-kpi-sub">${confTotal===0?'Sin tareas':(confAllDone?'Todo listo':'Pendientes')}</div></div>`;
+    <div class="m-kpi" data-kpitip="eto"><div class="m-kpi-head"><span class="m-kpi-label">ETo</span></div><div class="m-kpi-value">${s.eto>0?s.eto.toFixed(1):'—'}</div><div class="m-kpi-sub">mm</div></div>
+    <div class="m-kpi" data-kpitip="ene"><div class="m-kpi-head"><span class="m-kpi-label">Energía</span></div><div class="m-kpi-value">${s.energy>0?mobileFmtInt(s.energy):'—'}</div><div class="m-kpi-sub">kWh</div></div>
+    <div class="m-kpi" data-kpitip="conf"><div class="m-kpi-head"><span class="m-kpi-label">Conf. hoy</span></div><div class="m-kpi-value" style="color:${confColor}">${confTotal>0?`${confHechos}/${confTotal}`:'—'}</div><div class="m-kpi-sub">${confTotal===0?'Sin tareas':(confAllDone?'Todo listo':'Pendientes')}</div></div>`;
   if(!G.zonas.length){const grid=document.getElementById('mCalendarGrid');if(grid){grid.className='m-calendar-grid day';grid.innerHTML='<div style="grid-column:1/-1;padding:10px">'+mobileEmpty('ti-map-off','Sin zonas','El equipo seleccionado no tiene zonas activas.')+'</div>';}return;}
   renderMobileCalendarGrid();
 }
