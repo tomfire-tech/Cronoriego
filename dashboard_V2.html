@@ -2021,6 +2021,15 @@ function completarRiegoRec(rows){(rows||[]).forEach(r=>{
   else if(esAlertaRiego(r.alerta_recomendacion_riego)){l=rcVal(r.lamina_neta_acum_mm)||0;t=rcVal(r.tiempo_riego_acum_h)||0;}
   r.lamina_neta_riego_pronostico_mm=l;r.tiempo_de_riego_pronostico_horas=t;r.lamina_neta_riego_estacion_mm=0;r.tiempo_de_riego_estacion_horas=0;});
   return rows;}
+// El tiempo del dia es la lamina dividida por la intensidad de precipitacion, que vive en los calculos
+// estaticos (G.calc). Esos cargan DESPUES de las filas diarias, asi que en la primera carga el tiempo
+// quedaba en 0 y la zona salia "Sin riego" y con 0 m3 de agua programada. Esto lo rellena ya con los
+// calculos en memoria. Solo afecta a las razones sociales de riego diario (las demas copian AC/AD).
+function recalcTiempoDiario(rows,calcMap){if(!riegoDiario())return rows;
+  const pp=zid=>{const c=(calcMap||G.calc||{})[zid];const v=parseFloat(c&&c.intensidad_precip_neta_mmh);return v>0?v:0;};
+  (rows||[]).forEach(r=>{const l=parseFloat(r.lamina_neta_riego_pronostico_mm)||0;
+    if(l>0&&!((parseFloat(r.tiempo_de_riego_pronostico_horas)||0)>0)){const i=pp(r.id_zona);if(i>0)r.tiempo_de_riego_pronostico_horas=l/i;}});
+  return rows;}
 // Lo recomendado de la semana para una zona: el mayor acumulado de los días con riego recomendado (lo que hay que reponer).
 // En riego diario, la suma de los días.
 function recSemanaZona(rows){let l=0,t=0;const suma=riegoDiario();(rows||[]).forEach(r=>{const lr=parseFloat(r.lamina_neta_riego_pronostico_mm)||0,tr=parseFloat(r.tiempo_de_riego_pronostico_horas)||0;if(suma){l+=lr;t+=tr;}else{if(lr>l)l=lr;if(tr>t)t=tr;}});return{l,t};}
@@ -2049,7 +2058,8 @@ function fmtLavado(v){return v==null?'—':Math.round(v*100)+' %';}
 // Interruptor del calendario: Acumulado/Diario y Tiempo/mm. Todos parten en Acumulado + Tiempo; el navegador recuerda la elección.
 let VISTA={modo:'acum',unidad:'tiempo'};
 try{const v=JSON.parse(localStorage.getItem('cr_vista_riego')||'null');if(v&&['acum','dia'].includes(v.modo)&&['tiempo','mm'].includes(v.unidad))VISTA=v;}catch(e){}
-function pintarVistaCtl(){document.querySelectorAll('[data-vista]').forEach(b=>b.classList.toggle('on',VISTA[b.dataset.vista]===b.dataset.val));}
+function pintarVistaCtl(){document.querySelectorAll('[data-vista]').forEach(b=>b.classList.toggle('on',VISTA[b.dataset.vista]===b.dataset.val));
+  document.querySelectorAll('.vista-ctl').forEach(c=>{c.style.display=riegoDiario()?'none':'';});}   // riego diario: la casilla siempre muestra la lamina del dia
 function setVista(k,v){VISTA[k]=v;try{localStorage.setItem('cr_vista_riego',JSON.stringify(VISTA));}catch(e){}pintarVistaCtl();try{if(G.scDia)rCal(semDias(G.off),G.scDia);}catch(e){}try{renderMobileRiego();}catch(e){}try{if(typeof TAB!=='undefined'&&TAB==='operacion')loadRenderOperacion();}catch(e){}}
 // Intensidad de precipitación neta de la zona (cálculos estáticos). Si es 0 o falta, el tiempo diario queda en 0.
 function ppNeta(zid){const v=parseFloat(G.calc?.[zid]?.intensidad_precip_neta_mmh);return v>0?v:0;}
@@ -2314,7 +2324,7 @@ async function loadRender(){
   const fi=fs(dias[0]),ff=fs(dias[6]);
   const znIds=G.zonas.map(z=>z.id_zona);
   const [sc,ndvi,sem,mapas,calc,vol]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds),qVolResumen(znIds,isoWeekKey(dias[0]))]);
-  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;G.sem=sem;G.vol=vol;
+  G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;G.sem=sem;G.vol=vol;recalcTiempoDiario(G.scDia,calc);
   await Promise.all([
     qConfirmaciones(znIds,'riego',fi,ff),
     qConfirmaciones(znIds,'fertirriego',fi,ff),
@@ -3411,7 +3421,7 @@ async function loadRenderOperacion(){
     const zs=zsPorEq.flat();
     const dias=semDias(G.off),fi=fs(dias[0]),ff=fs(dias[6]),hS=fs(new Date());
     const ids=zs.map(z=>z.id_zona);
-    const [sc,calc]=await Promise.all([qSC(ids,fi,ff),qCalc(ids)]);
+    const [sc,calc]=await Promise.all([qSC(ids,fi,ff),qCalc(ids)]);recalcTiempoDiario(sc,calc);
     if(seq!==_opSeq)return;
     const dm={};sc.forEach(r=>{(dm[r.id_zona]=dm[r.id_zona]||{})[r.fecha]=r;});
     const eqNom={};equipos.forEach(e=>eqNom[e.id_equipo]=e.nombre||e.id_equipo);
