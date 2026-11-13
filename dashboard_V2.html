@@ -6188,7 +6188,7 @@ function vgControles(){
   const av=document.getElementById('vgAvisos');
   if(av){
     let h='';
-    if(VG.apiladas)h+='<div class="vg-aviso">Algunas zonas comparten coordenada en los estáticos. Se separaron un poco para verlas: esa no es su posición real.</div>';
+    if(VG.apiladas)h+='<div class="vg-aviso">Algunas zonas comparten coordenada. Se separaron por temas visuales: esa no es su posición real.</div>';
     if(VG.sinCoord.length)h+=`<div class="vg-aviso">Sin coordenada, no se dibujan: ${mtEsc(VG.sinCoord.join(', '))}.</div>`;
     av.innerHTML=h;
   }
