@@ -5996,7 +5996,7 @@ async function vgAbrir(){
   if(VG.mapa)setTimeout(()=>VG.mapa.invalidateSize(),60);
   if(VG.prId===pr&&VG.zonas.length)return;
   VG.prId=pr;
-  const cont=document.getElementById('vgSide');
+  const cont=document.getElementById('vgFicha');
   if(cont)cont.innerHTML='<div class="vg-vacio">Cargando el predio…</div>';
   const zs=await qZonasPredio(pr);
   const ids=(zs||[]).map(z=>z.id_zona);
@@ -6026,6 +6026,15 @@ function vgMapaInit(){
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(VG.mapa);
   VG.gNdvi=L.layerGroup().addTo(VG.mapa);
   VG.gZonas=L.layerGroup().addTo(VG.mapa);
+  // con muchas zonas juntas los nombres se tapan: fijos solo al acercarse
+  VG.mapa.on('zoomend',()=>{
+    const fijo=VG.mapa.getZoom()>=16;
+    VG.gZonas.eachLayer(l=>{
+      const t=l.getTooltip&&l.getTooltip();
+      if(t&&t.options.permanent!==fijo){const txt=t.getContent();l.unbindTooltip();
+        l.bindTooltip(txt,{permanent:fijo,direction:'center',className:'vg-eti'});}
+    });
+  });
   setTimeout(()=>VG.mapa.invalidateSize(),120);
 }
 function vgRadio(z){const ha=rcVal(z.superficie_ha)||0.5;return Math.max(16,Math.sqrt(ha*10000/Math.PI));}
@@ -6047,7 +6056,7 @@ function vgPintar(){
     const col=capa.color(z);
     const c=L.circle([la,lo],{radius:vgRadio(z),color:col,weight:2,fillColor:col,fillOpacity:.38});
     c.on('click',()=>vgFicha(z.id_zona));
-    c.bindTooltip(mtEsc(z.nombre||z.id_zona),{permanent:true,direction:'center',className:'vg-eti'});
+    c.bindTooltip(mtEsc(z.nombre||z.id_zona),{permanent:VG.mapa.getZoom()>=16,direction:'center',className:'vg-eti'});
     VG.gZonas.addLayer(c);
     const img=VG.img[z.id_zona];
     if(img&&img.url_ndvi&&rcVal(img.delta)){
@@ -6056,6 +6065,8 @@ function vgPintar(){
     }
   });
   if(pts.length)VG.mapa.fitBounds(L.latLngBounds(pts).pad(0.3));
+  const fi=document.getElementById('vgFicha');
+  if(fi&&/Cargando el predio/.test(fi.textContent))fi.innerHTML='<div class="vg-vacio">Haz clic en una zona del mapa para ver sus datos del día.</div>';
   vgOpacidad(document.getElementById('vgOpa')?.value||0);
   vgPanel();
 }
