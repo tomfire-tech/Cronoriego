@@ -1532,6 +1532,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   <div class="tab" id="tab-equipos" onclick="switchTab('equipos')"><i class="ti ti-settings-2"></i>Equipos de riego</div>
   <div class="tab" id="tab-balance" onclick="switchTab('balance')"><i class="ti ti-chart-donut-3"></i>Balance Nutricional</div>
   <div class="tab" id="tab-mantenimiento" onclick="switchTab('mantenimiento')"><i class="ti ti-tool"></i>Mantenimiento y Aforos</div>
+  <div class="tab" id="tab-vivero" onclick="switchTab('vivero')" style="display:none"><i class="ti ti-seeding"></i>Vivero</div>
 </div>
 <div class="views" id="viewsWrap">
 <div id="view-riego" class="view">
@@ -1683,6 +1684,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <div id="maintenanceDesktopMount"><div id="maintenanceApp" class="maint-app"></div></div>
   </div>
 </div>
+<div id="view-vivero" class="view" style="display:none">
+  <div class="maint-shell">
+    <div class="maint-hero">
+      <div><h2>Vivero</h2><p>Una ficha por hilera. Se va completando por etapas: plantacion, pua invernal, ojo vivo, conteos y ojo dormido. Lo registrado aqui llega a la pestana RV de la base de datos.</p></div>
+      <button class="maint-export" onclick="vvExportar()"><i class="ti ti-file-spreadsheet"></i>Exportar fichas</button>
+    </div>
+    <div id="viveroDesktopMount"></div>
+  </div>
+</div>
 <div class="plan-lock" id="planLock">
   <div class="lock-card">
     <div class="lock-badge" id="lockBadge"><i class="ti ti-crown"></i> PLAN PRO</div>
@@ -1780,6 +1790,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
       <button class="maint-export" onclick="openMaintenanceExport()"><i class="ti ti-file-spreadsheet"></i>Exportar registros</button>
       <div id="maintenanceMobileMount"></div>
     </section>
+    <section class="m-view" id="mView-vivero">
+      <div class="m-page-title">Vivero</div>
+      <div class="m-page-sub">Una ficha por hilera, que se va completando por etapas.</div>
+      <button class="maint-export" onclick="vvExportar()"><i class="ti ti-file-spreadsheet"></i>Exportar fichas</button>
+      <div id="viveroMobileMount"></div>
+    </section>
   </main>
 
   <nav class="m-bottom-nav" aria-label="Navegación principal">
@@ -1788,6 +1804,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
     <button class="m-bottom-btn" id="mNav-estanque" onclick="mobileSwitchModule('estanque')"><i class="ti ti-droplet"></i><span>Estanque</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-balance" onclick="mobileSwitchModule('balance')"><i class="ti ti-chart-donut-3"></i><span>Balance</span><span class="m-plan-tag" hidden></span></button>
     <button class="m-bottom-btn" id="mNav-mantenimiento" onclick="mobileSwitchModule('mantenimiento')"><i class="ti ti-tool"></i><span>Mantención</span><span class="m-plan-tag" hidden></span></button>
+    <button class="m-bottom-btn" id="mNav-vivero" hidden onclick="mobileSwitchModule('vivero')"><i class="ti ti-seeding"></i><span>Vivero</span></button>
   </nav>
 
   <div class="m-plan-lock" id="mPlanLock">
@@ -2273,6 +2290,8 @@ async function init(){
     if(!MODULOS.includes('mantenimiento'))MODULOS.push('mantenimiento');
   }catch(e){}
   const tOp=document.getElementById('tab-operacion');if(tOp)tOp.style.display=featOp()?'':'none';
+  const tVv=document.getElementById('tab-vivero');if(tVv)tVv.style.display=tieneModulo('vivero')?'':'none';
+  const nVv=document.getElementById('mNav-vivero');if(nVv)nVv.hidden=!tieneModulo('vivero');
   const ps=await qP(G.rsId);
   const sp=document.getElementById('sp');
   sp.innerHTML=ps.map(p=>`<option value="${p.id_predio}">${p.nombre}</option>`).join('');
@@ -3355,9 +3374,11 @@ const MOD_INFO={
   estanque:{nombre:'Dinámica de Estanque',ico:'ti-droplet-filled'},
   balance:{nombre:'Balance Nutricional',ico:'ti-chart-donut-3'},
   mantenimiento:{nombre:'Mantenimiento y Aforos',ico:'ti-tool'},
+  vivero:{nombre:'Vivero',ico:'ti-seeding'},
 };
 // Plan mínimo que incluye cada módulo (Estándar: riego · Pro: +ferti +estanque · Premium: +balance)
-const MOD_PLAN={riego:'Estándar',ferti:'Pro',estanque:'Pro',balance:'Premium',mantenimiento:'Estándar'};
+const MOD_PLAN={riego:'Estándar',ferti:'Pro',estanque:'Pro',balance:'Premium',mantenimiento:'Estándar',vivero:'Pro'};
+// Vivero es opt-in: solo aparece si la razon social lo trae en 'modulos'. Por eso no esta en el default.
 function tieneModulo(m){return MODULOS.includes(m);}
 function marcarTabsPlan(){
   ['riego','estanque','balance','mantenimiento'].forEach(m=>{
@@ -3390,7 +3411,7 @@ function cambiarPlan(){
 
 function switchTab(t){
   if(t===TAB)return;TAB=t;
-  const TABS=['operacion','riego','estanque','equipos','balance','mantenimiento'];
+  const TABS=['operacion','riego','estanque','equipos','balance','mantenimiento','vivero'];
   TABS.forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===t));
   document.getElementById('view-operacion').style.display=t==='operacion'?'flex':'none';
   document.getElementById('view-riego').style.display=t==='riego'?'flex':'none';
@@ -3398,11 +3419,13 @@ function switchTab(t){
   document.getElementById('view-equipos').style.display=t==='equipos'?'flex':'none';
   document.getElementById('view-balance').style.display=t==='balance'?'flex':'none';
   document.getElementById('view-mantenimiento').style.display=t==='mantenimiento'?'flex':'none';
+  document.getElementById('view-vivero').style.display=t==='vivero'?'flex':'none';
   if(t==='operacion')loadRenderOperacion();
   if(t==='estanque'){loadRenderEstanque();loadDatosEstanque();}
   if(t==='equipos')loadDatosEquipos();
   if(t==='balance')loadRenderBalance();
   if(t==='mantenimiento')openMaintenanceModule();
+  if(t==='vivero')vvAbrir();
   aplicarBloqueo(t);
 }
 
@@ -4425,11 +4448,11 @@ function mobileMirrorDesktopTab(module){
 }
 
 async function mobileSwitchModule(module){
-  if(!['riego','operacion','estanque','balance','mantenimiento'].includes(module))return;
+  if(!['riego','operacion','estanque','balance','mantenimiento','vivero'].includes(module))return;
   if(module==='operacion'&&!featOp())return;
   const permission=module==='operacion'?'riego':module;
   closeMobilePlanLock();MOBILE.module=module;mobileMirrorDesktopTab(module);
-  ['riego','operacion','estanque','balance','mantenimiento'].forEach(m=>{
+  ['riego','operacion','estanque','balance','mantenimiento','vivero'].forEach(m=>{
     document.getElementById('mView-'+m)?.classList.toggle('active',m===module);
     document.getElementById('mNav-'+m)?.classList.toggle('active',m===module);
   });
@@ -4440,6 +4463,7 @@ async function mobileSwitchModule(module){
   if(module==='estanque'){loadDatosEstanque();loadDatosEquipos();}
   if(module==='balance'&&!GB.loaded)await loadRenderBalance();
   if(module==='mantenimiento')await openMaintenanceModule();
+  if(module==='vivero')await vvAbrir();
   if(module==='operacion')await loadRenderOperacion();
   renderMobileAll();
 }
@@ -5730,6 +5754,163 @@ mobileContextLabel();
 initCustomDropdowns();
 
 init();
+
+// ===== VIVERO (pestana propia, solo para clientes con el modulo 'vivero') =====
+// Una ficha por hilera. Se crea con la plantacion y despues se va completando por etapas.
+// Todo queda en sc_registro_vivero; cargar_vivero.py la pasa a la pestana RV de DINAMICOS.
+const VV={fichas:[],zonas:[],sel:null,cargando:false,error:''};
+const VV_ETAPAS=[
+  {t:'Identificacion',ico:'ti-map-pin',campos:[
+    {k:'id_zona',l:'Zona',tipo:'zona'},{k:'cuartel',l:'Cuartel'},{k:'hilera',l:'Hilera'}]},
+  {t:'Plantacion',ico:'ti-seeding',campos:[
+    {k:'fecha_plantacion',l:'Fecha de plantacion',tipo:'date'},{k:'guia_de_despacho',l:'Guia de despacho'},
+    {k:'pi',l:'PI'},{k:'cantidad_plantada',l:'Cantidad plantada',tipo:'num'}]},
+  {t:'Pua invernal',ico:'ti-git-branch',campos:[
+    {k:'fecha_de_injertacion_pua_invernal',l:'Fecha de injertacion',tipo:'date'},
+    {k:'variedad_pua_invernal',l:'Variedad'},{k:'cantidad_pua_invernal',l:'Cantidad',tipo:'num'},
+    {k:'brutas_pua_invernal',l:'Brutas',tipo:'num'},{k:'cuadrilla',l:'Cuadrilla'}]},
+  {t:'Ojo vivo',ico:'ti-eye',campos:[
+    {k:'fecha_ojo_vivo',l:'Fecha',tipo:'date'},{k:'variedad_ojo_vivo',l:'Variedad'},
+    {k:'cantidad_ojo_vivo',l:'Cantidad',tipo:'num'},{k:'brutas',l:'Brutas',tipo:'num'}]},
+  {t:'Conteos y resultado',ico:'ti-list-numbers',campos:[
+    {k:'plantas_vivas',l:'Plantas vivas',tipo:'num'},{k:'plantas_muertas',l:'Plantas muertas',tipo:'num'},
+    {k:'variedad_planta_terminada',l:'Variedad planta terminada'},
+    {k:'plantas_terminadas',l:'Plantas terminadas',tipo:'num'},{k:'plantas_brutas',l:'Plantas brutas',tipo:'num'},
+    {k:'conteo_al_02_03_26',l:'Conteo al 02-03-26',tipo:'num'},{k:'conteo_al_02_03_27',l:'Conteo al 02-03-27',tipo:'num'}]},
+  {t:'Ojo dormido 2026',ico:'ti-moon',campos:[
+    {k:'fecha_injertacion_ojo_dormido_2026',l:'Fecha de injertacion',tipo:'date'},
+    {k:'procedencia_material_ojo_dormido_2026',l:'Procedencia del material'},
+    {k:'guia_material_ojo_dormido_2026',l:'Guia del material'},
+    {k:'variedad_ojo_dormido_2026',l:'Variedad'},
+    {k:'cantidad_injertada_ojo_dormido_2026',l:'Cantidad injertada',tipo:'num'},
+    {k:'brutas_ojo_dormido_2026',l:'Brutas',tipo:'num'}]},
+  {t:'Responsables',ico:'ti-user',campos:[
+    {k:'operario',l:'Operario (ejecuta)'},{k:'profesional',l:'Profesional (recomienda)'},
+    {k:'observaciones',l:'Observaciones',tipo:'texto'}]},
+];
+const VV_NUM=new Set(VV_ETAPAS.flatMap(e=>e.campos.filter(c=>c.tipo==='num').map(c=>c.k)));
+const VV_FECHA=new Set(VV_ETAPAS.flatMap(e=>e.campos.filter(c=>c.tipo==='date').map(c=>c.k)));
+
+function vvMount(){
+  let app=document.getElementById('viveroApp');
+  if(!app){app=document.createElement('div');app.id='viveroApp';app.className='maint-app';}
+  const movil=window.matchMedia('(max-width:900px)').matches;
+  const destino=document.getElementById(movil?'viveroMobileMount':'viveroDesktopMount');
+  if(destino&&app.parentElement!==destino)destino.appendChild(app);
+  return app;
+}
+async function vvAbrir(){
+  vvMount();
+  if(VV.cargando)return;
+  VV.cargando=true;vvRender();
+  try{
+    const pr=mtCurrentPredio();
+    const [{data,error},zs]=await Promise.all([
+      db.from('sc_registro_vivero').select('*').eq('id_razon_social',G.rsId).order('cuartel').order('hilera'),
+      (typeof qZonasPredio==='function'&&pr)?qZonasPredio(pr):Promise.resolve([])]);
+    if(error)throw error;
+    VV.fichas=(data||[]).filter(f=>!pr||f.id_predio===pr);
+    VV.zonas=zs||[];VV.error='';
+  }catch(e){VV.error=(e&&e.message)||'No se pudieron leer las fichas de vivero.';}
+  VV.cargando=false;vvRender();
+}
+function vvPrendimiento(f){
+  const vivas=parseFloat(f.plantas_vivas),muertas=parseFloat(f.plantas_muertas);
+  if(!(vivas>=0)||!(muertas>=0)||(vivas+muertas)<=0)return null;
+  return Math.round(vivas/(vivas+muertas)*100);
+}
+function vvEtapa(f){
+  if(f.fecha_injertacion_ojo_dormido_2026)return'Ojo dormido';
+  if(f.plantas_terminadas!=null)return'Terminada';
+  if(f.plantas_vivas!=null||f.plantas_muertas!=null)return'Conteo';
+  if(f.fecha_ojo_vivo)return'Ojo vivo';
+  if(f.fecha_de_injertacion_pua_invernal)return'Pua invernal';
+  if(f.fecha_plantacion)return'Plantada';
+  return'Sin etapa';
+}
+function vvRender(){
+  const app=vvMount();if(!app)return;
+  if(VV.cargando&&!VV.fichas.length){app.innerHTML='<div class="maint-empty">Cargando fichas…</div>';return;}
+  const aviso=VV.error?`<div class="maint-conn-banner">${mtEsc(VV.error)}</div>`:'';
+  const lista=VV.fichas.length?VV.fichas.map(f=>{
+    const p=vvPrendimiento(f);
+    return`<button class="maint-card" style="text-align:left;width:100%" onclick="vvEditar('${f.id}')">
+      <div class="maint-card-title">${mtEsc(f.cuartel||'Sin cuartel')} · Hilera ${mtEsc(f.hilera||'—')}</div>
+      <div class="maint-card-sub">${mtEsc(f.id_zona||'')} · ${mtEsc(vvEtapa(f))}${f.cantidad_plantada!=null?' · '+f.cantidad_plantada+' plantas':''}${p!=null?' · prendimiento '+p+'%':''}</div>
+    </button>`;}).join(''):'<div class="maint-empty">Todavia no hay fichas de vivero para este predio.</div>';
+  app.innerHTML=`${aviso}
+    <div class="maint-actions" style="margin-bottom:10px">
+      <button class="maint-export" onclick="vvNueva()"><i class="ti ti-plus"></i>Nueva ficha</button>
+    </div>
+    <div id="vvForm"></div>
+    <div class="maint-card-title" style="margin:16px 0 8px">Fichas <span style="font-weight:600;color:var(--muted)">${VV.fichas.length}</span></div>
+    ${lista}`;
+  if(VV.sel)vvRenderForm();
+}
+function vvRenderForm(){
+  const cont=document.getElementById('vvForm');if(!cont)return;
+  const f=VV.sel||{};
+  const campo=c=>{
+    const v=f[c.k]==null?'':f[c.k];
+    if(c.tipo==='zona'){
+      const ops=VV.zonas.map(z=>`<option value="${mtEsc(z.id_zona)}"${z.id_zona===v?' selected':''}>${mtEsc(z.nombre||z.id_zona)}</option>`).join('');
+      return`<div class="maint-field"><label>${c.l}</label><select id="vv_${c.k}"><option value="">Sin zona</option>${ops}</select></div>`;}
+    if(c.tipo==='texto')return`<div class="maint-field full"><label>${c.l}</label><textarea id="vv_${c.k}" rows="2">${mtEsc(v)}</textarea></div>`;
+    const t=c.tipo==='date'?'date':(c.tipo==='num'?'number':'text');
+    return`<div class="maint-field"><label>${c.l}</label><input id="vv_${c.k}" type="${t}"${c.tipo==='num'?' step="any" min="0"':''} value="${mtEsc(c.tipo==='date'?String(v).slice(0,10):v)}"></div>`;};
+  cont.innerHTML=`<div class="maint-card">
+    <div class="maint-card-title">${f.id?'Editar ficha':'Nueva ficha'}</div>
+    <div class="maint-card-sub">Llena solo lo que corresponda a esta etapa. Lo que dejes vacio no borra lo ya registrado.</div>
+    ${VV_ETAPAS.map(e=>`<div style="margin-top:14px">
+       <div class="maint-card-title" style="font-size:13px"><i class="ti ${e.ico}"></i> ${e.t}</div>
+       <div class="maint-form-grid">${e.campos.map(campo).join('')}</div></div>`).join('')}
+    <div class="maint-actions" style="margin-top:14px">
+      <button class="maint-export" onclick="vvGuardar()"><i class="ti ti-device-floppy"></i>Guardar ficha</button>
+      <button class="maint-clear" onclick="VV.sel=null;vvRender()">Cancelar</button>
+    </div></div>`;
+}
+function vvNueva(){VV.sel={};vvRender();document.getElementById('vvForm')?.scrollIntoView({behavior:'smooth',block:'start'});}
+function vvEditar(id){VV.sel=VV.fichas.find(x=>x.id===id)||{};vvRender();document.getElementById('vvForm')?.scrollIntoView({behavior:'smooth',block:'start'});}
+async function vvGuardar(){
+  const val=k=>{const el=document.getElementById('vv_'+k);return el?el.value.trim():'';};
+  const pr=mtCurrentPredio();
+  if(!pr){alert('Elige primero un predio arriba.');return;}
+  const hilera=val('hilera');
+  if(!hilera){alert('La ficha es por hilera: escribe la hilera.');return;}
+  const payload={id_razon_social:G.rsId,id_predio:pr};
+  VV_ETAPAS.forEach(e=>e.campos.forEach(c=>{
+    const v=val(c.k);
+    payload[c.k]=v===''?null:(VV_NUM.has(c.k)?Number(v):v);
+  }));
+  const z=VV.zonas.find(x=>x.id_zona===payload.id_zona);
+  if(z){payload.id_equipo=z.id_equipo||null;payload.id_estanque=z.id_estanque||null;}
+  try{
+    if(VV.sel&&VV.sel.id){
+      const {error}=await db.from('sc_registro_vivero').update(payload).eq('id',VV.sel.id);
+      if(error)throw error;
+    }else{
+      payload.creado_por=G.userId||null;payload.creado_por_email=G.userEmail||null;
+      const {error}=await db.from('sc_registro_vivero').insert(payload);
+      if(error)throw error;
+    }
+    VV.sel=null;
+    if(typeof showMaintenanceToast==='function')showMaintenanceToast('Ficha de vivero guardada.');
+    await vvAbrir();
+  }catch(e){alert('No se pudo guardar: '+((e&&e.message)||e));}
+}
+function vvExportar(){
+  if(!VV.fichas.length){alert('No hay fichas para exportar.');return;}
+  const filas=VV.fichas.map(f=>{
+    const o={'ID Razon Social':f.id_razon_social,'ID Predio':f.id_predio,'ID Equipo':f.id_equipo,
+             'ID Estanque':f.id_estanque,'ID Zona':f.id_zona,'Cuartel':f.cuartel,'Hilera':f.hilera};
+    VV_ETAPAS.forEach(e=>e.campos.forEach(c=>{if(!['id_zona','cuartel','hilera'].includes(c.k))o[c.l+(e.t==='Responsables'?'':' ('+e.t+')')]=f[c.k];}));
+    o['Prendimiento %']=vvPrendimiento(f);
+    return o;});
+  const book=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(filas),'Vivero');
+  const safe=String(G.rsId).replace(/[^a-zA-Z0-9_-]/g,'_');
+  XLSX.writeFile(book,`CronoRiego_Vivero_${safe}_${fs(new Date())}.xlsx`);
+}
 </script>
 </body>
 </html>
