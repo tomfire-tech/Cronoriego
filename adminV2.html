@@ -264,8 +264,8 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const LOGIN='loginV2.html', DASHBOARD='dashboard_V2.html';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{storageKey:'sb-cronoriego-asgard',persistSession:true}});
-const MODULOS_DEF=['riego','ferti','estanque','balance','mantenimiento'];
-const MODULOS_LBL={riego:'Riego',ferti:'Ferti',estanque:'Estanque',balance:'Balance',mantenimiento:'Mantención'};
+const MODULOS_DEF=['riego','ferti','estanque','balance','mantenimiento','vivero'];
+const MODULOS_LBL={riego:'Riego',ferti:'Ferti',estanque:'Estanque',balance:'Balance',mantenimiento:'Mantención',vivero:'Vivero'};
 const MODULO_FIJO='mantenimiento';   // el dashboard V2 lo deja siempre abierto
 let ES_ADMIN=false;
 
