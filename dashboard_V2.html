@@ -1433,32 +1433,79 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
 @media(max-width:820px) and (max-height:520px){.m-header-top{display:none}.m-header{padding-top:5px;padding-bottom:5px}.m-context>summary{min-height:42px}.m-main{padding-top:14px}.m-filter-grid{grid-template-columns:1fr 1fr 44px}.m-operation-field{grid-column:1/-1;grid-row:auto}.m-filter-grid>.m-icon-btn{grid-column:3;grid-row:1}}
 
 /* ===== VISTA GENERAL (mapa del predio) ===== */
-.vg-wrap{display:grid;grid-template-columns:1fr 330px;gap:12px;height:calc(100vh - 210px);min-height:460px}
-.vg-map{width:100%;height:100%;border-radius:14px;overflow:hidden;background:#0b0f0c;border:1px solid var(--line,#e2e8f0)}
-.vg-side{overflow-y:auto;display:flex;flex-direction:column;gap:10px}
-.vg-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-.vg-kpi{background:#fff;border:1px solid var(--line,#e2e8f0);border-radius:12px;padding:8px 10px}
-.vg-kpi small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#64748b);font-weight:800}
-.vg-kpi b{font-size:18px;font-variant-numeric:tabular-nums}
-.vg-capas{display:flex;flex-wrap:wrap;gap:5px}
-.vg-capa{padding:5px 11px;border-radius:999px;border:1px solid var(--line,#e2e8f0);background:#fff;color:var(--muted,#64748b);font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit}
-.vg-capa.on{background:#16A34A;color:#fff;border-color:#16A34A}
-.vg-ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted,#64748b);font-weight:700}
-.vg-ctl input[type=range]{flex:1}
-.vg-ley{font-size:11.5px;color:var(--muted,#64748b);line-height:1.85}
-.vg-ley i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.vg-aviso{background:#FEF3C7;border:1px solid #FCD34D;color:#92400E;font-size:11.5px;padding:8px 10px;border-radius:10px;line-height:1.5}
-.vg-ficha{background:#fff;border:1px solid var(--line,#e2e8f0);border-radius:14px;padding:13px}
-.vg-ficha h3{margin:0 0 2px;font-size:15px}
-.vg-ficha .esp{color:var(--muted,#64748b);font-size:12px;margin-bottom:10px}
-.vg-dato{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line,#eef2f7);font-size:12.5px}
-.vg-dato span{color:var(--muted,#64748b)}
-.vg-dato b{font-variant-numeric:tabular-nums;text-align:right}
-.vg-barra{height:7px;border-radius:999px;background:#eef2f7;overflow:hidden;margin:6px 0 2px}
-.vg-barra div{height:100%}
-.vg-vacio{color:var(--muted,#64748b);font-size:12.5px;text-align:center;padding:30px 10px;line-height:1.6}
-.vg-eti{font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap;background:none;border:none;box-shadow:none}
-@media(max-width:900px){.vg-wrap{grid-template-columns:1fr;height:auto}.vg-map{height:58vh;min-height:320px}.vg-kpis{grid-template-columns:repeat(2,1fr)}}
+#view-general{padding:16px 20px 18px;flex-direction:column;min-height:0}
+.vg-stage{position:relative;flex:1;min-height:520px;border-radius:var(--r-lg);overflow:hidden;background:#0b120d;isolation:isolate}
+#vgMap{position:absolute;inset:0;background:#0b120d}
+#vgMap .leaflet-control-zoom{border:0;box-shadow:var(--shadow-md);border-radius:10px;overflow:hidden;margin:0 16px 16px 0;transition:margin .22s cubic-bezier(.16,1,.3,1)}
+#vgMap .leaflet-control-zoom a{color:var(--ink);width:32px;height:32px;line-height:32px}
+/* superficie de los paneles flotantes: blanca y opaca, un paso de tono sobre el satelite */
+.vg-float{position:absolute;z-index:500;background:var(--white);border-radius:var(--r);box-shadow:0 8px 24px rgba(2,8,23,.28),0 2px 6px rgba(2,8,23,.18)}
+.vg-sum{top:16px;left:16px;padding:12px 16px;max-width:min(520px,calc(100% - 32px))}
+.vg-sum h2{font-size:15px;font-weight:650;letter-spacing:-.01em;color:var(--ink);line-height:1.3}
+.vg-sum p{margin-top:2px;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums;line-height:1.5}
+.vg-sum p b{font-weight:650;color:var(--ink)}
+.vg-sum .vg-crit{color:var(--red)}
+.vg-hint{margin-top:6px;font-size:12px;color:var(--muted)}
+.vg-skel{display:block;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--line2) 0%,var(--line) 50%,var(--line2) 100%);background-size:200% 100%;animation:vgSk 1.2s ease-in-out infinite}
+@keyframes vgSk{from{background-position:100% 0}to{background-position:-100% 0}}
+.vg-layers{left:16px;bottom:16px;padding:10px;max-width:calc(100% - 32px)}
+.vg-seg{display:flex;flex-wrap:wrap;gap:2px;background:var(--line2);border-radius:9px;padding:2px}
+.vg-seg button{border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;color:var(--muted);padding:6px 10px;border-radius:7px;cursor:pointer;transition:background-color .16s ease-out,color .16s ease-out}
+.vg-seg button:hover{color:var(--ink)}
+.vg-seg button.on{background:var(--white);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.16)}
+.vg-ley{display:flex;flex-wrap:wrap;gap:4px 12px;margin:9px 4px 2px;font-size:11.5px;color:var(--ink2)}
+.vg-ley span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.vg-ley i{width:10px;height:10px;border-radius:50%;flex:none}
+.vg-ndvi{display:flex;align-items:center;gap:10px;margin:8px 4px 0;font-size:12px;color:var(--ink2)}
+.vg-ndvi input{flex:1;accent-color:var(--green);min-width:90px}
+.vg-ndvi output{font-variant-numeric:tabular-nums;color:var(--muted);min-width:34px;text-align:right}
+.vg-aviso{margin:8px 4px 0;font-size:11.5px;line-height:1.45;color:#7c4a03;background:#FEF6E7;border-radius:8px;padding:7px 9px}
+/* ficha de zona: entra desde la derecha solo cuando hay una zona elegida */
+.vg-panel{top:16px;right:16px;bottom:16px;width:344px;display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));opacity:0;pointer-events:none;
+  transition:transform .22s cubic-bezier(.16,1,.3,1),opacity .18s ease-out}
+.vg-panel.open{transform:none;opacity:1;pointer-events:auto}
+.vg-ph{display:flex;align-items:flex-start;gap:10px;padding:16px 16px 0}
+.vg-ph h3{flex:1;font-size:16px;font-weight:650;letter-spacing:-.01em;color:var(--ink);line-height:1.3}
+.vg-x{border:0;background:var(--line2);width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink2);cursor:pointer;flex:none;font-size:16px}
+.vg-x:hover{background:var(--line);color:var(--ink)}
+.vg-sub{padding:2px 16px 0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.vg-pb{flex:1;overflow-y:auto;padding:14px 16px 4px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.vg-pb::-webkit-scrollbar{width:8px}.vg-pb::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.vg-aa{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--ink2)}
+.vg-aa b{font-size:20px;font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.vg-bar{height:6px;border-radius:999px;background:var(--line2);overflow:hidden;margin:6px 0 16px}
+.vg-bar span{display:block;height:100%;border-radius:999px;transition:width .3s cubic-bezier(.16,1,.3,1)}
+.vg-g{margin-bottom:14px}
+.vg-g h4{font-size:12px;font-weight:650;color:var(--ink);margin-bottom:6px}
+.vg-dl{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:12.5px}
+.vg-dl dt{color:var(--muted)}
+.vg-dl dd{color:var(--ink);font-weight:550;text-align:right;font-variant-numeric:tabular-nums}
+.vg-alerta{display:inline-flex;align-items:center;gap:6px}
+.vg-alerta i{width:8px;height:8px;border-radius:50%}
+.vg-nota{font-size:12px;line-height:1.5;color:#7c4a03;background:#FEF6E7;border-radius:9px;padding:9px 11px;margin-bottom:14px}
+.vg-pf{display:flex;gap:8px;padding:12px 16px 16px;background:var(--white);border-radius:0 0 var(--r) var(--r)}
+.vg-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:9px;padding:10px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:background-color .16s ease-out}
+.vg-btn.pri{background:var(--green);color:#fff}.vg-btn.pri:hover{background:#15803D}
+.vg-btn.sec{flex:0 0 auto;background:var(--line2);color:var(--ink2)}.vg-btn.sec:hover{background:var(--line)}
+.vg-btn[disabled]{opacity:.55;cursor:progress}
+.vg-open #vgMap .leaflet-control-zoom{margin-right:376px}
+.vg-msg:empty{display:none}
+.vg-msg{font-size:12px;color:var(--red);padding:0 16px 10px}
+#view-general :focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.vg-panel ::selection,.vg-float ::selection{background:#BBF7D0;color:var(--ink)}
+.vg-eti{font:600 10.5px/1 'Inter',system-ui,sans-serif;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.6);white-space:nowrap;background:none;border:none;box-shadow:none;padding:0}
+.vg-eti::before{display:none}
+@media(max-width:820px){
+  #vgMap .leaflet-control-zoom{display:none}
+  #viewGeneralMobileMount .vg-stage{min-height:0;height:62vh;border-radius:14px}
+  .vg-sum{top:10px;left:10px;right:10px;max-width:none;padding:10px 12px}
+  .vg-layers{left:10px;right:10px;bottom:10px;max-width:none}
+  .vg-seg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .vg-seg button{white-space:nowrap}
+  .vg-panel{position:fixed;z-index:1200;box-shadow:0 -10px 30px rgba(2,8,23,.25);left:0;right:0;top:auto;bottom:calc(64px + env(safe-area-inset-bottom));width:auto;max-height:62vh;border-radius:16px 16px 0 0;transform:translateY(105%)}
+  .vg-panel.open{transform:none}
+}
+@media(prefers-reduced-motion:reduce){.vg-panel,.vg-bar span,.vg-skel{transition:none;animation:none}}
 
 </style>
 </head>
@@ -1714,21 +1761,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;b
   </div>
 </div>
 <div id="view-general" class="view" style="display:none">
-  <div class="maint-shell">
-    <div class="maint-hero">
-      <div><h2>Vista general del predio</h2><p>Cada zona en su ubicación, con el tamaño de su superficie. Elige qué mostrar con el color y haz clic en una zona para ver sus datos del día.</p></div>
-      <div id="vgAgua" style="font-weight:800"></div>
-    </div>
-    <div class="vg-kpis" id="vgKpis"></div>
-    <div class="vg-wrap">
-      <div class="vg-map" id="vgMap"></div>
-      <div class="vg-side" id="vgSide">
-        <div class="vg-capas" id="vgCapas"></div>
-        <div class="vg-ctl"><span>Capa NDVI</span><input type="range" id="vgOpa" min="0" max="100" value="0" oninput="vgOpacidad(this.value)"><span id="vgOpaTxt">0 %</span></div>
-        <div class="vg-ley" id="vgLey"></div>
-        <div class="vg-ficha" id="vgFicha"><div class="vg-vacio">Haz clic en una zona del mapa para ver sus datos del día.</div></div>
-      </div>
-    </div>
+  <div class="vg-stage" id="vgStage">
+    <div id="vgMap" role="application" aria-label="Mapa del predio con sus zonas"></div>
+    <section class="vg-float vg-sum" id="vgSum" aria-live="polite"></section>
+    <section class="vg-float vg-layers" aria-label="Qué mostrar en el mapa">
+      <div class="vg-seg" id="vgCapas" role="group" aria-label="Color de las zonas"></div>
+      <div class="vg-ley" id="vgLey"></div>
+      <label class="vg-ndvi">Imagen NDVI<input type="range" id="vgOpa" min="0" max="100" value="0" oninput="vgOpacidad(this.value)" aria-label="Opacidad de la imagen NDVI"><output id="vgOpaTxt">0 %</output></label>
+      <div id="vgAvisos"></div>
+    </section>
+    <aside class="vg-float vg-panel" id="vgPanel" aria-label="Datos de la zona"></aside>
   </div>
 </div>
 <div id="view-vivero" class="view" style="display:none">
@@ -2358,6 +2400,7 @@ async function onPredio(){
   G.estanques=await qEstanquesNombres(prId);
   G.pozos=await qPozosNombres(prId);
   if(es.length)await onEquipo();
+  if(TAB==='general'||(typeof MOBILE!=='undefined'&&MOBILE.module==='general'))vgAbrir();   // el mapa sigue al predio elegido
 }
 async function onEquipo(){
   const eqId=document.getElementById('se').value;
@@ -3480,7 +3523,7 @@ function switchTab(t){
   if(t==='balance')loadRenderBalance();
   if(t==='mantenimiento')openMaintenanceModule();
   if(t==='vivero')vvAbrir();
-  if(t==='general')vgAbrir();
+  if(t==='general')vgAbrir();else vgCerrar();
   aplicarBloqueo(t);
 }
 
@@ -4519,7 +4562,7 @@ async function mobileSwitchModule(module){
   if(module==='balance'&&!GB.loaded)await loadRenderBalance();
   if(module==='mantenimiento')await openMaintenanceModule();
   if(module==='vivero')await vvAbrir();
-  if(module==='general'){vgMoverMovil();await vgAbrir();}
+  if(module==='general'){vgMoverMovil();await vgAbrir();}else vgCerrar();
   if(module==='operacion')await loadRenderOperacion();
   renderMobileAll();
 }
@@ -5970,35 +6013,49 @@ function vvExportar(){
 
 // ===== VISTA GENERAL: el predio en el mapa =====
 // Mismo dato que el resto del dashboard, pero ubicado. Una zona = un circulo con su superficie real.
-const VG={zonas:[],dia:{},calc:{},img:{},capa:'alerta',mapa:null,gZonas:null,gNdvi:null,prId:null,sinCoord:[]};
+const VG={zonas:[],dia:{},calc:{},img:{},capa:'alerta',mapa:null,gZonas:null,gNdvi:null,prId:null,sinCoord:[],apiladas:false,sel:null,cap:{}};
+const VG_GRIS='#94A3B8';
 const VG_CAPAS={
-  alerta:{t:'Alerta de riego',color:z=>{const a=(VG.dia[z.id_zona]||{}).alerta_recomendacion_riego||'';
+  alerta:{t:'Alerta',color:z=>{const a=(VG.dia[z.id_zona]||{}).alerta_recomendacion_riego||'';
     return /crítico|critico/i.test(a)?'#DC2626':esAlertaRiego(a)?'#2563EB':'#16A34A';},
-   ley:[['#DC2626','Riego crítico'],['#2563EB','Riego recomendado'],['#16A34A','Sin riego recomendado']]},
-  aa:{t:'Agua aprovechable',color:z=>{const v=rcVal((VG.dia[z.id_zona]||{}).agua_aprovechable);
-    return v==null?'#94A3B8':v<=0?'#DC2626':v<0.3?'#EA580C':v<0.6?'#EAB308':'#16A34A';},
-   ley:[['#DC2626','0 % o menos'],['#EA580C','hasta 30 %'],['#EAB308','hasta 60 %'],['#16A34A','sobre 60 %'],['#94A3B8','sin dato']]},
+   ley:[['#DC2626','Riego crítico'],['#2563EB','Riego recomendado'],['#16A34A','Sin riego']]},
+  aa:{t:'Agua en el suelo',color:z=>{const v=rcVal((VG.dia[z.id_zona]||{}).agua_aprovechable);
+    return v==null?VG_GRIS:v<=0?'#DC2626':v<0.3?'#EA580C':v<0.6?'#EAB308':'#16A34A';},
+   ley:[['#DC2626','Agotada'],['#EA580C','Bajo 30 %'],['#EAB308','30 a 60 %'],['#16A34A','Sobre 60 %'],[VG_GRIS,'Sin dato']]},
   ndvi:{t:'NDVI',color:z=>{const v=rcVal((VG.img[z.id_zona]||{}).ndvi);
-    return v==null?'#94A3B8':v<0.25?'#A16207':v<0.45?'#CA8A04':v<0.65?'#65A30D':'#15803D';},
-   ley:[['#A16207','bajo 0,25'],['#CA8A04','0,25 a 0,45'],['#65A30D','0,45 a 0,65'],['#15803D','sobre 0,65'],['#94A3B8','sin dato']]},
+    return v==null?VG_GRIS:v<0.25?'#A16207':v<0.45?'#CA8A04':v<0.65?'#65A30D':'#15803D';},
+   ley:[['#A16207','Bajo 0,25'],['#CA8A04','0,25 a 0,45'],['#65A30D','0,45 a 0,65'],['#15803D','Sobre 0,65'],[VG_GRIS,'Sin dato']]},
   kc:{t:'Kc',color:z=>{const v=rcVal((VG.dia[z.id_zona]||{}).kc)??rcVal((VG.img[z.id_zona]||{}).kc);
-    return v==null?'#94A3B8':v<0.4?'#93C5FD':v<0.7?'#60A5FA':v<1?'#2563EB':'#1E3A8A';},
-   ley:[['#93C5FD','bajo 0,40'],['#60A5FA','0,40 a 0,70'],['#2563EB','0,70 a 1,00'],['#1E3A8A','sobre 1,00'],['#94A3B8','sin dato']]},
-  etapa:{t:'Etapa',color:z=>vgPaleta((VG.dia[z.id_zona]||{}).etapa_fisiologica),ley:[]},
-  operacion:{t:'Operación',color:z=>vgPaleta(z.operacion),ley:[]},
+    return v==null?VG_GRIS:v<0.4?'#93C5FD':v<0.7?'#60A5FA':v<1?'#2563EB':'#1E3A8A';},
+   ley:[['#93C5FD','Bajo 0,40'],['#60A5FA','0,40 a 0,70'],['#2563EB','0,70 a 1,00'],['#1E3A8A','Sobre 1,00'],[VG_GRIS,'Sin dato']]},
+  etapa:{t:'Etapa',valor:z=>(VG.dia[z.id_zona]||{}).etapa_fisiologica,color:z=>vgPaleta((VG.dia[z.id_zona]||{}).etapa_fisiologica)},
+  operacion:{t:'Operación',valor:z=>z.operacion,color:z=>vgPaleta(z.operacion)},
 };
 function vgPaleta(v){const p=['#2563EB','#16A34A','#EA580C','#7C3AED','#0891B2','#DC2626','#CA8A04'];
-  const s=String(v??'');if(!s)return'#94A3B8';let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%p.length;return p[h];}
+  const s=String(v??'');if(!s)return VG_GRIS;let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%p.length;return p[h];}
+function vgCapasVisibles(){                  // RS con riego diario (RS-12) no usan alerta: no se ofrece esa capa
+  return Object.keys(VG_CAPAS).filter(k=>!(k==='alerta'&&riegoDiario()));}
+function vgLeyenda(){
+  const c=VG_CAPAS[VG.capa];
+  if(c.ley)return c.ley;
+  const vistos=new Map();
+  VG.zonas.forEach(z=>{const v=c.valor(z);const t=v==null||v===''?'Sin dato':(VG.capa==='operacion'?'Operación '+v:String(v));
+    if(!vistos.has(t))vistos.set(t,c.color(z));});
+  return [...vistos].map(([t,col])=>[col,t]);
+}
 
 async function vgAbrir(){
-  if(typeof vgMoverMovil==='function')vgMoverMovil();   // el bloque vive en escritorio o en celular segun el ancho
+  vgMoverMovil();                            // el bloque vive en escritorio o en celular segun el ancho
   const pr=mtCurrentPredio();
   if(VG.mapa)setTimeout(()=>VG.mapa.invalidateSize(),60);
   if(VG.prId===pr&&VG.zonas.length)return;
-  VG.prId=pr;
-  const cont=document.getElementById('vgFicha');
-  if(cont)cont.innerHTML='<div class="vg-vacio">Cargando el predio…</div>';
+  VG.prId=pr;VG.sel=null;vgCerrar();
+  if(!vgCapasVisibles().includes(VG.capa))VG.capa=vgCapasVisibles()[0];
+  const sum=document.getElementById('vgSum');
+  if(sum)sum.innerHTML='<span class="vg-skel" style="width:180px;height:13px"></span><span class="vg-skel" style="width:300px;margin-top:9px"></span>';
+  vgMapaInit();
   const zs=await qZonasPredio(pr);
+  if(VG.prId!==pr)return;                    // cambiaron de predio mientras cargaba
   const ids=(zs||[]).map(z=>z.id_zona);
   VG.dia={};VG.calc={};VG.img={};
   if(ids.length){
@@ -6018,16 +6075,17 @@ async function vgAbrir(){
     }});
   VG.sinCoord=(zs||[]).filter(z=>rcVal(z.latitud)==null).map(z=>z.nombre||z.id_zona);
   VG.zonas=(zs||[]).filter(z=>rcVal(z.latitud)!=null&&rcVal(z.longitud)!=null);
-  vgMapaInit();vgPintar();
+  vgPintar(true);
 }
 function vgMapaInit(){
   if(VG.mapa){setTimeout(()=>VG.mapa.invalidateSize(),60);return;}
-  VG.mapa=L.map('vgMap',{attributionControl:false}).setView([-33.4,-70.7],13);
+  VG.mapa=L.map('vgMap',{attributionControl:false,zoomControl:false}).setView([-33.4,-70.7],13);
+  L.control.zoom({position:'bottomright'}).addTo(VG.mapa);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(VG.mapa);
   VG.gNdvi=L.layerGroup().addTo(VG.mapa);
   VG.gZonas=L.layerGroup().addTo(VG.mapa);
-  // con muchas zonas juntas los nombres se tapan: fijos solo al acercarse
-  VG.mapa.on('zoomend',()=>{
+  VG.mapa.on('click',()=>vgCerrar());        // clic fuera de una zona cierra la ficha
+  VG.mapa.on('zoomend',()=>{                 // con muchas zonas juntas los nombres se tapan: fijos solo al acercarse
     const fijo=VG.mapa.getZoom()>=16;
     VG.gZonas.eachLayer(l=>{
       const t=l.getTooltip&&l.getTooltip();
@@ -6035,111 +6093,183 @@ function vgMapaInit(){
         l.bindTooltip(txt,{permanent:fijo,direction:'center',className:'vg-eti'});}
     });
   });
+  if(!VG._esc){VG._esc=true;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&VG.sel)vgCerrar();});}
   setTimeout(()=>VG.mapa.invalidateSize(),120);
 }
 function vgRadio(z){const ha=rcVal(z.superficie_ha)||0.5;return Math.max(16,Math.sqrt(ha*10000/Math.PI));}
-function vgPintar(){
+function vgPintar(encuadrar){
   if(!VG.mapa)return;
-  VG.gZonas.clearLayers();VG.gNdvi.clearLayers();
-  const capa=VG_CAPAS[VG.capa],pts=[],cuenta={};
+  VG.gZonas.clearLayers();VG.gNdvi.clearLayers();VG.cap={};
+  const pts=[],cuenta={},usado={};
   VG.zonas.forEach(z=>{const k=rcVal(z.latitud).toFixed(6)+','+rcVal(z.longitud).toFixed(6);cuenta[k]=(cuenta[k]||0)+1;});
-  const usado={};
+  VG.apiladas=Object.values(cuenta).some(n=>n>1);
   VG.zonas.forEach(z=>{
     let la=rcVal(z.latitud),lo=rcVal(z.longitud);
     const k=la.toFixed(6)+','+lo.toFixed(6);
     if(cuenta[k]>1){                         // zonas apiladas en la misma coordenada: se abren para poder verlas
-      usado[k]=(usado[k]||0);
+      usado[k]=usado[k]||0;
       const ang=2*Math.PI*usado[k]/cuenta[k];usado[k]++;
       la+=0.0006*Math.cos(ang);lo+=0.0006*Math.sin(ang);
     }
     pts.push([la,lo]);
-    const col=capa.color(z);
-    const c=L.circle([la,lo],{radius:vgRadio(z),color:col,weight:2,fillColor:col,fillOpacity:.38});
+    const c=L.circle([la,lo],{radius:vgRadio(z),bubblingMouseEvents:false});
     c.on('click',()=>vgFicha(z.id_zona));
     c.bindTooltip(mtEsc(z.nombre||z.id_zona),{permanent:VG.mapa.getZoom()>=16,direction:'center',className:'vg-eti'});
-    VG.gZonas.addLayer(c);
+    VG.gZonas.addLayer(c);VG.cap[z.id_zona]=c;
     const img=VG.img[z.id_zona];
     if(img&&img.url_ndvi&&rcVal(img.delta)){
       const d=rcVal(img.delta),ila=rcVal(img.lat),ilo=rcVal(img.lon);
       VG.gNdvi.addLayer(L.imageOverlay(img.url_ndvi,[[ila-d,ilo-d],[ila+d,ilo+d]],{opacity:0}));
     }
   });
-  if(pts.length)VG.mapa.fitBounds(L.latLngBounds(pts).pad(0.3));
-  const fi=document.getElementById('vgFicha');
-  if(fi&&/Cargando el predio/.test(fi.textContent))fi.innerHTML='<div class="vg-vacio">Haz clic en una zona del mapa para ver sus datos del día.</div>';
+  vgEstilo();
+  if(encuadrar&&pts.length)VG.mapa.fitBounds(L.latLngBounds(pts).pad(0.3));
   vgOpacidad(document.getElementById('vgOpa')?.value||0);
-  vgPanel();
+  vgResumen();vgControles();
+}
+function vgEstilo(){                         // la zona elegida resalta; el resto se atenua
+  const capa=VG_CAPAS[VG.capa];
+  VG.zonas.forEach(z=>{
+    const c=VG.cap[z.id_zona];if(!c)return;
+    const col=capa.color(z),es=VG.sel===z.id_zona,otra=VG.sel&&!es;
+    c.setStyle({color:es?'#FFFFFF':col,weight:es?3:2,opacity:otra?.45:1,fillColor:col,fillOpacity:es?.6:otra?.16:.4});
+    if(es)c.bringToFront();
+  });
 }
 function vgOpacidad(v){
   const t=document.getElementById('vgOpaTxt');if(t)t.textContent=v+' %';
   VG.gNdvi&&VG.gNdvi.eachLayer(l=>l.setOpacity(v/100));
 }
-function vgSetCapa(k){VG.capa=k;vgPintar();}
-function vgPanel(){
-  const n=VG.zonas.length;
-  const crit=VG.zonas.filter(z=>/crítico|critico/i.test((VG.dia[z.id_zona]||{}).alerta_recomendacion_riego||'')).length;
-  let m3=0;VG.zonas.forEach(z=>{const d=VG.dia[z.id_zona]||{},l=rcVal(d.lamina_neta_acum_mm);
-    if(l&&esAlertaRiego(d.alerta_recomendacion_riego))m3+=l*(rcVal(z.superficie_ha)||0)*10;});
-  const nd=VG.zonas.map(z=>rcVal((VG.img[z.id_zona]||{}).ndvi)).filter(v=>v!=null);
+function vgSetCapa(k){VG.capa=k;vgEstilo();vgControles();}
+function vgResumen(){
+  const sum=document.getElementById('vgSum');if(!sum)return;
+  const sp=document.getElementById('sp'),pred=sp&&sp.selectedIndex>=0?sp.options[sp.selectedIndex].text:'Predio';
+  const n=VG.zonas.length,diario=riegoDiario();
+  if(!n){
+    sum.innerHTML=`<h2>${mtEsc(pred)}</h2><p>Ninguna zona de este predio tiene coordenadas.</p>
+      <div class="vg-hint">Agrega latitud y longitud por zona en los estáticos y vuelve a subir el dashboard.</div>`;return;}
   const ha=VG.zonas.reduce((a,z)=>a+(rcVal(z.superficie_ha)||0),0);
-  const kpis=document.getElementById('vgKpis');
-  if(kpis)kpis.innerHTML=`
-    <div class="vg-kpi"><small>Zonas</small><b>${n}</b></div>
-    <div class="vg-kpi"><small>Superficie</small><b>${ha?rcNum(ha)+' ha':'—'}</b></div>
-    <div class="vg-kpi"><small>En crítico</small><b>${crit}</b></div>
-    <div class="vg-kpi"><small>NDVI medio</small><b>${nd.length?(nd.reduce((a,b)=>a+b,0)/nd.length).toFixed(2):'—'}</b></div>`;
-  const agua=document.getElementById('vgAgua');
-  if(agua)agua.textContent=m3?Math.round(m3).toLocaleString('es-CL')+' m³ programados hoy':'';
+  const al=z=>(VG.dia[z.id_zona]||{}).alerta_recomendacion_riego||'';
+  const crit=VG.zonas.filter(z=>/crítico|critico/i.test(al(z))).length;
+  const rec=VG.zonas.filter(z=>esAlertaRiego(al(z))&&!/crítico|critico/i.test(al(z))).length;
+  let m3=0;VG.zonas.forEach(z=>{const d=VG.dia[z.id_zona]||{};
+    const l=rcVal(diario?d.lamina_neta_mm:d.lamina_neta_acum_mm);
+    if(l&&(diario||esAlertaRiego(d.alerta_recomendacion_riego)))m3+=l*(rcVal(z.superficie_ha)||0)*10;});
+  const nd=VG.zonas.map(z=>rcVal((VG.img[z.id_zona]||{}).ndvi)).filter(v=>v!=null);
+  const conDia=VG.zonas.filter(z=>VG.dia[z.id_zona]).length;
+  const partes=[`<b>${n}</b> ${n===1?'zona':'zonas'}${ha?`, <b>${rcNum(ha)}</b> ha`:''}`];
+  if(!diario&&conDia)partes.push(crit?`<b class="vg-crit">${crit} en riego crítico</b>${rec?`, ${rec} con riego recomendado`:''}`:rec?`<b>${rec}</b> con riego recomendado`:'ninguna necesita riego hoy');
+  if(m3)partes.push(`<b>${Math.round(m3).toLocaleString('es-CL')} m³</b> ${diario?'para hoy':'programados'}`);
+  if(nd.length)partes.push(`NDVI medio <b>${(nd.reduce((a,b)=>a+b,0)/nd.length).toFixed(2).replace('.',',')}</b>`);
+  sum.innerHTML=`<h2>${mtEsc(pred)}</h2><p>${partes.join(' · ')}</p>
+    ${conDia?'':'<div class="vg-hint">Todavía no hay datos de hoy para estas zonas.</div>'}
+    ${VG.sel?'':'<div class="vg-hint">Toca una zona para ver su día.</div>'}`;
+}
+function vgControles(){
   const cap=document.getElementById('vgCapas');
-  if(cap)cap.innerHTML=Object.entries(VG_CAPAS).map(([k,c])=>`<button type="button" class="vg-capa${k===VG.capa?' on':''}" onclick="vgSetCapa('${k}')">${c.t}</button>`).join('');
+  if(cap)cap.innerHTML=vgCapasVisibles().map(k=>`<button type="button" class="${k===VG.capa?'on':''}" aria-pressed="${k===VG.capa}" onclick="vgSetCapa('${k}')">${VG_CAPAS[k].t}</button>`).join('');
   const ley=document.getElementById('vgLey');
-  if(ley){
-    const rep=new Set(),vistos={};
-    VG.zonas.forEach(z=>{const k=rcVal(z.latitud).toFixed(6)+','+rcVal(z.longitud).toFixed(6);if(vistos[k])rep.add(k);vistos[k]=1;});
-    let av=rep.size?'<div class="vg-aviso">Hay zonas con la misma coordenada en los estáticos. Para poder verlas se separaron un poco: esa no es su posición real.</div>':'';
-    if(VG.sinCoord.length)av+=`<div class="vg-aviso">Sin coordenada, no se pueden dibujar: ${mtEsc(VG.sinCoord.join(', '))}.</div>`;
-    ley.innerHTML=av+VG_CAPAS[VG.capa].ley.map(([c,t])=>`<div><i style="background:${c}"></i>${t}</div>`).join('');
+  if(ley)ley.innerHTML=vgLeyenda().map(([c,t])=>`<span><i style="background:${c}"></i>${mtEsc(t)}</span>`).join('');
+  const av=document.getElementById('vgAvisos');
+  if(av){
+    let h='';
+    if(VG.apiladas)h+='<div class="vg-aviso">Algunas zonas comparten coordenada en los estáticos. Se separaron un poco para verlas: esa no es su posición real.</div>';
+    if(VG.sinCoord.length)h+=`<div class="vg-aviso">Sin coordenada, no se dibujan: ${mtEsc(VG.sinCoord.join(', '))}.</div>`;
+    av.innerHTML=h;
   }
 }
-function vgFila(t,v){return v==null||v===''?'':`<div class="vg-dato"><span>${t}</span><b>${v}</b></div>`;}
+function vgFila(t,v){return v==null||v===''?'':`<dt>${t}</dt><dd>${v}</dd>`;}
+function vgGrupo(t,filas){return filas.trim()?`<div class="vg-g"><h4>${t}</h4><dl class="vg-dl">${filas}</dl></div>`:'';}
 function vgFicha(id){
   const z=VG.zonas.find(x=>x.id_zona===id);if(!z)return;
-  const d=VG.dia[id]||{},c=VG.calc[id]||{},n=VG.img[id]||{};
+  VG.sel=id;vgEstilo();vgResumen();
+  const d=VG.dia[id]||{},c=VG.calc[id]||{},n=VG.img[id]||{},diario=riegoDiario();
+  const num=(v,u)=>rcVal(v)!=null?rcNum(rcVal(v))+(u?' '+u:''):null;
   const aa=rcVal(d.agua_aprovechable),pct=aa==null?null:Math.round(aa*100);
-  const col=aa==null?'#94A3B8':aa<=0?'#DC2626':aa<0.3?'#EA580C':aa<0.6?'#EAB308':'#16A34A';
-  const lam=rcVal(d.lamina_neta_acum_mm),cap=rcVal(c.capacidad_estanque_suelo_mm);
+  const col=VG_CAPAS.aa.color(z);
+  const lam=rcVal(diario?d.lamina_neta_mm:d.lamina_neta_acum_mm),cap=rcVal(c.capacidad_estanque_suelo_mm);
+  const a=d.alerta_recomendacion_riego||'';
+  const aCol=/crítico|critico/i.test(a)?'#DC2626':esAlertaRiego(a)?'#2563EB':'#16A34A';
   const link=z.localizacion_link_google_maps||('https://www.google.com/maps/search/?api=1&query='+rcVal(z.latitud)+','+rcVal(z.longitud));
-  document.getElementById('vgFicha').innerHTML=`
-    <h3>${mtEsc(z.nombre||z.id_zona)}</h3>
-    <div class="esp">${mtEsc(z.especie||'')} ${mtEsc(z.variedad||'')} · ${mtEsc(z.superficie_ha||'?')} ha · ${mtEsc(d.etapa_fisiologica||'sin etapa')}</div>
-    ${aa!=null?`<div class="vg-barra"><div style="width:${Math.max(0,Math.min(100,pct))}%;background:${col}"></div></div><div class="esp">Agua aprovechable ${pct} %</div>`:''}
-    ${vgFila('Alerta',mtEsc(d.alerta_recomendacion_riego||'sin alerta'))}
-    ${vgFila('ETo del día',rcVal(d.eto_mm)!=null?rcNum(rcVal(d.eto_mm))+' mm':null)}
-    ${vgFila('ETc del día',rcVal(d.etc_mm)!=null?rcNum(rcVal(d.etc_mm))+' mm':null)}
-    ${vgFila('Kc',rcVal(d.kc)!=null?rcNum(rcVal(d.kc)):null)}
-    ${vgFila('Lluvia',rcVal(d.lluvia_mm)!=null?rcNum(rcVal(d.lluvia_mm))+' mm':null)}
-    ${vgFila('Lámina acumulada',lam!=null?rcNum(lam)+' mm':null)}
-    ${vgFila('Tiempo acumulado',hm(rcVal(d.tiempo_riego_acum_h)))}
-    ${vgFila('NDVI',n.ndvi!=null?rcNum(rcVal(n.ndvi))+' · '+mtEsc(String(n.fecha||'').slice(0,10)):null)}
-    ${vgFila('Intensidad de riego',rcVal(c.intensidad_precip_neta_mmh)!=null?rcNum(rcVal(c.intensidad_precip_neta_mmh))+' mm/h':null)}
-    ${vgFila('Agua disponible del suelo',cap!=null?rcNum(cap)+' mm':null)}
-    ${vgFila('Edad del huerto',mtEsc(c.edad_huerto||''))}
-    ${vgFila('Equipo y operación',mtEsc((z.id_equipo||'')+' · op '+(z.operacion??'—')))}
-    ${z._coordNdvi?'<div class="vg-aviso" style="margin-top:10px">Esta zona no tiene coordenada en los estáticos: se usa la del recorte NDVI.</div>':''}
-    ${lam!=null&&cap&&lam>cap?`<div class="vg-aviso" style="margin-top:10px">El déficit acumulado (${rcNum(lam)} mm) supera el agua disponible del suelo (${rcNum(cap)} mm). Según FAO-56 eso no puede pasar: revisa los riegos registrados.</div>`:''}
-    <div class="maint-actions" style="margin-top:12px">
-      <button class="maint-export" onclick="openDia('${fs(new Date())}','${z.id_zona}')"><i class="ti ti-droplet"></i>Ver el día</button>
-      <a class="maint-clear" style="text-decoration:none;text-align:center" href="${mtEsc(link)}" target="_blank">Google Maps</a>
+  const sub=[[z.especie,z.variedad].filter(Boolean).join(' '),z.superficie_ha?rcNum(rcVal(z.superficie_ha))+' ha':'',d.etapa_fisiologica].filter(Boolean).map(mtEsc).join(' · ');
+  const notas=[];
+  if(!VG.dia[id])notas.push('No hay datos de hoy para esta zona.');
+  if(!diario&&lam!=null&&cap&&lam>cap)notas.push(`El déficit acumulado (${rcNum(lam)} mm) supera el agua disponible del suelo (${rcNum(cap)} mm). Según FAO-56 (ec. 86) eso no puede pasar: revisa los riegos registrados.`);
+  if(z._coordNdvi)notas.push('Sin coordenada en los estáticos: se ubicó con la del recorte NDVI.');
+  const p=document.getElementById('vgPanel');
+  p.innerHTML=`
+    <div class="vg-ph"><h3>${mtEsc(z.nombre||z.id_zona)}</h3><button type="button" class="vg-x" onclick="vgCerrar()" aria-label="Cerrar ficha"><i class="ti ti-x"></i></button></div>
+    ${sub?`<div class="vg-sub">${sub}</div>`:''}
+    <div class="vg-pb">
+      ${aa!=null?`<div class="vg-aa"><span>Agua en el suelo</span><b>${pct} %</b></div><div class="vg-bar"><span style="width:${Math.max(0,Math.min(100,pct))}%;background:${col}"></span></div>`:''}
+      ${notas.map(t=>`<div class="vg-nota">${t}</div>`).join('')}
+      ${vgGrupo('Hoy',
+        (diario?'':vgFila('Alerta',`<span class="vg-alerta"><i style="background:${aCol}"></i>${mtEsc(a||'Sin alerta')}</span>`))+
+        vgFila('ETo',num(d.eto_mm,'mm'))+vgFila('ETc',num(d.etc_mm,'mm'))+vgFila('Kc',num(d.kc))+vgFila('Lluvia',num(d.lluvia_mm,'mm'))+
+        vgFila(diario?'Lámina del día':'Lámina acumulada',lam!=null?rcNum(lam)+' mm':null)+
+        (diario?'':vgFila('Tiempo acumulado',hm(rcVal(d.tiempo_riego_acum_h)))))}
+      ${vgGrupo('Suelo y equipo',
+        vgFila('Agua disponible del suelo',cap!=null?rcNum(cap)+' mm':null)+
+        vgFila('Intensidad de riego',num(c.intensidad_precip_neta_mmh,'mm/h'))+
+        vgFila('Equipo',mtEsc(z.id_equipo||''))+vgFila('Operación',z.operacion!=null&&z.operacion!==''?mtEsc(z.operacion):null)+
+        vgFila('Edad del huerto',mtEsc(c.edad_huerto||'')))}
+      ${vgGrupo('Imagen satelital',
+        vgFila('NDVI',n.ndvi!=null?rcNum(rcVal(n.ndvi)):null)+vgFila('Fecha de la imagen',n.fecha?mtEsc(String(n.fecha).slice(0,10)):null))}
+    </div>
+    <div class="vg-msg" id="vgMsg" role="status"></div>
+    <div class="vg-pf">
+      <button type="button" class="vg-btn pri" onclick="vgVerDia('${z.id_zona}',this)"><i class="ti ti-droplet"></i>Ver el día</button>
+      <a class="vg-btn sec" href="${mtEsc(link)}" target="_blank" rel="noopener"><i class="ti ti-map-pin"></i>Google Maps</a>
     </div>`;
+  p.classList.add('open');
+  document.getElementById('vgStage')?.classList.add('vg-open');
 }
-const _vgOnPredio=typeof onPredio==='function'?onPredio:null;
-
+function vgCerrar(){
+  document.getElementById('vgPanel')?.classList.remove('open');
+  document.getElementById('vgStage')?.classList.remove('vg-open');
+  if(VG.sel){VG.sel=null;vgEstilo();vgResumen();}
+}
+// "Ver el día": el calendario solo tiene el equipo, la operación y la semana elegidos arriba.
+// Se ajustan esos filtros a la zona, se carga la semana actual y recién ahí se abre el detalle.
+async function vgVerDia(id,btn){
+  const z=VG.zonas.find(x=>x.id_zona===id);if(!z)return;
+  const msg=document.getElementById('vgMsg');if(msg)msg.textContent='';
+  const txt=btn?btn.innerHTML:'';
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Abriendo…';}
+  const hoy=fs(new Date());
+  const tiene=()=>(G.scDia||[]).some(r=>r.id_zona===id&&r.fecha===hoy)&&(G.zonas||[]).some(x=>x.id_zona===id);
+  try{
+    const se=document.getElementById('se'),sop=document.getElementById('sop');
+    const otroEq=z.id_equipo&&se&&se.value!==z.id_equipo&&[...se.options].some(o=>o.value===z.id_equipo);
+    const otraOp=G.opFiltro&&String(z.operacion??'')!==G.opFiltro;
+    if(otroEq||otraOp||G.off!==0||!tiene()){
+      G.opFiltro='';if(sop)sop.value='';
+      G.off=0;updW();
+      if(otroEq){se.value=z.id_equipo;await onEquipo();}
+      else{G.zonas=filtrarPorOperacion(G.zonasAll);if(G.zonas.length)await loadRender();}
+      if(typeof mobileUpdateWeekLabel==='function'&&isMobileView())mobileUpdateWeekLabel();
+    }
+    if(!tiene()){
+      if(msg)msg.textContent='Esta zona no tiene datos de riego para hoy. Revisa que el último dashboard subido incluya la fecha de hoy.';
+      return;
+    }
+    vgCerrar();
+    if(isMobileView())await mobileSwitchModule('riego');else switchTab('riego');
+    openDia(hoy,id);
+  }catch(e){
+    if(msg)msg.textContent='No se pudo abrir el día: '+(e&&e.message||e);
+  }finally{
+    if(btn&&btn.isConnected){btn.disabled=false;btn.innerHTML=txt;}
+  }
+}
 function vgMoverMovil(){
-  const bloque=document.querySelector('#view-general .vg-wrap'),kpis=document.getElementById('vgKpis');
-  const movil=window.matchMedia('(max-width:900px)').matches;
-  if(!bloque||!kpis)return;
-  const destino=movil?document.getElementById('viewGeneralMobileMount'):document.querySelector('#view-general .maint-shell');
-  if(destino&&bloque.parentElement!==destino){destino.appendChild(kpis);destino.appendChild(bloque);}
+  const stage=document.getElementById('vgStage'),panel=document.getElementById('vgPanel');
+  if(!stage)return;
+  const movil=isMobileView();
+  const destino=movil?document.getElementById('viewGeneralMobileMount'):document.getElementById('view-general');
+  if(destino&&stage.parentElement!==destino)destino.appendChild(stage);
+  // en celular la ficha es una hoja inferior: vive en body para quedar sobre todo
+  if(panel){const pDest=movil?document.body:stage;if(panel.parentElement!==pDest)pDest.appendChild(panel);}
   setTimeout(()=>VG.mapa&&VG.mapa.invalidateSize(),120);
 }
 </script>
