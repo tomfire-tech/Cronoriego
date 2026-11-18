@@ -1567,6 +1567,28 @@ p{text-wrap:pretty}
  #mobileDashboard .m-day-card,#mobileDashboard .m-op-card{border-radius:9px;box-shadow:none}
 }
 </style>
+<style>
+@media(max-width:820px){
+ #mView-riego>.m-page-sub,#mView-riego>.m-vista,#mView-riego>.m-cal-legend,#mDailyCards,#mDailySummary{display:none!important}
+ #mView-riego .m-calendar-shell{display:block}
+ #mView-riego .m-calendar-grid.three,#mView-riego .m-calendar-grid.day{width:100%;min-width:0;grid-template-columns:minmax(0,1.35fr) repeat(var(--m-cal-cols),minmax(0,1fr))}
+ #mView-riego .m-calendar-grid.week{min-width:540px;grid-template-columns:110px repeat(7,minmax(0,1fr))}
+ #mCalendarGrid .m-cal-cell,#mCalendarGrid .m-cal-zone-label{min-height:46px;height:auto;padding:5px;font:600 13px/1.25 var(--font);font-variant-numeric:tabular-nums}
+ #mCalendarGrid .m-cal-zone-label{border-left:0}
+ #mCalendarGrid .cr-crit{color:#862d23;background:#f9eae6}
+ #mCalendarGrid .cr-crit:before{content:'●';font-size:8px}#mCalendarGrid .cr-crit{flex-direction:row;gap:3px}
+ .cr-metric-row,.cr-mapbar,#crMapSelection{display:flex;align-items:center;justify-content:space-between;gap:6px}
+ .cr-metric-row{margin:6px 0}.cr-metric-row select{max-width:74%;min-height:40px;padding:4px;border:1px solid #ccd8cc;border-radius:6px;background:white;font:inherit;font-size:13px}.cr-metric-row small{color:#862d23}
+ .cr-mapbar button,#crAlertList button,#crMapSelection button{min-height:44px;border:0;border-radius:6px;padding:6px 10px;background:#fff;color:#24583b;font:600 13px/1.35 var(--font);cursor:pointer}
+ .cr-mapbar{margin-bottom:5px}.cr-mapbar #crAlerts{text-align:left;flex:1}.cr-mapbar #crAlerts.has-critical{background:#faeae5;color:#852e24}
+ #crAlertList button{display:block;width:100%;text-align:left;border-bottom:1px solid #dde4da}
+ #viewGeneralMobileMount #vgSum{display:none}
+ #viewGeneralMobileMount:not(.show-layers) .vg-layers{display:none}
+ #viewGeneralMobileMount .vg-stage{height:clamp(240px,46dvh,500px)}
+ #crMapSelection{margin-top:5px;background:white;border-radius:8px;padding:7px 10px}#crMapSelection small{display:block}
+ #mobileDashboard .m-header{padding-block:5px}#mobileDashboard .m-header-top{margin-bottom:2px}#mobileDashboard .m-context>summary{min-height:40px}
+}
+</style>
 </head>
 <body><div class="app">
 
@@ -1918,6 +1940,7 @@ p{text-wrap:pretty}
         <span id="mCalendarModeLabel" hidden></span>
       </div>
       <div class="vista-ctl m-vista" role="group" aria-label="Qué mostrar en el calendario"><div class="seg"><button data-vista="modo" data-val="acum" onclick="setVista('modo','acum')">Acumulado</button><button data-vista="modo" data-val="dia" onclick="setVista('modo','dia')">Diario</button></div><div class="seg"><button data-vista="unidad" data-val="tiempo" onclick="setVista('unidad','tiempo')">Tiempo</button><button data-vista="unidad" data-val="mm" onclick="setVista('unidad','mm')">mm</button></div></div>
+      <div class="cr-metric-row"><select id="crMetric" aria-label="Valor por zona y día" onchange="renderMobileCalendarGrid()"><option value="time">Tiempo acumulado (h:min)</option><option value="aa">Agua aprovechable (%)</option><option value="mm">Lámina acumulada (mm)</option><option value="dayTime">Tiempo del día (h:min)</option><option value="dayMm">Lámina del día (mm)</option></select><small>● Crítico</small></div>
       <div class="m-daily-summary" id="mDailySummary"></div>
       <div class="m-daily-cards" id="mDailyCards"></div>
       <div class="m-calendar-shell"><div class="m-calendar-grid week" id="mCalendarGrid"></div></div>
@@ -1960,7 +1983,8 @@ p{text-wrap:pretty}
         <button aria-pressed="false" onclick="mobileMapMode(true)">Por válvula</button>
       </div>
       <section id="mobileValves" hidden><h2>Estado por válvula</h2><p>Agua aprovechable hoy · Equipo seleccionado</p><div id="mobileValveGrid"></div></section>
-      <div id="viewGeneralMobileMount"></div>
+      <div id="crMapTools"><div class="cr-mapbar"><button id="crAlerts" onclick="crToggleAlerts()" aria-expanded="false">Cargando zonas…</button><button id="crLayers" aria-expanded="false" onclick="crToggleLayers()">Capas ▾</button></div><div id="crAlertList" hidden></div></div>
+      <div id="viewGeneralMobileMount"></div><div id="crMapSelection" hidden></div>
     </section>
     <section class="m-view" id="mView-vivero">
       <div class="m-page-title">Vivero</div>
@@ -4934,38 +4958,43 @@ function mobileOpenCalendarCell(znId,date){
   document.getElementById('mCellSheetScrim')?.classList.add('show');document.getElementById('mCellSheet')?.classList.add('show');
 }
 function renderMobileCalendarGrid(){
-  const grid=document.getElementById('mCalendarGrid');if(!grid)return;
+  const grid=document.getElementById('mCalendarGrid'),metric=document.getElementById('crMetric');
   const days=semDias(G.off),indexes=mobileCalendarViewIndexes(),today=fs(new Date());
   mobileUpdateCalendarHeading(indexes);
-  const cls=MOBILE.calendarView==='day'?'day':MOBILE.calendarView==='3day'?'three':'week';
-  grid.className='m-calendar-grid '+cls;grid.style.setProperty('--m-cal-cols',indexes.length);
-  let html='<div class="m-cal-corner">Zonas</div>';
-  indexes.forEach(i=>{const d=days[i],date=fs(d);html+=`<div class="m-cal-day-head${date===today?' today':''}${i===MOBILE.dayIndex?' selected':''}"><span class="dow">${DSS[d.getDay()]}</span><span class="num">${d.getDate()}</span></div>`;});
-  G.zonas.forEach((z,zi)=>{
-    const c=ZC[zi%ZC.length],zn=String(z.id_zona).replace(/'/g,"\\'");
-    html+=`<button class="m-cal-zone-label" style="--zone-color:${c}" onclick="mobileOpenZoneDetail('${zn}')"><strong>${z.nombre||z.id_zona}</strong><span>${z.especie||'—'} ${z.variedad||''}<br>${z.superficie_ha||'—'} ha</span></button>`;
-    indexes.forEach(i=>{
-      const date=fs(days[i]),r=(G.scDia||[]).find(x=>x.id_zona===z.id_zona&&x.fecha===date);
-      // A la vista: AG alerta, AL agua aprovechable, AK riego aplicado (columnas del DASHBOARD, sin cálculos)
-      const rDiario=riegoDiario();
-      const alerta=!rDiario&&r&&r.alerta_recomendacion_riego?String(r.alerta_recomendacion_riego):'';
-      const estA=rcAlerta(alerta),rAp=r?rcVal(r.riego_aplicado_mm):null,aAp=r?rcVal(r.agua_aprovechable):null;
-      const esRiego=esAlertaRiego(alerta);
-      const ferti=(GF.ferti||[]).filter(x=>x.id_zona===z.id_zona&&x.fecha_evento===date),hasR=!!alerta,hasF=tieneModulo('ferti')&&ferti.length>0;
-      const confR=!hasR||estaConf(G.confirmR?.[z.id_zona+'|'+date]),confF=!hasF||estaConf(G.confirmF?.[z.id_zona+'|'+date]);
-      const done=(hasR||hasF)&&confR&&confF,pendingR=hasR&&esRiego&&date<=today&&!confR;
-      const classes=['m-cal-cell',hasR?'has-riego':'',hasF?'has-ferti':'',done?'done':''].filter(Boolean).join(' ');
-      const tiempoFertTot=ferti.reduce((a,e)=>a+(parseFloat(e.tiempo_fertirriego_hrs)||0),0);
-      const dosisEstanqueTot=ferti.reduce((a,e)=>a+(parseFloat(e.dosis_producto_estanque_kg)||0),0);
-      const fertiTxt=[hm(tiempoFertTot),dosisEstanqueTot>0?dosisEstanqueTot.toFixed(1)+' kg':null].filter(Boolean).join(' · ')||(ferti[0]?prodShort(ferti[0].producto_asignado):'');
-      const lamTxt='',sinDatoM=!!r&&date<today&&!(parseFloat(r.eto_estacion_mm_dia)>0);   // día pasado sin ETo de estación
-      const main=sinDatoM?'—':hasR?estA.corto:hasF?'Ferti':(lamTxt||(r?'—':'')),sub=sinDatoM?'Sin dato estación':aAp!=null?`AA ${Math.round(aAp*100)}%`:'',apTxt=rAp!=null?`${rcNum(rAp)} mm ap.`:'';
-      const vM=sinDatoM?null:vistaValor(r,z.id_zona),tmpTxt=(vM&&vM.v>0)?vM.txt:'';   // según interruptor
-      const xRetM=r?rcVal(r.lluvia_retenida_pronostico_mm_dia):null,retTxt=(!sinDatoM&&xRetM!=null&&xRetM>0)?`${rcNum(xRetM)} mm`:'';   // X lluvia retenida   // AD tiempo_riego_acum_h
-      html+=`<button class="${classes}" style="--cell-color:${hasR?estA.col:c}" onclick="mobileOpenCalendarCell('${zn}','${date}')" aria-label="${z.nombre||z.id_zona}, ${DS[days[i].getDay()]} ${days[i].getDate()}${alerta?', '+alerta:''}${pendingR?', riego sin confirmar':''}">${main?`<span class="m-cal-time">${main}</span>`:'<span class="m-cal-empty-mark">—</span>'}${sub?`<span class="m-cal-sub" title="Agua aprovechable">${sub}</span>`:''}${apTxt?`<span class="m-cal-volume" title="Riego aplicado">${apTxt}</span>`:''}${tmpTxt?`<span class="m-cal-tiempo" title="${vM?vM.lbl:''}"><i class="ti ${vM?vM.ico:'ti-clock-hour-4'}"></i>${tmpTxt}<small>${vM?vM.corto:''}</small></span>`:''}${retTxt?`<span class="m-cal-lluvia" title="Lluvia retenida"><i class="ti ti-droplet"></i>Lluvia ${retTxt}</span>`:''}${hasF&&fertiTxt?`<span class="m-cal-ferti-pill">${fertiTxt}</span>`:''}<span class="m-cal-icons">${hasR?'<i class="ti ti-droplet water"></i>':''}${hasF?'<i class="ti ti-flask-2 ferti"></i>':''}${pendingR?'<i class="ti ti-alert-triangle pending" title="Riego sin confirmación"></i>':''}</span></button>`;
-    });
-  });
-  grid.innerHTML=html;
+  grid.className='m-calendar-grid '+({day:'day','3day':'three',week:'week'}[MOBILE.calendarView]);
+  grid.style.setProperty('--m-cal-cols',indexes.length);
+  for(const option of metric.options)option.hidden=riegoDiario()&&!['aa','dayMm'].includes(option.value);
+  if(metric.selectedOptions[0].hidden)metric.value='dayMm';
+  const rows=new Map((G.scDia||[]).map(r=>[r.id_zona+'|'+r.fecha,r]));
+  grid.replaceChildren(mobileUiNode('div','m-cal-corner','Zona'));
+  for(const i of indexes){
+    const day=days[i],head=mobileUiNode('div','m-cal-day-head'+(fs(day)===today?' today':''));
+    head.append(mobileUiNode('span','dow',DSS[day.getDay()]),mobileUiNode('span','num',String(day.getDate())));grid.append(head);
+  }
+  for(const z of G.zonas){
+    const label=mobileUiNode('button','m-cal-zone-label');
+    label.append(mobileUiNode('strong','',z.nombre||z.id_zona));label.onclick=()=>mobileOpenZoneDetail(z.id_zona);grid.append(label);
+    for(const i of indexes){
+      const date=fs(days[i]),r=rows.get(z.id_zona+'|'+date);
+      const usable=r&&!(date<today&&!(parseFloat(r.eto_estacion_mm_dia)>0));
+      const alert=usable&&!riegoDiario()?r.alerta_recomendacion_riego:'';
+      let value='—';
+      if(usable){
+        const mode=metric.value;
+        const v=rcVal(r[{aa:'agua_aprovechable',time:'tiempo_riego_acum_h',mm:'lamina_neta_acum_mm',dayMm:'lamina_neta_pronostico_mm_dia',dayTime:'lamina_neta_pronostico_mm_dia'}[mode]]);
+        if(v!=null){
+          if(mode==='aa')value=Math.round(v*100)+' %';
+          else if(mode==='time'||mode==='dayTime'){
+            const minutes=Math.round(60*(mode==='time'?v:tiempoDia(v,z.id_zona)));
+            value=Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0');
+          }else value=rcNum(v);
+        }
+      }
+      const cell=mobileUiNode('button','m-cal-cell cr-'+alTipo(alert),value);
+      cell.setAttribute('aria-label',[z.nombre||z.id_zona,date,metric.selectedOptions[0].textContent,value==='—'?'Sin dato':value,alert].filter(Boolean).join(', '));
+      cell.onclick=()=>mobileOpenCalendarCell(z.id_zona,date);grid.append(cell);
+    }
+  }
 }
 function renderMobileRiego(){
   const kpi=document.getElementById('mRiegoKpis');if(!kpi)return;
@@ -6120,7 +6149,7 @@ const mobileComfortSync=mobileSyncSelectors;
 mobileSyncSelectors=function(){mobileComfortSync();mobileContextLabel();};
 const mobileComfortRiego=renderMobileRiego;
 renderMobileRiego=function(){mobileComfortRiego();renderMobileDailyCards();mobileContextLabel();};
-MOBILE.calendarView='day';
+MOBILE.calendarView='3day';
 mobileContextLabel();
 
 
@@ -6388,7 +6417,7 @@ function vgPintar(encuadrar){
     }
     pts.push([la,lo]);
     const c=L.circle([la,lo],{radius:vgRadio(z),bubblingMouseEvents:false});
-    c.on('click',()=>vgFicha(z.id_zona));
+    c.on('click',()=>isMobileView()?crSelectMapZone(z):vgFicha(z.id_zona));
     c.bindTooltip(mtEsc(z.nombre||z.id_zona),{permanent:VG.mapa.getZoom()>=16,direction:'center',className:'vg-eti'});
     VG.gZonas.addLayer(c);VG.cap[z.id_zona]=c;
     const img=VG.img[z.id_zona];
@@ -6417,6 +6446,7 @@ function vgOpacidad(v){
 }
 function vgSetCapa(k){VG.capa=k;vgEstilo();vgControles();}
 function vgResumen(){
+  if(isMobileView())crMapSummary();
   const sum=document.getElementById('vgSum');if(!sum)return;
   const sp=document.getElementById('sp'),pred=sp&&sp.selectedIndex>=0?sp.options[sp.selectedIndex].text:'Predio';
   const n=VG.zonas.length,diario=riegoDiario();
@@ -6500,6 +6530,7 @@ function vgFicha(id){
   document.getElementById('vgStage')?.classList.add('vg-open');
 }
 function vgCerrar(){
+  const compact=document.getElementById('crMapSelection');if(compact)compact.hidden=true;
   document.getElementById('vgPanel')?.classList.remove('open');
   document.getElementById('vgStage')?.classList.remove('vg-open');
   if(VG.sel){VG.sel=null;vgEstilo();vgResumen();}
@@ -6551,11 +6582,40 @@ function vgMoverMovil(){
 <script>
 function mobileMapMode(valves){
   vgCerrar();
+  document.getElementById('crMapTools').hidden=valves;
   document.getElementById('mobileValves').hidden=!valves;
   document.getElementById('viewGeneralMobileMount').hidden=valves;
   document.querySelectorAll('.cr-map-tabs button').forEach((b,i)=>b.setAttribute('aria-pressed',String(Boolean(i)===valves)));
   if(valves)mobileRenderValves();
   else requestAnimationFrame(()=>VG.mapa?.invalidateSize());
+}
+function crToggleLayers(){
+  const open=document.getElementById('viewGeneralMobileMount').classList.toggle('show-layers');
+  document.getElementById('crLayers').setAttribute('aria-expanded',String(open));
+}
+function crToggleAlerts(){
+  const list=document.getElementById('crAlertList');list.hidden=!list.hidden;
+  document.getElementById('crAlerts').setAttribute('aria-expanded',String(!list.hidden));
+}
+function crMapSummary(){
+  const button=document.getElementById('crAlerts'),list=document.getElementById('crAlertList');
+  const critical=VG.zonas.filter(z=>!riegoDiario()&&alTipo(VG.dia[z.id_zona]?.alerta_recomendacion_riego)==='crit');
+  const count=VG.zonas.length;
+  button.textContent=critical.length?critical.length+' de '+count+' zonas en riego crítico ›':count?count+' zonas en el mapa':'Sin zonas con coordenadas';
+  button.disabled=!critical.length;button.classList.toggle('has-critical',!!critical.length);
+  list.replaceChildren();list.hidden=true;button.setAttribute('aria-expanded','false');
+  for(const z of critical){
+    const b=mobileUiNode('button','',z.nombre||z.id_zona);
+    b.onclick=()=>{const layer=VG.cap[z.id_zona];if(layer)VG.mapa.panTo(layer.getLatLng());crSelectMapZone(z);};
+    list.append(b);
+  }
+}
+function crSelectMapZone(z){
+  vgCerrar();VG.sel=z.id_zona;vgEstilo();crMapSummary();
+  const box=document.getElementById('crMapSelection'),d=VG.dia[z.id_zona]||{},aa=rcVal(d.agua_aprovechable);
+  const label=mobileUiNode('div','');label.append(mobileUiNode('strong','',z.nombre||z.id_zona),mobileUiNode('small','',[!riegoDiario()&&d.alerta_recomendacion_riego,aa==null?'Agua aprovechable sin dato':'Agua aprovechable '+Math.round(aa*100)+' %'].filter(Boolean).join(' · ')));
+  const b=mobileUiNode('button','','Ver detalle ›');b.onclick=()=>vgFicha(z.id_zona);
+  box.replaceChildren(label,b);box.hidden=false;box.scrollIntoView({block:'nearest'});
 }
 function mobileRenderValves(){
   if(document.getElementById('mobileValves').hidden)return;
