@@ -1558,6 +1558,21 @@ p{text-wrap:pretty}
   </div>
 </div>
 
+<div class="modal-ov" id="mdl" onclick="if(event.target===this)cerrarDescarga()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div><div class="m-t">Descargar datos</div><div class="m-s">Estación meteorológica, estación por zona y registros de riego y fertirriego de las zonas que se están mostrando.</div></div>
+      <button onclick="cerrarDescarga()" aria-label="Cerrar" style="border:none;background:var(--line2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--muted);display:grid;place-items:center;flex:none"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="m-s" id="dlAlcance" style="margin-top:10px;line-height:1.5"></div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <div style="min-width:0"><label class="fl" for="dlDesde">Desde</label><div class="fi-w"><input type="date" id="dlDesde" class="fi" style="width:100%;min-width:0;box-sizing:border-box"></div></div>
+      <div style="min-width:0"><label class="fl" for="dlHasta">Hasta</label><div class="fi-w"><input type="date" id="dlHasta" class="fi" style="width:100%;min-width:0;box-sizing:border-box"></div></div>
+    </div>
+    <div class="m-msg" id="dlmsg"></div>
+    <button class="btn-p" id="dlGo" onclick="downloadEstacion()">Descargar Excel</button>
+  </div>
+</div>
 <div class="modal-ov" id="meq" onclick="if(event.target===this)closeEq()">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -1600,7 +1615,7 @@ p{text-wrap:pretty}
 
   </div>
   <div class="hdr-right">
-    <button class="dlbtn" id="dlEst" onclick="downloadEstacion()" title="Descargar datos de la estación (toda la temporada) en Excel"><i class="ti ti-download"></i><span class="dlbtn-txt">Estación</span></button>
+    <button class="dlbtn" id="dlEst" onclick="abrirDescarga()" title="Descargar estación y registros de riego en Excel"><i class="ti ti-download"></i><span class="dlbtn-txt">Estación</span></button>
     <div class="clim-badge" title="ETo media diaria del pronóstico semanal"><i class="ti ti-sun" style="color:var(--amber)"></i><span style="color:var(--subtle);font-size:11px">ETo</span><span id="ct">—</span><span style="color:var(--subtle);font-size:11px">mm/d</span></div>
     <div class="usr-btn" onclick="tgM(event)" id="ubtn">
       <div class="avatar" id="uini">—</div>
@@ -1815,7 +1830,7 @@ p{text-wrap:pretty}
     <div class="m-header-top">
       <div class="m-logo"><span style="color:#1A5276">Crono</span><span style="color:#1E8449">Riego</span><small>móvil</small></div>
       <div class="m-header-actions">
-        <button class="m-icon-btn" onclick="downloadEstacion()" aria-label="Descargar estación"><i class="ti ti-download"></i></button>
+        <button class="m-icon-btn" onclick="abrirDescarga()" aria-label="Descargar estación y registros"><i class="ti ti-download"></i></button>
         <button class="m-avatar-btn" onclick="toggleMobileUser(event)" aria-label="Menú de usuario"><span class="m-avatar" id="mUserInitial">—</span></button>
         <div class="m-user-menu" id="mUserMenu">
           <button id="mAdmin" hidden onclick="location.href='adminV2.html'"><i class="ti ti-shield-lock"></i>Panel administrador</button>
@@ -2039,9 +2054,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAlPanel();clos
 
 async function qP(rsId){const {data}=await db.from('v_predios').select('*').eq('id_rs',rsId);return data||[];}
 async function qE(prId){const {data}=await db.from('v_equipos').select('*').eq('id_predio',prId);return data||[];}
+const EQ_TODOS='__todos__';
+function esTodos(){return document.getElementById('se')?.value===EQ_TODOS;}
+function equiposPredio(){return [...(document.getElementById('se')?.options||[])].filter(o=>o.value&&o.value!==EQ_TODOS&&o.value!=='Sin equipos').map(o=>({id:o.value,nombre:o.textContent}));}
+function equipoDeZona(znId){return ((G.zonasAll||[]).find(z=>z.id_zona===znId)||{}).id_equipo||'';}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí').order('id_zona',{ascending:true});return data||[];}
 async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal,etapa_fisiologica').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return completarRiegoRec(data||[]);}
 async function qNDVI(znIds){if(!znIds.length)return{};const desde=fs(new Date(Date.now()-400*864e5));const {data}=await db.from('ndvi_historial').select('id_zona,fecha,ndvi,kc').in('id_zona',znIds).gte('fecha',desde).order('fecha',{ascending:false}).limit(5000);const m={};(data||[]).forEach(r=>{const z=r.id_zona;if(!m[z])m[z]={ndvi:parseFloat(r.ndvi),kc:parseFloat(r.kc),fecha:r.fecha,hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r.ndvi),fecha:r.fecha?.toString().slice(0,10)});});return m;}
+async function qSEMVarios(ids){
+  const ss=(await Promise.all(ids.map(id=>qSEM(id)))).filter(Boolean);
+  if(!ss.length)return null;
+  const tot=ss.reduce((a,x)=>a+(parseFloat(x.energia_total_kwh??x.energia_kwh??0)||0),0);
+  return {...ss[0],id_equipo:EQ_TODOS,energia_total_kwh:tot,energia_kwh:tot};
+}
 async function qSEM(eqId){const {data}=await db.from('sc_demanda_hidrica_semanal_equipo').select('*').eq('id_equipo',eqId).order('numero_semana',{ascending:false}).limit(1);return data?.[0]||null;}
 async function qMapas(znIds){if(!znIds.length)return{};const {data}=await db.from('ndvi_imagenes').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
 async function qCalc(znIds){if(!znIds.length)return{};const {data}=await db.from('sc_calculos_estaticos_zona').select('*').in('id_zona',znIds);const m={};(data||[]).forEach(r=>{m[r.id_zona]=r;});return m;}
@@ -2411,7 +2436,8 @@ async function onPredio(){
   const prId=document.getElementById('sp').value;
   const es=await qE(prId);
   const se=document.getElementById('se');
-  se.innerHTML=es.length?es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  se.innerHTML=es.length?(es.length>1?`<option value="${EQ_TODOS}">Todos</option>`:'')+es.map(e=>`<option value="${e.id_equipo}">${e.nombre}</option>`).join(''):'<option>Sin equipos</option>';
+  if(es.length>1)se.value=EQ_TODOS;
   G.estanques=await qEstanquesNombres(prId);
   G.pozos=await qPozosNombres(prId);
   if(es.length)await onEquipo();
@@ -2419,10 +2445,20 @@ async function onPredio(){
 }
 async function onEquipo(){
   const eqId=document.getElementById('se').value;
-  G.zonasAll=await qZ(eqId);
-  poblarOperaciones();
-  G.zonas=filtrarPorOperacion(G.zonasAll);
-  await qEquipoOpDefaults(eqId);
+  if(eqId===EQ_TODOS){
+    // Todos: zonas de todos los equipos del predio; el nombre lleva el equipo para distinguirlas
+    const eqs=equiposPredio();
+    const res=await Promise.all(eqs.map(e=>qZ(e.id).then(zs=>zs.map(z=>({...z,_nomBase:z.nombre,nombre:`${z.nombre||'Zona'} · ${e.nombre}`})))));
+    G.zonasAll=res.flat();
+    poblarOperaciones();
+    G.zonas=filtrarPorOperacion(G.zonasAll);
+    await qEquipoOpDefaults(eqs.map(e=>e.id));
+  }else{
+    G.zonasAll=await qZ(eqId);
+    poblarOperaciones();
+    G.zonas=filtrarPorOperacion(G.zonasAll);
+    await qEquipoOpDefaults([eqId]);
+  }
   if(G.zonas.length)await loadRender();
   if(TAB==='operacion')loadRenderOperacion();
   marcarTabsPlan();
@@ -2453,7 +2489,7 @@ async function loadRender(){
   const dias=semDias(G.off);
   const fi=fs(dias[0]),ff=fs(dias[6]);
   const znIds=G.zonas.map(z=>z.id_zona);
-  const [sc,ndvi,sem,mapas,calc,vol]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),qSEM(eqId),qMapas(znIds),qCalc(znIds),qVolResumen(znIds,isoWeekKey(dias[0]))]);
+  const [sc,ndvi,sem,mapas,calc,vol]=await Promise.all([qSC(znIds,fi,ff),qNDVI(znIds),(eqId===EQ_TODOS?qSEMVarios(equiposPredio().map(e=>e.id)):qSEM(eqId)),qMapas(znIds),qCalc(znIds),qVolResumen(znIds,isoWeekKey(dias[0]))]);
   G.scDia=sc;G.ndvi=ndvi;G.mapas=mapas;G.calc=calc;G.sem=sem;G.vol=vol;recalcTiempoDiario(G.scDia,calc);
   await Promise.all([
     qConfirmaciones(znIds,'riego',fi,ff),
@@ -3231,49 +3267,110 @@ async function qEstacionMeteo(prId){
   return out;
 }
 
+// ===== Descarga "Estación": rango de fechas + registros de riego y fertirriego =====
+function dlFmt(d){return d?String(d).slice(0,10).split('-').reverse().join('-'):'';}
+function dlAlcance(){
+  const pred=document.getElementById('sp')?.selectedOptions?.[0]?.textContent||'';
+  const eq=esTodos()?`Todos (${equiposPredio().map(e=>e.nombre).join(', ')})`:(document.getElementById('se')?.selectedOptions?.[0]?.textContent||'');
+  const op=G.opFiltro?opLabel(G.opFiltro):'';
+  const zs=(G.zonas||[]).map(z=>z._nomBase||z.nombre||z.id_zona);
+  return {pred,eq,op,zs};
+}
+function abrirDescarga(){
+  if(!G.zonas||!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
+  const a=dlAlcance();
+  document.getElementById('dlAlcance').innerHTML=`<b>${mtEsc(a.pred)}</b> · Equipo: ${mtEsc(a.eq)}${a.op?' · '+mtEsc(a.op):''}<br>${a.zs.length} zona${a.zs.length===1?'':'s'}: ${mtEsc(a.zs.slice(0,10).join(', '))}${a.zs.length>10?` y ${a.zs.length-10} más`:''}`;
+  const d=document.getElementById('dlDesde'),h=document.getElementById('dlHasta');
+  if(!d.value)d.value=iniTemporadaFerti();
+  if(!h.value)h.value=fs(new Date());
+  const m=document.getElementById('dlmsg');m.style.display='none';m.className='m-msg';
+  document.getElementById('mdl').classList.add('open');
+}
+function cerrarDescarga(){document.getElementById('mdl').classList.remove('open');}
+
 async function downloadEstacion(){
-  const btn=document.getElementById('dlEst');
-  if(!G.zonas.length){alert('Selecciona un equipo con zonas primero.');return;}
-  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i>Generando...';
+  const btn=document.getElementById('dlGo'),msg=document.getElementById('dlmsg');
+  const desde=document.getElementById('dlDesde').value,hasta=document.getElementById('dlHasta').value;
+  const err=t=>{msg.style.display='block';msg.className='m-msg err';msg.textContent=t;};
+  if(!desde||!hasta)return err('Elige las dos fechas.');
+  if(desde>hasta)return err('La fecha "desde" es posterior a la fecha "hasta".');
+  if(!G.zonas||!G.zonas.length)return err('No hay zonas para descargar.');
+  const orig=btn.textContent;btn.disabled=true;btn.textContent='Generando…';msg.style.display='none';
   try{
+    const a=dlAlcance();
     const znIds=G.zonas.map(z=>z.id_zona);
-    const znName={};G.zonas.forEach(z=>znName[z.id_zona]=z.nombre||z.id_zona);
-    const {data,error}=await db.from('sc_demanda_hidrica_diaria_zona')
-      .select('fecha,id_zona,eto_estacion_mm_dia,etc_estacion_mm_dia,lamina_neta_riego_estacion_mm,tiempo_de_riego_estacion_horas,lluvia_estacion_mm_dia')
-      .in('id_zona',znIds).order('id_zona',{ascending:true}).order('fecha',{ascending:true});
-    if(error)throw error;
-    const rows=(data||[]).filter(r=>
-      (parseFloat(r.eto_estacion_mm_dia)||0)>0 || (parseFloat(r.lamina_neta_riego_estacion_mm)||0)>0 ||
-      (parseFloat(r.tiempo_de_riego_estacion_horas)||0)>0 || (parseFloat(r.lluvia_estacion_mm_dia)||0)>0
-    ).map(r=>({
-      'Fecha':r.fecha,
-      'Zona':znName[r.id_zona]||r.id_zona,
-      'ETo estación (mm/día)':parseFloat(r.eto_estacion_mm_dia)||0,
-      'ETc estación (mm/día)':parseFloat(r.etc_estacion_mm_dia)||0,
-      'Lámina neta estación (mm)':parseFloat(r.lamina_neta_riego_estacion_mm)||0,
-      'Tiempo riego estación (h)':parseFloat(r.tiempo_de_riego_estacion_horas)||0,
-      'Lluvia estación (mm)':parseFloat(r.lluvia_estacion_mm_dia)||0
+    const zInfo={};G.zonas.forEach(z=>zInfo[z.id_zona]={nom:z._nomBase||z.nombre||z.id_zona,eq:z.id_equipo,ha:parseFloat(z.superficie_ha)||0});
+    const eqNom=id=>(equiposPredio().find(e=>e.id===id)||{}).nombre||id||'';
+    const n=v=>v===null||v===undefined||v===''?null:parseFloat(v);
+    const r2=v=>v==null||isNaN(v)?null:Math.round(v*100)/100;
+    // 1) Estación por zona (demanda diaria) en el rango
+    const dem=[];
+    for(let off=0;;off+=1000){
+      const {data,error}=await db.from('sc_demanda_hidrica_diaria_zona')
+        .select('fecha,id_zona,eto_estacion_mm_dia,etc_estacion_mm_dia,lluvia_estacion_mm_dia,lamina_neta_riego_estacion_mm,tiempo_de_riego_estacion_horas,riego_aplicado_mm')
+        .in('id_zona',znIds).gte('fecha',desde).lte('fecha',hasta)
+        .order('fecha',{ascending:true}).order('id_zona',{ascending:true}).range(off,off+999);
+      if(error)throw error;
+      (data||[]).forEach(r=>dem.push(r));
+      if(!data||data.length<1000)break;
+    }
+    const zonaRows=dem.map(r=>({
+      'Fecha':r.fecha,'Equipo':eqNom(zInfo[r.id_zona]?.eq),'Zona':zInfo[r.id_zona]?.nom||r.id_zona,
+      'ETo estación (mm/día)':n(r.eto_estacion_mm_dia),'ETc estación (mm/día)':n(r.etc_estacion_mm_dia),
+      'Lluvia estación (mm)':n(r.lluvia_estacion_mm_dia),'Lámina neta estación (mm)':n(r.lamina_neta_riego_estacion_mm),
+      'Tiempo riego estación (h)':n(r.tiempo_de_riego_estacion_horas),'Riego aplicado en el balance (mm)':n(r.riego_aplicado_mm)
     }));
-    // Registros diarios de la estación meteorológica del predio (sc_estacion_meteo_diaria)
-    const met=await qEstacionMeteo(document.getElementById('sp').value);
-    if(!rows.length&&!met.length){alert('No hay datos de estación registrados para este equipo todavía.');btn.disabled=false;btn.innerHTML=orig;return;}
+    // 2) Estación meteorológica del predio en el rango
+    const met=(await qEstacionMeteo(document.getElementById('sp').value)).filter(r=>r['Fecha']>=desde&&r['Fecha']<=hasta);
+    // 3) Registros de riego y fertirriego hechos en la plataforma (ejecutados y no ejecutados)
+    const regs=[];
+    for(let off=0;;off+=1000){
+      const {data,error}=await db.from('sc_confirmacion_ejecucion').select('*').in('id_zona',znIds)
+        .order('fecha_recomendada',{ascending:true}).range(off,off+999);
+      if(error)throw error;
+      (data||[]).forEach(r=>regs.push(r));
+      if(!data||data.length<1000)break;
+    }
+    const calc=G.calc||{};
+    const fReg=r=>String(r.fecha_ejecucion||r.fecha_recomendada||'');
+    const regRows=regs.filter(r=>{const f=fReg(r);return f>=desde&&f<=hasta;})
+      .sort((x,y)=>fReg(x).localeCompare(fReg(y))||String(zInfo[x.id_zona]?.nom||'').localeCompare(String(zInfo[y.id_zona]?.nom||''),'es',{numeric:true}))
+      .map(r=>{
+        const zi=zInfo[r.id_zona]||{},h=n(r.tiempo_horas),it=n(calc[r.id_zona]?.intensidad_precip_neta_mmh);
+        const lam=h!=null&&it?r2(h*it):null,vol=lam!=null&&zi.ha?Math.round(lam*zi.ha*10*10)/10:null;
+        return {
+          'Tipo':r.tipo==='fertirriego'?'Fertirriego':'Riego','Fecha recomendada':r.fecha_recomendada||null,'Fecha ejecución':r.fecha_ejecucion||null,
+          'Equipo':eqNom(r.id_equipo||zi.eq),'Zona':zi.nom||r.id_zona,'Ejecutado':estaConf(r)?'Sí':'No',
+          'Horas':r2(h),'Lámina aplicada (mm)':lam,'Volumen (m³)':vol,
+          'Producto':r.producto_asignado||null,'Dosis a aplicar (kg)':r2(n(r.dosis_aplicar_kg)),'Dosis en estanque (kg)':r2(n(r.dosis_producto_estanque_kg)),
+          'Solución madre (L)':r2(n(r.volumen_sol_madre_l)),'Solución a inyectar (L)':r2(n(r.vol_sol_madre_inyectar_l)),
+          '% inyección':r.pct_inyeccion==null?null:r2(r.pct_inyeccion*100),'Ratio inyección':r.ratio_inyeccion||null,
+          'Operario':r.operario||null,'Profesional':r.profesional||null,'Registrado el':fmtTS(r.actualizado_en||r.creado_en)
+        };
+      });
+    // Libro: cada hoja parte con 3 líneas que dicen qué se descargó
+    const info=[
+      [`CronoRiego · Predio ${a.pred} · Equipo: ${a.eq}${a.op?' · '+a.op:''}`],
+      [`${a.zs.length} zona${a.zs.length===1?'':'s'}: ${a.zs.join(', ')}`],
+      [`Período: ${dlFmt(desde)} al ${dlFmt(hasta)} · descargado el ${dlFmt(fs(new Date()))}`],[]];
     const wb=XLSX.utils.book_new();
-    if(met.length){
-      const wm=XLSX.utils.json_to_sheet(met);
-      wm['!cols']=[{wch:12},{wch:9},{wch:10},{wch:11},{wch:11},{wch:11},{wch:9},{wch:9},{wch:9},{wch:11},{wch:12},{wch:11},{wch:11},{wch:10}];
-      XLSX.utils.book_append_sheet(wb,wm,'Estación meteorológica');
-    }
-    if(rows.length){
-      const ws=XLSX.utils.json_to_sheet(rows);
-      ws['!cols']=[{wch:12},{wch:16},{wch:18},{wch:18},{wch:20},{wch:20},{wch:16}];
-      XLSX.utils.book_append_sheet(wb,ws,'Estación por zona');
-    }
-    const eqNom=document.getElementById('se').selectedOptions[0]?.textContent.replace(/[^a-zA-Z0-9]/g,'_')||'equipo';
-    XLSX.writeFile(wb,`Estacion_${eqNom}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  }catch(err){
-    console.error(err);alert('Error al descargar: '+(err.message||err));
+    const hoja=(json,nombre,anchos,vacio)=>{
+      const ws=XLSX.utils.aoa_to_sheet(info);
+      if(json.length)XLSX.utils.sheet_add_json(ws,json,{origin:'A5'});else XLSX.utils.sheet_add_aoa(ws,[[vacio]],{origin:'A5'});
+      ws['!cols']=anchos.map(w=>({wch:w}));
+      XLSX.utils.book_append_sheet(wb,ws,nombre);
+    };
+    hoja(met,'Estación meteorológica',[12,9,10,11,11,11,9,9,9,11,12,11,11,10],'Sin datos de la estación meteorológica en el período.');
+    hoja(zonaRows,'Estación por zona',[12,14,22,16,16,14,18,18,20],'Sin datos de estación por zona en el período.');
+    hoja(regRows,'Registros de riego',[12,14,14,14,22,10,8,12,12,18,12,12,12,12,10,10,18,18,18],'Sin registros de riego ni fertirriego en el período.');
+    const safe=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+    const eqTxt=esTodos()?'Todos':(document.getElementById('se')?.selectedOptions?.[0]?.textContent||'equipo');
+    XLSX.writeFile(wb,`Estacion_${safe(a.pred)}_${safe(eqTxt)}_${desde}_a_${hasta}.xlsx`);
+    cerrarDescarga();
+  }catch(e){
+    console.error(e);err('Error al descargar: '+(e.message||e));
   }finally{
-    btn.disabled=false;btn.innerHTML=orig;
+    btn.disabled=false;btn.textContent=orig;
   }
 }
 
@@ -3283,15 +3380,20 @@ let EQ_OP={operario_default:'',profesional_default:''};
 // Confirmaciones cargadas de la semana visible, indexadas por "id_zona|fecha_recomendada"
 G.confirmR={};G.confirmF={};
 
-async function qEquipoOpDefaults(eqId){
-  EQ_OP={operario_default:'',profesional_default:''};
-  if(!eqId)return;
+let EQ_OP_MAP={};
+async function qEquipoOpDefaults(ids){
+  EQ_OP={operario_default:'',profesional_default:''};EQ_OP_MAP={};
+  ids=(Array.isArray(ids)?ids:[ids]).filter(Boolean);
+  if(!ids.length)return;
   try{
-    const {data}=await db.from('sc_equipo_operarios').select('*').eq('id_equipo',eqId).limit(1);
-    if(data&&data[0]){EQ_OP.operario_default=data[0].operario_default||'';EQ_OP.profesional_default=data[0].profesional_default||'';}
+    const {data}=await db.from('sc_equipo_operarios').select('*').in('id_equipo',ids);
+    (data||[]).forEach(r=>{EQ_OP_MAP[r.id_equipo]={operario_default:r.operario_default||'',profesional_default:r.profesional_default||''};});
+    if(ids.length===1&&EQ_OP_MAP[ids[0]])EQ_OP={...EQ_OP_MAP[ids[0]]};
   }catch(e){/* tabla puede no existir todavía */}
 }
+function eqOpZona(znId){return EQ_OP_MAP[equipoDeZona(znId)]||EQ_OP;}
 function openEq(){
+  if(esTodos()){alert('Elige un equipo en el selector para editar sus datos.');return;}
   document.getElementById('eqOperario').value=EQ_OP.operario_default||'';
   document.getElementById('eqProfesional').value=EQ_OP.profesional_default||'';
   document.getElementById('eqmsg').style.display='none';document.getElementById('eqmsg').className='m-msg';
@@ -3338,8 +3440,8 @@ function confirmBoxHtml(tipo,znId,fechaRecom,tiempoRecom){
   const fechaEjec=existente?existente.fecha_ejecucion:fechaRecom;
   const tiempoValRaw=existente?(existente.tiempo_horas??tiempoRecom??''):(tiempoRecom??'');
 const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
-  const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
-  const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
+  const operario=existente?(existente.operario||''):(eqOpZona(znId).operario_default||'');
+  const profesional=existente?(existente.profesional||''):(eqOpZona(znId).profesional_default||'');
   const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
   return `<div class="d-section">
     <div class="d-section-t">Confirmar ejecución</div>
@@ -3381,8 +3483,8 @@ function confirmBoxHtmlFerti(znId,fecha,e){
   const pctExistente=existente&&existente.pct_inyeccion!=null?existente.pct_inyeccion*100:null;
   const pctIny=round2(pctExistente!=null?pctExistente:(e.pct_inyeccion!=null?e.pct_inyeccion*100:null));
   const ratioVal=existente?(existente.ratio_inyeccion||e.ratio_inyeccion||''):(e.ratio_inyeccion||'');
-  const operario=existente?(existente.operario||''):(EQ_OP.operario_default||'');
-  const profesional=existente?(existente.profesional||''):(EQ_OP.profesional_default||'');
+  const operario=existente?(existente.operario||''):(eqOpZona(znId).operario_default||'');
+  const profesional=existente?(existente.profesional||''):(eqOpZona(znId).profesional_default||'');
   const ultGuardado=existente?fmtTS(existente.actualizado_en||existente.creado_en):null;
   return `<div class="d-section">
     <div class="d-section-t">Confirmar ejecución</div>
@@ -3411,7 +3513,7 @@ function confirmBoxHtmlFerti(znId,fecha,e){
   </div>`;
 }
 async function guardarConfirmacion(tipo,znId,fechaRecom,uid){
-  const eqId=document.getElementById('se').value;
+  const eqId=equipoDeZona(znId)||(esTodos()?null:document.getElementById('se').value);
   const btn=document.getElementById(uid+'_save'),msg=document.getElementById(uid+'_msg');
   const confirmado=document.getElementById(uid+'_chk').checked;
   const getNum=id=>{const el=document.getElementById(uid+id);return (!el||el.value==='')?null:parseFloat(el.value);};
@@ -4895,7 +4997,11 @@ function showMaintenanceToast(text){
 
 const mtIso=id=>{const v=mtVal(id);return v?new Date(v).toISOString():new Date().toISOString();};
 const mtCurrentPredio=()=>document.getElementById('sp')?.value||'';
-const mtCurrentEquipo=()=>document.getElementById('se')?.value||'';
+const mtCurrentEquipo=()=>{const v=document.getElementById('se')?.value||'';if(v!==EQ_TODOS)return v;return document.getElementById('mtEquipoId')?.tagName==='SELECT'?document.getElementById('mtEquipoId').value:'';};
+function mtCampoEquipo(){
+  if(!esTodos())return mtField('Equipo','mtEquipoId','text',`readonly value="${mtEsc(nomEquipo(mtCurrentEquipo()))}"`);
+  return `<div class="maint-field"><label for="mtEquipoId">Equipo</label><select class="maint-input" id="mtEquipoId" required>${equiposPredio().map(e=>`<option value="${mtEsc(e.id)}">${mtEsc(e.nombre)}</option>`).join('')}</select></div>`;
+}
 const mtCurrentPredioName=()=>document.getElementById('sp')?.selectedOptions?.[0]?.textContent||mtCurrentPredio();
 const mtCurrentEquipoName=()=>document.getElementById('se')?.selectedOptions?.[0]?.textContent||mtCurrentEquipo();
 
@@ -5068,7 +5174,7 @@ function maintenanceEquipmentForm(){
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
     <div class="maint-subhead"><i class="ti ti-list-details"></i>Identificación</div>
     ${mtField('Fecha y hora','mtFechaHora','datetime-local',`required value="${mtLocalNow()}"`)}
-    ${mtField('Equipo','mtEquipoId','text',`readonly value="${mtEsc(nomEquipo(mtCurrentEquipo()))}"`)}
+    ${mtCampoEquipo()}
     <div class="maint-subhead"><i class="ti ti-gauge"></i>Lecturas hidráulicas</div>
     ${mtField('Caudal instantáneo (L/s)','mtCaudalInstantaneo','number','step="0.01" min="0"')}
     ${mtField('Caudalímetro salida bomba (m³)','mtCaudalBomba','number','step="0.01" min="0"')}
@@ -5290,7 +5396,7 @@ async function gafGuardarEmisor(){
   GAF.guardando=true;renderMaintenance();
   const pos=GAF.posActual;const fresco=!!(pos&&(Date.now()-pos.t)<30000);
   const payload={
-    id_razon_social:G.rsId,id_predio:mtCurrentPredio()||null,id_equipo:mtCurrentEquipo()||null,id_zona:GAF.zonaId,
+    id_razon_social:G.rsId,id_predio:mtCurrentPredio()||null,id_equipo:equipoDeZona(GAF.zonaId)||mtCurrentEquipo()||null,id_zona:GAF.zonaId,
     id_campana_aforo:GAF.campanaId,pos_lateral:GAF.lateral,pos_emisor:'E-'+String(GAF.emisorSeq).padStart(2,'0'),
     posicion_manguera_hilera:GAF.posicionManguera,
     caudal_nominal_l_h:GAF.caudalNominal,presion_valvula_kg_cm2:GAF.presionValvula,
@@ -5390,7 +5496,7 @@ function maintenanceFacturaFertiForm(){
   <form onsubmit="saveMaintenanceRecord(event)"><div class="maint-form-grid">
     <div class="maint-subhead"><i class="ti ti-list-details"></i>Identificación</div>
     ${mtField('Fecha de la factura','mtFechaFactura','date',`required value="${todayISODate()}"`)}
-    ${mtField('Equipo','mtEquipoId','text',`readonly value="${mtEsc(nomEquipo(mtCurrentEquipo()))}"`)}
+    ${mtCampoEquipo()}
     ${mtField('N° de factura','mtIdFactura','text','placeholder="Ej. SI-16322"')}
     ${mtProductoField()}
     ${mtField('Proveedor','mtProveedor','text')}
@@ -5529,7 +5635,7 @@ function maintenancePayload(){
   const common={id_razon_social:G.rsId,id_predio:mtCurrentPredio(),fecha_hora:mtIso('mtFechaHora'),observaciones:mtVal('mtObservaciones')||null,creado_por:G.userId,creado_por_email:G.userEmail};
   if(GM.section==='fuente')return {...common,id_estanque:mtVal('mtEstanque')||null,tipo_fuente:GM.sourceType,id_fuente:GM.sourceType==='Lluvia'?null:mtVal('mtFuenteId'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud'),ce_agua_ds_m:GM.sourceType==='Pozo'?mtNum('mtCeFuente'):null,caudal_instantaneo_ls:GM.sourceType==='Lluvia'?null:mtNum('mtCaudal'),totalizador_m3:GM.sourceType==='Pozo'?mtInt('mtTotalizador'):null,nivel_freatico_m:GM.sourceType==='Pozo'?mtNum('mtNivelFreatico'):null,nivel_estanque_m:GM.sourceType==='Pozo'?mtNum('mtNivelEstanque'):null,altura_limnimetrica_cm:GM.sourceType==='Canal'?mtInt('mtAlturaLim'):null,ultima_calibracion_caudalimetro:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
   if(GM.section==='equipo')return {...common,id_equipo:mtCurrentEquipo(),caudal_instantaneo_ls:mtNum('mtCaudalInstantaneo'),caudalimetro_salida_bomba_m3:mtNum('mtCaudalBomba'),presion_antes_filtro_bar:mtNum('mtPresionAntes'),presion_despues_filtro_bar:mtNum('mtPresionDespues'),retrolavado:mtVal('mtRetrolavado')||null,gatillante_automatico:mtVal('mtGatillante')||null,valor_gatillante:mtNum('mtValorGatillante'),duracion_ciclo_retrolavado_min:mtNum('mtDuracionRetro'),ultima_calibracion_inyectores:mtVal('mtCalibracionInyectores')||null,ultima_calibracion_caudalimetros:mtVal('mtCalibracionCaudal')||null,operario:mtVal('mtOperario')||null,profesional:mtVal('mtProfesional')||null};
-  return {...common,id_equipo:mtCurrentEquipo(),id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud')};
+  return {...common,id_equipo:equipoDeZona(mtVal('mtZonaId'))||mtCurrentEquipo()||null,id_zona:mtVal('mtZonaId'),aforo_goteros_ml_3min:mtNum('mtAforo'),numero_mediciones:mtInt('mtNumeroMediciones'),presion_valvula_bar:mtNum('mtPresionValvula'),presion_final_lateral_bar:mtNum('mtPresionFinal'),ce_salida_gotero_ds_m:mtNum('mtCeGotero'),latitud:mtNum('mtLatitud'),longitud:mtNum('mtLongitud')};
 }
 function maintenanceValidate(p){
   if(!G.rsId||!p.id_predio||!G.userId)return 'No fue posible identificar la Razón Social, el predio o el usuario.';
@@ -5562,7 +5668,7 @@ async function saveMaintenanceRecord(event){
     event?.target?.reset();
     const fecha=document.getElementById('mtFechaHora');if(fecha)fecha.value=mtLocalNow();
     const fechaF=document.getElementById('mtFechaFactura');if(fechaF)fechaF.value=todayISODate();
-    if((GM.section==='equipo'||GM.section==='factura_ferti')){const eq=document.getElementById('mtEquipoId');if(eq)eq.value=nomEquipo(mtCurrentEquipo());}
+    if((GM.section==='equipo'||GM.section==='factura_ferti')){const eq=document.getElementById('mtEquipoId');if(eq&&eq.tagName!=='SELECT')eq.value=nomEquipo(mtCurrentEquipo());}
     if(GM.section==='equipo')updateMaintenanceDelta();
     if(GM.section==='factura_ferti')updateFFTotales();
     if(GM.section==='fuente'||GM.section==='zona')initMtMap();
@@ -5649,7 +5755,7 @@ async function mtFetchExportSection(section,scope,from,to){
     // sc_confirmacion_ejecucion no tiene id_razon_social ni id_predio (solo
     // se relaciona por zona/equipo) — se acota siempre al equipo activo,
     // independiente del selector de alcance (RS completa no aplica acá).
-    q=db.from(MT_TABLES[section]).select('*').eq('id_equipo',mtCurrentEquipo()).order(dateField,{ascending:true});
+    q=db.from(MT_TABLES[section]).select('*').in('id_equipo',mtCurrentEquipo()?[mtCurrentEquipo()]:equiposPredio().map(e=>e.id)).order(dateField,{ascending:true});
   } else {
     q=db.from(MT_TABLES[section]).select('*').eq('id_razon_social',G.rsId).order(dateField,{ascending:true});
     if(scope==='predio'&&mtCurrentPredio())q=q.eq('id_predio',mtCurrentPredio());
@@ -6188,7 +6294,7 @@ function vgControles(){
   const av=document.getElementById('vgAvisos');
   if(av){
     let h='';
-    if(VG.apiladas)h+='<div class="vg-aviso">Algunas zonas comparten coordenada. Se separaron por temas visuales: esa no es su posición real.</div>';
+    if(VG.apiladas)h+='<div class="vg-aviso">Algunas zonas comparten coordenada en los estáticos. Se separaron un poco para verlas: esa no es su posición real.</div>';
     if(VG.sinCoord.length)h+=`<div class="vg-aviso">Sin coordenada, no se dibujan: ${mtEsc(VG.sinCoord.join(', '))}.</div>`;
     av.innerHTML=h;
   }
@@ -6255,7 +6361,7 @@ async function vgVerDia(id,btn){
   const tiene=()=>(G.scDia||[]).some(r=>r.id_zona===id&&r.fecha===hoy)&&(G.zonas||[]).some(x=>x.id_zona===id);
   try{
     const se=document.getElementById('se'),sop=document.getElementById('sop');
-    const otroEq=z.id_equipo&&se&&se.value!==z.id_equipo&&[...se.options].some(o=>o.value===z.id_equipo);
+    const otroEq=!esTodos()&&z.id_equipo&&se&&se.value!==z.id_equipo&&[...se.options].some(o=>o.value===z.id_equipo);
     const otraOp=G.opFiltro&&String(z.operacion??'')!==G.opFiltro;
     if(otroEq||otraOp||G.off!==0||!tiene()){
       G.opFiltro='';if(sop)sop.value='';
