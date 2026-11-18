@@ -1139,14 +1139,19 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   .tab{font-size:14px;padding:0 14px;border-bottom-width:3px;}
   .tab.active{color:#14532D;border-bottom-color:#1E8449;font-weight:700;}
   /* KPIs como tarjetas */
-  #view-riego .kpi-bar{gap:12px;padding:20px 28px 0;background:transparent;border-bottom:none;}
-  #view-riego .kpi-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  /* 18-11: KPIs compactos para que se vea mas calendario (sub-texto en 1 linea; el detalle sigue en el recuadro al pasar el mouse) */
+  #view-riego .kpi-bar{gap:10px;padding:12px 28px 0;background:transparent;border-bottom:none;}
+  #view-riego .kpi-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:9px 14px;gap:3px;}
+  #view-riego .kpi-ico{width:26px;height:26px;font-size:14px;border-radius:8px;}
+  #view-riego .kpi-val{font-size:21px;}
+  #view-riego .kpi-val .vol-u{font-size:11px;}
+  #view-riego .kpi-sub{font-size:11px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
   #view-riego .kpi-card:last-child{border-right:1px solid var(--line);}
   .kpi-lbl{font-size:11px;font-weight:700;letter-spacing:0;color:var(--muted);}
   .kpi-val{font-size:28px;letter-spacing:-.015em;}
   .kpi-sub{font-size:12px;}
   /* Cuerpo:calendario y panel como tarjetas */
-  #view-riego .body{padding:16px 28px 20px;gap:20px;}
+  #view-riego .body{padding:12px 28px 20px;gap:20px;}
   .cal-zone{background:var(--white);border:1px solid var(--line);border-radius:16px;}
   .cal-scroll{padding:0 16px 8px;} /* 18-11: sin padding arriba, asi lo que se desplaza no asoma sobre el encabezado fijo */
   .cal-tbl thead tr th{background:var(--white);border-bottom:1px solid var(--line2);color:var(--muted);font-weight:700;padding-top:12px;}
