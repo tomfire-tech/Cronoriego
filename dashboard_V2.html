@@ -608,6 +608,26 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .confirm-save:hover{background:#15803D;}
 .confirm-save:disabled{opacity:.55;cursor:not-allowed;}
 .confirm-msg{font-size:11px;padding:7px 10px;border-radius:7px;margin-top:9px;display:none;border:1px solid transparent;}
+.reg-hist{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.reg-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.reg-t{font-size:12px;font-weight:600;color:var(--ink2)}
+.reg-seg{display:inline-flex;background:var(--line2);border-radius:8px;padding:2px}
+.reg-seg button{border:0;background:transparent;font:inherit;font-size:11px;font-weight:600;color:var(--muted);padding:5px 9px;border-radius:6px;cursor:pointer}
+.reg-seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(21,35,28,.14)}
+.reg-acc{display:flex;gap:8px;margin-top:9px}
+.reg-acc button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.reg-acc button:hover{background:var(--line2)}
+.reg-cnt,.reg-vacio{font-size:11px;color:var(--muted);margin-top:8px}
+.reg-vacio.err{color:var(--red)}
+.reg-tbl{width:100%;border-collapse:collapse;margin-top:6px;font-size:12px;font-variant-numeric:tabular-nums}
+.reg-tbl th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);padding:4px 6px;border-bottom:1px solid var(--line)}
+.reg-tbl td{padding:5px 6px;border-bottom:1px solid var(--line2);color:var(--ink)}
+.reg-tbl .n{text-align:right}
+.reg-tbl tr.no td{color:var(--muted)}
+.reg-del{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:6px;font-size:14px}
+.reg-del:hover{color:var(--red);background:#FEF2F2}
+.confirm-del{margin-top:8px;width:100%;padding:8px;background:transparent;color:var(--red);border:1px solid #FECACA;border-radius:8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.confirm-del:hover{background:#FEF2F2}
 .confirm-msg.ok{display:block;background:#F0FDF4;color:var(--green);border-color:#BBF7D0;}
 .confirm-msg.err{display:block;background:#FEF2F2;color:var(--red);border-color:#FECACA;}
 .card-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 1px 3px rgba(21,35,28,.25);z-index:2;}
@@ -3004,6 +3024,7 @@ function rPanel(dias,sc,ndvi){
 const alCard=a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`;
 
 function openDia(fecha,znId){
+  G._dia={f:fecha,z:znId};
   const r=G.scDia.find(d=>d.fecha===fecha&&d.id_zona===znId);
   const z=G.zonas.find(zz=>zz.id_zona===znId);
   if(!r||!z)return;
@@ -3458,10 +3479,108 @@ const tiempoVal=tiempoValRaw===''?'':Math.round(Number(tiempoValRaw)*100)/100;
         <div><label class="confirm-fl">Profesional (recomienda)</label><input type="text" class="confirm-fi" id="${uid}_profesional" value="${profesional}" placeholder="Nombre" ${checked?'':'disabled'}></div>
       </div>
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('${tipo}','${znId}','${fechaRecom}','${uid}')">Guardar confirmación</button>
+      ${existente&&existente.id?`<button type="button" class="confirm-del" onclick="regEliminar('${existente.id}','${tipo}','${znId}','${uid}')"><i class="ti ti-trash"></i> Eliminar registro</button>`:''}
       <div class="confirm-msg" id="${uid}_msg"></div>
+      ${regBloqueHtml(tipo,znId,uid)}
     </div>
   </div>`;
 }
+// ===== Registros confirmados en el detalle del día: ver, descargar y eliminar =====
+const REG={};   // por caja: {alcance:'zona'|'todas', filas:[...]}
+function regBloqueHtml(tipo,znId,uid){
+  const t=tipo==='fertirriego'?'fertirriegos':'riegos';
+  return `<div class="reg-hist">
+    <div class="reg-top"><span class="reg-t">Registros de ${t}</span>
+      <div class="reg-seg" id="${uid}_seg" role="group" aria-label="Qué zonas mostrar">
+        <button type="button" class="on" onclick="regAlcance('${tipo}','${znId}','${uid}','zona')">Esta zona</button><button type="button" onclick="regAlcance('${tipo}','${znId}','${uid}','todas')">Todas las zonas</button>
+      </div></div>
+    <div class="reg-acc">
+      <button type="button" onclick="regVer('${tipo}','${znId}','${uid}')"><i class="ti ti-list-details"></i>Ver registros</button>
+      <button type="button" onclick="regDescargar('${tipo}','${znId}','${uid}')"><i class="ti ti-download"></i>Descargar Excel</button>
+    </div>
+    <div class="reg-lista" id="${uid}_rl"></div>
+  </div>`;
+}
+function regAlcance(tipo,znId,uid,a){
+  REG[uid]={...(REG[uid]||{}),alcance:a};
+  document.querySelectorAll('#'+uid+'_seg button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(a==='zona')));
+  if(document.getElementById(uid+'_rl')?.innerHTML)regVer(tipo,znId,uid);
+}
+function regNomZona(id){const z=(G.zonasAll||G.zonas||[]).find(x=>x.id_zona===id);return z?(z._nomBase||z.nombre||id):id;}
+async function regDatos(tipo,znId,uid){
+  const a=(REG[uid]||{}).alcance||'zona';
+  const ids=a==='zona'?[znId]:(G.zonas||[]).map(z=>z.id_zona);
+  const out=[];
+  for(let off=0;;off+=1000){
+    const {data,error}=await db.from('sc_confirmacion_ejecucion').select('*').in('id_zona',ids).eq('tipo',tipo)
+      .order('fecha_recomendada',{ascending:false}).range(off,off+999);
+    if(error)throw error;
+    (data||[]).forEach(r=>out.push(r));
+    if(!data||data.length<1000)break;
+  }
+  const ini=iniTemporadaFerti(),f=r=>String(r.fecha_ejecucion||r.fecha_recomendada||'');
+  const filas=out.filter(r=>f(r)>=ini).sort((x,y)=>f(y).localeCompare(f(x))||regNomZona(x.id_zona).localeCompare(regNomZona(y.id_zona),'es',{numeric:true}));
+  REG[uid]={...(REG[uid]||{}),alcance:a,filas,ids};
+  return filas;
+}
+function regLamina(r){const h=parseFloat(r.tiempo_horas),it=parseFloat((G.calc||{})[r.id_zona]?.intensidad_precip_neta_mmh);return isFinite(h)&&isFinite(it)&&it>0?Math.round(h*it*100)/100:null;}
+async function regVer(tipo,znId,uid){
+  const el=document.getElementById(uid+'_rl');if(!el)return;
+  el.innerHTML='<div class="reg-vacio">Cargando…</div>';
+  try{
+    const filas=await regDatos(tipo,znId,uid),todas=(REG[uid].alcance==='todas');
+    if(!filas.length){el.innerHTML=`<div class="reg-vacio">No hay ${tipo==='fertirriego'?'fertirriegos':'riegos'} registrados desde el ${dlFmt(iniTemporadaFerti())}.</div>`;return;}
+    const fx=d=>{const s=dlFmt(d);return s?s.slice(0,5):'';};
+    el.innerHTML=`<div class="reg-cnt">${filas.length} registro${filas.length===1?'':'s'} desde el ${dlFmt(iniTemporadaFerti())}</div>
+      <table class="reg-tbl"><thead><tr><th>Fecha</th>${todas?'<th>Zona</th>':''}<th class="n">Horas</th><th class="n">mm</th><th>Ejec.</th><th></th></tr></thead><tbody>
+      ${filas.slice(0,150).map(r=>`<tr${estaConf(r)?'':' class="no"'}><td>${fx(r.fecha_ejecucion||r.fecha_recomendada)}</td>${todas?`<td>${mtEsc(regNomZona(r.id_zona))}</td>`:''}
+        <td class="n">${r.tiempo_horas!=null?rcNum(parseFloat(r.tiempo_horas)):'—'}</td><td class="n">${regLamina(r)!=null?rcNum(regLamina(r)):'—'}</td>
+        <td>${estaConf(r)?'Sí':'No'}</td>
+        <td><button type="button" class="reg-del" title="Eliminar este registro" aria-label="Eliminar registro del ${fx(r.fecha_ejecucion||r.fecha_recomendada)}" onclick="regEliminar('${r.id}','${tipo}','${znId}','${uid}')"><i class="ti ti-trash"></i></button></td></tr>`).join('')}
+      </tbody></table>${filas.length>150?`<div class="reg-cnt">Se muestran los 150 más recientes; el Excel trae todos.</div>`:''}`;
+  }catch(e){el.innerHTML=`<div class="reg-vacio err">No se pudieron cargar los registros: ${mtEsc(e.message||e)}</div>`;}
+}
+async function regDescargar(tipo,znId,uid){
+  try{
+    const filas=await regDatos(tipo,znId,uid),todas=(REG[uid].alcance==='todas');
+    const zs=todas?(G.zonas||[]).map(z=>z._nomBase||z.nombre||z.id_zona):[regNomZona(znId)];
+    const a=dlAlcance(),eqNom=id=>(equiposPredio().find(e=>e.id===id)||{}).nombre||nomEquipo(id)||id||'';
+    const n=v=>v===null||v===undefined||v===''?null:Math.round(parseFloat(v)*100)/100;
+    const json=filas.map(r=>{const lam=regLamina(r),ha=parseFloat(((G.zonasAll||[]).find(z=>z.id_zona===r.id_zona)||{}).superficie_ha)||0;
+      const o={'Fecha recomendada':r.fecha_recomendada||null,'Fecha ejecución':r.fecha_ejecucion||null,'Equipo':eqNom(r.id_equipo||equipoDeZona(r.id_zona)),'Zona':regNomZona(r.id_zona),
+        'Ejecutado':estaConf(r)?'Sí':'No','Horas':n(r.tiempo_horas),'Lámina aplicada (mm)':lam,'Volumen (m³)':lam!=null&&ha?Math.round(lam*ha*10*10)/10:null};
+      if(tipo==='fertirriego')Object.assign(o,{'Producto':r.producto_asignado||null,'Dosis a aplicar (kg)':n(r.dosis_aplicar_kg),'Dosis en estanque (kg)':n(r.dosis_producto_estanque_kg),
+        'Solución madre (L)':n(r.volumen_sol_madre_l),'Solución a inyectar (L)':n(r.vol_sol_madre_inyectar_l),'% inyección':r.pct_inyeccion==null?null:n(r.pct_inyeccion*100),'Ratio inyección':r.ratio_inyeccion||null});
+      return Object.assign(o,{'Operario':r.operario||null,'Profesional':r.profesional||null,'Registrado el':fmtTS(r.actualizado_en||r.creado_en)});});
+    const info=[[`CronoRiego · Predio ${a.pred} · Equipo: ${a.eq}`],[`${todas?zs.length+' zonas':'Zona'}: ${zs.join(', ')}`],
+      [`Registros de ${tipo==='fertirriego'?'fertirriego':'riego'} desde el ${dlFmt(iniTemporadaFerti())} · descargado el ${dlFmt(fs(new Date()))}`],[]];
+    const ws=XLSX.utils.aoa_to_sheet(info);
+    if(json.length)XLSX.utils.sheet_add_json(ws,json,{origin:'A5'});else XLSX.utils.sheet_add_aoa(ws,[['Sin registros en la temporada.']],{origin:'A5'});
+    ws['!cols']=[14,14,14,22,10,8,12,12,18,12,12,12,12,10,10,18,18,18].map(w=>({wch:w}));
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,tipo==='fertirriego'?'Fertirriegos':'Riegos');
+    const safe=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+    XLSX.writeFile(wb,`Registros_${tipo==='fertirriego'?'fertirriego':'riego'}_${safe(a.pred)}_${todas?'todas_las_zonas':safe(regNomZona(znId))}_${fs(new Date())}.xlsx`);
+  }catch(e){alert('No se pudo descargar: '+(e.message||e));}
+}
+async function regEliminar(id,tipo,znId,uid){
+  const r=((REG[uid]||{}).filas||[]).find(x=>x.id===id)||Object.values(tipo==='riego'?G.confirmR:G.confirmF).find(x=>x&&x.id===id);
+  if(!r)return;
+  const fecha=dlFmt(r.fecha_ejecucion||r.fecha_recomendada);
+  if(!confirm(`¿Eliminar el ${tipo==='fertirriego'?'fertirriego':'riego'} de ${regNomZona(r.id_zona)} del ${fecha}${r.tiempo_horas!=null?' ('+rcNum(parseFloat(r.tiempo_horas))+' h)':''}?\n\nSe borra de la plataforma y, en la próxima carga a RP, también de la planilla.`))return;
+  try{
+    // copia de respaldo (quién y cuándo); si falla, igual se elimina
+    try{await db.from('sc_confirmacion_eliminada').insert({id_confirmacion:r.id,id_zona:r.id_zona,tipo:r.tipo,fila:r,eliminado_por:G.userEmail||G.userId||null});}catch(e){}
+    const {error}=await db.from('sc_confirmacion_ejecucion').delete().eq('id',id);
+    if(error)throw error;
+    const target=tipo==='riego'?G.confirmR:G.confirmF;delete target[r.id_zona+'|'+r.fecha_recomendada];
+    await loadRender();
+    if(typeof isMobileView==='function'&&isMobileView()&&typeof renderMobileAll==='function')renderMobileAll();
+    if(tipo==='riego'&&G._dia&&document.getElementById('drawer')?.classList.contains('open'))openDia(G._dia.f,G._dia.z);
+    const nuevoUid=Object.keys(REG).find(k=>document.getElementById(k+'_rl'));
+    if(nuevoUid){REG[nuevoUid]={...REG[nuevoUid],alcance:(REG[uid]||{}).alcance||'zona'};regAlcance(tipo,znId,nuevoUid,REG[nuevoUid].alcance);regVer(tipo,znId,nuevoUid);}
+  }catch(e){alert('No se pudo eliminar: '+(e.message||e));}
+}
+
 function toggleConfirmFields(uid){
   const on=document.getElementById(uid+'_chk').checked;
   document.getElementById(uid+'_box').classList.toggle('done',on);
@@ -3508,7 +3627,9 @@ function confirmBoxHtmlFerti(znId,fecha,e){
         <div><label class="confirm-fl">Profesional (recomienda)</label><input type="text" class="confirm-fi" id="${uid}_profesional" value="${profesional}" placeholder="Nombre" ${checked?'':'disabled'}></div>
       </div>
       <button class="confirm-save" id="${uid}_save" onclick="guardarConfirmacion('fertirriego','${znId}','${fecha}','${uid}')">Guardar confirmación</button>
+      ${existente&&existente.id?`<button type="button" class="confirm-del" onclick="regEliminar('${existente.id}','fertirriego','${znId}','${uid}')"><i class="ti ti-trash"></i> Eliminar registro</button>`:''}
       <div class="confirm-msg" id="${uid}_msg"></div>
+      ${regBloqueHtml('fertirriego',znId,uid)}
     </div>
   </div>`;
 }
