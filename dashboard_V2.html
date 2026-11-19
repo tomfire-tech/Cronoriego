@@ -2209,7 +2209,7 @@ function esTodos(){return document.getElementById('se')?.value===EQ_TODOS;}
 function equiposPredio(){return [...(document.getElementById('se')?.options||[])].filter(o=>o.value&&o.value!==EQ_TODOS&&o.value!=='Sin equipos').map(o=>({id:o.value,nombre:o.textContent}));}
 function equipoDeZona(znId){return ((G.zonasAll||[]).find(z=>z.id_zona===znId)||{}).id_equipo||'';}
 async function qZ(eqId){const {data}=await db.from('v_zonas').select('*').eq('id_equipo',eqId).eq('activa','Sí').order('id_zona',{ascending:true});return data||[];}
-async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal,etapa_fisiologica').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return completarRiegoRec(data||[]);}
+async function qSC(znIds,fi,ff){if(!znIds.length)return[];const {data}=await db.from('sc_demanda_hidrica_diaria_zona').select('fecha,id_zona,eto_estacion_mm_dia,eto_pronostico_mm_dia,etc_estacion_mm_dia,etc_pronostico_mm_dia,lamina_neta_riego_estacion_mm,lamina_neta_riego_pronostico_mm,tiempo_de_riego_estacion_horas,tiempo_de_riego_pronostico_horas,lluvia_estacion_mm_dia,lluvia_pronostico_mm_dia,lluvia_retenida_pronostico_mm_dia,alerta_recomendacion_riego,agua_aprovechable,kc,riego_aplicado_mm,lamina_neta_acum_mm,tiempo_riego_acum_h,calculo_umbral_riego_mm,lamina_neta_pronostico_mm_dia,fraccion_de_lavado_lr_decimal,etapa_fisiologica').in('id_zona',znIds).gte('fecha',fi).lte('fecha',ff).order('fecha',{ascending:true});return completarRiegoRec(data||[]);}
 async function qNDVI(znIds){if(!znIds.length)return{};const desde=fs(new Date(Date.now()-400*864e5));const {data}=await db.from('ndvi_historial').select('id_zona,fecha,ndvi,kc').in('id_zona',znIds).gte('fecha',desde).order('fecha',{ascending:false}).limit(5000);const m={};(data||[]).forEach(r=>{const z=r.id_zona;if(!m[z])m[z]={ndvi:parseFloat(r.ndvi),kc:parseFloat(r.kc),fecha:r.fecha,hist:[]};if(m[z].hist.length<6)m[z].hist.push({ndvi:parseFloat(r.ndvi),fecha:r.fecha?.toString().slice(0,10)});});return m;}
 async function qSEMVarios(ids){
   const ss=(await Promise.all(ids.map(id=>qSEM(id)))).filter(Boolean);
@@ -2761,7 +2761,15 @@ function rcNum(v){return (Math.round(v*100)/100).toLocaleString('es-CL',{maximum
 // Umbrales del motor: "Riego Recomendado" cuando lo consumido sin reponer llega al umbral de riego de la zona;
 // "Riego crítico" cuando el agua aprovechable baja del 45 %.
 function alTipo(a){a=String(a||'').trim().toLowerCase();if(a==='riego crítico'||a==='riego critico')return'crit';if(a==='riego recomendado'||a==='riego')return'rec';if(a==='riego parcial')return'parcial';if(a==='restricción de bomba')return'restr';return a?'otro':'ok';}
-function alAAtot(r){const aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm);if(aa==null||ac==null||ac<=0||aa>=0.98)return null;return ac/(1-aa);}
+function alAAtot(r,znId){
+  /* Regla: si el dato esta en el dashboard se usa el del dashboard; si no esta, se estima aqui.
+     Capacidad del estanque de suelo = CALCULOS ESTATICOS -> calculos_estaticos_zona.
+     Si esa zona no la trae, se estima como acumulado/(1-AA) y se muestra con "aprox.". */
+  var c=(G.calc||{})[znId];var cap=rcVal(c&&c.capacidad_estanque_suelo_mm);
+  if(cap!=null&&cap>0)return {v:cap,aprox:false};
+  var aa=rcVal(r&&r.agua_aprovechable),ac=rcVal(r&&r.lamina_neta_acum_mm);
+  if(aa==null||ac==null||ac<=0||aa>=0.98)return null;
+  return {v:ac/(1-aa),aprox:true};}
 function alPct(x){return x==null?'—':Math.round(x*100)+' %';}
 // Plantación de la zona (ESTATICOS → tabla zonas): tipo, especie y variedad. Se lee una vez por zona.
 const AL_ZT={};
@@ -2877,7 +2885,7 @@ function alPanelHtml(znId,fecha,r,hist){
   const val=(x,k)=>{const e=x.fecha<=hoy?rcVal(x[k+'_estacion_mm_dia']):null;return e!=null?e:rcVal(x[k+'_pronostico_mm_dia']);};
   const a=r.alerta_recomendacion_riego||'',tp=alTipo(a),t=alTexto(a,r,znId);
   const cls={crit:'al-crit',rec:'al-riego',ok:'al-ok'}[tp]||'al-otro';
-  const aa=rcVal(r.agua_aprovechable),ac=rcVal(r.lamina_neta_acum_mm),um=rcVal(r.calculo_umbral_riego_mm),th=rcVal(r.tiempo_riego_acum_h),tot=alAAtot(r),kc=rcVal(r.kc),etc=val(r,'etc');
+  const aa=rcVal(r.agua_aprovechable),ac=rcVal(r.lamina_neta_acum_mm),um=rcVal(r.calculo_umbral_riego_mm),th=rcVal(r.tiempo_riego_acum_h),totO=alAAtot(r,znId),tot=totO&&totO.v,kc=rcVal(r.kc),etc=val(r,'etc');
   const r1=x=>rcNum(Math.round(x*10)/10),n=(x,u)=>x==null?'—':r1(x)+(u?' '+u:'');
   let h=`<div class="al-sec"><span class="al-chip ${cls}">${mtEsc(t.tit)}</span><p class="al-txt">${mtEsc(t.txt)}</p></div>`;
   if(aa!=null){
@@ -2889,7 +2897,7 @@ function alPanelHtml(znId,fecha,r,hist){
   }
   const kp=(l,v,w)=>`<div class="al-kpi${w?' w2':''}"><small>${l}</small><strong>${v}</strong></div>`;
   h+=`<div class="al-sec"><h4>Números del día</h4><div class="al-kpis">
-    ${kp('Agua aprovechable',alPct(aa))}${kp('Capacidad del suelo',tot?'≈ '+r1(tot)+' mm':'—')}
+    ${kp('Agua aprovechable',alPct(aa))}${kp('Capacidad del suelo',tot?(totO.aprox?'≈ ':'')+r1(tot)+' mm':'—')}
     ${kp('Consumido sin reponer',n(ac,'mm'))}${kp('Umbral de riego',n(um,'mm'))}
     ${kp('Tiempo para reponer',th>0?hm(th):'—')}${kp('Consumo del día (ETc)',n(etc,'mm'))}
     ${kp('Kc del cultivo',kc!=null?rcNum(kc):'—')}${kp('ETo del día',n(val(r,'eto'),'mm'))}
@@ -3299,6 +3307,20 @@ function crNdviHist(hist){
   </div>`;
 }
 
+function kcDashboard(znId){
+  /* El Kc SIEMPRE sale del dashboard (sc_demanda_hidrica_diaria_zona). No se usa el de
+     ndvi_historial / ndvi_imagenes: ese es la regresion generica Kc=1.457*NDVI+0.1 que
+     calcula Descarga_DD_V2.py, sin la formula por especie ni el techo de la Estrategia. */
+  var fil=(G.scDia||[]).filter(function(r){return r.id_zona===znId&&r.kc!=null&&r.kc!=='';})
+    .sort(function(a,b){return String(a.fecha).localeCompare(String(b.fecha));});
+  if(!fil.length)return null;
+  var hoy=fs(new Date());
+  var prev=fil.filter(function(r){return String(r.fecha).slice(0,10)<=hoy;});
+  var r=prev.length?prev[prev.length-1]:fil[0];
+  var v=Number(r.kc);
+  return isFinite(v)?v:null;
+}
+
 function openZona(znId){
   const z=G.zonas.find(zz=>zz.id_zona===znId);
   if(!z)return;
@@ -3333,7 +3355,7 @@ function openZona(znId){
   const mp=G.mapas[znId];
   // NDVI/Kc: preferir ndvi_registros (trae historial); si no hay, usar el de la imagen (ndvi_imagenes)
   const ndviVal=nd?nd.ndvi:(mp&&mp.ndvi!=null?Number(mp.ndvi):null);
-  const kcVal=nd?nd.kc:(mp&&mp.kc!=null?Number(mp.kc):null);
+  const kcVal=kcDashboard(znId);
   const tieneHist=nd&&nd.hist&&nd.hist.length>0;
   const cultivo=(ndviVal!=null)?`<div class="d-section">
       <div class="d-section-t">Estado del cultivo</div>
@@ -6420,7 +6442,7 @@ const VG_CAPAS={
   ndvi:{t:'NDVI',color:z=>{const v=rcVal((VG.img[z.id_zona]||{}).ndvi);
     return v==null?VG_GRIS:v<0.25?'#A16207':v<0.45?'#CA8A04':v<0.65?'#65A30D':'#15803D';},
    ley:[['#A16207','Bajo 0,25'],['#CA8A04','0,25 a 0,45'],['#65A30D','0,45 a 0,65'],['#15803D','Sobre 0,65'],[VG_GRIS,'Sin dato']]},
-  kc:{t:'Kc',color:z=>{const v=rcVal((VG.dia[z.id_zona]||{}).kc)??rcVal((VG.img[z.id_zona]||{}).kc);
+  kc:{t:'Kc',color:z=>{const v=rcVal((VG.dia[z.id_zona]||{}).kc);
     return v==null?VG_GRIS:v<0.4?'#93C5FD':v<0.7?'#60A5FA':v<1?'#2563EB':'#1E3A8A';},
    ley:[['#93C5FD','Bajo 0,40'],['#60A5FA','0,40 a 0,70'],['#2563EB','0,70 a 1,00'],['#1E3A8A','Sobre 1,00'],[VG_GRIS,'Sin dato']]},
   etapa:{t:'Etapa',valor:z=>(VG.dia[z.id_zona]||{}).etapa_fisiologica,color:z=>vgPaleta((VG.dia[z.id_zona]||{}).etapa_fisiologica)},
