@@ -3145,36 +3145,50 @@ function rPanel(dias,sc,ndvi){
     ${als.slice(0,3).map(alCard).join('')}
     ${als.length>3?`<details class="al-more"><summary><i class="ti ti-chevron-down"></i><span class="al-more-show">Ver ${als.length-3} alerta${als.length-3>1?'s':''} más</span><span class="al-more-hide">Ocultar</span></summary>${als.slice(3).map(alCard).join('')}</details>`:''}`;
 
+  /* Riego de la semana (lunes a domingo de la semana elegida):
+     - Necesita = suma de la lamina neta diaria del dashboard (ETc - lluvia efectiva), incluye pronostico.
+     - Regado   = suma del riego aplicado del dashboard (riegos registrados).
+     Horas = mm / intensidad neta de la zona (dashboard). Las zonas de una misma operacion riegan
+     juntas, asi que el total de horas del equipo se suma por operacion (la zona mas larga de cada una). */
+  const itZ=zid=>{const c=(G.calc||{})[zid];const v=parseFloat(c&&c.intensidad_precip_neta_mmh);return v>0?v:null;};
   const res=G.zonas.map((z,zi)=>{
-    let lP=0,tP=0;const ha=parseFloat(z.superficie_ha)||0;
-    const sz=recSemanaZona(sc.filter(r=>r.id_zona===z.id_zona));lP=sz.l;tP=sz.t;
-    return{z,zi,lP,tP,vP:lP*ha*10};
+    const ha=parseFloat(z.superficie_ha)||0,it=itZ(z.id_zona);let nec=0,reg=0;
+    sc.filter(r=>r.id_zona===z.id_zona).forEach(r=>{
+      const l=parseFloat(r.lamina_neta_pronostico_mm_dia);if(l>0)nec+=l;
+      const a=parseFloat(r.riego_aplicado_mm);if(a>0)reg+=a;});
+    return{z,zi,nec,reg,hNec:it?nec/it:null,hReg:it?reg/it:null,m3:nec*ha*10};
   });
-  const tot={lP:0,tP:0,vP:0};
-  res.forEach(r=>{tot.lP+=r.lP;tot.tP+=r.tP;tot.vP+=r.vP;});
-  const mm=v=>v>0?rcNum(Math.round(v*10)/10):'—';
-  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL'):'—';
+  const ops={};res.forEach(r=>{const k=(r.z.id_equipo||'')+'|'+(r.z.operacion??r.z.id_zona);
+    const o=ops[k]=ops[k]||{n:0,g:0};if((r.hNec||0)>o.n)o.n=r.hNec;if((r.hReg||0)>o.g)o.g=r.hReg;});
+  const totN=Object.values(ops).reduce((a,o)=>a+o.n,0),totG=Object.values(ops).reduce((a,o)=>a+o.g,0);
+  const totM3=res.reduce((a,r)=>a+r.m3,0);
+  const mm=v=>v>0?rcNum(Math.round(v*10)/10)+' mm':'—';
+  const m3=v=>v>0?Math.round(v).toLocaleString('es-CL')+' m³':'';
   const hh=v=>hm(v)||'—';
+  const sub=t=>t?`<div style="font-size:11px;color:var(--muted);font-weight:400">${t}</div>`:'';
+  const MESC=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const rango=`${dias[0].getDate()} al ${dias[6].getDate()} ${MESC[dias[6].getMonth()]}`;
+  const celNec=r=>r.hNec!=null?`${hh(r.hNec)}${sub(mm(r.nec))}`:mm(r.nec);
+  const celReg=r=>{if(!(r.reg>0))return'—';const ok=r.reg>=r.nec-0.05;
+    return `<span style="${ok?'color:var(--green);font-weight:600':''}">${r.hReg!=null?hh(r.hReg):mm(r.reg)}${ok?' ✓':''}</span>${r.hReg!=null?sub(mm(r.reg)):''}`;};
   document.getElementById('presum').innerHTML=`
-    <div class="p-title"><i class="ti ti-table"></i>Resumen semanal · riego recomendado</div>
+    <div class="p-title"><i class="ti ti-table"></i>Riego de la semana · ${rango}</div>
     <table class="res-tbl">
-      <thead><tr><th>Zona</th><th>mm netos</th><th>h</th><th>m³ netos</th></tr></thead>
+      <thead><tr><th>Zona</th><th>Necesita</th><th>Regado</th></tr></thead>
       <tbody>
         ${res.map(r=>`<tr>
           <td><div class="zona-dot" style="background:${ZC[r.zi%ZC.length]}"></div>${r.z.nombre||'Zona'}</td>
-          <td>${mm(r.lP)}</td>
-          <td>${hh(r.tP)}</td>
-          <td>${m3(r.vP)}</td>
+          <td>${celNec(r)}</td>
+          <td>${celReg(r)}</td>
         </tr>`).join('')}
         <tr class="total-row">
-          <td>Total equipo</td>
-          <td>${mm(tot.lP)}</td>
-          <td>${hh(tot.tP)}</td>
-          <td>${m3(tot.vP)}</td>
+          <td>${(document.getElementById('se')||{}).value===EQ_TODOS?'Total predio':'Total equipo'}</td>
+          <td>${hh(totN)}${sub(m3(totM3))}</td>
+          <td>${totG>0?hh(totG):'—'}</td>
         </tr>
       </tbody>
     </table>
-    <div class="vc-note" style="margin-top:8px;font-size:11px;color:var(--muted)">Lámina neta que necesita el cultivo, acumulada hasta el riego. La tarjeta «Riego recomendado» muestra el volumen bruto que sale del equipo.</div>`;
+    <div class="vc-note" style="margin-top:8px;font-size:11px;color:var(--muted)">Necesita: agua que consume el cultivo de lunes a domingo (incluye pronóstico). Regado: riegos registrados esta semana; ✓ cuando ya cubre lo que necesita. En el total, las zonas de una misma operación cuentan una vez porque riegan juntas.</div>`;
 }
 
 const alCard=a=>`<div class="alerta-card ${a.cls}"><i class="ti ${a.i} alerta-ico"></i><div><div class="alerta-t">${a.t}</div><div class="alerta-s">${a.s}</div></div></div>`;
