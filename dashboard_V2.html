@@ -1257,6 +1257,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .vc-mini i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:3px;}
 .vc-mini.over i{background:var(--amber);}
 .vc-note{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;}
+
+/* Pantalla grande (tele, proyector, monitor 2560+): la pagina se agranda sola; ver presAuto(). */
+html.modo-pres body{zoom:var(--pres-z,1);}
+/* con zoom, 100vh/100dvh se agrandan igual que todo; se dividen por el zoom para que calcen con la pantalla */
+html.modo-pres .app{height:calc(100vh / var(--pres-z,1))!important;}
+html.modo-pres .al-panel{height:calc(100dvh / var(--pres-z,1))!important;}
+html.modo-pres .maint-export-box{max-height:min(720px,calc(92dvh / var(--pres-z,1)))!important;}
 </style>
 <style id="v2-elementos-con-estilo-v1">
 /* Estilos de la V1 (lineas finales de su hoja de estilos) */
@@ -6938,6 +6945,25 @@ const _mcLoadRender=loadRender;
 loadRender=async function(){const r=await _mcLoadRender.apply(this,arguments);if(isMobileView()&&['carga','zonas'].includes(MOBILE.module))mcRefrescar();return r;};
 const _mcOnPredio=onPredio;
 onPredio=async function(){const r=await _mcOnPredio.apply(this,arguments);if(isMobileView()&&MOBILE.module==='general'){vgMoverMovil();await vgAbrir();mcInicio();}return r;};
+</script>
+<script>
+/* Pantalla grande: si la ventana tiene 2200 px de ancho o mas (tele 4K, proyector, monitor 2560+),
+   la pagina se dibuja como si tuviera 1760 px (cabe la semana completa del calendario) y se agranda
+   hasta llenar la pantalla: 2560 x1,45; 4K x2,18. Bajo 2200 px (notebook, monitor Full HD) no cambia nada.
+   Si alguien hace Ctrl + o -, el ancho cambia y esto se ajusta solo.
+   (La version con boton "Presentar" quedo en BD_V2\Anteriores\html.) */
+var PRES_ANCHO=1760,PRES_DESDE=2200;
+function presRefrescar(){setTimeout(function(){
+  try{if(typeof VG!=='undefined'&&VG.mapa){VG.mapa.invalidateSize();
+    var mc=document.getElementById('vgMap');if(mc&&mc.offsetParent!==null&&typeof vgPintar==='function')vgPintar(true);}}catch(e){}
+  try{window.dispatchEvent(new Event('resize'));}catch(e){}},60);}
+var _presZ=0;
+function presAuto(){var w=window.innerWidth,h=document.documentElement,z=w>=PRES_DESDE?Math.min(3,w/PRES_ANCHO):0;
+  if(z)h.style.setProperty('--pres-z',z.toFixed(3));
+  h.classList.toggle('modo-pres',!!z);
+  if(Math.abs(z-_presZ)>0.01){var antes=_presZ;_presZ=z;if(antes||z)presRefrescar();}}
+presAuto();
+window.addEventListener('resize',function(){clearTimeout(window._presT);window._presT=setTimeout(presAuto,150);});
 </script>
 </body>
 </html>
